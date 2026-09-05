@@ -1,0 +1,38 @@
+# Digvation Control Center
+
+Internal Digvation backoffice for customer control-plane administration,
+operations visibility, observability, and incident management.
+
+The frontend will eventually combine CORE-owned business/control-plane data and
+telemetry-owned runtime signals in one operator experience. It is not a client
+application, a POS backoffice, a CORE replacement, or a monitoring database.
+
+## Current checkpoint
+
+BF-01 establishes the application bootstrap, provider composition, routing,
+responsive shell, error/loading states, typed configuration, and one mock-backed
+feature data-source pattern. Real integrations and operational domains remain
+out of scope.
+
+## Requirements and commands
+
+- Node.js `>=20`
+- npm
+
+```bash
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+Checkpoint verification:
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+Current version: `0.1.0-alpha.0`. See
+`docs/engineering/VERSIONING_STANDARD.md` for release lifecycle rules.
