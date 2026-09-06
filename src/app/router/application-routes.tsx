@@ -5,6 +5,7 @@ import { ClientDetailPage } from '../../features/clients/pages/client-detail-pag
 import { ClientListPage } from '../../features/clients/pages/client-list-page';
 import { CreateClientPage } from '../../features/clients/pages/create-client-page';
 import { EditClientPage } from '../../features/clients/pages/edit-client-page';
+import { ProductListPage } from '../../features/products/pages/product-list-page';
 import { NotFoundPage } from './not-found-page';
 import { PlaceholderPage } from './placeholder-page';
 import { RouteErrorState } from './route-error-state';
@@ -22,7 +23,7 @@ export const applicationRoutes: RouteObject[] = [
       { path: 'clients/:clientId/edit', element: <EditClientPage /> },
       {
         path: 'products',
-        element: <PlaceholderPage title="Products" description="Digvation product definitions and capabilities will be managed here." />,
+        element: <ProductListPage />,
       },
       {
         path: 'installations',

@@ -9,8 +9,8 @@ application, a POS backoffice, a CORE replacement, or a monitoring database.
 
 ## Current scope
 
-The Control Center currently provides an operational dashboard and client
-management foundation using feature-owned mock data sources. Real integrations
+The Control Center currently provides an operational dashboard plus client and
+product management using feature-owned mock data sources. Real integrations
 remain out of scope.
 
 ## Requirements and commands
@@ -33,5 +33,5 @@ npm test
 npm run build
 ```
 
-Current version: `0.1.0-alpha.1`. See
+Current version: `0.1.0-alpha.2`. See
 `docs/engineering/VERSIONING_STANDARD.md` for release lifecycle rules.
