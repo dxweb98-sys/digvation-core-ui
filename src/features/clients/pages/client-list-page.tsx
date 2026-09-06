@@ -1,8 +1,7 @@
 import { DButton, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DStatusFilter, type TableAction, type TableColumn } from '@digvation-labs/ui';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { ClientDetailDialog } from '../components/client-detail-dialog';
 import { ClientFormDialog } from '../components/client-form-dialog';
-import { ClientQuickDetailDialog } from '../components/client-quick-detail-dialog';
 import { ClientStatusBadge } from '../components/client-status-badge';
 import { useClientList } from '../hooks/use-client-list';
 import type { ClientListItem, ClientListQuery, ClientStatus } from '../types/client';
@@ -38,10 +37,9 @@ function formatClientDate(value: string) {
 }
 
 export function ClientListPage() {
-  const navigate = useNavigate();
   const [query, setQuery] = useState<ClientListQuery>({ search: '', status: 'ALL', page: 1, limit: PAGE_LIMIT });
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [quickDetailClient, setQuickDetailClient] = useState<ClientListItem | null>(null);
+  const [detailClientId, setDetailClientId] = useState<string | null>(null);
   const [editClient, setEditClient] = useState<ClientListItem | null>(null);
   const clientQuery = useClientList(query);
 
@@ -63,8 +61,7 @@ export function ClientListPage() {
 
   const result = clientQuery.data;
   const tableActions: TableAction<ClientListItem>[] = [
-    { label: 'Quick Detail', onClick: setQuickDetailClient },
-    { label: 'Open Client', onClick: (client) => navigate(`/clients/${client.id}`) },
+    { label: 'Quick Detail', onClick: (client) => setDetailClientId(client.id) },
     { label: 'Edit Client', onClick: setEditClient },
   ];
 
@@ -99,19 +96,12 @@ export function ClientListPage() {
         onPageChange={(page) => updateQuery({ page })}
         onPageSizeChange={(limit) => updateQuery({ limit, page: 1 })}
         emptyMessage={<DEmptyState title="No clients found" description="Try another search or status filter, or add the first client." />}
-        onRowClick={(client) => navigate(`/clients/${client.id}`)}
+        onRowClick={(client) => setDetailClientId(client.id)}
         actions={tableActions}
       />
       <ClientFormDialog open={isCreateDialogOpen} mode="create" onClose={() => setIsCreateDialogOpen(false)} />
       <ClientFormDialog open={editClient !== null} mode="edit" client={editClient ?? undefined} onClose={() => setEditClient(null)} />
-      <ClientQuickDetailDialog
-        client={quickDetailClient}
-        onClose={() => setQuickDetailClient(null)}
-        onOpenClient={(clientId) => {
-          setQuickDetailClient(null);
-          navigate(`/clients/${clientId}`);
-        }}
-      />
+      {detailClientId ? <ClientDetailDialog clientId={detailClientId} open onClose={() => setDetailClientId(null)} /> : null}
     </div>
   );
 }

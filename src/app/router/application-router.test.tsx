@@ -65,8 +65,8 @@ describe('application routing foundation', () => {
     expect(actionMenu).not.toBeNull();
     fireEvent.click(actionMenu!);
     fireEvent.click(screen.getByRole('button', { name: 'Quick Detail' }));
-    expect(screen.getByRole('dialog', { name: 'Nova Salon' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Open Client' })).toBeInTheDocument();
+    expect(await screen.findByRole('dialog', { name: 'Nova Salon' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Overview' })).toBeInTheDocument();
   });
 
   it('renders a recoverable not-found state for unknown routes', async () => {
