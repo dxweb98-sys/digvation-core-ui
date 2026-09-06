@@ -6,6 +6,7 @@ import { ApplicationNavigation } from './application-navigation';
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
   '/clients': 'Clients',
+  '/clients/new': 'Add Client',
   '/products': 'Products',
   '/installations': 'Installations',
   '/infrastructure': 'Infrastructure',
@@ -33,7 +34,8 @@ function OperatorProfile() {
 export function ApplicationShell() {
   const location = useLocation();
   const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
-  const pageTitle = ROUTE_TITLES[location.pathname] ?? 'Control Center';
+  const pageTitle = ROUTE_TITLES[location.pathname] ??
+    (location.pathname.startsWith('/clients/') ? 'Client' : 'Control Center');
 
   useEffect(() => {
     document.title = `${pageTitle} · Digvation Control Center`;

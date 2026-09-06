@@ -1,6 +1,10 @@
 import type { RouteObject } from 'react-router';
 import { ApplicationShell } from '../shell/application-shell';
 import { DashboardPage } from '../../features/dashboard/pages/dashboard-page';
+import { ClientDetailPage } from '../../features/clients/pages/client-detail-page';
+import { ClientListPage } from '../../features/clients/pages/client-list-page';
+import { CreateClientPage } from '../../features/clients/pages/create-client-page';
+import { EditClientPage } from '../../features/clients/pages/edit-client-page';
 import { NotFoundPage } from './not-found-page';
 import { PlaceholderPage } from './placeholder-page';
 import { RouteErrorState } from './route-error-state';
@@ -12,10 +16,10 @@ export const applicationRoutes: RouteObject[] = [
     errorElement: <RouteErrorState />,
     children: [
       { index: true, element: <DashboardPage /> },
-      {
-        path: 'clients',
-        element: <PlaceholderPage title="Clients" description="Customer organizations and their lifecycle will be managed here." />,
-      },
+      { path: 'clients', element: <ClientListPage /> },
+      { path: 'clients/new', element: <CreateClientPage /> },
+      { path: 'clients/:clientId', element: <ClientDetailPage /> },
+      { path: 'clients/:clientId/edit', element: <EditClientPage /> },
       {
         path: 'products',
         element: <PlaceholderPage title="Products" description="Digvation product definitions and capabilities will be managed here." />,

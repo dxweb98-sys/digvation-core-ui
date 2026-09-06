@@ -20,6 +20,6 @@ Rules:
 - `VITE_DATA_SOURCE_MODE` is currently restricted to `mock`; unsupported values
   fail configuration validation instead of silently selecting another backend.
 
-BF-02 applies this pattern to Dashboard through `DashboardDataSource` and
-`MockDashboardDataSource`. Add other feature contracts only when their
-checkpoint introduces real UI requirements.
+Dashboard and Client Management apply this pattern through their own
+feature-owned data-source contracts and mock implementations. Add other feature
+contracts only when their UI requires them.

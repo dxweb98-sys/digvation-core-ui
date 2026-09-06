@@ -7,13 +7,11 @@ The frontend will eventually combine CORE-owned business/control-plane data and
 telemetry-owned runtime signals in one operator experience. It is not a client
 application, a POS backoffice, a CORE replacement, or a monitoring database.
 
-## Current checkpoint
+## Current scope
 
-BF-02 adds the first operator-facing dashboard, grouped Control Center
-navigation, responsive shell behavior, and realistic mock operational state.
-The dashboard covers attention items, client application health, managed
-infrastructure, deployments, and recent events. Real integrations remain out of
-scope.
+The Control Center currently provides an operational dashboard and client
+management foundation using feature-owned mock data sources. Real integrations
+remain out of scope.
 
 ## Requirements and commands
 
