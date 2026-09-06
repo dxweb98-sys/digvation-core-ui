@@ -7,6 +7,7 @@
 | `src/app/router` | Route definitions and route-level failure handling |
 | `src/app/shell` | Operator shell and primary navigation composition |
 | `src/features/dashboard` | Operational dashboard UI, types, query hook, and mock data source |
+| `src/features/clients` | Client management UI, lifecycle composition, forms, hooks, and mock data source |
 | `src/shared/config` | Typed environment/configuration boundary |
 | `src/test` | Shared test-environment setup only |
 | `src/main.tsx` | Browser bootstrap |

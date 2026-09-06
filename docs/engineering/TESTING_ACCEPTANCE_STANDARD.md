@@ -14,9 +14,9 @@ Frontend checkpoint acceptance requires:
 4. `npm run test -- --run` for meaningful feature and shell behavior
 5. `npm run build`
 
-BF-02 additionally requires one manual browser smoke review of the Dashboard,
-navigation, responsive layout, controlled loading/error behavior, console, and
-visual hierarchy.
+Feature review additionally requires one manual browser smoke review of the
+affected routes, navigation, responsive layout, controlled loading/error
+behavior, console, and visual hierarchy.
 
 Add tests for behavior and important boundaries, not coverage arithmetic.
 Browser automation is deferred until a checkpoint has an acceptance need that
