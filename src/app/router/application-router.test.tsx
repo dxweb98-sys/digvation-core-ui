@@ -85,4 +85,31 @@ describe('application routing foundation', () => {
       screen.getByRole('button', { name: 'Return to overview' }),
     ).toBeInTheDocument();
   });
+
+  it('renders product management through the canonical table and dialog flow', async () => {
+    renderRoute('/products');
+
+    expect(await screen.findByRole('heading', { name: 'Products' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add Product' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add Product' }));
+    expect(screen.getByRole('dialog', { name: 'Add product' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Product Code *')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Product Code *'), { target: { value: 'ops console' } });
+    fireEvent.change(screen.getByLabelText('Product Name *'), { target: { value: 'Operations Console' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create Product' }));
+    expect(await screen.findByText('Product created')).toBeInTheDocument();
+
+    const actionMenu = document.querySelector<HTMLElement>('[data-ds-component="data-table"] tbody [data-ds-component="dropdown-trigger"]');
+    expect(actionMenu).not.toBeNull();
+    fireEvent.click(actionMenu!);
+    fireEvent.click(screen.getByRole('button', { name: 'Quick Detail' }));
+
+    expect(await screen.findByRole('dialog', { name: 'Operations Console' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Features' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Clients' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'More Actions' }));
+    expect(screen.getByRole('menuitem', { name: 'Mark Active' })).toBeInTheDocument();
+  });
 });
