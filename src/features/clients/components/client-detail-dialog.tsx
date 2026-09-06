@@ -57,14 +57,17 @@ export function ClientDetailDialog({
         size="xl"
         title={client.displayName}
         description={<><code className="client-code">{client.code}</code>{client.legalName ? ` · ${client.legalName}` : ''}</>}
+        footer={
+          <div className="client-dialog-actions">
+            <DButton variant="outline" onClick={onClose}>Close</DButton>
+            <DButton variant="outline" onClick={() => setIsEditDialogOpen(true)}>Edit Client</DButton>
+            <ClientLifecycleAction client={client} isSubmitting={statusTransition.isPending} onTransition={handleTransition} />
+          </div>
+        }
       >
         <div className="client-detail-dialog">
           <div className="client-detail-header">
             <ClientStatusBadge status={client.status} />
-            <div className="client-header-actions">
-              <DButton variant="outline" onClick={() => setIsEditDialogOpen(true)}>Edit Client</DButton>
-              <ClientLifecycleAction client={client} isSubmitting={statusTransition.isPending} onTransition={handleTransition} />
-            </div>
           </div>
           {statusTransition.isError ? <p className="client-form-error">{statusTransition.error.message}</p> : null}
           <DTabs defaultValue="overview" value={tab} onValueChange={setTab} className="client-detail-tabs">

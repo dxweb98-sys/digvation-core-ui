@@ -1,4 +1,4 @@
-import { DButton, DDialog, DTextarea, useToast } from '@digvation-labs/ui';
+import { DButton, DDialog, DDropdown, DTextarea, useToast } from '@digvation-labs/ui';
 import { useState } from 'react';
 import type { Client, ClientStatus } from '../types/client';
 import { ClientStatusBadge } from './client-status-badge';
@@ -61,17 +61,25 @@ export function ClientLifecycleAction({
   }
 
   return (
-    <div className="client-lifecycle-actions">
-      {VALID_TRANSITIONS[client.status].map((status) => (
-        <DButton
-          key={status}
-          size="sm"
-          variant={status === 'ARCHIVED' ? 'outline' : 'soft'}
-          onClick={() => setTargetStatus(status)}
-        >
-          Mark {getTransitionLabel(status)}
-        </DButton>
-      ))}
+    <>
+      <DDropdown
+        placement="top-end"
+        contentRole="menu"
+        contentClassName="client-lifecycle-menu"
+        trigger={() => <DButton variant="outline">More Actions</DButton>}
+      >
+        {VALID_TRANSITIONS[client.status].map((status) => (
+          <button
+            className={status === 'ARCHIVED' ? 'client-lifecycle-menu-item is-danger' : 'client-lifecycle-menu-item'}
+            key={status}
+            role="menuitem"
+            type="button"
+            onClick={() => setTargetStatus(status)}
+          >
+            Mark {getTransitionLabel(status)}
+          </button>
+        ))}
+      </DDropdown>
       <DDialog
         open={Boolean(targetStatus)}
         onClose={closeDialog}
@@ -104,6 +112,6 @@ export function ClientLifecycleAction({
           </div>
         ) : null}
       </DDialog>
-    </div>
+    </>
   );
 }
