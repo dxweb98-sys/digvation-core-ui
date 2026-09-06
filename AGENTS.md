@@ -1,36 +1,49 @@
-# Digvation Control Center Agent Guide
+# Digvation CORE UI — Repository Agent Contract
 
-Digvation Control Center is Digvation's internal operator console. It combines
-control-plane administration and operational visibility; it does not replace
-CORE or telemetry systems.
+This file adds CORE Control Center UI-specific rules to the Digvation lifecycle standards.
 
-Before implementation, read these authoritative documents:
+## Application role
 
-1. `docs/architecture/BACKOFFICE_ARCHITECTURE.md`
-2. `docs/engineering/CODEBASE_MAP.md`
-3. `docs/engineering/ENGINEERING_GUARDRAILS.md`
-4. `docs/engineering/TESTING_ACCEPTANCE_STANDARD.md`
-5. `docs/engineering/VERSIONING_STANDARD.md`
-6. `docs/engineering/GIT_WORKFLOW_STANDARD.md`
-7. `docs/engineering/DATA_ACCESS_STANDARD.md`
+CORE UI is the Digvation control-plane administration experience.
 
-Non-negotiable rules:
+It manages control-plane concepts.
 
-- Keep directories and files kebab-case; components and types PascalCase;
-  functions and variables camelCase; hooks `useSomething`; booleans should use
-  `is`, `has`, `can`, or `should` prefixes.
-- Keep feature-owned code in `src/features/<feature>`. Add shared code only when
-  it is genuinely cross-feature. Do not create speculative directories or
-  barrels.
-- Use `@digvation-labs/ui` version `1.0.0` and canonical `D*` components. Never
-  wrap a design-system primitive merely to forward props or create competing
-  design tokens.
-- Pages and components consume feature hooks, never mock arrays or transport
-  clients directly. Mock implementations live behind feature-owned data-source
-  interfaces until integration is explicitly approved.
-- Do not prematurely integrate CORE, authentication, monitoring, telemetry, or
-  operational actions.
-- Test at coherent checkpoints. Use targeted checks during implementation and
-  run the full defined acceptance set once at the checkpoint boundary.
-- Do not commit, push, tag, create a PR, or change a remote unless the user
-  explicitly requests that Git action.
+It must not become the UI for product operational transactions.
+
+## Product boundaries
+
+Display/manage:
+
+- clients;
+- products/features;
+- subscriptions/entitlements;
+- installations;
+- deployment/version metadata where supported.
+
+Do not implement POS/Workshop operational domain behavior inside CORE UI.
+
+Use explicit backend contracts.
+
+## UI consistency
+
+Use the canonical Digvation Design System where configured.
+
+Shared page/shell/table/dialog/pagination rules should be applied consistently across current pages, not fixed one page at a time.
+
+Do not create local reusable primitives when the Design System already provides them.
+
+## Naming
+
+Internal planning labels must not appear in branch names, commits, code, files, variables, routes, or release names.
+
+Use actual control-plane domain vocabulary.
+
+## Validation
+
+Production code first.
+
+Run only the scoped CORE UI validation at the complete work-unit boundary.
+
+Full test/build/release checks belong to explicit acceptance/release preparation.
+
+STOP for manual review before commit/merge unless explicitly authorized.
