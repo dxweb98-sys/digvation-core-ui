@@ -21,13 +21,6 @@ export interface ProductFeature {
   updatedAt: string;
 }
 
-export interface ProductClient {
-  id: string;
-  code: string;
-  displayName: string;
-  status: 'ACTIVE' | 'SUSPENDED' | 'ARCHIVED';
-}
-
 export interface ProductListQuery {
   search: string;
   status: ProductStatus | 'ALL';
@@ -49,7 +42,6 @@ export interface ProductListItem extends Product {
 export interface ProductDetail {
   product: Product;
   features: ProductFeature[];
-  clients: ProductClient[];
 }
 
 export interface CreateProductInput {

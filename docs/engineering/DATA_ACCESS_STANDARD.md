@@ -20,6 +20,9 @@ Rules:
 - `VITE_DATA_SOURCE_MODE` is currently restricted to `mock`; unsupported values
   fail configuration validation instead of silently selecting another backend.
 
-Dashboard and Client Management apply this pattern through their own
-feature-owned data-source contracts and mock implementations. Add other feature
-contracts only when their UI requires them.
+Dashboard, Client Management, Product Management, and Client Product
+Management apply this pattern through their own feature-owned data-source
+contracts and mock implementations. Client Product Management returns resolved
+relationship summaries to its client and product tab compositions so those UI
+components do not manually join fixtures. Add other feature contracts only when
+their UI requires them.

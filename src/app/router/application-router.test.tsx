@@ -70,7 +70,16 @@ describe('application routing foundation', () => {
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Edit Client' })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'More Actions' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Products' }));
+    expect(await screen.findByText('Assign Product')).toBeInTheDocument();
+    expect(screen.getAllByText('Digvation POS').length).toBeGreaterThan(0);
+
+    const moreActionButtons = screen.getAllByRole('button', { name: 'More Actions' });
+    fireEvent.click(moreActionButtons[0]);
+    expect(screen.getByRole('menuitem', { name: 'Suspend' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Cancel' })).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'Start Trial' })).not.toBeInTheDocument();
+    fireEvent.click(moreActionButtons[moreActionButtons.length - 1]);
     expect(screen.getByRole('menuitem', { name: 'Mark Suspended' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Mark Archived' })).toBeInTheDocument();
   });

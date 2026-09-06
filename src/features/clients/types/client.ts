@@ -28,12 +28,6 @@ export interface ClientListResult {
   totalPages: number;
 }
 
-export interface ClientProductRelationship {
-  id: string;
-  productName: string;
-  status: 'ACTIVE' | 'PROVISIONING';
-}
-
 export interface ClientActivity {
   id: string;
   type: 'CLIENT_CREATED' | 'CLIENT_UPDATED' | 'CLIENT_STATUS_CHANGED';
@@ -44,7 +38,6 @@ export interface ClientActivity {
 
 export interface ClientDetail {
   client: Client;
-  productRelationships: ClientProductRelationship[];
   activity: ClientActivity[];
 }
 

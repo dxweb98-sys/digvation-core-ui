@@ -3,7 +3,6 @@ import type {
   Client,
   ClientActivity,
   ClientDetail,
-  ClientProductRelationship,
   ClientStatus,
 } from '../types/client';
 import { normalizeClientCode } from '../schemas/client-form-schema';
@@ -15,14 +14,11 @@ const CLIENTS: Client[] = [
   { id: 'client-leaf', code: 'LEAF', displayName: 'Leaf Lab', status: 'ARCHIVED', statusChangedAt: '2026-08-29T09:20:00.000Z', createdAt: '2026-08-15T01:00:00.000Z', updatedAt: '2026-08-29T09:20:00.000Z' },
 ];
 
-const PRODUCT_RELATIONSHIPS: Record<string, ClientProductRelationship[]> = {
-  'client-nova': [
-    { id: 'relationship-nova-pos', productName: 'Digvation POS', status: 'ACTIVE' },
-    { id: 'relationship-nova-workshop', productName: 'Digvation Workshop', status: 'PROVISIONING' },
-  ],
-  'client-poseidon': [{ id: 'relationship-poseidon-web', productName: 'Company Website', status: 'ACTIVE' }],
-  'client-fortuna': [{ id: 'relationship-fortuna-web', productName: 'Company Website', status: 'ACTIVE' }],
-  'client-leaf': [{ id: 'relationship-leaf-learning', productName: 'Learning Media', status: 'ACTIVE' }],
+const PRODUCT_COUNTS: Record<string, number> = {
+  'client-nova': 2,
+  'client-poseidon': 1,
+  'client-fortuna': 1,
+  'client-leaf': 1,
 };
 
 const ACTIVITY: Record<string, ClientActivity[]> = {
@@ -55,13 +51,12 @@ function toStatusLabel(status: ClientStatus) {
 
 export function createMockClientDataSource(): ClientDataSource {
   const clients = CLIENTS.map(copyClient);
-  const relationships = structuredClone(PRODUCT_RELATIONSHIPS);
+  const productCounts = { ...PRODUCT_COUNTS };
   const activity = structuredClone(ACTIVITY);
 
   function getDetail(client: Client): ClientDetail {
     return {
       client: copyClient(client),
-      productRelationships: [...(relationships[client.id] ?? [])],
       activity: [...(activity[client.id] ?? [])],
     };
   }
@@ -84,7 +79,7 @@ export function createMockClientDataSource(): ClientDataSource {
       return {
         clients: matchingClients.slice(start, start + query.limit).map((client) => ({
           ...copyClient(client),
-          productCount: relationships[client.id]?.length ?? 0,
+          productCount: productCounts[client.id] ?? 0,
         })),
         total: matchingClients.length,
         totalPages,
@@ -113,7 +108,7 @@ export function createMockClientDataSource(): ClientDataSource {
         updatedAt: now,
       };
       clients.unshift(client);
-      relationships[client.id] = [];
+      productCounts[client.id] = 0;
       activity[client.id] = [{ id: `activity-${client.id}-created`, type: 'CLIENT_CREATED', title: 'Client created', description: `${client.displayName} was registered in the control plane.`, occurredAt: now }];
       return getDetail(client);
     },
