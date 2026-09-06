@@ -13,12 +13,24 @@ const APPLICATION_HEALTH_COLUMNS: TableColumn<ClientApplicationHealthData>[] = [
       </div>
     ),
   },
-  { key: 'environment', label: 'Environment' },
+  {
+    key: 'environment',
+    label: 'Environment',
+    render: (application) => (
+      <span className="environment-label">{application.environment}</span>
+    ),
+  },
   {
     key: 'status',
     label: 'Status',
     render: (application) => (
-      <OperationalHealthBadge status={application.status} />
+      <div className="application-status-cell">
+        <OperationalHealthBadge status={application.status} />
+        <span
+          className={`application-status-signal application-status-${application.status.toLowerCase()}`}
+          aria-hidden="true"
+        />
+      </div>
     ),
   },
   {

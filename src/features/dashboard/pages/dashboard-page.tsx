@@ -3,6 +3,7 @@ import { ClientApplicationHealth } from '../components/client-application-health
 import { DashboardLoadingState } from '../components/dashboard-loading-state';
 import { DashboardSummary } from '../components/dashboard-summary';
 import { ManagedInfrastructure } from '../components/managed-infrastructure';
+import { OperationalHealthSummary } from '../components/operational-health-summary';
 import { RecentDeployments } from '../components/recent-deployments';
 import { RecentEvents } from '../components/recent-events';
 import { RequiresAttention } from '../components/requires-attention';
@@ -31,6 +32,9 @@ export function DashboardPage() {
   }
 
   const dashboard = dashboardQuery.data;
+  const criticalAttentionCount = dashboard.attentionItems.filter(
+    (item) => item.severity === 'CRITICAL',
+  ).length;
   const isDashboardEmpty =
     dashboard.summary.clientCount === 0 &&
     dashboard.applicationHealth.length === 0 &&
@@ -61,16 +65,16 @@ export function DashboardPage() {
         <span className="dashboard-updated">{dashboard.generatedAtLabel}</span>
       </div>
 
-      <DashboardSummary summary={dashboard.summary} />
+      <DashboardSummary
+        summary={dashboard.summary}
+        criticalAttentionCount={criticalAttentionCount}
+      />
+      <OperationalHealthSummary applications={dashboard.applicationHealth} />
       <RequiresAttention items={dashboard.attentionItems} />
       <ClientApplicationHealth applications={dashboard.applicationHealth} />
-
-      <div className="dashboard-two-column">
-        <ManagedInfrastructure infrastructure={dashboard.infrastructure} />
-        <RecentEvents events={dashboard.recentEvents} />
-      </div>
-
+      <ManagedInfrastructure infrastructure={dashboard.infrastructure} />
       <RecentDeployments deployments={dashboard.recentDeployments} />
+      <RecentEvents events={dashboard.recentEvents} />
     </div>
   );
 }

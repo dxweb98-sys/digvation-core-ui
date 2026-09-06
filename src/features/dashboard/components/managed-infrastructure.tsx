@@ -1,6 +1,7 @@
-import { DCard, DCardContent, DProgress } from '@digvation-labs/ui';
+import { DCard, DCardContent } from '@digvation-labs/ui';
 import type { InfrastructureSummary } from '../types/dashboard';
 import { OperationalHealthBadge } from './dashboard-status-badges';
+import { ResourceUtilization } from './resource-utilization';
 
 export function ManagedInfrastructure({
   infrastructure,
@@ -28,18 +29,9 @@ export function ManagedInfrastructure({
                 <OperationalHealthBadge status={node.status} />
               </div>
               <div className="resource-metrics">
-                <DProgress
-                  label={`CPU ${node.cpuUsagePercent}%`}
-                  value={node.cpuUsagePercent}
-                />
-                <DProgress
-                  label={`Memory ${node.memoryUsagePercent}%`}
-                  value={node.memoryUsagePercent}
-                />
-                <DProgress
-                  label={`Disk ${node.diskUsagePercent}%`}
-                  value={node.diskUsagePercent}
-                />
+                <ResourceUtilization resourceName="CPU" value={node.cpuUsagePercent} />
+                <ResourceUtilization resourceName="Memory" value={node.memoryUsagePercent} />
+                <ResourceUtilization resourceName="Disk" value={node.diskUsagePercent} />
               </div>
             </DCardContent>
           </DCard>

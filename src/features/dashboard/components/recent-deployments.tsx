@@ -1,40 +1,6 @@
-import { DCard, DCardContent, DDataTable, type TableColumn } from '@digvation-labs/ui';
+import { DCard, DCardContent, DEmptyState } from '@digvation-labs/ui';
 import type { RecentDeployment } from '../types/dashboard';
 import { DeploymentStatusBadge } from './dashboard-status-badges';
-
-const DEPLOYMENT_COLUMNS: TableColumn<RecentDeployment>[] = [
-  {
-    key: 'clientName',
-    label: 'Client / application',
-    render: (deployment) => (
-      <div className="table-primary-cell">
-        <strong>{deployment.clientName}</strong>
-        <span>{deployment.applicationName}</span>
-      </div>
-    ),
-  },
-  {
-    key: 'serviceName',
-    label: 'Service',
-    render: (deployment) => deployment.serviceName ?? 'Application',
-  },
-  {
-    key: 'version',
-    label: 'Version',
-    render: (deployment) => (
-      <code className="version-label">{deployment.version}</code>
-    ),
-  },
-  { key: 'environment', label: 'Environment' },
-  {
-    key: 'status',
-    label: 'Status',
-    render: (deployment) => (
-      <DeploymentStatusBadge status={deployment.status} />
-    ),
-  },
-  { key: 'deployedAtLabel', label: 'Deployed' },
-];
 
 export function RecentDeployments({
   deployments,
@@ -49,14 +15,33 @@ export function RecentDeployments({
           <h2 id="deployments-title">Recent deployments</h2>
         </div>
       </div>
-      <DCard className="dashboard-table-card" variant="outlined">
-        <DCardContent>
-          <DDataTable
-            columns={DEPLOYMENT_COLUMNS}
-            data={deployments}
-            rowKey="id"
-            emptyMessage="No recent deployments are available."
-          />
+      <DCard className="deployment-card" variant="outlined">
+        <DCardContent className="deployment-list">
+          {deployments.length === 0 ? (
+            <DEmptyState
+              title="No recent deployments"
+              description="Deployment activity will appear here when it is available."
+            />
+          ) : (
+            deployments.map((deployment) => (
+              <article
+                className={`deployment-item deployment-item-${deployment.status.toLowerCase()}`}
+                key={deployment.id}
+              >
+                <div className="deployment-status-marker" aria-hidden="true" />
+                <div className="deployment-identity">
+                  <strong>{deployment.clientName}</strong>
+                  <span>{deployment.applicationName} · {deployment.serviceName ?? 'Application'}</span>
+                </div>
+                <div className="deployment-context">
+                  <span className="environment-label">{deployment.environment}</span>
+                  <code className="version-label">{deployment.version}</code>
+                </div>
+                <DeploymentStatusBadge status={deployment.status} />
+                <time>{deployment.deployedAtLabel}</time>
+              </article>
+            ))
+          )}
         </DCardContent>
       </DCard>
     </section>

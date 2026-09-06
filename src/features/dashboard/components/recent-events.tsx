@@ -18,6 +18,7 @@ export function RecentEvents({ events }: { events: OperationalEvent[] }) {
           ) : (
             events.map((event) => (
               <article className="event-item" key={event.id}>
+                <time className="event-time">{event.occurredAtLabel}</time>
                 <span
                   className={`event-marker event-marker-${event.severity.toLowerCase()}`}
                   aria-hidden="true"
@@ -32,7 +33,6 @@ export function RecentEvents({ events }: { events: OperationalEvent[] }) {
                     {event.clientName ? (
                       <span>{event.clientName} · {event.applicationName}</span>
                     ) : null}
-                    <time>{event.occurredAtLabel}</time>
                   </div>
                 </div>
               </article>
