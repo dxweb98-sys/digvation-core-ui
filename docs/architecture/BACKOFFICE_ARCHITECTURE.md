@@ -31,7 +31,7 @@ mock behind the contract without rewriting the page.
 
 TanStack Query owns server-state lifecycle. Local React state owns ephemeral UI
 state. React Hook Form and Zod own future form state and validation. No global
-client state library is justified at BF-01.
+client state library is justified for the current dashboard scope.
 
 ## UI foundation
 
