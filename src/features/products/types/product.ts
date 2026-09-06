@@ -1,4 +1,5 @@
 export type ProductStatus = 'DRAFT' | 'ACTIVE' | 'RETIRED';
+export type ProductFeatureStatus = 'DRAFT' | 'ACTIVE' | 'RETIRED';
 
 export interface Product {
   id: string;
@@ -15,7 +16,9 @@ export interface ProductFeature {
   code: string;
   name: string;
   description?: string;
-  status: 'DRAFT' | 'ACTIVE' | 'RETIRED';
+  status: ProductFeatureStatus;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ProductClient {
@@ -33,9 +36,14 @@ export interface ProductListQuery {
 }
 
 export interface ProductListResult {
-  products: Product[];
+  products: ProductListItem[];
   total: number;
   totalPages: number;
+}
+
+export interface ProductListItem extends Product {
+  featureCount: number;
+  clientCount: number;
 }
 
 export interface ProductDetail {

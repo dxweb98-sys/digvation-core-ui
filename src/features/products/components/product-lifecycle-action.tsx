@@ -4,7 +4,7 @@ import type { Product, ProductStatus } from '../types/product';
 import { ProductStatusBadge } from './product-status-badge';
 
 const VALID_TRANSITIONS: Record<ProductStatus, ProductStatus[]> = {
-  DRAFT: ['ACTIVE'],
+  DRAFT: ['ACTIVE', 'RETIRED'],
   ACTIVE: ['RETIRED'],
   RETIRED: ['DRAFT'],
 };

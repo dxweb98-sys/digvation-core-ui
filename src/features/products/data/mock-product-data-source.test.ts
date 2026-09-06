@@ -34,4 +34,11 @@ describe('mock product data source', () => {
     const detail = await dataSource.transitionProductStatus({ productId: 'product-pos', targetStatus: 'RETIRED', reason: 'Product consolidation.' });
     expect(detail.product.status).toBe('RETIRED');
   });
+
+  it('allows a draft product to transition directly to retired', async () => {
+    const dataSource = createMockProductDataSource();
+    const detail = await dataSource.transitionProductStatus({ productId: 'product-workshop', targetStatus: 'RETIRED', reason: 'Scope was deferred.' });
+
+    expect(detail.product.status).toBe('RETIRED');
+  });
 });

@@ -111,5 +111,6 @@ describe('application routing foundation', () => {
     expect(screen.getByRole('tab', { name: 'Clients' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'More Actions' }));
     expect(screen.getByRole('menuitem', { name: 'Mark Active' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Mark Retired' })).toBeInTheDocument();
   });
 });

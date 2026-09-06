@@ -4,16 +4,18 @@ import { ProductDetailDialog } from '../components/product-detail-dialog';
 import { ProductFormDialog } from '../components/product-form-dialog';
 import { ProductStatusBadge } from '../components/product-status-badge';
 import { useProductList } from '../hooks/use-product-list';
-import type { Product, ProductListQuery, ProductStatus } from '../types/product';
+import type { ProductListItem, ProductListQuery, ProductStatus } from '../types/product';
 import '../products.css';
 
 const PAGE_LIMIT = 10;
 const PRODUCT_STATUS_OPTIONS = [{ value: 'DRAFT', label: 'Draft' }, { value: 'ACTIVE', label: 'Active' }, { value: 'RETIRED', label: 'Retired' }];
 
-const PRODUCT_COLUMNS: TableColumn<Product>[] = [
+const PRODUCT_COLUMNS: TableColumn<ProductListItem>[] = [
   { key: 'name', label: 'Product', render: (product) => <div className="product-table-identity"><strong>{product.name}</strong><span>{product.description ?? 'No description recorded'}</span></div> },
   { key: 'code', label: 'Code', render: (product) => <code className="product-code">{product.code}</code> },
   { key: 'status', label: 'Status', render: (product) => <ProductStatusBadge status={product.status} /> },
+  { key: 'featureCount', label: 'Features', render: (product) => `${product.featureCount} feature${product.featureCount === 1 ? '' : 's'}` },
+  { key: 'clientCount', label: 'Clients', render: (product) => `${product.clientCount} client${product.clientCount === 1 ? '' : 's'}` },
   { key: 'updatedAt', label: 'Updated', render: (product) => formatProductDate(product.updatedAt) },
 ];
 
@@ -25,7 +27,7 @@ export function ProductListPage() {
   const [query, setQuery] = useState<ProductListQuery>({ search: '', status: 'ALL', page: 1, limit: PAGE_LIMIT });
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [detailProductId, setDetailProductId] = useState<string | null>(null);
-  const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [editProduct, setEditProduct] = useState<ProductListItem | null>(null);
   const productQuery = useProductList(query);
 
   function updateQuery(nextQuery: Partial<ProductListQuery>) {
@@ -36,7 +38,7 @@ export function ProductListPage() {
   if (productQuery.isError) return <div className="products-page-state"><DConnectionError title="Product list unavailable" message="Product records could not be loaded from the selected data source." detail={productQuery.error.message} isRetrying={productQuery.isFetching} onRetry={() => void productQuery.refetch()} /></div>;
 
   const result = productQuery.data;
-  const tableActions: TableAction<Product>[] = [
+  const tableActions: TableAction<ProductListItem>[] = [
     { label: 'Quick Detail', onClick: (product) => setDetailProductId(product.id) },
     { label: 'Edit Product', onClick: setEditProduct },
   ];

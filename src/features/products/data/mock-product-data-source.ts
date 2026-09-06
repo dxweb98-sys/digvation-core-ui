@@ -11,19 +11,19 @@ const PRODUCTS: Product[] = [
 
 const FEATURES: Record<string, ProductFeature[]> = {
   'product-pos': [
-    { id: 'feature-pos-cashier', code: 'CASHIER', name: 'Cashier', description: 'Transaction capture and payment recording.', status: 'ACTIVE' },
-    { id: 'feature-pos-catalog', code: 'CATALOG', name: 'Catalog', description: 'Product, price, and tax configuration.', status: 'ACTIVE' },
-    { id: 'feature-pos-employee', code: 'EMPLOYEE-CONTRIBUTION', name: 'Employee Contribution', description: 'Attributed service contribution reporting.', status: 'DRAFT' },
+    { id: 'feature-pos-cashier', code: 'CASHIER', name: 'Cashier', description: 'Transaction capture and payment recording.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-06T10:00:00.000Z' },
+    { id: 'feature-pos-catalog', code: 'CATALOG', name: 'Catalog', description: 'Product, price, and tax configuration.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-05T10:00:00.000Z' },
+    { id: 'feature-pos-employee', code: 'EMPLOYEE-CONTRIBUTION', name: 'Employee Contribution', description: 'Attributed service contribution reporting.', status: 'DRAFT', createdAt: '2026-08-28T04:30:00.000Z', updatedAt: '2026-09-04T10:00:00.000Z' },
   ],
   'product-workshop': [
-    { id: 'feature-workshop-work-order', code: 'WORK-ORDER', name: 'Work Orders', description: 'Workshop job intake and fulfillment tracking.', status: 'DRAFT' },
-    { id: 'feature-workshop-invoice', code: 'INVOICING', name: 'Invoicing', description: 'Customer billing and receipt generation.', status: 'DRAFT' },
+    { id: 'feature-workshop-work-order', code: 'WORK-ORDER', name: 'Work Orders', description: 'Workshop job intake and fulfillment tracking.', status: 'DRAFT', createdAt: '2026-08-18T07:10:00.000Z', updatedAt: '2026-09-04T08:40:00.000Z' },
+    { id: 'feature-workshop-invoice', code: 'INVOICING', name: 'Invoicing', description: 'Customer billing and receipt generation.', status: 'DRAFT', createdAt: '2026-08-18T07:10:00.000Z', updatedAt: '2026-09-04T08:40:00.000Z' },
   ],
   'product-company-site': [
-    { id: 'feature-site-content', code: 'CONTENT-PAGES', name: 'Content Pages', description: 'Managed responsive company content pages.', status: 'ACTIVE' },
+    { id: 'feature-site-content', code: 'CONTENT-PAGES', name: 'Content Pages', description: 'Managed responsive company content pages.', status: 'ACTIVE', createdAt: '2026-07-20T06:00:00.000Z', updatedAt: '2026-09-01T02:45:00.000Z' },
   ],
   'product-learning-media': [
-    { id: 'feature-learning-library', code: 'CONTENT-LIBRARY', name: 'Content Library', description: 'Learning media collection and publishing.', status: 'RETIRED' },
+    { id: 'feature-learning-library', code: 'CONTENT-LIBRARY', name: 'Content Library', description: 'Learning media collection and publishing.', status: 'RETIRED', createdAt: '2026-08-15T01:00:00.000Z', updatedAt: '2026-08-29T09:20:00.000Z' },
   ],
 };
 
@@ -38,7 +38,7 @@ const CLIENTS: Record<string, ProductClient[]> = {
 };
 
 const VALID_TRANSITIONS: Record<ProductStatus, ProductStatus[]> = {
-  DRAFT: ['ACTIVE'],
+  DRAFT: ['ACTIVE', 'RETIRED'],
   ACTIVE: ['RETIRED'],
   RETIRED: ['DRAFT'],
 };
@@ -70,7 +70,7 @@ export function createMockProductDataSource(): ProductDataSource {
       const totalPages = Math.max(1, Math.ceil(matches.length / query.limit));
       const page = Math.min(Math.max(query.page, 1), totalPages);
       const start = (page - 1) * query.limit;
-      return { products: matches.slice(start, start + query.limit).map(copyProduct), total: matches.length, totalPages };
+      return { products: matches.slice(start, start + query.limit).map((product) => ({ ...copyProduct(product), featureCount: features[product.id]?.length ?? 0, clientCount: clients[product.id]?.length ?? 0 })), total: matches.length, totalPages };
     },
 
     async getProductDetail(productId) {
