@@ -9,10 +9,11 @@ application, a POS backoffice, a CORE replacement, or a monitoring database.
 
 ## Current checkpoint
 
-BF-01 establishes the application bootstrap, provider composition, routing,
-responsive shell, error/loading states, typed configuration, and one mock-backed
-feature data-source pattern. Real integrations and operational domains remain
-out of scope.
+BF-02 adds the first operator-facing dashboard, grouped Control Center
+navigation, responsive shell behavior, and realistic mock operational state.
+The dashboard covers attention items, client application health, managed
+infrastructure, deployments, and recent events. Real integrations remain out of
+scope.
 
 ## Requirements and commands
 
@@ -34,5 +35,5 @@ npm test
 npm run build
 ```
 
-Current version: `0.1.0-alpha.0`. See
+Current version: `0.1.0-alpha.1`. See
 `docs/engineering/VERSIONING_STANDARD.md` for release lifecycle rules.

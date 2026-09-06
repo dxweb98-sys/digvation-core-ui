@@ -6,12 +6,17 @@ During implementation, run targeted checks only when they materially reduce
 risk. At a coherent checkpoint boundary, run the full checkpoint acceptance set
 once and record results in the completion report.
 
-BF-01 acceptance requires:
+Frontend checkpoint acceptance requires:
 
-1. `npm run lint`
-2. `npm run typecheck`
-3. `npm test` for meaningful routing, shell, overview, and not-found behavior
-4. `npm run build`
+1. `npm ci`
+2. `npm run lint`
+3. `npm run typecheck`
+4. `npm run test -- --run` for meaningful feature and shell behavior
+5. `npm run build`
+
+BF-02 additionally requires one manual browser smoke review of the Dashboard,
+navigation, responsive layout, controlled loading/error behavior, console, and
+visual hierarchy.
 
 Add tests for behavior and important boundaries, not coverage arithmetic.
 Browser automation is deferred until a checkpoint has an acceptance need that
