@@ -1,6 +1,6 @@
 import type { ProductDataSource } from './product-data-source';
 import { normalizeProductCode } from '../schemas/product-form-schema';
-import type { Product, ProductClient, ProductDetail, ProductFeature, ProductStatus } from '../types/product';
+import type { Product, ProductDetail, ProductFeature, ProductStatus } from '../types/product';
 
 const PRODUCTS: Product[] = [
   { id: 'product-pos', code: 'DIGVATION-POS', name: 'Digvation POS', description: 'Operational point-of-sale platform for service and retail businesses.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-06T10:00:00.000Z' },
@@ -27,14 +27,11 @@ const FEATURES: Record<string, ProductFeature[]> = {
   ],
 };
 
-const CLIENTS: Record<string, ProductClient[]> = {
-  'product-pos': [{ id: 'client-nova', code: 'NOVA', displayName: 'Nova Salon', status: 'ACTIVE' }],
-  'product-workshop': [{ id: 'client-nova', code: 'NOVA', displayName: 'Nova Salon', status: 'ACTIVE' }],
-  'product-company-site': [
-    { id: 'client-poseidon', code: 'POSEIDON', displayName: 'Poseidon Filter', status: 'ACTIVE' },
-    { id: 'client-fortuna', code: 'FORTUNA', displayName: 'Fortuna Emporos', status: 'SUSPENDED' },
-  ],
-  'product-learning-media': [{ id: 'client-leaf', code: 'LEAF', displayName: 'Leaf Lab', status: 'ARCHIVED' }],
+const CLIENT_COUNTS: Record<string, number> = {
+  'product-pos': 1,
+  'product-workshop': 1,
+  'product-company-site': 2,
+  'product-learning-media': 1,
 };
 
 const VALID_TRANSITIONS: Record<ProductStatus, ProductStatus[]> = {
@@ -51,14 +48,14 @@ function copyProduct(product: Product): Product {
   return { ...product };
 }
 
-function getDetail(product: Product, features: Record<string, ProductFeature[]>, clients: Record<string, ProductClient[]>): ProductDetail {
-  return { product: copyProduct(product), features: structuredClone(features[product.id] ?? []), clients: structuredClone(clients[product.id] ?? []) };
+function getDetail(product: Product, features: Record<string, ProductFeature[]>): ProductDetail {
+  return { product: copyProduct(product), features: structuredClone(features[product.id] ?? []) };
 }
 
 export function createMockProductDataSource(): ProductDataSource {
   const products = PRODUCTS.map(copyProduct);
   const features = structuredClone(FEATURES);
-  const clients = structuredClone(CLIENTS);
+  const clientCounts = { ...CLIENT_COUNTS };
 
   return {
     async getProducts(query) {
@@ -70,12 +67,12 @@ export function createMockProductDataSource(): ProductDataSource {
       const totalPages = Math.max(1, Math.ceil(matches.length / query.limit));
       const page = Math.min(Math.max(query.page, 1), totalPages);
       const start = (page - 1) * query.limit;
-      return { products: matches.slice(start, start + query.limit).map((product) => ({ ...copyProduct(product), featureCount: features[product.id]?.length ?? 0, clientCount: clients[product.id]?.length ?? 0 })), total: matches.length, totalPages };
+      return { products: matches.slice(start, start + query.limit).map((product) => ({ ...copyProduct(product), featureCount: features[product.id]?.length ?? 0, clientCount: clientCounts[product.id] ?? 0 })), total: matches.length, totalPages };
     },
 
     async getProductDetail(productId) {
       const product = products.find((candidate) => candidate.id === productId);
-      return product ? getDetail(product, features, clients) : null;
+      return product ? getDetail(product, features) : null;
     },
 
     async createProduct(input) {
@@ -85,8 +82,8 @@ export function createMockProductDataSource(): ProductDataSource {
       const product: Product = { id: `product-${code.toLowerCase()}-${products.length + 1}`, code, name: input.name.trim(), description: input.description?.trim() || undefined, status: 'DRAFT', createdAt: now, updatedAt: now };
       products.unshift(product);
       features[product.id] = [];
-      clients[product.id] = [];
-      return getDetail(product, features, clients);
+      clientCounts[product.id] = 0;
+      return getDetail(product, features);
     },
 
     async updateProduct(productId, input) {
@@ -95,7 +92,7 @@ export function createMockProductDataSource(): ProductDataSource {
       product.name = input.name.trim();
       product.description = input.description?.trim() || undefined;
       product.updatedAt = getNow();
-      return getDetail(product, features, clients);
+      return getDetail(product, features);
     },
 
     async transitionProductStatus(input) {
@@ -105,7 +102,7 @@ export function createMockProductDataSource(): ProductDataSource {
       if (!VALID_TRANSITIONS[product.status].includes(input.targetStatus)) throw new Error(`Cannot transition ${product.status} to ${input.targetStatus}.`);
       product.status = input.targetStatus;
       product.updatedAt = getNow();
-      return getDetail(product, features, clients);
+      return getDetail(product, features);
     },
   };
 }

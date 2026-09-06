@@ -1,0 +1,78 @@
+.client-products-tab {
+  display: grid;
+  gap: 16px;
+}
+
+.client-product-tab-state,
+.client-product-dialog-state {
+  display: grid;
+  min-height: 160px;
+  place-items: center;
+  padding: 24px;
+}
+
+.client-product-identity {
+  display: grid;
+  gap: 4px;
+}
+
+.client-product-identity strong {
+  font-size: 0.8rem;
+}
+
+.client-product-identity code {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+}
+
+.client-product-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.client-product-lifecycle-menu {
+  display: grid;
+  min-width: 150px;
+  gap: 2px;
+  padding: 4px;
+}
+
+.client-product-lifecycle-menu-item {
+  width: 100%;
+  padding: 8px 10px;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.78rem;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-menu-item);
+  cursor: pointer;
+}
+
+.client-product-lifecycle-menu-item:hover,
+.client-product-lifecycle-menu-item:focus-visible {
+  background: var(--color-surface-muted);
+  outline: none;
+}
+
+.client-product-lifecycle-menu-item.is-danger {
+  color: var(--color-danger);
+}
+
+.client-product-transition-dialog {
+  display: grid;
+  gap: 18px;
+}
+
+.client-product-transition-dialog > p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}

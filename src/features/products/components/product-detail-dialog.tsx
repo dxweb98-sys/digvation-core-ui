@@ -1,5 +1,6 @@
-import { DBadge, DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation-labs/ui';
+import { DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation-labs/ui';
 import { useState } from 'react';
+import { ProductClientsTab } from '../../client-products/components/product-clients-tab';
 import { useProductDetail } from '../hooks/use-product-detail';
 import { useProductStatusTransition } from '../hooks/use-product-mutations';
 import type { ProductFeature, ProductStatus } from '../types/product';
@@ -43,7 +44,7 @@ export function ProductDetailDialog({ productId, open, onClose }: { productId: s
             <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="features">Features</DTabsTrigger><DTabsTrigger value="clients">Clients</DTabsTrigger></DTabsList>
             <DTabsContent value="overview"><DCard variant="outlined"><DCardContent><dl className="product-overview-list"><div><dt>Product Name</dt><dd>{product.name}</dd></div><div><dt>Product Code</dt><dd><code className="product-code">{product.code}</code></dd></div><div><dt>Description</dt><dd>{product.description ?? 'Not recorded'}</dd></div><div><dt>Status</dt><dd><ProductStatusBadge status={product.status} /></dd></div><div><dt>Created</dt><dd>{formatDate(product.createdAt)}</dd></div><div><dt>Updated</dt><dd>{formatDate(product.updatedAt)}</dd></div></dl></DCardContent></DCard></DTabsContent>
             <DTabsContent value="features"><DCard variant="outlined"><DCardContent><FeatureCatalog features={detail.features} /></DCardContent></DCard></DTabsContent>
-            <DTabsContent value="clients"><DCard variant="outlined"><DCardContent>{detail.clients.length === 0 ? <DEmptyState title="No client relationships" description="Client product relationships will be managed in a later domain." /> : <div className="product-client-list">{detail.clients.map((client) => <article key={client.id}><div><strong>{client.displayName}</strong><code>{client.code}</code></div><DBadge variant={client.status === 'ACTIVE' ? 'success' : client.status === 'SUSPENDED' ? 'warning' : 'default'} dot>{client.status[0] + client.status.slice(1).toLowerCase()}</DBadge></article>)}</div>}</DCardContent></DCard></DTabsContent>
+            <DTabsContent value="clients"><ProductClientsTab productId={product.id} /></DTabsContent>
           </DTabs>
         </div>
       </DDialog>

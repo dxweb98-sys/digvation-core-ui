@@ -1,5 +1,6 @@
-import { DBadge, DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation-labs/ui';
+import { DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation-labs/ui';
 import { useState } from 'react';
+import { ClientProductsTab } from '../../client-products/components/client-products-tab';
 import { useClientDetail } from '../hooks/use-client-detail';
 import { useClientStatusTransition } from '../hooks/use-client-mutations';
 import type { ClientActivity, ClientStatus } from '../types/client';
@@ -83,9 +84,7 @@ export function ClientDetailDialog({
                 <div><dt>Updated</dt><dd>{formatDate(client.updatedAt)}</dd></div>
               </dl></DCardContent></DCard>
             </DTabsContent>
-            <DTabsContent value="products">
-              <DCard variant="outlined"><DCardContent>{detail.productRelationships.length === 0 ? <DEmptyState title="No product relationships" description="Product relationships will be managed in a later domain." /> : <div className="client-product-list">{detail.productRelationships.map((relationship) => <article key={relationship.id}><div><strong>{relationship.productName}</strong><span>Client product relationship</span></div><DBadge variant={relationship.status === 'ACTIVE' ? 'success' : 'info'} dot>{relationship.status}</DBadge></article>)}</div>}</DCardContent></DCard>
-            </DTabsContent>
+            <DTabsContent value="products"><ClientProductsTab clientId={client.id} /></DTabsContent>
             <DTabsContent value="activity"><DCard variant="outlined"><DCardContent><ActivityTimeline activity={detail.activity} /></DCardContent></DCard></DTabsContent>
           </DTabs>
         </div>
