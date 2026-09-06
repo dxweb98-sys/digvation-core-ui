@@ -37,6 +37,13 @@
   field validation, toasts for mutation success or failure, and
   `DConnectionError` for page data failures. Keep `DDataTable`,
   `DSearchInput`, `DStatusFilter`, and `DPagination` canonical.
+- Navigation groups own a restrained, consistent sibling-item gap; do not add
+  per-route spacing exceptions.
+- Dialog action groups align to the right on normal viewports. Preserve usable
+  wrapping on narrow screens, with Cancel before the primary action.
+- When applicable, use `DDataTable` for its integrated search, filters, header
+  actions, row action menu, and pagination. Avoid redundant table wrappers or
+  several visible row-action buttons.
 
 ## Integration and safety
 

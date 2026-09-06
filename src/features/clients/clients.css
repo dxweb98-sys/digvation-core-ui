@@ -31,40 +31,6 @@
   line-height: 1.6;
 }
 
-.client-list-card {
-  overflow: hidden;
-}
-
-.client-list-toolbar {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.client-list-toolbar > :first-child {
-  width: min(100%, 460px);
-}
-
-.client-list-footer {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 16px;
-  margin-top: 8px;
-  font-size: 0.72rem;
-  color: var(--color-text-muted);
-  border-top: 1px solid var(--color-border);
-}
-
-.client-table-actions {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
 .client-table-identity {
   display: grid;
   gap: 3px;
@@ -118,6 +84,10 @@
 .client-form-actions {
   justify-content: flex-end;
   padding-top: 8px;
+}
+
+.client-dialog-actions {
+  justify-content: flex-end;
 }
 
 .client-form-error {
@@ -298,16 +268,6 @@
   .clients-page-heading,
   .client-detail-header {
     flex-direction: column;
-  }
-
-  .client-list-toolbar,
-  .client-list-footer {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .client-list-toolbar > :first-child {
-    width: 100%;
   }
 
   .client-header-actions {

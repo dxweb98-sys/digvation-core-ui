@@ -1,4 +1,4 @@
-import { DButton, DCard, DCardContent, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DPagination, DSearchInput, DStatusFilter, type TableColumn } from '@digvation-labs/ui';
+import { DButton, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DStatusFilter, type TableAction, type TableColumn } from '@digvation-labs/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ClientFormDialog } from '../components/client-form-dialog';
@@ -42,6 +42,7 @@ export function ClientListPage() {
   const [query, setQuery] = useState<ClientListQuery>({ search: '', status: 'ALL', page: 1, limit: PAGE_LIMIT });
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [quickDetailClient, setQuickDetailClient] = useState<ClientListItem | null>(null);
+  const [editClient, setEditClient] = useState<ClientListItem | null>(null);
   const clientQuery = useClientList(query);
 
   function updateQuery(nextQuery: Partial<ClientListQuery>) {
@@ -61,6 +62,11 @@ export function ClientListPage() {
   }
 
   const result = clientQuery.data;
+  const tableActions: TableAction<ClientListItem>[] = [
+    { label: 'Quick Detail', onClick: setQuickDetailClient },
+    { label: 'Open Client', onClick: (client) => navigate(`/clients/${client.id}`) },
+    { label: 'Edit Client', onClick: setEditClient },
+  ];
 
   return (
     <div className="clients-page">
@@ -70,45 +76,34 @@ export function ClientListPage() {
           <h1>Clients</h1>
           <p>Manage the organizations registered in Digvation’s control plane and their lifecycle state.</p>
         </div>
-        <DButton onClick={() => setIsCreateDialogOpen(true)}>Add Client</DButton>
       </div>
-      <DCard className="client-list-card" variant="outlined">
-        <DCardContent>
-          <div className="client-list-toolbar">
-            <DSearchInput value={query.search} onChange={(search) => updateQuery({ search })} placeholder="Search client name, legal name, or code" />
-            <DStatusFilter
-              label="Status"
-              allLabel="All statuses"
-              options={CLIENT_STATUS_OPTIONS}
-              value={query.status}
-              onChange={(status) => updateQuery({ status: status as ClientStatus | 'ALL' })}
-            />
-          </div>
-          {result.total === 0 ? (
-            <DEmptyState title="No clients found" description="Try another search or status filter, or add the first client." />
-          ) : (
-            <>
-              <DDataTable
-                columns={CLIENT_COLUMNS}
-                data={result.clients}
-                rowKey="id"
-                onRowClick={(client) => navigate(`/clients/${client.id}`)}
-                actions={(client) => (
-                  <div className="client-table-actions">
-                    <DButton size="sm" variant="ghost" onClick={(event) => { event.stopPropagation(); setQuickDetailClient(client); }}>Quick detail</DButton>
-                    <DButton size="sm" variant="ghost" onClick={(event) => { event.stopPropagation(); navigate(`/clients/${client.id}`); }}>Open</DButton>
-                  </div>
-                )}
-              />
-              <div className="client-list-footer">
-                <span>{result.total} clients</span>
-                <DPagination page={query.page} totalPages={result.totalPages} onChange={(page) => updateQuery({ page })} />
-              </div>
-            </>
-          )}
-        </DCardContent>
-      </DCard>
+      <DDataTable
+        columns={CLIENT_COLUMNS}
+        data={result.clients}
+        rowKey="id"
+        searchable
+        searchPlaceholder="Search client name, legal name, or code"
+        searchValue={query.search}
+        onSearchChange={(search) => updateQuery({ search })}
+        filters={
+          <DStatusFilter
+            label="Status"
+            allLabel="All statuses"
+            options={CLIENT_STATUS_OPTIONS}
+            value={query.status}
+            onChange={(status) => updateQuery({ status: status as ClientStatus | 'ALL' })}
+          />
+        }
+        headerActions={<DButton onClick={() => setIsCreateDialogOpen(true)}>Add Client</DButton>}
+        pagination={{ page: query.page, pageSize: query.limit, total: result.total }}
+        onPageChange={(page) => updateQuery({ page })}
+        onPageSizeChange={(limit) => updateQuery({ limit, page: 1 })}
+        emptyMessage={<DEmptyState title="No clients found" description="Try another search or status filter, or add the first client." />}
+        onRowClick={(client) => navigate(`/clients/${client.id}`)}
+        actions={tableActions}
+      />
       <ClientFormDialog open={isCreateDialogOpen} mode="create" onClose={() => setIsCreateDialogOpen(false)} />
+      <ClientFormDialog open={editClient !== null} mode="edit" client={editClient ?? undefined} onClose={() => setEditClient(null)} />
       <ClientQuickDetailDialog
         client={quickDetailClient}
         onClose={() => setQuickDetailClient(null)}

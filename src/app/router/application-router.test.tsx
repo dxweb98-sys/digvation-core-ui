@@ -61,7 +61,10 @@ describe('application routing foundation', () => {
     expect(screen.getByLabelText('Client Code *')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Close dialog' }));
-    fireEvent.click(screen.getAllByRole('button', { name: 'Quick detail' })[0]);
+    const actionMenu = document.querySelector<HTMLElement>('[data-ds-component="data-table"] tbody [data-ds-component="dropdown-trigger"]');
+    expect(actionMenu).not.toBeNull();
+    fireEvent.click(actionMenu!);
+    fireEvent.click(screen.getByRole('button', { name: 'Quick Detail' }));
     expect(screen.getByRole('dialog', { name: 'Nova Salon' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Open Client' })).toBeInTheDocument();
   });

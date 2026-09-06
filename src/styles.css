@@ -109,11 +109,13 @@ a {
 }
 
 .navigation-group {
+  display: grid;
+  gap: 5px;
   margin-top: 18px;
 }
 
 .navigation-section-label {
-  padding: 0 10px 6px;
+  padding: 0 10px 1px;
   font-size: 0.63rem;
   font-weight: 700;
   color: #64748b;
