@@ -1,9 +1,8 @@
 .clients-page,
-.client-form-page,
 .client-detail-page {
+  width: 100%;
   display: grid;
   gap: 24px;
-  max-width: 1280px;
 }
 
 .clients-page-heading,
@@ -60,6 +59,12 @@
   border-top: 1px solid var(--color-border);
 }
 
+.client-table-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
 .client-table-identity {
   display: grid;
   gap: 3px;
@@ -95,19 +100,6 @@
   padding: 32px;
 }
 
-.client-form-page {
-  max-width: 760px;
-}
-
-.client-form-heading {
-  display: grid;
-  gap: 0;
-}
-
-.client-form-card {
-  overflow: hidden;
-}
-
 .client-form {
   display: grid;
   gap: 18px;
@@ -132,6 +124,31 @@
   margin: 14px 0 0;
   font-size: 0.78rem;
   color: var(--color-danger);
+}
+
+.client-quick-detail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 24px;
+  margin: 0;
+}
+
+.client-quick-detail > div {
+  display: grid;
+  gap: 4px;
+}
+
+.client-quick-detail dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.client-quick-detail dd {
+  margin: 0;
+  font-size: 0.82rem;
 }
 
 .client-back-link {
@@ -298,6 +315,10 @@
   }
 
   .client-overview-list {
+    grid-template-columns: 1fr;
+  }
+
+  .client-quick-detail {
     grid-template-columns: 1fr;
   }
 

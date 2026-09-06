@@ -1,6 +1,8 @@
 import { DButton, DCard, DCardContent, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DPagination, DSearchInput, DStatusFilter, type TableColumn } from '@digvation-labs/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { ClientFormDialog } from '../components/client-form-dialog';
+import { ClientQuickDetailDialog } from '../components/client-quick-detail-dialog';
 import { ClientStatusBadge } from '../components/client-status-badge';
 import { useClientList } from '../hooks/use-client-list';
 import type { ClientListItem, ClientListQuery, ClientStatus } from '../types/client';
@@ -38,6 +40,8 @@ function formatClientDate(value: string) {
 export function ClientListPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState<ClientListQuery>({ search: '', status: 'ALL', page: 1, limit: PAGE_LIMIT });
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [quickDetailClient, setQuickDetailClient] = useState<ClientListItem | null>(null);
   const clientQuery = useClientList(query);
 
   function updateQuery(nextQuery: Partial<ClientListQuery>) {
@@ -66,7 +70,7 @@ export function ClientListPage() {
           <h1>Clients</h1>
           <p>Manage the organizations registered in Digvation’s control plane and their lifecycle state.</p>
         </div>
-        <DButton onClick={() => navigate('/clients/new')}>Add Client</DButton>
+        <DButton onClick={() => setIsCreateDialogOpen(true)}>Add Client</DButton>
       </div>
       <DCard className="client-list-card" variant="outlined">
         <DCardContent>
@@ -89,7 +93,12 @@ export function ClientListPage() {
                 data={result.clients}
                 rowKey="id"
                 onRowClick={(client) => navigate(`/clients/${client.id}`)}
-                actions={(client) => <DButton size="sm" variant="ghost" onClick={() => navigate(`/clients/${client.id}`)}>View</DButton>}
+                actions={(client) => (
+                  <div className="client-table-actions">
+                    <DButton size="sm" variant="ghost" onClick={(event) => { event.stopPropagation(); setQuickDetailClient(client); }}>Quick detail</DButton>
+                    <DButton size="sm" variant="ghost" onClick={(event) => { event.stopPropagation(); navigate(`/clients/${client.id}`); }}>Open</DButton>
+                  </div>
+                )}
               />
               <div className="client-list-footer">
                 <span>{result.total} clients</span>
@@ -99,6 +108,15 @@ export function ClientListPage() {
           )}
         </DCardContent>
       </DCard>
+      <ClientFormDialog open={isCreateDialogOpen} mode="create" onClose={() => setIsCreateDialogOpen(false)} />
+      <ClientQuickDetailDialog
+        client={quickDetailClient}
+        onClose={() => setQuickDetailClient(null)}
+        onOpenClient={(clientId) => {
+          setQuickDetailClient(null);
+          navigate(`/clients/${clientId}`);
+        }}
+      />
     </div>
   );
 }

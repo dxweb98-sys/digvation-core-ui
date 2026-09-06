@@ -1,4 +1,4 @@
-import { DButton, DDialog, DTextarea } from '@digvation-labs/ui';
+import { DButton, DDialog, DTextarea, useToast } from '@digvation-labs/ui';
 import { useState } from 'react';
 import type { Client, ClientStatus } from '../types/client';
 import { ClientStatusBadge } from './client-status-badge';
@@ -25,6 +25,7 @@ export function ClientLifecycleAction({
   const [targetStatus, setTargetStatus] = useState<ClientStatus | null>(null);
   const [reason, setReason] = useState('');
   const [reasonError, setReasonError] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   function closeDialog() {
     if (!isSubmitting) {
@@ -42,8 +43,21 @@ export function ClientLifecycleAction({
       setReasonError('A reason is required for this lifecycle change.');
       return;
     }
-    await onTransition(targetStatus, reason);
-    closeDialog();
+    try {
+      await onTransition(targetStatus, reason);
+      showToast({
+        title: 'Client lifecycle updated',
+        description: `${client.displayName} is now ${getTransitionLabel(targetStatus).toLowerCase()}.`,
+        variant: 'success',
+      });
+      closeDialog();
+    } catch (error) {
+      showToast({
+        title: 'Lifecycle update failed',
+        description: error instanceof Error ? error.message : 'The client lifecycle state could not be changed.',
+        variant: 'danger',
+      });
+    }
   }
 
   return (

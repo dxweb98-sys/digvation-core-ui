@@ -1,4 +1,5 @@
 import { DButton, DInput } from '@digvation-labs/ui';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { clientFormSchema, normalizeClientCode, type ClientFormValues } from '../schemas/client-form-schema';
 
@@ -20,6 +21,11 @@ export function ClientForm({
   onSubmit: (values: ClientFormValues) => void | Promise<void>;
 }) {
   const form = useForm<ClientFormValues>({ defaultValues });
+  const { code, displayName, legalName } = defaultValues;
+
+  useEffect(() => {
+    form.reset({ code, displayName, legalName });
+  }, [code, displayName, form, legalName]);
 
   async function handleSubmit(values: ClientFormValues) {
     const normalizedValues = {

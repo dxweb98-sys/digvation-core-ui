@@ -25,6 +25,18 @@
   must not be prop-forwarding primitive wrappers.
 - Use design-system semantic CSS variables. Do not add competing tokens,
   decorative dashboards, or unneeded animation.
+- Operational page roots use the full workspace width after the application
+  sidebar; preserve responsive padding and apply local readability limits only
+  to long-form text.
+- Use `DDialog` for small create/edit work and quick record detail. Reserve
+  dedicated routes for complex, tabbed, or deep-link-worthy workspaces.
+- Use `DConfirmDialog` for simple destructive confirmation. When an operation
+  requires input such as a lifecycle reason, use `DDialog` with explicit
+  confirmation instead.
+- Use canonical design-system `DToastProvider` feedback: inline errors for
+  field validation, toasts for mutation success or failure, and
+  `DConnectionError` for page data failures. Keep `DDataTable`,
+  `DSearchInput`, `DStatusFilter`, and `DPagination` canonical.
 
 ## Integration and safety
 

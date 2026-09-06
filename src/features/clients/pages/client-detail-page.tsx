@@ -2,6 +2,7 @@ import { DBadge, DButton, DCard, DCardContent, DConnectionError, DEmptyState, DL
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { ClientLifecycleAction } from '../components/client-lifecycle-action';
+import { ClientFormDialog } from '../components/client-form-dialog';
 import { ClientStatusBadge } from '../components/client-status-badge';
 import { useClientDetail } from '../hooks/use-client-detail';
 import { useClientStatusTransition } from '../hooks/use-client-mutations';
@@ -21,6 +22,7 @@ export function ClientDetailPage() {
   const navigate = useNavigate();
   const { clientId = '' } = useParams();
   const [tab, setTab] = useState('overview');
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const clientQuery = useClientDetail(clientId);
   const statusTransition = useClientStatusTransition();
 
@@ -44,7 +46,7 @@ export function ClientDetailPage() {
           <p><code className="client-code">{client.code}</code>{client.legalName ? ` · ${client.legalName}` : ''}</p>
         </div>
         <div className="client-header-actions">
-          <DButton variant="outline" onClick={() => navigate(`/clients/${client.id}/edit`)}>Edit Client</DButton>
+          <DButton variant="outline" onClick={() => setIsEditDialogOpen(true)}>Edit Client</DButton>
           <ClientLifecycleAction client={client} isSubmitting={statusTransition.isPending} onTransition={handleTransition} />
         </div>
       </div>
@@ -67,6 +69,7 @@ export function ClientDetailPage() {
         </DTabsContent>
         <DTabsContent value="activity"><DCard variant="outlined"><DCardContent><ActivityTimeline activity={detail.activity} /></DCardContent></DCard></DTabsContent>
       </DTabs>
+      <ClientFormDialog open={isEditDialogOpen} mode="edit" client={client} onClose={() => setIsEditDialogOpen(false)} />
     </div>
   );
 }
