@@ -8,6 +8,8 @@ import { EditClientPage } from '../../features/clients/pages/edit-client-page';
 import { ProductListPage } from '../../features/products/pages/product-list-page';
 import { InstallationListPage } from '../../features/installations/pages/installation-list-page';
 import { InfrastructureListPage } from '../../features/infrastructure/pages/infrastructure-list-page';
+import { IncidentsPage } from '../../features/operations/pages/incidents-page';
+import { DeploymentsPage } from '../../features/operations/pages/deployments-page';
 import { PlatformHealthPage } from '../../features/runtime/pages/platform-health-page';
 import { NotFoundPage } from './not-found-page';
 import { PlaceholderPage } from './placeholder-page';
@@ -30,14 +32,8 @@ export const applicationRoutes: RouteObject[] = [
       },
       { path: 'installations', element: <InstallationListPage /> },
       { path: 'infrastructure', element: <InfrastructureListPage /> },
-      {
-        path: 'deployments',
-        element: <PlaceholderPage title="Deployments" description="Release and deployment history will be visible here." />,
-      },
-      {
-        path: 'incidents',
-        element: <PlaceholderPage title="Incidents" description="Operational incident coordination will be managed here." />,
-      },
+      { path: 'deployments', element: <DeploymentsPage /> },
+      { path: 'incidents', element: <IncidentsPage /> },
       {
         path: 'users',
         element: <PlaceholderPage title="Users" description="Internal Control Center user access will be managed here." />,
