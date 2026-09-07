@@ -111,6 +111,11 @@ describe('application routing foundation', () => {
     fireEvent.click(actionMenu!);
     expect(screen.getByRole('button', { name: 'Open Installation' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Edit Installation' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'More Actions' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open Installation' }));
+    expect(await screen.findByRole('dialog', { name: 'Nova POS Production' })).toBeInTheDocument();
+    expect(screen.queryByText('Installation not found')).not.toBeInTheDocument();
   });
 
   it('renders a recoverable not-found state for unknown routes', async () => {

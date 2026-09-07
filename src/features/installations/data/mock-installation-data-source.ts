@@ -28,7 +28,13 @@ function now() { return new Date().toISOString(); }
 function resolveInstallation(installation: Installation): InstallationSummary {
   const clientProduct = CLIENT_PRODUCTS.find((candidate) => candidate.id === installation.clientProductId);
   if (!clientProduct) throw new Error('Installation references an unavailable client product.');
-  return { ...copyInstallation(installation), ...clientProduct };
+  return {
+    ...copyInstallation(installation),
+    clientId: clientProduct.clientId,
+    clientName: clientProduct.clientName,
+    productName: clientProduct.productName,
+    productCode: clientProduct.productCode,
+  };
 }
 
 export function createMockInstallationDataSource(): InstallationDataSource {
