@@ -1,0 +1,2 @@
+import type { ClientProductCommercialSummary, ProductConfiguration, RenewalTermInput, SubscriptionTerm } from '../types/subscription';
+export interface SubscriptionDataSource { getClientCommercialSummary(clientId: string): Promise<ClientProductCommercialSummary[]>; addRenewalTerm(subscriptionId: string, input: RenewalTermInput): Promise<SubscriptionTerm>; updateProductConfiguration(clientProductId: string, configurations: ProductConfiguration[]): Promise<ProductConfiguration[]>; }

@@ -5,6 +5,14 @@ export interface Client {
   code: string;
   displayName: string;
   legalName?: string;
+  organizationEmail?: string;
+  organizationPhone?: string;
+  website?: string;
+  taxIdentifier?: string;
+  country?: string;
+  timezone?: string;
+  address?: string;
+  notes?: string;
   status: ClientStatus;
   statusChangedAt: string;
   createdAt: string;
@@ -50,6 +58,14 @@ export interface CreateClientInput {
 export interface UpdateClientInput {
   displayName: string;
   legalName?: string;
+  organizationEmail?: string;
+  organizationPhone?: string;
+  website?: string;
+  taxIdentifier?: string;
+  country?: string;
+  timezone?: string;
+  address?: string;
+  notes?: string;
 }
 
 export interface ClientStatusTransitionInput {

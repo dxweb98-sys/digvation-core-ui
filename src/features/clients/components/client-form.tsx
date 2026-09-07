@@ -1,4 +1,4 @@
-import { DButton, DInput } from '@digvation-labs/ui';
+import { DButton, DInput, DTextarea } from '@digvation-labs/ui';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { clientFormSchema, normalizeClientCode, type ClientFormValues } from '../schemas/client-form-schema';
@@ -21,17 +21,17 @@ export function ClientForm({
   onSubmit: (values: ClientFormValues) => void | Promise<void>;
 }) {
   const form = useForm<ClientFormValues>({ defaultValues });
-  const { code, displayName, legalName } = defaultValues;
+  const { code, displayName, legalName, organizationEmail, organizationPhone, website, taxIdentifier, country, timezone, address, notes } = defaultValues;
 
   useEffect(() => {
-    form.reset({ code, displayName, legalName });
-  }, [code, displayName, form, legalName]);
+    form.reset({ code, displayName, legalName, organizationEmail, organizationPhone, website, taxIdentifier, country, timezone, address, notes });
+  }, [address, code, country, displayName, form, legalName, notes, organizationEmail, organizationPhone, taxIdentifier, timezone, website]);
 
   async function handleSubmit(values: ClientFormValues) {
     const normalizedValues = {
       ...values,
       code: normalizeClientCode(values.code),
-      legalName: values.legalName?.trim() || undefined,
+      legalName: values.legalName?.trim() || undefined, organizationEmail: values.organizationEmail?.trim() || undefined, organizationPhone: values.organizationPhone?.trim() || undefined, website: values.website?.trim() || undefined, taxIdentifier: values.taxIdentifier?.trim() || undefined, country: values.country?.trim() || undefined, timezone: values.timezone?.trim() || undefined, address: values.address?.trim() || undefined, notes: values.notes?.trim() || undefined,
     };
     const result = clientFormSchema.safeParse(normalizedValues);
 
@@ -57,6 +57,7 @@ export function ClientForm({
         error={form.formState.errors.code?.message}
         onChange={(value) => form.setValue('code', normalizeClientCode(value), { shouldValidate: true })}
       />
+      {mode === 'edit' ? <><div className="client-form-grid"><DInput label="Organization Email" value={form.watch('organizationEmail') ?? ''} error={form.formState.errors.organizationEmail?.message} onChange={(value) => form.setValue('organizationEmail', value, { shouldValidate: true })} /><DInput label="Organization Phone" value={form.watch('organizationPhone') ?? ''} error={form.formState.errors.organizationPhone?.message} onChange={(value) => form.setValue('organizationPhone', value, { shouldValidate: true })} /></div><div className="client-form-grid"><DInput label="Website" value={form.watch('website') ?? ''} error={form.formState.errors.website?.message} onChange={(value) => form.setValue('website', value, { shouldValidate: true })} /><DInput label="Tax Identifier" value={form.watch('taxIdentifier') ?? ''} error={form.formState.errors.taxIdentifier?.message} onChange={(value) => form.setValue('taxIdentifier', value, { shouldValidate: true })} /></div><div className="client-form-grid"><DInput label="Country" value={form.watch('country') ?? ''} error={form.formState.errors.country?.message} onChange={(value) => form.setValue('country', value, { shouldValidate: true })} /><DInput label="Timezone" value={form.watch('timezone') ?? ''} error={form.formState.errors.timezone?.message} onChange={(value) => form.setValue('timezone', value, { shouldValidate: true })} /></div><DTextarea label="Address" value={form.watch('address') ?? ''} error={form.formState.errors.address?.message} onChange={(value) => form.setValue('address', value, { shouldValidate: true })} /><DTextarea label="Notes" value={form.watch('notes') ?? ''} error={form.formState.errors.notes?.message} onChange={(value) => form.setValue('notes', value, { shouldValidate: true })} /></> : null}
       <DInput
         label="Display Name *"
         value={form.watch('displayName')}

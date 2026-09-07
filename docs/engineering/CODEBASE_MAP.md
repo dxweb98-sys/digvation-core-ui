@@ -7,7 +7,8 @@
 | `src/app/router` | Route definitions and route-level failure handling |
 | `src/app/shell` | Operator shell and primary navigation composition |
 | `src/features/dashboard` | Operational dashboard UI, types, query hook, and mock data source |
-| `src/features/clients` | Client management UI, lifecycle composition, forms, hooks, and mock data source |
+| `src/features/clients` | Client organization profile, contacts, lifecycle composition, forms, hooks, and mock data sources |
+| `src/features/subscriptions` | Client-product commercial terms, renewal history, and product configuration UI with mock data source |
 | `src/features/products` | Product catalog UI, lifecycle composition, forms, hooks, and mock data source |
 | `src/features/client-products` | Contextual client-to-product relationship UI, lifecycle composition, hooks, and mock data source |
 | `src/features/installations` | Installation management UI, lifecycle composition, forms, hooks, and mock data source |
