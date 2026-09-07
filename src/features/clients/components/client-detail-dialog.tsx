@@ -1,4 +1,4 @@
-import { DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation-labs/ui';
+import { DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation/ui';
 import { useState } from 'react';
 import { ClientProductsTab } from '../../client-products/components/client-products-tab';
 import { ClientInstallationsTab } from '../../installations/components/client-installations-tab';

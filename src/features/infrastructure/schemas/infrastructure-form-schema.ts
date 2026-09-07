@@ -1,0 +1,5 @@
+import { z } from 'zod';
+export const normalizeInfrastructureCode = (value: string) => value.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '-').replace(/-+/g, '-');
+const optionalText = z.string().max(500).optional();
+export const infrastructureFormSchema = z.object({ code: z.string().min(2, 'Infrastructure code is required.').max(80), name: z.string().trim().min(2, 'Name is required.').max(120), provider: z.string().trim().min(2, 'Provider is required.').max(120), region: optionalText, ownership: z.enum(['DIGVATION', 'CLIENT']), managedByDigvation: z.boolean(), lifecycleStatus: z.enum(['REGISTERED', 'ACTIVE', 'MAINTENANCE', 'RETIRED']), hostname: optionalText, publicAddress: optionalText, privateAddress: optionalText, operatingSystem: optionalText, architecture: optionalText, cpuCores: z.number().int().positive().optional(), memoryMiB: z.number().int().positive().optional(), diskGiB: z.number().int().positive().optional(), notes: optionalText });
+export type InfrastructureFormValues = z.infer<typeof infrastructureFormSchema>;

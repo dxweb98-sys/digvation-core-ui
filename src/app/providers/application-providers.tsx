@@ -1,4 +1,4 @@
-import { DThemeProvider, DToastProvider } from '@digvation-labs/ui';
+import { DThemeProvider, DToastProvider } from '@digvation/ui';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { PropsWithChildren } from 'react';
 import { useState } from 'react';

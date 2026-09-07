@@ -1,4 +1,4 @@
-import { DConnectionError } from '@digvation-labs/ui';
+import { DConnectionError } from '@digvation/ui';
 import { isRouteErrorResponse, useRouteError } from 'react-router';
 
 export function RouteErrorState() {

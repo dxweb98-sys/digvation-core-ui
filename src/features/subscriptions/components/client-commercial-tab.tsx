@@ -1,4 +1,4 @@
-import { DButton, DConnectionError, DDataTable, DDialog, DEmptyState, DInput, DSelect, DToggle, useToast, type TableColumn } from '@digvation-labs/ui';
+import { DButton, DConnectionError, DDataTable, DDialog, DEmptyState, DInput, DSelect, DToggle, useToast, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
 import { useClientProducts } from '../../client-products/hooks/use-client-products';
 import { useAddRenewalTerm, useClientCommercial, useCreateInitialSubscription, useUpdateProductConfiguration } from '../hooks/use-client-commercial';

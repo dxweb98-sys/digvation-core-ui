@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import '@digvation-labs/ui/styles.css';
+import '@digvation/ui/styles.css';
 import { ApplicationErrorBoundary } from './app/error-boundary/application-error-boundary';
 import { ApplicationProviders } from './app/providers/application-providers';
 import { ApplicationRouter } from './app/router/application-router';

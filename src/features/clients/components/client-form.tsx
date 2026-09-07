@@ -1,4 +1,4 @@
-import { DButton, DInput, DTextarea } from '@digvation-labs/ui';
+import { DButton, DInput, DTextarea } from '@digvation/ui';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { clientFormSchema, normalizeClientCode, type ClientFormValues } from '../schemas/client-form-schema';

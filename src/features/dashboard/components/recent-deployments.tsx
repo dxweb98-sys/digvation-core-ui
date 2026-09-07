@@ -1,4 +1,4 @@
-import { DCard, DCardContent, DEmptyState } from '@digvation-labs/ui';
+import { DCard, DCardContent, DEmptyState } from '@digvation/ui';
 import type { RecentDeployment } from '../types/dashboard';
 import { DeploymentStatusBadge } from './dashboard-status-badges';
 

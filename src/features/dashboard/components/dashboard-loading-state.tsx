@@ -1,4 +1,4 @@
-import { DCard, DCardContent, DSkeleton } from '@digvation-labs/ui';
+import { DCard, DCardContent, DSkeleton } from '@digvation/ui';
 
 export function DashboardLoadingState() {
   return (

@@ -1,4 +1,4 @@
-import { DProgress } from '@digvation-labs/ui';
+import { DProgress } from '@digvation/ui';
 
 type ResourceName = 'CPU' | 'Memory' | 'Disk';
 

@@ -1,4 +1,4 @@
-import { DButton, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DStatusFilter, type TableAction, type TableColumn } from '@digvation-labs/ui';
+import { DButton, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DStatusFilter, type TableAction, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
 import { ClientDetailDialog } from '../components/client-detail-dialog';
 import { ClientFormDialog } from '../components/client-form-dialog';

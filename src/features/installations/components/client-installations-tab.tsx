@@ -1,4 +1,4 @@
-import { DDataTable, DConnectionError, DEmptyState, DLoadingIndicator, type TableColumn } from '@digvation-labs/ui';
+import { DDataTable, DConnectionError, DEmptyState, DLoadingIndicator, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
 import { useClientInstallations } from '../hooks/use-installations';
 import type { InstallationSummary } from '../types/installation';

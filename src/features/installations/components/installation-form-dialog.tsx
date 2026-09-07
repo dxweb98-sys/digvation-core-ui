@@ -1,4 +1,4 @@
-import { DButton, DDialog, DEmptyState, DLoadingIndicator, useToast } from '@digvation-labs/ui';
+import { DButton, DDialog, DEmptyState, DLoadingIndicator, useToast } from '@digvation/ui';
 import { useCreateInstallation, useUpdateInstallation } from '../hooks/use-installation-mutations';
 import { useClientProductOptions } from '../hooks/use-installations';
 import type { InstallationFormValues } from '../schemas/installation-form-schema';

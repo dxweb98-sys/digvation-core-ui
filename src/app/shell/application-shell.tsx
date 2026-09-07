@@ -1,4 +1,4 @@
-import { DAvatar, DBadge, DButton } from '@digvation-labs/ui';
+import { DAvatar, DBadge, DButton } from '@digvation/ui';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { ApplicationNavigation } from './application-navigation';

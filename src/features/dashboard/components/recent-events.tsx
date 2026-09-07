@@ -1,4 +1,4 @@
-import { DCard, DCardContent } from '@digvation-labs/ui';
+import { DCard, DCardContent } from '@digvation/ui';
 import type { OperationalEvent } from '../types/dashboard';
 import { AttentionSeverityBadge } from './dashboard-status-badges';
 

@@ -1,4 +1,4 @@
-import { DCard, DCardContent } from '@digvation-labs/ui';
+import { DCard, DCardContent } from '@digvation/ui';
 import type { DashboardSummary as DashboardSummaryData } from '../types/dashboard';
 
 const SUMMARY_ITEMS: Array<{

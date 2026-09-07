@@ -1,4 +1,4 @@
-import { DButton, DConfirmDialog, DConnectionError, DDataTable, DDialog, DEmptyState, DInput, DSelect, useToast, type TableAction, type TableColumn } from '@digvation-labs/ui';
+import { DButton, DConfirmDialog, DConnectionError, DDataTable, DDialog, DEmptyState, DInput, DSelect, useToast, type TableAction, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
 import { useClientContacts, useCreateClientContact, useRemoveClientContact, useUpdateClientContact } from '../hooks/use-client-contacts';
 import type { ClientContact, ClientContactInput, ContactRole } from '../types/client-contact';

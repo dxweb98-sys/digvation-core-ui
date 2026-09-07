@@ -1,4 +1,4 @@
-import { DBadge, type BadgeVariant } from '@digvation-labs/ui';
+import { DBadge, type BadgeVariant } from '@digvation/ui';
 import type {
   AttentionSeverity,
   DeploymentStatus,

@@ -1,4 +1,4 @@
-import { DCard, DCardContent, DEmptyState } from '@digvation-labs/ui';
+import { DCard, DCardContent, DEmptyState } from '@digvation/ui';
 import type { AttentionItem } from '../types/dashboard';
 import { AttentionSeverityBadge } from './dashboard-status-badges';
 

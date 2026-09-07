@@ -1,4 +1,4 @@
-import { DButton, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DSelect, useToast } from '@digvation-labs/ui';
+import { DButton, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DSelect, useToast } from '@digvation/ui';
 import { useState } from 'react';
 import { useAssignableProducts } from '../hooks/use-client-products';
 import { useAssignClientProduct } from '../hooks/use-client-product-mutations';
