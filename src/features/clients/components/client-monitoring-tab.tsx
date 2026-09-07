@@ -11,16 +11,13 @@ function formatDate(value?: string) {
 }
 
 const columns: TableColumn<ClientMonitoringRecord>[] = [
-  { key: 'product', label: 'Product', render: (record) => <div className="client-monitoring-identity"><strong>{record.clientProduct.productName}</strong><code>{record.clientProduct.productCode}</code></div> },
-  { key: 'installation', label: 'Installation', render: (record) => <div className="client-monitoring-identity"><strong>{record.installation.name}</strong><code>{record.installation.code}</code></div> },
+  { key: 'system', label: 'System', render: (record) => <div className="client-monitoring-identity"><strong>{record.installation.name}</strong><span>{record.clientProduct.productName}</span></div> },
   { key: 'environment', label: 'Environment', render: (record) => record.installation.environment },
-  { key: 'deploymentMode', label: 'Mode', render: (record) => record.installation.deploymentMode },
+  { key: 'deploymentMode', label: 'Deployment', render: (record) => record.installation.deploymentMode },
   { key: 'health', label: 'Health', render: (record) => <HealthBadge status={record.health} /> },
   { key: 'runtimeStatus', label: 'Runtime', render: (record) => <ObservedStateBadge state={record.runtimeStatus} /> },
-  { key: 'deployment', label: 'Current version', render: (record) => record.currentDeployment?.version ?? 'Not deployed' },
-  { key: 'lastObservedAt', label: 'Last observed', render: (record) => formatDate(record.lastObservedAt) },
-  { key: 'incidents', label: 'Incident', render: (record) => record.activeIncidents.length ? <Badge value={record.activeIncidents[0].severity} /> : 'None' },
-  { key: 'maintenance', label: 'Maintenance', render: (record) => record.maintenanceState === 'NOT_APPLICABLE' ? 'Not applicable' : record.maintenanceState === 'MAINTENANCE' ? 'Maintenance' : 'Normal' },
+  { key: 'incidents', label: 'Incident', render: (record) => record.activeIncidents.length ? <div className="client-monitoring-incident"><Badge value={record.activeIncidents[0].severity} /><Badge value={record.activeIncidents[0].status} />{record.maintenanceState === 'MAINTENANCE' ? <span>Maintenance</span> : null}</div> : record.maintenanceState === 'MAINTENANCE' ? <div className="client-monitoring-incident"><span>None</span><span>Maintenance</span></div> : 'None' },
+  { key: 'lastObservedAt', label: 'Updated', render: (record) => formatDate(record.lastObservedAt) },
 ];
 
 export function ClientMonitoringTab({ clientId }: { clientId: string }) {
@@ -28,7 +25,7 @@ export function ClientMonitoringTab({ clientId }: { clientId: string }) {
   const query = useClientMonitoring(clientId);
   if (query.isPending) return <div className="client-monitoring-state"><DLoadingIndicator label="Loading client operational monitoring" /></div>;
   if (query.isError) return <DConnectionError title="Monitoring unavailable" message="Client operational information could not be loaded." detail={query.error.message} onRetry={() => void query.refetch()} />;
-  const actions: TableAction<ClientMonitoringRecord>[] = [{ label: 'Open system detail', onClick: setRecord }];
+  const actions: TableAction<ClientMonitoringRecord>[] = [{ label: 'View details', onClick: setRecord }];
   return <div className="client-monitoring-tab">
     <dl className="client-monitoring-summary" aria-label="Operational summary">
       <div><dt>Products monitored</dt><dd>{query.data.overview.productsMonitored}</dd></div>

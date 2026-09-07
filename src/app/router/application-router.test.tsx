@@ -98,6 +98,10 @@ describe('application routing foundation', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Monitoring' }));
     expect(await screen.findByText('Products monitored')).toBeInTheDocument();
     expect(screen.getByText('Requires attention')).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'System' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Deployment' })).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: 'Current version' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: 'Maintenance' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Activity' }));
     expect(await screen.findByText('Client information updated')).toBeInTheDocument();
   });
