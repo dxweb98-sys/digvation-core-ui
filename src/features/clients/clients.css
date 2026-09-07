@@ -131,6 +131,23 @@
   gap: 18px;
 }
 
+.client-monitoring-tab { display: grid; gap: 18px; }
+.client-monitoring-state { display: grid; min-height: 160px; place-items: center; padding: 24px; }
+.client-monitoring-summary,
+.client-monitoring-detail-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; border: 1px solid var(--color-border); border-radius: var(--radius-card); overflow: hidden; }
+.client-monitoring-summary > div,
+.client-monitoring-detail-list > div { display: grid; gap: 6px; min-height: 78px; padding: 15px 16px; border-right: 1px solid var(--color-border); }
+.client-monitoring-summary > div:last-child { border-right: 0; }
+.client-monitoring-summary dt,
+.client-monitoring-detail-list dt { font-size: .66rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .06em; }
+.client-monitoring-summary dd { margin: 0; font-size: 1.45rem; font-weight: 700; letter-spacing: -.04em; }
+.client-monitoring-detail-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.client-monitoring-detail-list > div:nth-child(even) { border-right: 0; }
+.client-monitoring-detail-list dd { margin: 0; font-size: .82rem; }
+.client-monitoring-identity { display: grid; gap: 4px; }
+.client-monitoring-identity strong { font-size: .8rem; }
+.client-monitoring-identity code { font-size: .7rem; color: var(--color-text-muted); }
+
 .client-overview-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -255,6 +272,13 @@
   .client-overview-list {
     grid-template-columns: 1fr;
   }
+  .client-monitoring-summary,
+  .client-monitoring-detail-list { grid-template-columns: 1fr; }
+  .client-monitoring-summary > div,
+  .client-monitoring-detail-list > div,
+  .client-monitoring-detail-list > div:nth-child(even) { border-right: 0; border-bottom: 1px solid var(--color-border); }
+  .client-monitoring-summary > div:last-child,
+  .client-monitoring-detail-list > div:last-child { border-bottom: 0; }
   .client-form-grid { grid-template-columns: 1fr; }
 
   .client-overview-list > div,

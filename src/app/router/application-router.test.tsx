@@ -95,6 +95,11 @@ describe('application routing foundation', () => {
     fireEvent.click(screen.getByRole('button', { name: 'More Actions' }));
     expect(screen.getByRole('menuitem', { name: 'Mark Suspended' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Mark Archived' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Monitoring' }));
+    expect(await screen.findByText('Products monitored')).toBeInTheDocument();
+    expect(screen.getByText('Requires attention')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Activity' }));
+    expect(await screen.findByText('Client information updated')).toBeInTheDocument();
   });
 
   it('renders installation management through the canonical table and dialog flow', async () => {
