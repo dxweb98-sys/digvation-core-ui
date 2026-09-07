@@ -1,4 +1,4 @@
-import { DConnectionError, DEmptyState } from '@digvation-labs/ui';
+import { DConnectionError, DEmptyState } from '@digvation/ui';
 import { ClientApplicationHealth } from '../components/client-application-health';
 import { DashboardLoadingState } from '../components/dashboard-loading-state';
 import { DashboardSummary } from '../components/dashboard-summary';

@@ -1,4 +1,4 @@
-import { DCard, DCardContent } from '@digvation-labs/ui';
+import { DCard, DCardContent } from '@digvation/ui';
 import type { InfrastructureSummary } from '../types/dashboard';
 import { OperationalHealthBadge } from './dashboard-status-badges';
 import { ResourceUtilization } from './resource-utilization';

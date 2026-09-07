@@ -1,4 +1,4 @@
-import { DConnectionError } from '@digvation-labs/ui';
+import { DConnectionError } from '@digvation/ui';
 import { Component, type ErrorInfo, type PropsWithChildren } from 'react';
 
 interface ApplicationErrorBoundaryState {

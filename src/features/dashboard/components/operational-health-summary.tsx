@@ -1,4 +1,4 @@
-import { DCard, DCardContent } from '@digvation-labs/ui';
+import { DCard, DCardContent } from '@digvation/ui';
 import type { ClientApplicationHealth, OperationalHealth } from '../types/dashboard';
 
 const HEALTH_ORDER: OperationalHealth[] = [

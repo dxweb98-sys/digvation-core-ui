@@ -1,4 +1,4 @@
-import { DButton, DDialog, DDropdown, DTextarea, useToast } from '@digvation-labs/ui';
+import { DButton, DDialog, DDropdown, DTextarea, useToast } from '@digvation/ui';
 import { useState } from 'react';
 import type { Client, ClientStatus } from '../types/client';
 import { ClientStatusBadge } from './client-status-badge';

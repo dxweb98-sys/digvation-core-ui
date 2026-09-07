@@ -1,4 +1,4 @@
-import { DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, DLoadingIndicator } from '@digvation-labs/ui';
+import { DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, DLoadingIndicator } from '@digvation/ui';
 import { useState } from 'react';
 import { useInstallationDetail } from '../hooks/use-installations';
 import { useInstallationStatusTransition } from '../hooks/use-installation-mutations';

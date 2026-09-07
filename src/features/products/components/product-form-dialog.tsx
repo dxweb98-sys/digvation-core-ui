@@ -1,4 +1,4 @@
-import { DButton, DDialog, useToast } from '@digvation-labs/ui';
+import { DButton, DDialog, useToast } from '@digvation/ui';
 import { ProductForm } from './product-form';
 import { useCreateProduct, useUpdateProduct } from '../hooks/use-product-mutations';
 import type { ProductFormValues } from '../schemas/product-form-schema';

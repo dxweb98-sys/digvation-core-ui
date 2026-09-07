@@ -1,4 +1,4 @@
-import { DBadge, DCard, DCardContent } from '@digvation-labs/ui';
+import { DBadge, DCard, DCardContent } from '@digvation/ui';
 
 export function PlaceholderPage({
   title,

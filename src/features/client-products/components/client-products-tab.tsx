@@ -1,4 +1,4 @@
-import { DButton, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, type TableColumn } from '@digvation-labs/ui';
+import { DButton, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
 import { useClientProducts } from '../hooks/use-client-products';
 import { useClientProductStatusTransition } from '../hooks/use-client-product-mutations';

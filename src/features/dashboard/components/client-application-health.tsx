@@ -1,4 +1,4 @@
-import { DCard, DCardContent, DDataTable, type TableColumn } from '@digvation-labs/ui';
+import { DCard, DCardContent, DDataTable, type TableColumn } from '@digvation/ui';
 import type { ClientApplicationHealth as ClientApplicationHealthData } from '../types/dashboard';
 import { OperationalHealthBadge } from './dashboard-status-badges';
 

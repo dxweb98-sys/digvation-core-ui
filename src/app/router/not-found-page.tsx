@@ -1,4 +1,4 @@
-import { DButton, DEmptyState } from '@digvation-labs/ui';
+import { DButton, DEmptyState } from '@digvation/ui';
 import { useNavigate } from 'react-router';
 
 export function NotFoundPage() {

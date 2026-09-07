@@ -42,6 +42,6 @@ client state library is justified for the current dashboard scope.
 
 ## UI foundation
 
-`@digvation-labs/ui@1.0.0` is the primitive and semantic-token authority.
+`@digvation/ui@1.1.0` is the primitive and semantic-token authority.
 Application CSS may compose layout and responsive behavior but must not create a
 parallel token system or duplicate `D*` components.

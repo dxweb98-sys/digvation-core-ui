@@ -1,4 +1,4 @@
-import { DInput, DTextarea } from '@digvation-labs/ui';
+import { DInput, DTextarea } from '@digvation/ui';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { normalizeProductCode, productFormSchema, type ProductFormValues } from '../schemas/product-form-schema';

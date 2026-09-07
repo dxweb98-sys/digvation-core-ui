@@ -1,4 +1,4 @@
-import { DDialog, useToast } from '@digvation-labs/ui';
+import { DDialog, useToast } from '@digvation/ui';
 import { ClientForm } from './client-form';
 import { useCreateClient, useUpdateClient } from '../hooks/use-client-mutations';
 import type { ClientFormValues } from '../schemas/client-form-schema';

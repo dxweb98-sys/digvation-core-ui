@@ -1,4 +1,4 @@
-import { DInput, DSelect, DToggle } from '@digvation-labs/ui';
+import { DInput, DSelect, DToggle } from '@digvation/ui';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { installationFormSchema, normalizeInstallationCode, type InstallationFormValues } from '../schemas/installation-form-schema';

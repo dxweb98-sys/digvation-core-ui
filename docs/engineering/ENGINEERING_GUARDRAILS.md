@@ -20,7 +20,7 @@
 
 ## UI
 
-- Import canonical `D*` primitives from `@digvation-labs/ui@1.0.0` directly.
+- Import canonical `D*` primitives from `@digvation/ui@1.1.0` directly.
 - Application components may compose workflow or layout responsibilities, but
   must not be prop-forwarding primitive wrappers.
 - Use design-system semantic CSS variables. Do not add competing tokens,

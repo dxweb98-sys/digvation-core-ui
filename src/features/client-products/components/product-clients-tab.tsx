@@ -1,4 +1,4 @@
-import { DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, type TableColumn } from '@digvation-labs/ui';
+import { DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, type TableColumn } from '@digvation/ui';
 import { useProductClients } from '../hooks/use-client-products';
 import type { ProductClientSummary } from '../types/client-product';
 import { ClientProductStatusBadge } from './client-product-status-badge';

@@ -1,4 +1,4 @@
-import { DBadge } from '@digvation-labs/ui';
+import { DBadge } from '@digvation/ui';
 import type { ClientProductStatus } from '../types/client-product';
 
 const STATUS_VARIANTS: Record<ClientProductStatus, 'info' | 'success' | 'warning' | 'danger' | 'default'> = {
