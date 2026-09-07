@@ -1,6 +1,7 @@
 import { DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation-labs/ui';
 import { useState } from 'react';
 import { ClientProductsTab } from '../../client-products/components/client-products-tab';
+import { ClientInstallationsTab } from '../../installations/components/client-installations-tab';
 import { useClientDetail } from '../hooks/use-client-detail';
 import { useClientStatusTransition } from '../hooks/use-client-mutations';
 import type { ClientActivity, ClientStatus } from '../types/client';
@@ -72,7 +73,7 @@ export function ClientDetailDialog({
           </div>
           {statusTransition.isError ? <p className="client-form-error">{statusTransition.error.message}</p> : null}
           <DTabs defaultValue="overview" value={tab} onValueChange={setTab} className="client-detail-tabs">
-            <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="products">Products</DTabsTrigger><DTabsTrigger value="activity">Activity</DTabsTrigger></DTabsList>
+            <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="products">Products</DTabsTrigger><DTabsTrigger value="installations">Installations</DTabsTrigger><DTabsTrigger value="activity">Activity</DTabsTrigger></DTabsList>
             <DTabsContent value="overview">
               <DCard variant="outlined"><DCardContent><dl className="client-overview-list">
                 <div><dt>Display Name</dt><dd>{client.displayName}</dd></div>
@@ -85,6 +86,7 @@ export function ClientDetailDialog({
               </dl></DCardContent></DCard>
             </DTabsContent>
             <DTabsContent value="products"><ClientProductsTab clientId={client.id} /></DTabsContent>
+            <DTabsContent value="installations"><ClientInstallationsTab clientId={client.id} /></DTabsContent>
             <DTabsContent value="activity"><DCard variant="outlined"><DCardContent><ActivityTimeline activity={detail.activity} /></DCardContent></DCard></DTabsContent>
           </DTabs>
         </div>
