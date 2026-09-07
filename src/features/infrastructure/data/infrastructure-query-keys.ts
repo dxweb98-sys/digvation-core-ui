@@ -1,0 +1,2 @@
+import type { InfrastructureListQuery } from '../types/infrastructure';
+export const INFRASTRUCTURE_QUERY_KEYS = { all: ['infrastructure'] as const, list: (query: InfrastructureListQuery) => ['infrastructure', 'list', query] as const, detail: (nodeId: string) => ['infrastructure', 'detail', nodeId] as const, installationBindings: (installationId: string) => ['infrastructure', 'installation-bindings', installationId] as const, installationOptions: ['infrastructure', 'installation-options'] as const };

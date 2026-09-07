@@ -7,6 +7,7 @@ import { CreateClientPage } from '../../features/clients/pages/create-client-pag
 import { EditClientPage } from '../../features/clients/pages/edit-client-page';
 import { ProductListPage } from '../../features/products/pages/product-list-page';
 import { InstallationListPage } from '../../features/installations/pages/installation-list-page';
+import { InfrastructureListPage } from '../../features/infrastructure/pages/infrastructure-list-page';
 import { NotFoundPage } from './not-found-page';
 import { PlaceholderPage } from './placeholder-page';
 import { RouteErrorState } from './route-error-state';
@@ -27,10 +28,7 @@ export const applicationRoutes: RouteObject[] = [
         element: <ProductListPage />,
       },
       { path: 'installations', element: <InstallationListPage /> },
-      {
-        path: 'infrastructure',
-        element: <PlaceholderPage title="Infrastructure" description="Digvation-managed infrastructure inventory will be visible here." />,
-      },
+      { path: 'infrastructure', element: <InfrastructureListPage /> },
       {
         path: 'deployments',
         element: <PlaceholderPage title="Deployments" description="Release and deployment history will be visible here." />,
