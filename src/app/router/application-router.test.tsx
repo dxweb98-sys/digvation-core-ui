@@ -1,6 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DToastProvider } from '@digvation-labs/ui';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { createApplicationQueryClient } from '../providers/query-client';
@@ -73,6 +73,17 @@ describe('application routing foundation', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Products' }));
     expect(await screen.findByText('Assign Product')).toBeInTheDocument();
     expect(screen.getAllByText('Digvation POS').length).toBeGreaterThan(0);
+
+    const productRelationshipTable = screen.getAllByRole('table').at(-1);
+    const productRelationshipActionButton = productRelationshipTable?.querySelector<HTMLButtonElement>('tbody button');
+    expect(productRelationshipActionButton).not.toBeNull();
+    fireEvent.click(productRelationshipActionButton!);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Create Installation' }));
+    const contextualInstallationDialog = await screen.findByRole('dialog', { name: 'Add installation' });
+    expect(contextualInstallationDialog).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Relationship' })).toBeInTheDocument();
+    expect(screen.getByText(/is locked for this contextual creation/)).toBeInTheDocument();
+    fireEvent.click(within(contextualInstallationDialog).getByRole('button', { name: 'Close dialog' }));
 
     const moreActionButtons = screen.getAllByRole('button', { name: 'More Actions' });
     fireEvent.click(moreActionButtons[0]);

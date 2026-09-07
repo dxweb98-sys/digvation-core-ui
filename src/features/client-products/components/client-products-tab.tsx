@@ -6,6 +6,7 @@ import type { ClientProductStatus, ClientProductSummary } from '../types/client-
 import { AssignProductDialog } from './assign-product-dialog';
 import { ClientProductLifecycleAction } from './client-product-lifecycle-action';
 import { ClientProductStatusBadge } from './client-product-status-badge';
+import { InstallationFormDialog } from '../../installations/components/installation-form-dialog';
 import '../client-products.css';
 
 function formatDate(value: string) {
@@ -21,6 +22,7 @@ const COLUMNS: TableColumn<ClientProductSummary>[] = [
 
 export function ClientProductsTab({ clientId }: { clientId: string }) {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [clientProductForInstallation, setClientProductForInstallation] = useState<ClientProductSummary | null>(null);
   const clientProductsQuery = useClientProducts(clientId);
   const transitionClientProductStatus = useClientProductStatusTransition();
 
@@ -34,8 +36,9 @@ export function ClientProductsTab({ clientId }: { clientId: string }) {
 
   return (
     <div className="client-products-tab">
-      {relationships.length === 0 ? <DEmptyState title="No products assigned" description="Assign a product to establish the first client product relationship." action={<DButton onClick={() => setIsAssignDialogOpen(true)}>Assign Product</DButton>} /> : <DDataTable columns={COLUMNS} data={relationships} rowKey="id" headerActions={<DButton onClick={() => setIsAssignDialogOpen(true)}>Assign Product</DButton>} actions={(relationship) => <ClientProductLifecycleAction clientProduct={relationship} isSubmitting={transitionClientProductStatus.isPending} onTransition={(targetStatus, reason) => transitionStatus(relationship.id, targetStatus, reason)} />} />}
+      {relationships.length === 0 ? <DEmptyState title="No products assigned" description="Assign a product to establish the first client product relationship." action={<DButton onClick={() => setIsAssignDialogOpen(true)}>Assign Product</DButton>} /> : <DDataTable columns={COLUMNS} data={relationships} rowKey="id" headerActions={<DButton onClick={() => setIsAssignDialogOpen(true)}>Assign Product</DButton>} actions={(relationship) => <ClientProductLifecycleAction clientProduct={relationship} isSubmitting={transitionClientProductStatus.isPending} onCreateInstallation={() => setClientProductForInstallation(relationship)} onTransition={(targetStatus, reason) => transitionStatus(relationship.id, targetStatus, reason)} />} />}
       <AssignProductDialog clientId={clientId} open={isAssignDialogOpen} onClose={() => setIsAssignDialogOpen(false)} />
+      <InstallationFormDialog open={clientProductForInstallation !== null} mode="create" initialClientProduct={clientProductForInstallation ? { id: clientProductForInstallation.id, label: `${clientProductForInstallation.productName} · ${clientProductForInstallation.productCode}` } : undefined} onClose={() => setClientProductForInstallation(null)} />
     </div>
   );
 }
