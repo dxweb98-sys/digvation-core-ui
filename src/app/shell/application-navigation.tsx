@@ -31,7 +31,13 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
       { label: 'Audit', to: '/audit' },
     ],
   },
-  { label: 'System', items: [{ label: 'Platform Health', to: '/platform-health' }] },
+  {
+    label: 'System',
+    items: [
+      { label: 'Platform Health', to: '/platform-health' },
+      { label: 'Client Monitoring', to: '/client-monitoring' },
+    ],
+  },
 ] as const;
 
 export function ApplicationNavigation({

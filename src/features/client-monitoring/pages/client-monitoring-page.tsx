@@ -1,2 +1,20 @@
-import { DConnectionError, DLoadingIndicator } from '@digvation/ui'; import { NavLink, Outlet } from 'react-router'; import { useClientMonitoring } from '../hooks/use-client-monitoring'; import '../monitoring.css';
-export function ClientMonitoringPage() { const query = useClientMonitoring(); if (query.isPending) return <div className="cm-state"><DLoadingIndicator label="Loading your systems" /></div>; if (query.isError) return <DConnectionError title="Monitoring unavailable" message="Your monitoring status could not be loaded." detail={query.error.message} onRetry={() => void query.refetch()} />; return <div className="cm-page"><header className="cm-header"><div><p className="page-eyebrow">Client monitoring</p><h1>{query.data.context.displayName} systems</h1><p>Client-safe service status and incident visibility.</p></div><span className="cm-read-only">Read-only</span></header><nav className="cm-nav" aria-label="Client monitoring navigation"><NavLink end to="/client-monitoring">Overview</NavLink><NavLink to="/client-monitoring/systems">Systems</NavLink><NavLink to="/client-monitoring/incidents">Incidents</NavLink></nav><Outlet context={query.data} /></div>; }
+import { DConnectionError, DLoadingIndicator } from '@digvation/ui';
+import { useEffect } from 'react';
+import { NavLink, Outlet } from 'react-router';
+import { useClientMonitoring } from '../hooks/use-client-monitoring';
+import '../monitoring.css';
+
+export function ClientMonitoringPage() {
+  const query = useClientMonitoring();
+
+  useEffect(() => {
+    if (query.data) {
+      document.title = `Client Monitoring · ${query.data.context.displayName}`;
+    }
+  }, [query.data]);
+
+  if (query.isPending) return <div className="cm-state"><DLoadingIndicator label="Loading your systems" /></div>;
+  if (query.isError) return <DConnectionError title="Monitoring unavailable" message="Your monitoring status could not be loaded." detail={query.error.message} onRetry={() => void query.refetch()} />;
+
+  return <div className="cm-page"><header className="cm-header"><div><p className="page-eyebrow">Client monitoring</p><h1>{query.data.context.displayName} systems</h1><p>Client-safe service status and incident visibility.</p></div><span className="cm-read-only">Read-only</span></header><nav className="cm-nav" aria-label="Client monitoring navigation"><NavLink end to="/client-monitoring">Overview</NavLink><NavLink to="/client-monitoring/systems">Systems</NavLink><NavLink to="/client-monitoring/incidents">Incidents</NavLink></nav><Outlet context={query.data} /></div>;
+}
