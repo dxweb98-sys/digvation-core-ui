@@ -79,9 +79,27 @@ describe('application routing foundation', () => {
     expect(screen.getByRole('menuitem', { name: 'Suspend' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Cancel' })).toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Start Trial' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Installations' }));
+    expect((await screen.findAllByText('Nova POS Production')).length).toBeGreaterThan(0);
     fireEvent.click(moreActionButtons[moreActionButtons.length - 1]);
     expect(screen.getByRole('menuitem', { name: 'Mark Suspended' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Mark Archived' })).toBeInTheDocument();
+  });
+
+  it('renders installation management through the canonical table and dialog flow', async () => {
+    renderRoute('/installations');
+
+    expect(await screen.findByRole('heading', { name: 'Installations' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Add Installation' }));
+    expect(screen.getByRole('dialog', { name: 'Add installation' })).toBeInTheDocument();
+    expect(screen.getByText('Client Product *')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Close dialog' }));
+
+    const actionMenu = document.querySelector<HTMLElement>('[data-ds-component="data-table"] tbody [data-ds-component="dropdown-trigger"]');
+    expect(actionMenu).not.toBeNull();
+    fireEvent.click(actionMenu!);
+    expect(screen.getByRole('button', { name: 'Open Installation' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Edit Installation' })).toBeInTheDocument();
   });
 
   it('renders a recoverable not-found state for unknown routes', async () => {
