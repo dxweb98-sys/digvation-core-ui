@@ -1,0 +1,1 @@
+import type { RuntimeDataSource } from './runtime-data-source'; import { createMockRuntimeDataSource } from './mock-runtime-data-source'; export function resolveRuntimeDataSource(): RuntimeDataSource { return createMockRuntimeDataSource(); }
