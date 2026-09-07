@@ -11,11 +11,16 @@ import { InfrastructureListPage } from '../../features/infrastructure/pages/infr
 import { IncidentsPage } from '../../features/operations/pages/incidents-page';
 import { DeploymentsPage } from '../../features/operations/pages/deployments-page';
 import { PlatformHealthPage } from '../../features/runtime/pages/platform-health-page';
+import { ClientMonitoringPage } from '../../features/client-monitoring/pages/client-monitoring-page';
+import { ClientMonitoringOverviewPage } from '../../features/client-monitoring/pages/client-monitoring-overview-page';
+import { ClientMonitoringSystemsPage } from '../../features/client-monitoring/pages/client-monitoring-systems-page';
+import { ClientMonitoringIncidentsPage } from '../../features/client-monitoring/pages/client-monitoring-incidents-page';
 import { NotFoundPage } from './not-found-page';
 import { PlaceholderPage } from './placeholder-page';
 import { RouteErrorState } from './route-error-state';
 
 export const applicationRoutes: RouteObject[] = [
+  { path: '/client-monitoring', element: <ClientMonitoringPage />, children: [{ index: true, element: <ClientMonitoringOverviewPage /> }, { path: 'systems', element: <ClientMonitoringSystemsPage /> }, { path: 'incidents', element: <ClientMonitoringIncidentsPage /> }] },
   {
     path: '/',
     element: <ApplicationShell />,
