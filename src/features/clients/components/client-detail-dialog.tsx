@@ -10,6 +10,7 @@ import { ClientFormDialog } from './client-form-dialog';
 import { ClientLifecycleAction } from './client-lifecycle-action';
 import { ClientStatusBadge } from './client-status-badge';
 import { ClientContactsSection } from './client-contacts-section';
+import { ClientMonitoringTab } from './client-monitoring-tab';
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
@@ -75,7 +76,7 @@ export function ClientDetailDialog({
           </div>
           {statusTransition.isError ? <p className="client-form-error">{statusTransition.error.message}</p> : null}
           <DTabs defaultValue="overview" value={tab} onValueChange={setTab} className="client-detail-tabs">
-            <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="products">Products</DTabsTrigger><DTabsTrigger value="commercial">Commercial</DTabsTrigger><DTabsTrigger value="installations">Installations</DTabsTrigger><DTabsTrigger value="activity">Activity</DTabsTrigger></DTabsList>
+            <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="products">Products</DTabsTrigger><DTabsTrigger value="commercial">Commercial</DTabsTrigger><DTabsTrigger value="installations">Installations</DTabsTrigger><DTabsTrigger value="monitoring">Monitoring</DTabsTrigger><DTabsTrigger value="activity">Activity</DTabsTrigger></DTabsList>
             <DTabsContent value="overview">
               <DCard variant="outlined"><DCardContent><dl className="client-overview-list">
                 <div><dt>Display Name</dt><dd>{client.displayName}</dd></div>
@@ -98,6 +99,7 @@ export function ClientDetailDialog({
             <DTabsContent value="products"><ClientProductsTab clientId={client.id} /></DTabsContent>
             <DTabsContent value="commercial"><ClientCommercialTab clientId={client.id} /></DTabsContent>
             <DTabsContent value="installations"><ClientInstallationsTab clientId={client.id} /></DTabsContent>
+            <DTabsContent value="monitoring"><ClientMonitoringTab clientId={client.id} /></DTabsContent>
             <DTabsContent value="activity"><DCard variant="outlined"><DCardContent><ActivityTimeline activity={detail.activity} /></DCardContent></DCard></DTabsContent>
           </DTabs>
         </div>
