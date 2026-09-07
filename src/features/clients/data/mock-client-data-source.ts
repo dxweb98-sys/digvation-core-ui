@@ -8,7 +8,7 @@ import type {
 import { normalizeClientCode } from '../schemas/client-form-schema';
 
 const CLIENTS: Client[] = [
-  { id: 'client-nova', code: 'NOVA', displayName: 'Nova Salon', legalName: 'PT Nova Beauty Indonesia', status: 'ACTIVE', statusChangedAt: '2026-09-04T08:20:00.000Z', createdAt: '2026-06-12T04:30:00.000Z', updatedAt: '2026-09-06T10:00:00.000Z' },
+  { id: 'client-nova', code: 'NOVA', displayName: 'Nova Salon', legalName: 'PT Nova Beauty Indonesia', organizationEmail: 'hello@novasalon.id', organizationPhone: '+62 21 5550 1200', website: 'https://novasalon.id', taxIdentifier: '01.234.567.8-901.000', country: 'Indonesia', timezone: 'Asia/Jakarta', address: 'Jl. Kemang Raya 14, Jakarta Selatan', notes: 'Renewal discussion is normally coordinated with the commercial contact.', status: 'ACTIVE', statusChangedAt: '2026-09-04T08:20:00.000Z', createdAt: '2026-06-12T04:30:00.000Z', updatedAt: '2026-09-06T10:00:00.000Z' },
   { id: 'client-poseidon', code: 'POSEIDON', displayName: 'Poseidon Filter', status: 'ACTIVE', statusChangedAt: '2026-08-18T07:10:00.000Z', createdAt: '2026-07-26T03:15:00.000Z', updatedAt: '2026-09-04T08:40:00.000Z' },
   { id: 'client-fortuna', code: 'FORTUNA', displayName: 'Fortuna Emporos', legalName: 'PT Fortuna Emporos Nusantara', status: 'SUSPENDED', statusChangedAt: '2026-09-01T02:45:00.000Z', createdAt: '2026-08-05T06:00:00.000Z', updatedAt: '2026-09-01T02:45:00.000Z' },
   { id: 'client-leaf', code: 'LEAF', displayName: 'Leaf Lab', status: 'ARCHIVED', statusChangedAt: '2026-08-29T09:20:00.000Z', createdAt: '2026-08-15T01:00:00.000Z', updatedAt: '2026-08-29T09:20:00.000Z' },
@@ -119,8 +119,7 @@ export function createMockClientDataSource(): ClientDataSource {
         throw new Error('Client was not found.');
       }
       const now = getNow();
-      client.displayName = input.displayName.trim();
-      client.legalName = input.legalName?.trim() || undefined;
+      Object.assign(client, { displayName: input.displayName.trim(), legalName: input.legalName?.trim() || undefined, organizationEmail: input.organizationEmail?.trim() || undefined, organizationPhone: input.organizationPhone?.trim() || undefined, website: input.website?.trim() || undefined, taxIdentifier: input.taxIdentifier?.trim() || undefined, country: input.country?.trim() || undefined, timezone: input.timezone?.trim() || undefined, address: input.address?.trim() || undefined, notes: input.notes?.trim() || undefined });
       client.updatedAt = now;
       activity[client.id].unshift({ id: `activity-${client.id}-updated-${Date.now()}`, type: 'CLIENT_UPDATED', title: 'Client information updated', description: 'Display name or legal name was updated.', occurredAt: now });
       return getDetail(client);

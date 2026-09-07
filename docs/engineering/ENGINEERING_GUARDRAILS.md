@@ -44,6 +44,8 @@
 - When applicable, use `DDataTable` for its integrated search, filters, header
   actions, row action menu, and pagination. Avoid redundant table wrappers or
   several visible row-action buttons.
+- Table row actions use the canonical icon-only ellipsis trigger with an
+  accessible `Actions` label; primary workflow actions retain explicit text.
 
 ## Integration and safety
 

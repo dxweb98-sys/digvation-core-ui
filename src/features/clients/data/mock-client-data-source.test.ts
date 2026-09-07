@@ -35,10 +35,13 @@ describe('mock client data source', () => {
     const detail = await dataSource.updateClient('client-nova', {
       displayName: 'Nova Salon Jakarta',
       legalName: 'PT Nova Beauty Indonesia',
+      organizationEmail: 'operations@nova.example',
+      country: 'Indonesia',
     });
 
     expect(detail.client.code).toBe('NOVA');
     expect(detail.client.displayName).toBe('Nova Salon Jakarta');
+    expect(detail.client.organizationEmail).toBe('operations@nova.example');
     expect(detail.activity[0]?.type).toBe('CLIENT_UPDATED');
   });
 

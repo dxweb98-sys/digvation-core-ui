@@ -16,6 +16,13 @@ becoming the system of record for either domain.
   frontend validation, and orchestration of approved backend capabilities.
 - Infrastructure mutations must eventually use explicit secured backend APIs;
   the browser must never connect directly to infrastructure control surfaces.
+- The Control Center will evolve toward an operational command plane. Future
+  start, stop, restart, redeploy, maintenance, and remote health operations
+  must flow through an audited orchestration layer and secured runtime agents or
+  connectors, never browser-to-server SSH. Each operation requires authorization,
+  a reason, execution status, result, and auditability. AI may summarize
+  incidents, correlate telemetry, or recommend actions, but must use this same
+  governed action boundary for execution.
 
 ## Frontend structure
 

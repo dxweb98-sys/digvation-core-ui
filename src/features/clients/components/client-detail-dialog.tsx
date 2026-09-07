@@ -2,12 +2,14 @@ import { DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, D
 import { useState } from 'react';
 import { ClientProductsTab } from '../../client-products/components/client-products-tab';
 import { ClientInstallationsTab } from '../../installations/components/client-installations-tab';
+import { ClientCommercialTab } from '../../subscriptions/components/client-commercial-tab';
 import { useClientDetail } from '../hooks/use-client-detail';
 import { useClientStatusTransition } from '../hooks/use-client-mutations';
 import type { ClientActivity, ClientStatus } from '../types/client';
 import { ClientFormDialog } from './client-form-dialog';
 import { ClientLifecycleAction } from './client-lifecycle-action';
 import { ClientStatusBadge } from './client-status-badge';
+import { ClientContactsSection } from './client-contacts-section';
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
@@ -73,19 +75,28 @@ export function ClientDetailDialog({
           </div>
           {statusTransition.isError ? <p className="client-form-error">{statusTransition.error.message}</p> : null}
           <DTabs defaultValue="overview" value={tab} onValueChange={setTab} className="client-detail-tabs">
-            <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="products">Products</DTabsTrigger><DTabsTrigger value="installations">Installations</DTabsTrigger><DTabsTrigger value="activity">Activity</DTabsTrigger></DTabsList>
+            <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="products">Products</DTabsTrigger><DTabsTrigger value="commercial">Commercial</DTabsTrigger><DTabsTrigger value="installations">Installations</DTabsTrigger><DTabsTrigger value="activity">Activity</DTabsTrigger></DTabsList>
             <DTabsContent value="overview">
               <DCard variant="outlined"><DCardContent><dl className="client-overview-list">
                 <div><dt>Display Name</dt><dd>{client.displayName}</dd></div>
                 <div><dt>Legal Name</dt><dd>{client.legalName ?? 'Not recorded'}</dd></div>
                 <div><dt>Client Code</dt><dd><code className="client-code">{client.code}</code></dd></div>
                 <div><dt>Status</dt><dd><ClientStatusBadge status={client.status} /></dd></div>
+                <div><dt>Organization Email</dt><dd>{client.organizationEmail ?? 'Not recorded'}</dd></div>
+                <div><dt>Organization Phone</dt><dd>{client.organizationPhone ?? 'Not recorded'}</dd></div>
+                <div><dt>Website</dt><dd>{client.website ?? 'Not recorded'}</dd></div>
+                <div><dt>Tax Identifier</dt><dd>{client.taxIdentifier ?? 'Not recorded'}</dd></div>
+                <div><dt>Country</dt><dd>{client.country ?? 'Not recorded'}</dd></div>
+                <div><dt>Timezone</dt><dd>{client.timezone ?? 'Not recorded'}</dd></div>
+                <div><dt>Address</dt><dd>{client.address ?? 'Not recorded'}</dd></div>
+                <div><dt>Notes</dt><dd>{client.notes ?? 'Not recorded'}</dd></div>
                 <div><dt>Status Changed</dt><dd>{formatDate(client.statusChangedAt)}</dd></div>
                 <div><dt>Created</dt><dd>{formatDate(client.createdAt)}</dd></div>
                 <div><dt>Updated</dt><dd>{formatDate(client.updatedAt)}</dd></div>
-              </dl></DCardContent></DCard>
+              </dl><ClientContactsSection clientId={client.id} /></DCardContent></DCard>
             </DTabsContent>
             <DTabsContent value="products"><ClientProductsTab clientId={client.id} /></DTabsContent>
+            <DTabsContent value="commercial"><ClientCommercialTab clientId={client.id} /></DTabsContent>
             <DTabsContent value="installations"><ClientInstallationsTab clientId={client.id} /></DTabsContent>
             <DTabsContent value="activity"><DCard variant="outlined"><DCardContent><ActivityTimeline activity={detail.activity} /></DCardContent></DCard></DTabsContent>
           </DTabs>
