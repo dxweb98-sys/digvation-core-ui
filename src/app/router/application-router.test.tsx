@@ -85,14 +85,14 @@ describe('application routing foundation', () => {
     expect(screen.getByText(/is locked for this contextual creation/)).toBeInTheDocument();
     fireEvent.click(within(contextualInstallationDialog).getByRole('button', { name: 'Close dialog' }));
 
-    const moreActionButtons = screen.getAllByRole('button', { name: 'More Actions' });
-    fireEvent.click(moreActionButtons[0]);
+    const actionButtons = screen.getAllByRole('button', { name: 'Actions' });
+    fireEvent.click(actionButtons[0]);
     expect(screen.getByRole('menuitem', { name: 'Suspend' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Cancel' })).toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Start Trial' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Installations' }));
     expect((await screen.findAllByText('Nova POS Production')).length).toBeGreaterThan(0);
-    fireEvent.click(moreActionButtons[moreActionButtons.length - 1]);
+    fireEvent.click(screen.getByRole('button', { name: 'More Actions' }));
     expect(screen.getByRole('menuitem', { name: 'Mark Suspended' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Mark Archived' })).toBeInTheDocument();
   });

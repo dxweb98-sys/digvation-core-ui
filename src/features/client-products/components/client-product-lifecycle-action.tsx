@@ -62,7 +62,7 @@ export function ClientProductLifecycleAction({
 
   return (
     <>
-      <DDropdown placement="bottom-end" closeOnItemClick contentRole="menu" contentClassName="client-product-lifecycle-menu" trigger={() => <DButton variant="outline">More Actions</DButton>}>
+      <DDropdown placement="bottom-end" closeOnItemClick contentRole="menu" contentClassName="client-product-lifecycle-menu" trigger={() => <DButton variant="outline" size="sm" aria-label="Actions" title="Actions">•••</DButton>}>
         {onCreateInstallation ? <button className="client-product-lifecycle-menu-item" role="menuitem" type="button" onClick={onCreateInstallation}>Create Installation</button> : null}
         {VALID_TRANSITIONS[clientProduct.status].map((status) => <button className={status === 'CANCELLED' || status === 'DECOMMISSIONED' ? 'client-product-lifecycle-menu-item is-danger' : 'client-product-lifecycle-menu-item'} key={status} role="menuitem" type="button" onClick={() => setTargetStatus(status)}>{TRANSITION_LABELS[status]}</button>)}
       </DDropdown>

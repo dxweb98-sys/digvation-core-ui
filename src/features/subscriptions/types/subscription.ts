@@ -6,3 +6,4 @@ export interface SubscriptionTerm { id: string; subscriptionId: string; startsAt
 export interface ProductConfiguration { id: string; clientProductId: string; key: string; label: string; valueType: ProductConfigurationValueType; value: string | number | boolean; unit?: string; }
 export interface ClientProductCommercialSummary { clientProductId: string; productName: string; productCode: string; subscription?: Subscription; currentTerm?: SubscriptionTerm; terms: SubscriptionTerm[]; configurations: ProductConfiguration[]; }
 export interface RenewalTermInput { startsAt: string; endsAt?: string; billingCycle: BillingCycle; amountMinor: number; currency: string; paymentTermsDays?: number; }
+export interface InitialSubscriptionInput extends RenewalTermInput { clientProductId: string; clientId: string; productName: string; productCode: string; autoRenew: boolean; renewalNoticeDays: number; gracePeriodDays?: number; contractReference?: string; }
