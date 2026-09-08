@@ -1,5 +1,5 @@
 import { DBadge, DButton, DCheckbox, DConfirmDialog, DDialog, DInput, DSelect, useToast } from '@digvation/ui';
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useCreateInvitation, useSaveRole, useUpdateUserRoles, useUserStatus } from '../hooks/use-access';
 import { formatAccessDate, effectivePermissions, PERMISSIONS, type AccessRole, type AccessUser, type AuditEntry, type RoleInput } from '../types/access';
 
@@ -93,29 +93,49 @@ export function InvitationFormDialog({ roles, onClose }: { roles: AccessRole[]; 
 }
 
 export function RoleDialog({ role, assignedUserCount, onClose }: { role?: AccessRole; assignedUserCount: number; onClose: () => void }) {
+  const [savedRole, setSavedRole] = useState(role);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(!role);
-  const [input, setInput] = useState<RoleInput>({ name: role?.name ?? '', description: role?.description ?? '', permissions: role?.permissions ?? [] });
+  const [input, setInput] = useState<RoleInput>({ name: role?.name ?? '', description: role?.description ?? '', permissions: savedRole?.permissions ?? [] });
   const [error, setError] = useState('');
-  const mutation = useSaveRole(role?.id);
+  const mutation = useSaveRole(savedRole?.id);
+  const dirty = !savedRole || input.name.trim() !== savedRole.name || input.description.trim() !== savedRole.description ||
+    input.permissions.length !== savedRole.permissions.length || input.permissions.some(permission => !savedRole.permissions.includes(permission));
+  useLayoutEffect(() => {
+    // DDialog owns scrolling; this wrapper is its direct content child.
+    const scrollContainer = contentRef.current?.parentElement;
+    if (scrollContainer) scrollContainer.scrollTop = 0;
+    if (editing) contentRef.current?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true });
+  }, [editing]);
+  function cancelEdit() {
+    if (!savedRole) { onClose(); return; }
+    setInput({ name: savedRole.name, description: savedRole.description, permissions: [...savedRole.permissions] });
+    setError('');
+    setEditing(false);
+  }
   const { showToast } = useToast();
   const groups = permissionGroups(PERMISSIONS);
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (mutation.isPending || !dirty) return;
     setError('');
     try {
-      await mutation.mutateAsync(input);
-      showToast({ title: role ? 'Role updated' : 'Role created', variant: 'success' });
-      onClose();
+      const updated = await mutation.mutateAsync(input);
+      showToast({ title: savedRole ? 'Role updated' : 'Role created', variant: 'success' });
+      if (!savedRole) { onClose(); return; }
+      setSavedRole(updated);
+      setInput({ name: updated.name, description: updated.description, permissions: [...updated.permissions] });
+      setEditing(false);
     } catch (error) {
       setError(errorMessage(error));
       showToast({ title: 'Role save failed', description: errorMessage(error), variant: 'danger' });
     }
   }
-  return <DDialog open onClose={() => { if (!mutation.isPending) onClose(); }} title={role ? role.name : 'Create role'} description={role?.description || undefined} size="lg" footer={<div className="access-actions">
-    <DButton variant="outline" disabled={mutation.isPending} onClick={onClose}>{editing ? 'Cancel' : 'Close'}</DButton>
-    {editing ? <DButton form="access-role-form" type="submit" loading={mutation.isPending} disabled={mutation.isPending}>Save role</DButton> : <DButton onClick={() => setEditing(true)}>Edit role</DButton>}
+  return <DDialog open onClose={() => { if (!mutation.isPending) onClose(); }} title={savedRole ? editing ? 'Edit role' : savedRole.name : 'Create role'} description={editing ? savedRole?.name : savedRole?.description || undefined} size="lg" footer={<div className="access-actions">
+    <DButton variant="outline" disabled={mutation.isPending} onClick={editing ? cancelEdit : onClose}>{editing ? 'Cancel' : 'Close'}</DButton>
+    {editing ? <DButton form="access-role-form" type="submit" loading={mutation.isPending} disabled={mutation.isPending || !dirty}>{savedRole ? 'Save changes' : 'Save role'}</DButton> : <DButton onClick={() => setEditing(true)}>Edit role</DButton>}
   </div>}>
-    {editing ? <form id="access-role-form" className="access-detail-content" onSubmit={event => void submit(event)}>
+    <div ref={contentRef}>{editing ? <form id="access-role-form" className="access-detail-content" onSubmit={event => void submit(event)}>
       <section className="access-section access-form" aria-labelledby="role-information-title">
         <h3 id="role-information-title">Role information</h3>
         <DInput label="Role name" value={input.name} onChange={name => setInput(current => ({ ...current, name }))} required disabled={mutation.isPending} />
@@ -131,10 +151,10 @@ export function RoleDialog({ role, assignedUserCount, onClose }: { role?: Access
     </form> : <div className="access-detail-content">
       <section className="access-section" aria-labelledby="role-overview-title">
         <h3 id="role-overview-title">Overview</h3>
-        <dl className="access-detail"><div><dt>Assigned users</dt><dd>{assignedUserCount}</dd></div><div><dt>Capabilities</dt><dd>{role?.permissions.length ?? 0}</dd></div></dl>
+        <dl className="access-detail"><div><dt>Assigned users</dt><dd>{assignedUserCount}</dd></div><div><dt>Capabilities</dt><dd>{savedRole?.permissions.length ?? 0}</dd></div></dl>
       </section>
-      <section className="access-section" aria-labelledby="role-permissions-title"><h3 id="role-permissions-title">Permissions</h3><PermissionSummary permissions={role?.permissions ?? []} /></section>
-    </div>}
+      <section className="access-section" aria-labelledby="role-permissions-title"><h3 id="role-permissions-title">Permissions</h3><PermissionSummary permissions={savedRole?.permissions ?? []} /></section>
+    </div>}</div>
   </DDialog>;
 }
 

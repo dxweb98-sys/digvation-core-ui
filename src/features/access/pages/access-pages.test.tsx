@@ -5,6 +5,7 @@ import { MemoryRouter, useRoutes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { applicationRoutes } from '../../../app/router/application-routes';
 import { accessDataSource } from '../data/resolve-access-data-source';
+import { effectivePermissions } from '../types/access';
 import { createMockAccessDataSource } from '../data/mock-access-data-source';
 
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-09-08T00:00:00Z')); });
@@ -56,9 +57,69 @@ describe('access workflows', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit role' }));
     expect(screen.getByRole('checkbox', { name: 'Clients Read' })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Updated role description' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save role' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     await screen.findByText('Role updated');
     expect((await source.getRoles())[0].description).toBe('Updated role description');
+  });
+
+  it('enters explicit edit mode at the top and cancels without changing saved roles or audit', async () => {
+    const source = renderAccess('/roles');
+    await screen.findAllByText('Control Center Administrator');
+    openFirstAction('View Role');
+    const overview = screen.getByRole('region', { name: 'Overview' });
+    const scrollContainer = overview.parentElement!.parentElement!.parentElement!;
+    scrollContainer.scrollTop = 300;
+    const originalAudit = await source.getAudit();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit role' }));
+    expect(screen.getByRole('dialog', { name: 'Edit role' })).toBeInTheDocument();
+    expect(scrollContainer.scrollTop).toBe(0);
+    expect(screen.getByLabelText('Role name')).toHaveFocus();
+    expect(screen.queryByRole('button', { name: 'Edit role' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+    const permission = screen.getByRole('checkbox', { name: 'Clients Read' });
+    expect(permission).toBeChecked();
+    fireEvent.click(permission);
+    fireEvent.change(screen.getByLabelText('Role name'), { target: { value: 'Unsaved name' } });
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByRole('dialog', { name: 'Control Center Administrator' })).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(await source.getAudit()).toEqual(originalAudit);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit role' }));
+    expect(screen.getByLabelText('Role name')).toHaveValue('Control Center Administrator');
+    expect(screen.getByRole('checkbox', { name: 'Clients Read' })).toBeChecked();
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+  });
+
+  it('saves role permissions and returns to the updated read-only state with coherent audit', async () => {
+    const source = renderAccess('/roles');
+    await screen.findAllByText('Control Center Administrator');
+    openFirstAction('View Role');
+    const before = (await source.getRoles())[0];
+    const auditBefore = await source.getAudit();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit role' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Clients Write' }));
+    fireEvent.change(screen.getByLabelText('Role name'), { target: { value: 'Updated administrator' } });
+    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Updated access description' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await screen.findByText('Role updated');
+    const dialog = screen.getByRole('dialog', { name: 'Updated administrator' });
+    expect(within(dialog).getByText('Updated access description')).toBeInTheDocument();
+    expect(within(dialog).queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Edit role' })).toBeInTheDocument();
+    expect(within(within(dialog).getByRole('region', { name: 'Clients' })).queryByText('Write')).not.toBeInTheDocument();
+    expect(within(dialog).getByText('Capabilities').nextElementSibling).toHaveTextContent(String(before.permissions.length - 1));
+    const roles = await source.getRoles();
+    expect(roles[0].permissions).not.toContain('clients.write');
+    const user = (await source.getUsers())[0];
+    expect(effectivePermissions(user.roleIds, roles)).not.toContain('clients.write');
+    const audit = await source.getAudit();
+    expect(audit).toHaveLength(auditBefore.length + 1);
+    expect(audit[0]).toMatchObject({ action: 'Role permissions changed', target: 'Updated administrator', metadata: { before: before.permissions.join(', '), after: roles[0].permissions.join(', ') } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Edit role' }));
+    expect(screen.getByRole('checkbox', { name: 'Clients Write' })).not.toBeChecked();
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
   });
 
   it('creates an invitation and keeps validation errors inside the open form', async () => {
