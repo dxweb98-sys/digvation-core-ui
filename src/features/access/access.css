@@ -1,0 +1,10 @@
+.access-page{display:grid;gap:24px;width:100%}.access-page h1{margin:0;font-size:2rem}.access-page p{color:var(--color-text-muted)}.access-id{display:grid;gap:3px}.access-id span{font-size:.72rem;color:var(--color-text-muted)}.access-actions{display:flex;justify-content:flex-end;gap:8px}.access-detail{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.access-detail div{display:grid;gap:4px}.access-detail dt{font-size:.7rem;color:var(--color-text-muted)}.access-detail dd{margin:0}.access-checks,.access-form{display:grid;gap:12px}.access-checks label{display:flex;gap:8px}
+
+.access-actions { flex-wrap: wrap; }
+.access-detail dd { overflow-wrap: anywhere; }
+.access-checks { min-width: 0; margin: 0; padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; }
+.access-checks legend { padding: 0 4px; font-weight: 600; }
+.access-checks label { align-items: center; overflow-wrap: anywhere; }
+.access-permission-groups, .access-permissions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.access-permissions { padding-left: 20px; overflow-wrap: anywhere; }
+@media (max-width: 640px) { .access-detail, .access-permission-groups, .access-permissions { grid-template-columns: minmax(0, 1fr); } }
