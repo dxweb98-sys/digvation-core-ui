@@ -53,7 +53,7 @@ export function UsersPage() {
     { key: 'updatedAt', label: 'Updated', render: user => formatAccessDate(user.updatedAt) },
   ];
   return <AccessPage title="Users">{users.isPending || roles.isPending || users.isError || roles.isError ? <AccessQueryState queries={[users, roles]} /> : <>
-    <DDataTable {...list.table} columns={columns} rowKey="id" searchPlaceholder="Search users or roles" filters={<DStatusFilter label="Status" value={list.status} onChange={list.changeStatus} options={['ACTIVE', 'INACTIVE'].map(value => ({ value, label: value }))} />} actions={user => <DDropdown closeOnItemClick trigger={() => <DButton variant="outline" aria-label="Actions">⋯</DButton>}><DButton variant="ghost" onClick={() => setSelectedId(user.id)}>View User Detail</DButton></DDropdown>} />
+    <DDataTable {...list.table} columns={columns} rowKey="id" searchPlaceholder="Search users or roles" filters={<DStatusFilter label="Status" value={list.status} onChange={list.changeStatus} options={['ACTIVE', 'INACTIVE'].map(value => ({ value, label: value }))} />} actions={user => <DDropdown closeOnItemClick placement="bottom-end" minWidth={140} contentClassName="access-row-menu" trigger={() => <DButton variant="outline" size="icon" aria-label="Actions">⋯</DButton>}><DButton variant="ghost" size="sm" onClick={() => setSelectedId(user.id)}>View User Detail</DButton></DDropdown>} />
     {selected && <UserDetailDialog key={selected.id} user={selected} roles={roles.data ?? []} onClose={() => setSelectedId(null)} />}
   </>}</AccessPage>;
 }
@@ -82,7 +82,7 @@ export function InvitationsPage() {
   return <AccessPage title="Invitations">{invitations.isPending || roles.isPending || invitations.isError || roles.isError ? <AccessQueryState queries={[invitations, roles]} /> : <>
     <DDataTable {...list.table} columns={columns} rowKey="id" searchPlaceholder="Search invitations" headerActions={<DButton onClick={() => setCreating(true)}>Create Invitation</DButton>}
       filters={<DStatusFilter label="Status" value={list.status} onChange={list.changeStatus} options={['PENDING', 'ACCEPTED', 'EXPIRED', 'REVOKED'].map(value => ({ value, label: value }))} />}
-      actions={invitation => invitation.status === 'PENDING' ? <DDropdown closeOnItemClick trigger={() => <DButton variant="outline" aria-label="Actions">⋯</DButton>}><DButton variant="ghost" onClick={() => setSelected(invitation)}>Revoke invitation</DButton></DDropdown> : null} />
+      actions={invitation => invitation.status === 'PENDING' ? <DDropdown closeOnItemClick placement="bottom-end" minWidth={140} contentClassName="access-row-menu" trigger={() => <DButton variant="outline" size="icon" aria-label="Actions">⋯</DButton>}><DButton variant="ghost" size="sm" onClick={() => setSelected(invitation)}>Revoke invitation</DButton></DDropdown> : null} />
     {creating && <InvitationFormDialog roles={roles.data ?? []} onClose={() => setCreating(false)} />}
     {selected && <DConfirmDialog open title="Revoke invitation?" message={selected.email} confirmLabel="Revoke invitation" variant="danger" loading={revoke.isPending} onClose={() => { if (!revoke.isPending) setSelected(null); }} onConfirm={() => void revokeSelected()} />}
   </>}</AccessPage>;
@@ -94,11 +94,12 @@ const ROLE_COLUMNS: TableColumn<AccessRole>[] = [
 ];
 export function RolesPage() {
   const roles = useAccessRoles();
+  const users = useAccessUsers();
   const [selected, setSelected] = useState<AccessRole | 'new' | null>(null);
   const list = useAccessList(roles.data ?? [], role => `${role.name} ${role.description} ${role.permissions.join(' ')}`);
-  return <AccessPage title="Roles">{roles.isPending || roles.isError ? <AccessQueryState queries={[roles]} /> : <>
-    <DDataTable {...list.table} columns={ROLE_COLUMNS} rowKey="id" searchPlaceholder="Search roles or permissions" headerActions={<DButton onClick={() => setSelected('new')}>Create Role</DButton>} actions={role => <DDropdown closeOnItemClick trigger={() => <DButton variant="outline" aria-label="Actions">⋯</DButton>}><DButton variant="ghost" onClick={() => setSelected(role)}>View Role</DButton></DDropdown>} />
-    {selected && <RoleDialog role={selected === 'new' ? undefined : selected} onClose={() => setSelected(null)} />}
+  return <AccessPage title="Roles">{roles.isPending || roles.isError || users.isPending || users.isError ? <AccessQueryState queries={[roles, users]} /> : <>
+    <DDataTable {...list.table} columns={ROLE_COLUMNS} rowKey="id" searchPlaceholder="Search roles or permissions" headerActions={<DButton onClick={() => setSelected('new')}>Create Role</DButton>} actions={role => <DDropdown closeOnItemClick placement="bottom-end" minWidth={140} contentClassName="access-row-menu" trigger={() => <DButton variant="outline" size="icon" aria-label="Actions">⋯</DButton>}><DButton variant="ghost" size="sm" onClick={() => setSelected(role)}>View Role</DButton></DDropdown>} />
+    {selected && <RoleDialog assignedUserCount={selected === 'new' ? 0 : (users.data ?? []).filter(user => user.roleIds.includes(selected.id)).length} role={selected === 'new' ? undefined : selected} onClose={() => setSelected(null)} />}
   </>}</AccessPage>;
 }
 
@@ -108,14 +109,15 @@ const AUDIT_COLUMNS: TableColumn<AuditEntry>[] = [
 ];
 export function AuditPage() {
   const audit = useAccessAudit();
+  const roles = useAccessRoles();
   const [selected, setSelected] = useState<AuditEntry | null>(null);
   const [result, setResult] = useState('ALL');
   const list = useAccessList((audit.data ?? []).filter(entry => result === 'ALL' || entry.result === result), entry => `${entry.actor} ${entry.action} ${entry.target} ${entry.reason ?? ''}`, (entry, domain) => domain === 'ALL' || entry.domain === domain);
-  return <AccessPage title="Audit">{audit.isPending || audit.isError ? <AccessQueryState queries={[audit]} /> : <>
+  return <AccessPage title="Audit">{audit.isPending || audit.isError || roles.isPending || roles.isError ? <AccessQueryState queries={[audit, roles]} /> : <>
     <DDataTable {...list.table} columns={AUDIT_COLUMNS} rowKey="id" searchPlaceholder="Search actor, action or target" filters={<>
       <DStatusFilter label="Domain" value={list.status} onChange={list.changeStatus} options={[...new Set(audit.data?.map(entry => entry.domain))].map(value => ({ value, label: value }))} />
       <DStatusFilter label="Result" value={result} onChange={value => { setResult(value); list.table.onPageChange(1); }} options={['SUCCESS', 'REVOKED'].map(value => ({ value, label: value }))} />
-    </>} actions={entry => <DDropdown closeOnItemClick trigger={() => <DButton variant="outline" aria-label="Actions">⋯</DButton>}><DButton variant="ghost" onClick={() => setSelected(entry)}>View audit detail</DButton></DDropdown>} />
-    {selected && <AuditDetailDialog entry={selected} onClose={() => setSelected(null)} />}
+    </>} actions={entry => <DDropdown closeOnItemClick placement="bottom-end" minWidth={140} contentClassName="access-row-menu" trigger={() => <DButton variant="outline" size="icon" aria-label="Actions">⋯</DButton>}><DButton variant="ghost" size="sm" onClick={() => setSelected(entry)}>View audit detail</DButton></DDropdown>} />
+    {selected && <AuditDetailDialog roles={roles.data} entry={selected} onClose={() => setSelected(null)} />}
   </>}</AccessPage>;
 }

@@ -44,12 +44,17 @@ describe('access workflows', () => {
     const source = renderAccess('/roles');
     fireEvent.click(await screen.findByRole('button', { name: 'Create Role' }));
     fireEvent.change(screen.getByLabelText('Role name'), { target: { value: 'Review team' } });
-    fireEvent.click(screen.getByRole('checkbox', { name: 'audit.read' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Audit Read' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save role' }));
     await screen.findByText('Role created');
     expect((await source.getRoles()).find(role => role.name === 'Review team')?.permissions).toEqual(['audit.read']);
     openFirstAction('View Role');
+    const roleView = screen.getByRole('dialog');
+    expect(within(roleView).queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(within(roleView).queryByRole('textbox')).not.toBeInTheDocument();
+    expect(within(roleView).getByText('Assigned users')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Edit role' }));
+    expect(screen.getByRole('checkbox', { name: 'Clients Read' })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Updated role description' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save role' }));
     await screen.findByText('Role updated');
@@ -86,7 +91,7 @@ describe('access workflows', () => {
     renderAccess('/audit');
     await screen.findAllByText('Client lifecycle changed');
     openFirstAction('View audit detail');
-    const dialog = screen.getByRole('dialog', { name: 'Audit detail' });
+    const dialog = screen.getByRole('dialog', { name: 'Client lifecycle changed' });
     expect(within(dialog).queryByRole('textbox')).not.toBeInTheDocument();
     expect(within(dialog).getByText('Commercial review completed.')).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
