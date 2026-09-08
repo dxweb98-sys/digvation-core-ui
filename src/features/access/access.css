@@ -1,0 +1,36 @@
+.access-page { display: grid; gap: 24px; width: 100%; }
+.access-page h1 { margin: 0; font-size: 2rem; }
+.access-page p { color: var(--color-text-muted); }
+.access-id { display: grid; gap: 3px; }
+.access-id span { font-size: .72rem; color: var(--color-text-muted); }
+.access-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.access-entity-title { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 1.2rem; line-height: 1.4; }
+.access-detail-content { display: grid; gap: 24px; }
+.access-section + .access-section { border-top: 1px solid var(--color-border); padding-top: 24px; }
+.access-section h3 { margin: 0 0 16px; font-size: .95rem; font-weight: 650; }
+.access-section h4, .access-checks legend { margin: 0 0 8px; font-size: .85rem; font-weight: 600; }
+.access-section-count { margin-left: 8px; color: var(--color-text-muted); font-size: .75rem; font-weight: 400; }
+.access-secondary { color: var(--color-text-muted); font-size: .8rem; line-height: 1.6; }
+.access-section > p { margin: 0 0 16px; }
+.access-detail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; margin: 0; }
+.access-detail div { display: grid; gap: 5px; align-content: start; }
+.access-detail dt { font-size: .75rem; color: var(--color-text-muted); }
+.access-detail dd { margin: 0; font-size: .875rem; line-height: 1.5; overflow-wrap: anywhere; }
+.access-role-options, .access-checks { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 12px; }
+.access-role-options label { display: flex; align-items: flex-start; gap: 12px; }
+.access-role-options label > span { display: grid; gap: 3px; }
+.access-role-options strong { font-weight: 500; font-size: .875rem; }
+.access-checks label { display: flex; align-items: center; gap: 8px; font-size: .85rem; }
+.access-form { display: grid; gap: 16px; }
+.access-permission-groups, .access-change-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
+.access-capability-list, .access-change-groups ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.access-capability-list li, .access-change-groups li { display: flex; align-items: baseline; gap: 8px; font-size: .85rem; line-height: 1.5; overflow-wrap: anywhere; }
+.access-checkmark, .access-added { color: var(--color-success); }
+.access-removed { color: var(--color-danger); }
+.access-row-menu { width: max-content; max-width: calc(100vw - 24px); padding: 4px; }
+.access-row-menu [data-ds-component="button"] { justify-content: flex-start; width: 100%; white-space: nowrap; }
+@media (max-width: 640px) {
+  .access-detail, .access-permission-groups, .access-change-groups { grid-template-columns: minmax(0, 1fr); }
+  .access-detail-content { gap: 20px; }
+  .access-section + .access-section { padding-top: 20px; }
+}

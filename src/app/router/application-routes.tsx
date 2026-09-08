@@ -12,7 +12,7 @@ import { IncidentsPage } from '../../features/operations/pages/incidents-page';
 import { DeploymentsPage } from '../../features/operations/pages/deployments-page';
 import { PlatformHealthPage } from '../../features/runtime/pages/platform-health-page';
 import { NotFoundPage } from './not-found-page';
-import { PlaceholderPage } from './placeholder-page';
+import { AuditPage, InvitationsPage, RolesPage, UsersPage } from '../../features/access/pages/access-pages';
 import { RouteErrorState } from './route-error-state';
 
 export const applicationRoutes: RouteObject[] = [
@@ -34,22 +34,10 @@ export const applicationRoutes: RouteObject[] = [
       { path: 'infrastructure', element: <InfrastructureListPage /> },
       { path: 'deployments', element: <DeploymentsPage /> },
       { path: 'incidents', element: <IncidentsPage /> },
-      {
-        path: 'users',
-        element: <PlaceholderPage title="Users" description="Internal Control Center user access will be managed here." />,
-      },
-      {
-        path: 'invitations',
-        element: <PlaceholderPage title="Invitations" description="Pending operator invitations will be managed here." />,
-      },
-      {
-        path: 'roles',
-        element: <PlaceholderPage title="Roles" description="Control Center role definitions will be managed here." />,
-      },
-      {
-        path: 'audit',
-        element: <PlaceholderPage title="Audit" description="Auditable operator activity will be reviewed here." />,
-      },
+      { path: 'users', element: <UsersPage /> },
+      { path: 'invitations', element: <InvitationsPage /> },
+      { path: 'roles', element: <RolesPage /> },
+      { path: 'audit', element: <AuditPage /> },
       { path: 'platform-health', element: <PlatformHealthPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
