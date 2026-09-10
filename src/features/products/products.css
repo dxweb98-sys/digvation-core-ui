@@ -70,7 +70,8 @@
   gap: 18px;
 }
 
-.product-dialog-actions {
+.product-dialog-actions,
+.product-capability-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -150,12 +151,14 @@
 }
 
 .product-feature-list,
-.product-client-list {
+.product-client-list,
+.product-capability-list {
   display: grid;
 }
 
 .product-feature-list article,
-.product-client-list article {
+.product-client-list article,
+.product-capability-row {
   display: flex;
   gap: 16px;
   align-items: center;
@@ -164,24 +167,78 @@
 }
 
 .product-feature-list article + article,
-.product-client-list article + article {
+.product-client-list article + article,
+.product-capability-row + .product-capability-row {
   border-top: 1px solid var(--color-border);
 }
 
 .product-feature-list article > div,
-.product-client-list article > div {
+.product-client-list article > div,
+.product-capability-copy {
   display: grid;
+  flex: 1;
   gap: 4px;
+  min-width: 0;
 }
 
 .product-feature-list strong,
-.product-client-list strong {
+.product-client-list strong,
+.product-capability-list strong,
+.product-capability-heading > div > strong {
   font-size: 0.82rem;
 }
 
-.product-feature-list span {
+.product-feature-list span,
+.product-capability-copy > span:last-child,
+.product-capability-heading p,
+.product-capability-note {
   font-size: 0.7rem;
+  line-height: 1.55;
   color: var(--color-text-muted);
+}
+
+.product-capability-section {
+  display: grid;
+  gap: 16px;
+}
+
+.product-capability-heading {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.product-capability-heading > div {
+  display: grid;
+  max-width: 680px;
+  gap: 5px;
+}
+
+.product-capability-heading p,
+.product-capability-note {
+  margin: 0;
+}
+
+.product-capability-identity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.product-capability-row {
+  cursor: default;
+}
+
+.product-capability-row:has(input:not(:disabled)) {
+  cursor: pointer;
+}
+
+.product-capability-state {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
 }
 
 .product-transition-dialog > p {
@@ -195,8 +252,14 @@
 }
 
 @media (max-width: 760px) {
-  .products-page-heading {
+  .products-page-heading,
+  .product-capability-heading {
     flex-direction: column;
+  }
+
+  .product-capability-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .product-overview-list {
