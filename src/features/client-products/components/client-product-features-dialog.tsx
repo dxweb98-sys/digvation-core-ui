@@ -175,6 +175,17 @@ export function ClientProductFeaturesDialog({
               ? error.message
               : 'Product composition could not be loaded.'
           }
+          action={
+            <DButton
+              variant="outline"
+              onClick={() => {
+                void productDetail.refetch();
+                void featureEntitlements.refetch();
+              }}
+            >
+              Retry
+            </DButton>
+          }
         />
       ) : !productDetail.data ? (
         <DEmptyState
