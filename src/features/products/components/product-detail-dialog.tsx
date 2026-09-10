@@ -4,6 +4,7 @@ import { ProductClientsTab } from '../../client-products/components/product-clie
 import { useProductDetail } from '../hooks/use-product-detail';
 import { useProductStatusTransition } from '../hooks/use-product-mutations';
 import type { ProductFeature, ProductStatus } from '../types/product';
+import { ProductCapabilitiesTab } from './product-capabilities-tab';
 import { ProductFormDialog } from './product-form-dialog';
 import { ProductLifecycleAction } from './product-lifecycle-action';
 import { ProductStatusBadge } from './product-status-badge';
@@ -41,9 +42,10 @@ export function ProductDetailDialog({ productId, open, onClose }: { productId: s
           <div className="product-detail-header"><ProductStatusBadge status={product.status} /></div>
           {statusTransition.isError ? <p className="product-form-error">{statusTransition.error.message}</p> : null}
           <DTabs defaultValue="overview" value={tab} onValueChange={setTab} className="product-detail-tabs">
-            <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="features">Features</DTabsTrigger><DTabsTrigger value="clients">Clients</DTabsTrigger></DTabsList>
+            <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="features">Features</DTabsTrigger><DTabsTrigger value="capabilities">Capabilities</DTabsTrigger><DTabsTrigger value="clients">Clients</DTabsTrigger></DTabsList>
             <DTabsContent value="overview"><DCard variant="outlined"><DCardContent><dl className="product-overview-list"><div><dt>Product Name</dt><dd>{product.name}</dd></div><div><dt>Product Code</dt><dd><code className="product-code">{product.code}</code></dd></div><div><dt>Description</dt><dd>{product.description ?? 'Not recorded'}</dd></div><div><dt>Status</dt><dd><ProductStatusBadge status={product.status} /></dd></div><div><dt>Created</dt><dd>{formatDate(product.createdAt)}</dd></div><div><dt>Updated</dt><dd>{formatDate(product.updatedAt)}</dd></div></dl></DCardContent></DCard></DTabsContent>
             <DTabsContent value="features"><DCard variant="outlined"><DCardContent><FeatureCatalog features={detail.features} /></DCardContent></DCard></DTabsContent>
+            <DTabsContent value="capabilities"><ProductCapabilitiesTab product={product} compatibleCapabilities={detail.capabilities} /></DTabsContent>
             <DTabsContent value="clients"><ProductClientsTab productId={product.id} /></DTabsContent>
           </DTabs>
         </div>
