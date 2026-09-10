@@ -157,6 +157,10 @@ export function ClientCapabilitiesSection({
                       {assignment ? (
                         <ClientCapabilityLifecycleAction
                           assignment={assignment}
+                          canBecomeEffective={
+                            canAssignCapabilities &&
+                            item.capability.status === 'ACTIVE'
+                          }
                           isSubmitting={transitionCapability.isPending}
                           onTransition={(targetStatus, reason) =>
                             transition(assignment.id, targetStatus, reason)
@@ -208,6 +212,7 @@ export function ClientCapabilitiesSection({
                   </div>
                   <ClientCapabilityLifecycleAction
                     assignment={assignment}
+                    canBecomeEffective={false}
                     isSubmitting={transitionCapability.isPending}
                     onTransition={(targetStatus, reason) =>
                       transition(assignment.id, targetStatus, reason)
