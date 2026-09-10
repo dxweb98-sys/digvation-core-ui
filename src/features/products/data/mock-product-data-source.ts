@@ -138,14 +138,6 @@ const CAPABILITIES: Capability[] = [
     status: 'ACTIVE',
   },
   {
-    id: 'capability-finance-operations',
-    code: 'FINANCE_OPERATIONS',
-    name: 'Finance Operations',
-    description:
-      'Reusable finance/financial-operations capability where explicitly entitled.',
-    status: 'ACTIVE',
-  },
-  {
     id: 'capability-loyalty-points',
     code: 'LOYALTY_POINTS',
     name: 'Loyalty Points',
