@@ -3,6 +3,30 @@
   gap: 16px;
 }
 
+.client-composition-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.client-composition-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.client-composition-copy > strong {
+  font-size: 0.86rem;
+}
+
+.client-composition-copy > p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
 .client-product-tab-state,
 .client-product-dialog-state {
   display: grid;
@@ -25,6 +49,7 @@
   font-size: 0.68rem;
 }
 
+.client-product-row-actions,
 .client-product-dialog-actions {
   display: flex;
   flex-wrap: wrap;
@@ -62,7 +87,8 @@
   color: var(--color-danger);
 }
 
-.client-product-transition-dialog {
+.client-product-transition-dialog,
+.client-feature-composition {
   display: grid;
   gap: 18px;
 }
@@ -75,4 +101,62 @@
   margin: 0;
   font-size: 0.82rem;
   line-height: 1.55;
+}
+
+.client-composition-warning {
+  margin: 0;
+  padding: 10px 12px;
+  color: var(--color-warning-foreground, var(--color-text));
+  font-size: 0.76rem;
+  line-height: 1.5;
+  background: var(--color-warning-subtle, var(--color-surface-muted));
+  border-radius: var(--radius-card);
+}
+
+.client-feature-list {
+  display: grid;
+  gap: 8px;
+}
+
+.client-feature-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-card);
+}
+
+.client-feature-copy,
+.client-feature-identity {
+  display: grid;
+  gap: 4px;
+}
+
+.client-feature-copy > span:last-child {
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.client-feature-identity strong {
+  font-size: 0.8rem;
+}
+
+.client-feature-identity code {
+  width: fit-content;
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+}
+
+@media (max-width: 720px) {
+  .client-feature-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .client-feature-row > :last-child {
+    grid-column: 2;
+    justify-self: start;
+  }
 }
