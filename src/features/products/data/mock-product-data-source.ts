@@ -1,10 +1,11 @@
 import type { ProductDataSource } from './product-data-source';
 import { normalizeProductCode } from '../schemas/product-form-schema';
+import { getMockCapabilityStore } from '../../capabilities/data/mock-capability-store';
 import type {
-  Capability,
   Product,
   ProductDetail,
   ProductFeature,
+  ProductFeatureStatus,
   ProductStatus,
 } from '../types/product';
 
@@ -104,56 +105,21 @@ const FEATURES: Record<string, ProductFeature[]> = {
   'product-inventory': [],
 };
 
-const CAPABILITIES: Capability[] = [
-  {
-    id: 'capability-customer-management',
-    code: 'CUSTOMER_MANAGEMENT',
-    name: 'Customer Management',
-    description:
-      'Reusable customer-management capability built on shared customer identity.',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'capability-membership',
-    code: 'MEMBERSHIP',
-    name: 'Membership',
-    description:
-      'Reusable membership capability for enrollment, status, tier, benefits, and eligibility when enabled.',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'capability-promotions',
-    code: 'PROMOTIONS',
-    name: 'Promotions',
-    description:
-      'Reusable customer-facing promotion, offer, discount, and commercial-rule capability.',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'capability-tax-fiscal',
-    code: 'TAX_FISCAL',
-    name: 'Tax / Fiscal',
-    description:
-      'Reusable tax and fiscal-rule capability for compatible business products.',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'capability-loyalty-points',
-    code: 'LOYALTY_POINTS',
-    name: 'Loyalty Points',
-    description:
-      'Optional loyalty-points capability kept separate from Membership; activation requires an explicit lifecycle decision.',
-    status: 'DRAFT',
-  },
-];
-
-const SHARED_BUSINESS_CAPABILITY_IDS = CAPABILITIES.map(
-  (capability) => capability.id,
-);
-
 const PRODUCT_CAPABILITIES: Record<string, string[]> = {
-  'product-pos': [...SHARED_BUSINESS_CAPABILITY_IDS],
-  'product-workshop': [...SHARED_BUSINESS_CAPABILITY_IDS],
+  'product-pos': [
+    'capability-customer-management',
+    'capability-membership',
+    'capability-promotions',
+    'capability-tax-fiscal',
+    'capability-loyalty-points',
+  ],
+  'product-workshop': [
+    'capability-customer-management',
+    'capability-membership',
+    'capability-promotions',
+    'capability-tax-fiscal',
+    'capability-loyalty-points',
+  ],
   'product-inventory': [],
 };
 
@@ -163,7 +129,13 @@ const CLIENT_COUNTS: Record<string, number> = {
   'product-inventory': 0,
 };
 
-const VALID_TRANSITIONS: Record<ProductStatus, ProductStatus[]> = {
+const PRODUCT_TRANSITIONS: Record<ProductStatus, ProductStatus[]> = {
+  DRAFT: ['ACTIVE', 'RETIRED'],
+  ACTIVE: ['RETIRED'],
+  RETIRED: ['DRAFT'],
+};
+
+const FEATURE_TRANSITIONS: Record<ProductFeatureStatus, ProductFeatureStatus[]> = {
   DRAFT: ['ACTIVE', 'RETIRED'],
   ACTIVE: ['RETIRED'],
   RETIRED: ['DRAFT'],
@@ -177,10 +149,6 @@ function copyProduct(product: Product): Product {
   return { ...product };
 }
 
-function copyCapability(capability: Capability): Capability {
-  return { ...capability };
-}
-
 function getDetail(
   product: Product,
   features: Record<string, ProductFeature[]>,
@@ -190,10 +158,28 @@ function getDetail(
   return {
     product: copyProduct(product),
     features: structuredClone(features[product.id] ?? []),
-    capabilities: CAPABILITIES.filter((capability) =>
-      capabilityIds.has(capability.id),
-    ).map(copyCapability),
+    capabilities: getMockCapabilityStore()
+      .filter((capability) => capabilityIds.has(capability.id))
+      .map((capability) => ({ ...capability })),
   };
+}
+
+function findProduct(products: Product[], productId: string) {
+  const product = products.find((candidate) => candidate.id === productId);
+  if (!product) throw new Error('Product was not found.');
+  return product;
+}
+
+function findFeature(
+  features: Record<string, ProductFeature[]>,
+  productId: string,
+  featureId: string,
+) {
+  const feature = (features[productId] ?? []).find(
+    (candidate) => candidate.id === featureId,
+  );
+  if (!feature) throw new Error('Product feature was not found.');
+  return feature;
 }
 
 export function createMockProductDataSource(): ProductDataSource {
@@ -221,13 +207,11 @@ export function createMockProductDataSource(): ProductDataSource {
       const page = Math.min(Math.max(query.page, 1), totalPages);
       const start = (page - 1) * query.limit;
       return {
-        products: matches
-          .slice(start, start + query.limit)
-          .map((product) => ({
-            ...copyProduct(product),
-            featureCount: features[product.id]?.length ?? 0,
-            clientCount: clientCounts[product.id] ?? 0,
-          })),
+        products: matches.slice(start, start + query.limit).map((product) => ({
+          ...copyProduct(product),
+          featureCount: features[product.id]?.length ?? 0,
+          clientCount: clientCounts[product.id] ?? 0,
+        })),
         total: matches.length,
         totalPages,
       };
@@ -238,24 +222,20 @@ export function createMockProductDataSource(): ProductDataSource {
       return product ? getDetail(product, features, productCapabilities) : null;
     },
 
-    async getCapabilities() {
-      return CAPABILITIES.map(copyCapability);
-    },
-
     async createProduct(input) {
       const code = normalizeProductCode(input.code);
       if (products.some((product) => product.code === code)) {
         throw new Error('Product code is already in use.');
       }
-      const now = getNow();
+      const timestamp = getNow();
       const product: Product = {
         id: `product-${code.toLowerCase()}-${products.length + 1}`,
         code,
         name: input.name.trim(),
         description: input.description?.trim() || undefined,
         status: 'DRAFT',
-        createdAt: now,
-        updatedAt: now,
+        createdAt: timestamp,
+        updatedAt: timestamp,
       };
       products.unshift(product);
       features[product.id] = [];
@@ -265,8 +245,7 @@ export function createMockProductDataSource(): ProductDataSource {
     },
 
     async updateProduct(productId, input) {
-      const product = products.find((candidate) => candidate.id === productId);
-      if (!product) throw new Error('Product was not found.');
+      const product = findProduct(products, productId);
       product.name = input.name.trim();
       product.description = input.description?.trim() || undefined;
       product.updatedAt = getNow();
@@ -274,28 +253,77 @@ export function createMockProductDataSource(): ProductDataSource {
     },
 
     async transitionProductStatus(input) {
-      const product = products.find(
-        (candidate) => candidate.id === input.productId,
-      );
-      if (!product) throw new Error('Product was not found.');
+      const product = findProduct(products, input.productId);
       if (!input.reason.trim()) {
         throw new Error('A reason is required for lifecycle changes.');
       }
-      if (!VALID_TRANSITIONS[product.status].includes(input.targetStatus)) {
+      if (!PRODUCT_TRANSITIONS[product.status].includes(input.targetStatus)) {
         throw new Error(
           `Cannot transition ${product.status} to ${input.targetStatus}.`,
         );
+      }
+      if (
+        input.targetStatus === 'RETIRED' &&
+        (features[product.id] ?? []).some((feature) => feature.status !== 'RETIRED')
+      ) {
+        throw new Error('Product features must be retired before retiring the product.');
       }
       product.status = input.targetStatus;
       product.updatedAt = getNow();
       return getDetail(product, features, productCapabilities);
     },
 
+    async createProductFeature(input) {
+      const product = findProduct(products, input.productId);
+      if (product.status === 'RETIRED') {
+        throw new Error('Cannot add a feature to a retired product.');
+      }
+      const code = input.code.trim().toLowerCase();
+      const productFeatures = features[product.id] ?? [];
+      if (productFeatures.some((feature) => feature.code === code)) {
+        throw new Error('Product feature code is already in use for this product.');
+      }
+      const timestamp = getNow();
+      productFeatures.push({
+        id: `feature-${product.id}-${productFeatures.length + 1}`,
+        code,
+        name: input.name.trim(),
+        description: input.description?.trim() || undefined,
+        status: 'DRAFT',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+      features[product.id] = productFeatures;
+      product.updatedAt = timestamp;
+    },
+
+    async updateProductFeature(input) {
+      const feature = findFeature(features, input.productId, input.featureId);
+      feature.name = input.name.trim();
+      feature.description = input.description?.trim() || undefined;
+      feature.updatedAt = getNow();
+    },
+
+    async transitionProductFeatureStatus(input) {
+      const product = findProduct(products, input.productId);
+      const feature = findFeature(features, input.productId, input.featureId);
+      if (!input.reason.trim()) {
+        throw new Error('A reason is required for lifecycle changes.');
+      }
+      if (!FEATURE_TRANSITIONS[feature.status].includes(input.targetStatus)) {
+        throw new Error(
+          `Cannot transition ${feature.status} to ${input.targetStatus}.`,
+        );
+      }
+      if (input.targetStatus === 'ACTIVE' && product.status !== 'ACTIVE') {
+        throw new Error('Product must be active before activating a feature.');
+      }
+      feature.status = input.targetStatus;
+      feature.updatedAt = getNow();
+    },
+
     async replaceProductCapabilities(input) {
-      const product = products.find(
-        (candidate) => candidate.id === input.productId,
-      );
-      if (!product) throw new Error('Product was not found.');
+      const product = findProduct(products, input.productId);
       if (product.status === 'RETIRED') {
         throw new Error(
           'Capability compatibility cannot be changed for a retired product.',
@@ -305,8 +333,9 @@ export function createMockProductDataSource(): ProductDataSource {
       if (capabilityIds.size !== input.capabilityIds.length) {
         throw new Error('Capability compatibility contains duplicate entries.');
       }
+      const capabilities = getMockCapabilityStore();
       for (const capabilityId of capabilityIds) {
-        const capability = CAPABILITIES.find(
+        const capability = capabilities.find(
           (candidate) => candidate.id === capabilityId,
         );
         if (!capability) {
@@ -318,9 +347,9 @@ export function createMockProductDataSource(): ProductDataSource {
           );
         }
       }
-      productCapabilities[product.id] = CAPABILITIES.filter((capability) =>
-        capabilityIds.has(capability.id),
-      ).map((capability) => capability.id);
+      productCapabilities[product.id] = capabilities
+        .filter((capability) => capabilityIds.has(capability.id))
+        .map((capability) => capability.id);
       product.updatedAt = getNow();
     },
   };
