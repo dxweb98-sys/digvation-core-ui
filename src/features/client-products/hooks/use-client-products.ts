@@ -27,3 +27,11 @@ export function useProductClients(productId: string) {
     enabled: Boolean(productId),
   });
 }
+
+export function useClientProductFeatureIds(clientProductId: string) {
+  return useQuery({
+    queryKey: CLIENT_PRODUCT_QUERY_KEYS.featureEntitlements(clientProductId),
+    queryFn: () => clientProductDataSource.getClientProductFeatureIds(clientProductId),
+    enabled: Boolean(clientProductId),
+  });
+}
