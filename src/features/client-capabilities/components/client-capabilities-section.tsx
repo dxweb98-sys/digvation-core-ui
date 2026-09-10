@@ -26,9 +26,11 @@ import '../client-capabilities.css';
 export function ClientCapabilitiesSection({
   clientId,
   clientProducts,
+  canAssignCapabilities,
 }: {
   clientId: string;
   clientProducts: ClientProductSummary[];
+  canAssignCapabilities: boolean;
 }) {
   const assignmentsQuery = useClientCapabilities(clientId);
   const compatibility = useCompatibleClientCapabilities(clientProducts);
@@ -165,14 +167,17 @@ export function ClientCapabilitiesSection({
                           size="sm"
                           variant="outline"
                           disabled={
+                            !canAssignCapabilities ||
                             item.capability.status !== 'ACTIVE' ||
                             assignCapability.isPending
                           }
                           onClick={() => void assign(item)}
                         >
-                          {item.capability.status === 'ACTIVE'
-                            ? 'Assign'
-                            : 'Not Active'}
+                          {!canAssignCapabilities
+                            ? 'Client Not Active'
+                            : item.capability.status === 'ACTIVE'
+                              ? 'Assign'
+                              : 'Not Active'}
                         </DButton>
                       )}
                     </div>
