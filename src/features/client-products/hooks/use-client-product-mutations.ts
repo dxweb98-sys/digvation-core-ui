@@ -24,10 +24,16 @@ export function useReplaceClientProductFeatures() {
   return useMutation({
     mutationFn: (input: ReplaceClientProductFeaturesInput) =>
       clientProductDataSource.replaceClientProductFeatures(input),
-    onSuccess: (_result, input) =>
-      queryClient.invalidateQueries({
-        queryKey: CLIENT_PRODUCT_QUERY_KEYS.featureEntitlements(input.clientProductId),
-      }),
+    onSuccess: async (_result, input) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: CLIENT_PRODUCT_QUERY_KEYS.featureEntitlements(
+            input.clientProductId,
+          ),
+        }),
+        invalidateClientProducts(queryClient),
+      ]);
+    },
   });
 }
 
