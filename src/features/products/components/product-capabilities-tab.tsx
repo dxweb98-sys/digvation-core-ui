@@ -10,7 +10,10 @@ import {
 import { useState } from 'react';
 
 import { CapabilityStatusBadge } from '../../capabilities/components/capability-status-badge';
-import type { Capability } from '../../capabilities/types/capability';
+import type {
+  Capability,
+  CapabilitySummary,
+} from '../../capabilities/types/capability';
 import { useCapabilityCatalog } from '../hooks/use-capability-catalog';
 import { useReplaceProductCapabilities } from '../hooks/use-product-mutations';
 import type { Product } from '../types/product';
@@ -21,7 +24,7 @@ function CapabilityList({
   selectedCapabilityIds,
   onToggle,
 }: {
-  capabilities: Capability[];
+  capabilities: Array<Capability | CapabilitySummary>;
   isEditing: boolean;
   selectedCapabilityIds: Set<string>;
   onToggle: (capabilityId: string, checked: boolean) => void;
@@ -66,7 +69,7 @@ export function ProductCapabilitiesTab({
   compatibleCapabilities,
 }: {
   product: Product;
-  compatibleCapabilities: Capability[];
+  compatibleCapabilities: CapabilitySummary[];
 }) {
   const capabilityCatalog = useCapabilityCatalog();
   const replaceCapabilities = useReplaceProductCapabilities();
