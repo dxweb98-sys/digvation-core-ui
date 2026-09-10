@@ -163,6 +163,7 @@ export function ClientProductsTab({
               </DButton>
               <ClientProductLifecycleAction
                 clientProduct={relationship}
+                canBecomeEffective={canManageComposition}
                 isSubmitting={transitionClientProductStatus.isPending}
                 onTransition={(targetStatus, reason) =>
                   transitionStatus(relationship.id, targetStatus, reason)
