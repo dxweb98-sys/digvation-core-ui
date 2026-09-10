@@ -1,104 +1,171 @@
 .capabilities-page {
   display: grid;
-  gap: var(--space-6);
+  width: 100%;
+  gap: 24px;
 }
 
 .capabilities-page-heading {
   display: flex;
+  gap: 24px;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-4);
 }
 
 .capabilities-page-heading h1 {
   margin: 0;
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  letter-spacing: -0.03em;
 }
 
 .capabilities-page-heading p:not(.page-eyebrow) {
-  margin: var(--space-2) 0 0;
+  max-width: 680px;
+  margin: 9px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.6;
   color: var(--color-text-muted);
-  max-width: 48rem;
 }
 
 .capability-page-state {
-  min-height: 16rem;
   display: grid;
+  min-height: 55vh;
   place-items: center;
+  padding: 32px;
 }
 
 .capability-table-identity {
   display: grid;
-  gap: var(--space-1);
+  gap: 3px;
+}
+
+.capability-table-identity strong {
+  font-size: 0.8rem;
 }
 
 .capability-table-identity span {
+  max-width: 420px;
+  overflow: hidden;
+  font-size: 0.7rem;
   color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .capability-code {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-sm);
+  display: inline-block;
+  padding: 3px 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+  border-radius: 4px;
 }
 
 .capability-form,
 .capability-transition-dialog {
   display: grid;
-  gap: var(--space-4);
+  gap: 18px;
 }
 
 .capability-dialog-actions {
   display: flex;
-  justify-content: flex-end;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .capability-overview-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-5);
   margin: 0;
 }
 
-.capability-overview-list div {
+.capability-overview-list > div {
   display: grid;
-  gap: var(--space-1);
+  gap: 6px;
+  min-height: 74px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.capability-overview-list > div:nth-child(odd) {
+  border-right: 1px solid var(--color-border);
+}
+
+.capability-overview-list > div:nth-last-child(-n + 2) {
+  border-bottom: 0;
 }
 
 .capability-overview-list dt {
+  font-size: 0.66rem;
+  font-weight: 700;
   color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .capability-overview-list dd {
   margin: 0;
+  font-size: 0.83rem;
+}
+
+.capability-transition-dialog > p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
 }
 
 .capability-lifecycle-menu {
-  min-width: 12rem;
+  display: grid;
+  gap: 2px;
+  min-width: 170px;
+  padding: 4px;
 }
 
 .capability-lifecycle-menu-item {
   width: 100%;
-  border: 0;
-  background: transparent;
-  color: inherit;
+  padding: 8px 10px;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.78rem;
   text-align: left;
-  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-menu-item);
   cursor: pointer;
 }
 
-.capability-lifecycle-menu-item:hover {
-  background: var(--color-surface-subtle);
+.capability-lifecycle-menu-item:hover,
+.capability-lifecycle-menu-item:focus-visible {
+  background: var(--color-surface-muted);
+  outline: none;
 }
 
 .capability-lifecycle-menu-item.is-danger {
-  color: var(--color-danger-text);
+  color: var(--color-danger);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 760px) {
+  .capabilities-page-heading {
+    flex-direction: column;
+  }
+
   .capability-overview-list {
     grid-template-columns: 1fr;
+  }
+
+  .capability-overview-list > div,
+  .capability-overview-list > div:nth-child(odd),
+  .capability-overview-list > div:nth-last-child(-n + 2) {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .capability-overview-list > div:last-child {
+    border-bottom: 0;
   }
 }
