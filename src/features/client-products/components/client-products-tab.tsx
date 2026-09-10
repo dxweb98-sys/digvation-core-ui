@@ -57,7 +57,13 @@ const COLUMNS: TableColumn<ClientProductSummary>[] = [
   },
 ];
 
-export function ClientProductsTab({ clientId }: { clientId: string }) {
+export function ClientProductsTab({
+  clientId,
+  canManageComposition,
+}: {
+  clientId: string;
+  canManageComposition: boolean;
+}) {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [featureRelationship, setFeatureRelationship] =
     useState<ClientProductSummary | null>(null);
@@ -96,43 +102,58 @@ export function ClientProductsTab({ clientId }: { clientId: string }) {
     });
   }
 
+  const assignProductButton = (
+    <DButton
+      disabled={!canManageComposition}
+      onClick={() => setIsAssignDialogOpen(true)}
+    >
+      Assign Product
+    </DButton>
+  );
+
   return (
     <div className="client-products-tab">
       <div className="client-composition-heading">
         <div className="client-composition-copy">
           <strong>Product entitlements</strong>
           <p>
-            Assign Products first, then explicitly select the Product Features this client may use.
+            Assign Products first, then explicitly select the Product Features
+            this client may use.
           </p>
         </div>
       </div>
 
+      {!canManageComposition ? (
+        <p className="client-composition-warning">
+          New Product, Feature, and Capability grants require an active Client.
+          Existing lifecycle actions remain available where the control-plane
+          lifecycle permits them.
+        </p>
+      ) : null}
+
       {relationships.length === 0 ? (
         <DEmptyState
           title="No products assigned"
-          description="Assign a product to establish the first client product relationship."
-          action={
-            <DButton onClick={() => setIsAssignDialogOpen(true)}>
-              Assign Product
-            </DButton>
+          description={
+            canManageComposition
+              ? 'Assign a product to establish the first client product relationship.'
+              : 'Activate the client before assigning its first product.'
           }
+          action={assignProductButton}
         />
       ) : (
         <DDataTable
           columns={COLUMNS}
           data={relationships}
           rowKey="id"
-          headerActions={
-            <DButton onClick={() => setIsAssignDialogOpen(true)}>
-              Assign Product
-            </DButton>
-          }
+          headerActions={assignProductButton}
           actions={(relationship) => (
             <div className="client-product-row-actions">
               <DButton
                 size="sm"
                 variant="outline"
                 disabled={
+                  !canManageComposition ||
                   relationship.status === 'CANCELLED' ||
                   relationship.status === 'DECOMMISSIONED'
                 }
@@ -155,6 +176,7 @@ export function ClientProductsTab({ clientId }: { clientId: string }) {
       <ClientCapabilitiesSection
         clientId={clientId}
         clientProducts={relationships}
+        canAssignCapabilities={canManageComposition}
       />
 
       <AssignProductDialog
