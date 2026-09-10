@@ -25,12 +25,10 @@ export function ClientProductLifecycleAction({
   clientProduct,
   isSubmitting,
   onTransition,
-  onCreateInstallation,
 }: {
   clientProduct: ClientProductSummary;
   isSubmitting: boolean;
   onTransition: (targetStatus: ClientProductStatus, reason: string) => Promise<void>;
-  onCreateInstallation?: () => void;
 }) {
   const [targetStatus, setTargetStatus] = useState<ClientProductStatus | null>(null);
   const [reason, setReason] = useState('');
@@ -63,7 +61,6 @@ export function ClientProductLifecycleAction({
   return (
     <>
       <DDropdown placement="bottom-end" closeOnItemClick contentRole="menu" contentClassName="client-product-lifecycle-menu" trigger={() => <DButton variant="outline" size="sm" aria-label="Actions" title="Actions">•••</DButton>}>
-        {onCreateInstallation ? <button className="client-product-lifecycle-menu-item" role="menuitem" type="button" onClick={onCreateInstallation}>Create Installation</button> : null}
         {VALID_TRANSITIONS[clientProduct.status].map((status) => <button className={status === 'CANCELLED' || status === 'DECOMMISSIONED' ? 'client-product-lifecycle-menu-item is-danger' : 'client-product-lifecycle-menu-item'} key={status} role="menuitem" type="button" onClick={() => setTargetStatus(status)}>{TRANSITION_LABELS[status]}</button>)}
       </DDropdown>
       <DDialog open={Boolean(targetStatus)} onClose={closeDialog} title="Confirm product relationship change" description="Provide a reason before changing the client product lifecycle state." footer={<div className="client-product-dialog-actions"><DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton><DButton variant={targetStatus === 'CANCELLED' || targetStatus === 'DECOMMISSIONED' ? 'danger' : 'primary'} onClick={() => void confirmTransition()} loading={isSubmitting}>Confirm change</DButton></div>}>
