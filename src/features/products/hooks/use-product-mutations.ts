@@ -1,6 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PRODUCT_QUERY_KEYS } from '../data/product-query-keys';
-import type { CreateProductInput, ProductStatusTransitionInput, UpdateProductInput } from '../types/product';
+import type {
+  CreateProductFeatureInput,
+  CreateProductInput,
+  ProductFeatureStatusTransitionInput,
+  ProductStatusTransitionInput,
+  ReplaceProductCapabilitiesInput,
+  UpdateProductFeatureInput,
+  UpdateProductInput,
+} from '../types/product';
 import { productDataSource } from './use-product-list';
 
 function invalidateProducts(queryClient: ReturnType<typeof useQueryClient>) {
@@ -9,15 +17,62 @@ function invalidateProducts(queryClient: ReturnType<typeof useQueryClient>) {
 
 export function useCreateProduct() {
   const queryClient = useQueryClient();
-  return useMutation({ mutationFn: (input: CreateProductInput) => productDataSource.createProduct(input), onSuccess: () => invalidateProducts(queryClient) });
+  return useMutation({
+    mutationFn: (input: CreateProductInput) => productDataSource.createProduct(input),
+    onSuccess: () => invalidateProducts(queryClient),
+  });
 }
 
 export function useUpdateProduct(productId: string) {
   const queryClient = useQueryClient();
-  return useMutation({ mutationFn: (input: UpdateProductInput) => productDataSource.updateProduct(productId, input), onSuccess: () => invalidateProducts(queryClient) });
+  return useMutation({
+    mutationFn: (input: UpdateProductInput) =>
+      productDataSource.updateProduct(productId, input),
+    onSuccess: () => invalidateProducts(queryClient),
+  });
 }
 
 export function useProductStatusTransition() {
   const queryClient = useQueryClient();
-  return useMutation({ mutationFn: (input: ProductStatusTransitionInput) => productDataSource.transitionProductStatus(input), onSuccess: () => invalidateProducts(queryClient) });
+  return useMutation({
+    mutationFn: (input: ProductStatusTransitionInput) =>
+      productDataSource.transitionProductStatus(input),
+    onSuccess: () => invalidateProducts(queryClient),
+  });
+}
+
+export function useCreateProductFeature() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateProductFeatureInput) =>
+      productDataSource.createProductFeature(input),
+    onSuccess: () => invalidateProducts(queryClient),
+  });
+}
+
+export function useUpdateProductFeature() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateProductFeatureInput) =>
+      productDataSource.updateProductFeature(input),
+    onSuccess: () => invalidateProducts(queryClient),
+  });
+}
+
+export function useProductFeatureStatusTransition() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ProductFeatureStatusTransitionInput) =>
+      productDataSource.transitionProductFeatureStatus(input),
+    onSuccess: () => invalidateProducts(queryClient),
+  });
+}
+
+export function useReplaceProductCapabilities() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ReplaceProductCapabilitiesInput) =>
+      productDataSource.replaceProductCapabilities(input),
+    onSuccess: () => invalidateProducts(queryClient),
+  });
 }

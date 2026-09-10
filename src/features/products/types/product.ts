@@ -1,3 +1,5 @@
+import type { CapabilitySummary } from '../../capabilities/types/capability';
+
 export type ProductStatus = 'DRAFT' | 'ACTIVE' | 'RETIRED';
 export type ProductFeatureStatus = 'DRAFT' | 'ACTIVE' | 'RETIRED';
 
@@ -42,6 +44,7 @@ export interface ProductListItem extends Product {
 export interface ProductDetail {
   product: Product;
   features: ProductFeature[];
+  capabilities: CapabilitySummary[];
 }
 
 export interface CreateProductInput {
@@ -59,4 +62,30 @@ export interface ProductStatusTransitionInput {
   productId: string;
   targetStatus: ProductStatus;
   reason: string;
+}
+
+export interface CreateProductFeatureInput {
+  productId: string;
+  code: string;
+  name: string;
+  description?: string;
+}
+
+export interface UpdateProductFeatureInput {
+  productId: string;
+  featureId: string;
+  name: string;
+  description?: string;
+}
+
+export interface ProductFeatureStatusTransitionInput {
+  productId: string;
+  featureId: string;
+  targetStatus: ProductFeatureStatus;
+  reason: string;
+}
+
+export interface ReplaceProductCapabilitiesInput {
+  productId: string;
+  capabilityIds: string[];
 }

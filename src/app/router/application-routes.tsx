@@ -6,6 +6,7 @@ import { ClientListPage } from '../../features/clients/pages/client-list-page';
 import { CreateClientPage } from '../../features/clients/pages/create-client-page';
 import { EditClientPage } from '../../features/clients/pages/edit-client-page';
 import { ProductListPage } from '../../features/products/pages/product-list-page';
+import { CapabilityListPage } from '../../features/capabilities/pages/capability-list-page';
 import { InstallationListPage } from '../../features/installations/pages/installation-list-page';
 import { InfrastructureListPage } from '../../features/infrastructure/pages/infrastructure-list-page';
 import { IncidentsPage } from '../../features/operations/pages/incidents-page';
@@ -26,10 +27,8 @@ export const applicationRoutes: RouteObject[] = [
       { path: 'clients/new', element: <CreateClientPage /> },
       { path: 'clients/:clientId', element: <ClientDetailPage /> },
       { path: 'clients/:clientId/edit', element: <EditClientPage /> },
-      {
-        path: 'products',
-        element: <ProductListPage />,
-      },
+      { path: 'products', element: <ProductListPage /> },
+      { path: 'capabilities', element: <CapabilityListPage /> },
       { path: 'installations', element: <InstallationListPage /> },
       { path: 'infrastructure', element: <InfrastructureListPage /> },
       { path: 'deployments', element: <DeploymentsPage /> },
