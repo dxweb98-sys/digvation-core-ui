@@ -7,7 +7,7 @@ import {
   DLoadingIndicator,
   useToast,
 } from '@digvation/ui';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { useCapabilityCatalog } from '../hooks/use-capability-catalog';
 import { useReplaceProductCapabilities } from '../hooks/use-product-mutations';
@@ -72,33 +72,26 @@ export function ProductCapabilitiesTab({
   const { showToast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCapabilityIds, setSelectedCapabilityIds] = useState<Set<string>>(
-    () => new Set(compatibleCapabilities.map((capability) => capability.id)),
+    new Set(),
   );
 
-  useEffect(() => {
-    if (!isEditing) {
-      setSelectedCapabilityIds(
-        new Set(compatibleCapabilities.map((capability) => capability.id)),
-      );
-    }
-  }, [compatibleCapabilities, isEditing]);
+  const displayCapabilities = isEditing
+    ? capabilityCatalog.data ?? []
+    : compatibleCapabilities;
 
-  const displayCapabilities = useMemo(() => {
-    if (isEditing) return capabilityCatalog.data ?? [];
-    return compatibleCapabilities;
-  }, [capabilityCatalog.data, compatibleCapabilities, isEditing]);
-
-  function beginEditing() {
+  function snapshotCurrentCompatibility() {
     setSelectedCapabilityIds(
       new Set(compatibleCapabilities.map((capability) => capability.id)),
     );
+  }
+
+  function beginEditing() {
+    snapshotCurrentCompatibility();
     setIsEditing(true);
   }
 
   function cancelEditing() {
-    setSelectedCapabilityIds(
-      new Set(compatibleCapabilities.map((capability) => capability.id)),
-    );
+    snapshotCurrentCompatibility();
     setIsEditing(false);
   }
 
