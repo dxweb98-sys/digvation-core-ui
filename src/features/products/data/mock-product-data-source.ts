@@ -1,37 +1,88 @@
 import type { ProductDataSource } from './product-data-source';
 import { normalizeProductCode } from '../schemas/product-form-schema';
-import type { Product, ProductDetail, ProductFeature, ProductStatus } from '../types/product';
+import type {
+  Capability,
+  Product,
+  ProductDetail,
+  ProductFeature,
+  ProductStatus,
+} from '../types/product';
 
 const PRODUCTS: Product[] = [
-  { id: 'product-pos', code: 'DIGVATION-POS', name: 'Digvation POS', description: 'Operational point-of-sale platform for service and retail businesses.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-06T10:00:00.000Z' },
-  { id: 'product-workshop', code: 'DIGVATION-WORKSHOP', name: 'Digvation Workshop', description: 'Workshop operations and invoicing foundation.', status: 'DRAFT', createdAt: '2026-08-18T07:10:00.000Z', updatedAt: '2026-09-04T08:40:00.000Z' },
-  { id: 'product-company-site', code: 'COMPANY-SITE', name: 'Company Website', description: 'Managed company web presence product.', status: 'ACTIVE', createdAt: '2026-07-20T06:00:00.000Z', updatedAt: '2026-09-01T02:45:00.000Z' },
-  { id: 'product-learning-media', code: 'LEARNING-MEDIA', name: 'Learning Media', status: 'RETIRED', createdAt: '2026-08-15T01:00:00.000Z', updatedAt: '2026-08-29T09:20:00.000Z' },
+  {
+    id: 'product-pos',
+    code: 'POS',
+    name: 'Digvation POS',
+    description: 'Selling, checkout, payment, receipt, refund, and cashier operations.',
+    status: 'ACTIVE',
+    createdAt: '2026-06-10T04:30:00.000Z',
+    updatedAt: '2026-09-10T10:00:00.000Z',
+  },
+  {
+    id: 'product-workshop',
+    code: 'WORKSHOP',
+    name: 'Digvation Workshop',
+    description: 'Vehicle service execution, inspection, estimates, work orders, invoicing, and service history.',
+    status: 'ACTIVE',
+    createdAt: '2026-08-18T07:10:00.000Z',
+    updatedAt: '2026-09-10T10:00:00.000Z',
+  },
+  {
+    id: 'product-inventory',
+    code: 'INVENTORY',
+    name: 'Digvation Inventory',
+    description: 'Stock authority for receiving, transfer, adjustment, reservation, and purchasing workflows.',
+    status: 'DRAFT',
+    createdAt: '2026-09-10T10:00:00.000Z',
+    updatedAt: '2026-09-10T10:00:00.000Z',
+  },
 ];
 
 const FEATURES: Record<string, ProductFeature[]> = {
   'product-pos': [
-    { id: 'feature-pos-cashier', code: 'CASHIER', name: 'Cashier', description: 'Transaction capture and payment recording.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-06T10:00:00.000Z' },
-    { id: 'feature-pos-catalog', code: 'CATALOG', name: 'Catalog', description: 'Product, price, and tax configuration.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-05T10:00:00.000Z' },
-    { id: 'feature-pos-employee', code: 'EMPLOYEE-CONTRIBUTION', name: 'Employee Contribution', description: 'Attributed service contribution reporting.', status: 'DRAFT', createdAt: '2026-08-28T04:30:00.000Z', updatedAt: '2026-09-04T10:00:00.000Z' },
+    { id: 'feature-pos-sales', code: 'pos.sales', name: 'Sales', description: 'Sale capture and transaction management.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-pos-checkout', code: 'pos.checkout', name: 'Checkout', description: 'Checkout orchestration and completion.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-pos-payments', code: 'pos.payments', name: 'Payments', description: 'Payment execution and recording.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-pos-receipts', code: 'pos.receipts', name: 'Receipts', description: 'Receipt generation and transaction proof.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-pos-refunds', code: 'pos.refunds', name: 'Refunds', description: 'Refund and void transaction handling.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-pos-cashier-session', code: 'pos.cashier-session', name: 'Cashier Session', description: 'Cashier/register session lifecycle and accountability.', status: 'ACTIVE', createdAt: '2026-06-10T04:30:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
   ],
   'product-workshop': [
-    { id: 'feature-workshop-work-order', code: 'WORK-ORDER', name: 'Work Orders', description: 'Workshop job intake and fulfillment tracking.', status: 'DRAFT', createdAt: '2026-08-18T07:10:00.000Z', updatedAt: '2026-09-04T08:40:00.000Z' },
-    { id: 'feature-workshop-invoice', code: 'INVOICING', name: 'Invoicing', description: 'Customer billing and receipt generation.', status: 'DRAFT', createdAt: '2026-08-18T07:10:00.000Z', updatedAt: '2026-09-04T08:40:00.000Z' },
+    { id: 'feature-workshop-inspections', code: 'workshop.inspections', name: 'Inspections', description: 'Vehicle inspection and service intake findings.', status: 'ACTIVE', createdAt: '2026-08-18T07:10:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-workshop-estimates', code: 'workshop.estimates', name: 'Estimates', description: 'Service estimates before work execution.', status: 'ACTIVE', createdAt: '2026-08-18T07:10:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-workshop-work-orders', code: 'workshop.work-orders', name: 'Work Orders', description: 'Workshop job planning, execution, and fulfillment tracking.', status: 'ACTIVE', createdAt: '2026-08-18T07:10:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-workshop-invoicing', code: 'workshop.invoicing', name: 'Invoicing', description: 'Customer billing for completed workshop work.', status: 'ACTIVE', createdAt: '2026-08-18T07:10:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-workshop-service-history', code: 'workshop.service-history', name: 'Service History', description: 'Historical vehicle service and completed-work records.', status: 'ACTIVE', createdAt: '2026-08-18T07:10:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
   ],
-  'product-company-site': [
-    { id: 'feature-site-content', code: 'CONTENT-PAGES', name: 'Content Pages', description: 'Managed responsive company content pages.', status: 'ACTIVE', createdAt: '2026-07-20T06:00:00.000Z', updatedAt: '2026-09-01T02:45:00.000Z' },
+  'product-inventory': [
+    { id: 'feature-inventory-stock', code: 'inventory.stock', name: 'Stock', description: 'Canonical stock and availability authority.', status: 'DRAFT', createdAt: '2026-09-10T10:00:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-inventory-receiving', code: 'inventory.receiving', name: 'Receiving', description: 'Inbound stock receiving and confirmation.', status: 'DRAFT', createdAt: '2026-09-10T10:00:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-inventory-transfers', code: 'inventory.transfers', name: 'Transfers', description: 'Stock movement between authorized locations.', status: 'DRAFT', createdAt: '2026-09-10T10:00:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-inventory-adjustments', code: 'inventory.adjustments', name: 'Adjustments', description: 'Controlled stock adjustment and reason tracking.', status: 'DRAFT', createdAt: '2026-09-10T10:00:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
+    { id: 'feature-inventory-purchasing', code: 'inventory.purchasing', name: 'Purchasing', description: 'Purchasing and replenishment workflows where assigned to Inventory.', status: 'DRAFT', createdAt: '2026-09-10T10:00:00.000Z', updatedAt: '2026-09-10T10:00:00.000Z' },
   ],
-  'product-learning-media': [
-    { id: 'feature-learning-library', code: 'CONTENT-LIBRARY', name: 'Content Library', description: 'Learning media collection and publishing.', status: 'RETIRED', createdAt: '2026-08-15T01:00:00.000Z', updatedAt: '2026-08-29T09:20:00.000Z' },
-  ],
+};
+
+const CAPABILITIES: Capability[] = [
+  { id: 'capability-catalog', code: 'CATALOG', name: 'Catalog', description: 'Reusable business catalog foundation consumed by compatible products.', status: 'ACTIVE' },
+  { id: 'capability-customer-management', code: 'CUSTOMER_MANAGEMENT', name: 'Customer Management', description: 'Shared customer identity and customer-management capability.', status: 'ACTIVE' },
+  { id: 'capability-membership', code: 'MEMBERSHIP', name: 'Membership', description: 'Membership enrollment, status, and member-specific business behavior.', status: 'ACTIVE' },
+  { id: 'capability-loyalty-points', code: 'LOYALTY_POINTS', name: 'Loyalty Points', description: 'Optional points earning and redemption capability for eligible products.', status: 'DRAFT' },
+  { id: 'capability-promotions', code: 'PROMOTIONS', name: 'Promotions', description: 'Customer-facing promotion, offer, discount, and campaign rules.', status: 'ACTIVE' },
+  { id: 'capability-tax-fiscal', code: 'TAX_FISCAL', name: 'Tax / Fiscal', description: 'Dynamic business tax and fiscal configuration/calculation capability.', status: 'ACTIVE' },
+  { id: 'capability-finance-operations', code: 'FINANCE_OPERATIONS', name: 'Finance Operations', description: 'Reusable finance/accounting-adjacent operational capability where explicitly entitled.', status: 'DRAFT' },
+];
+
+const PRODUCT_CAPABILITIES: Record<string, string[]> = {
+  'product-pos': CAPABILITIES.map((capability) => capability.id),
+  'product-workshop': CAPABILITIES.map((capability) => capability.id),
+  'product-inventory': ['capability-catalog', 'capability-tax-fiscal', 'capability-finance-operations'],
 };
 
 const CLIENT_COUNTS: Record<string, number> = {
   'product-pos': 1,
   'product-workshop': 1,
-  'product-company-site': 2,
-  'product-learning-media': 1,
+  'product-inventory': 0,
 };
 
 const VALID_TRANSITIONS: Record<ProductStatus, ProductStatus[]> = {
@@ -48,13 +99,27 @@ function copyProduct(product: Product): Product {
   return { ...product };
 }
 
-function getDetail(product: Product, features: Record<string, ProductFeature[]>): ProductDetail {
-  return { product: copyProduct(product), features: structuredClone(features[product.id] ?? []) };
+function copyCapability(capability: Capability): Capability {
+  return { ...capability };
+}
+
+function getDetail(
+  product: Product,
+  features: Record<string, ProductFeature[]>,
+  productCapabilities: Record<string, string[]>,
+): ProductDetail {
+  const capabilityIds = new Set(productCapabilities[product.id] ?? []);
+  return {
+    product: copyProduct(product),
+    features: structuredClone(features[product.id] ?? []),
+    capabilities: CAPABILITIES.filter((capability) => capabilityIds.has(capability.id)).map(copyCapability),
+  };
 }
 
 export function createMockProductDataSource(): ProductDataSource {
   const products = PRODUCTS.map(copyProduct);
   const features = structuredClone(FEATURES);
+  const productCapabilities = structuredClone(PRODUCT_CAPABILITIES);
   const clientCounts = { ...CLIENT_COUNTS };
 
   return {
@@ -72,7 +137,11 @@ export function createMockProductDataSource(): ProductDataSource {
 
     async getProductDetail(productId) {
       const product = products.find((candidate) => candidate.id === productId);
-      return product ? getDetail(product, features) : null;
+      return product ? getDetail(product, features, productCapabilities) : null;
+    },
+
+    async getCapabilities() {
+      return CAPABILITIES.map(copyCapability);
     },
 
     async createProduct(input) {
@@ -82,8 +151,9 @@ export function createMockProductDataSource(): ProductDataSource {
       const product: Product = { id: `product-${code.toLowerCase()}-${products.length + 1}`, code, name: input.name.trim(), description: input.description?.trim() || undefined, status: 'DRAFT', createdAt: now, updatedAt: now };
       products.unshift(product);
       features[product.id] = [];
+      productCapabilities[product.id] = [];
       clientCounts[product.id] = 0;
-      return getDetail(product, features);
+      return getDetail(product, features, productCapabilities);
     },
 
     async updateProduct(productId, input) {
@@ -92,7 +162,7 @@ export function createMockProductDataSource(): ProductDataSource {
       product.name = input.name.trim();
       product.description = input.description?.trim() || undefined;
       product.updatedAt = getNow();
-      return getDetail(product, features);
+      return getDetail(product, features, productCapabilities);
     },
 
     async transitionProductStatus(input) {
@@ -102,7 +172,22 @@ export function createMockProductDataSource(): ProductDataSource {
       if (!VALID_TRANSITIONS[product.status].includes(input.targetStatus)) throw new Error(`Cannot transition ${product.status} to ${input.targetStatus}.`);
       product.status = input.targetStatus;
       product.updatedAt = getNow();
-      return getDetail(product, features);
+      return getDetail(product, features, productCapabilities);
+    },
+
+    async replaceProductCapabilities(input) {
+      const product = products.find((candidate) => candidate.id === input.productId);
+      if (!product) throw new Error('Product was not found.');
+      if (product.status === 'RETIRED') throw new Error('Capability compatibility cannot be changed for a retired product.');
+      const capabilityIds = new Set(input.capabilityIds);
+      if (capabilityIds.size !== input.capabilityIds.length) throw new Error('Capability compatibility contains duplicate entries.');
+      for (const capabilityId of capabilityIds) {
+        const capability = CAPABILITIES.find((candidate) => candidate.id === capabilityId);
+        if (!capability) throw new Error('One or more capabilities were not found.');
+        if (capability.status === 'RETIRED') throw new Error('Retired capabilities cannot be assigned to a product catalog.');
+      }
+      productCapabilities[product.id] = CAPABILITIES.filter((capability) => capabilityIds.has(capability.id)).map((capability) => capability.id);
+      product.updatedAt = getNow();
     },
   };
 }
