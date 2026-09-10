@@ -36,6 +36,17 @@ const CLIENT_PRODUCTS: ClientProduct[] = [
   },
 ];
 
+const CLIENT_PRODUCT_FEATURES: Record<string, string[]> = {
+  'client-product-nova-pos': [
+    'feature-pos-sales',
+    'feature-pos-checkout',
+    'feature-pos-payments',
+    'feature-pos-receipts',
+    'feature-pos-refunds-voids',
+    'feature-pos-cashier-sessions',
+  ],
+};
+
 const VALID_TRANSITIONS: Record<ClientProductStatus, ClientProductStatus[]> = {
   PROVISIONING: ['TRIAL', 'ACTIVE', 'CANCELLED'],
   TRIAL: ['ACTIVE', 'SUSPENDED', 'CANCELLED'],
@@ -89,6 +100,7 @@ function resolveProductClient(
 
 export function createMockClientProductDataSource(): ClientProductDataSource {
   const clientProducts = CLIENT_PRODUCTS.map(copyClientProduct);
+  const clientProductFeatures = structuredClone(CLIENT_PRODUCT_FEATURES);
 
   return {
     async getClientProducts(clientId) {
@@ -112,6 +124,13 @@ export function createMockClientProductDataSource(): ClientProductDataSource {
       return ACTIVE_PRODUCTS.filter(
         (product) => !assignedProductIds.has(product.id),
       ).map((product) => ({ ...product }));
+    },
+
+    async getClientProductFeatureIds(clientProductId) {
+      if (!clientProducts.some((item) => item.id === clientProductId)) {
+        throw new Error('Client product relationship was not found.');
+      }
+      return [...(clientProductFeatures[clientProductId] ?? [])];
     },
 
     async assignProduct(input) {
@@ -141,7 +160,31 @@ export function createMockClientProductDataSource(): ClientProductDataSource {
         updatedAt: timestamp,
       };
       clientProducts.unshift(clientProduct);
+      clientProductFeatures[clientProduct.id] = [];
       return copyClientProduct(clientProduct);
+    },
+
+    async replaceClientProductFeatures(input) {
+      const clientProduct = clientProducts.find(
+        (candidate) => candidate.id === input.clientProductId,
+      );
+      if (!clientProduct) {
+        throw new Error('Client product relationship was not found.');
+      }
+      if (
+        clientProduct.status === 'CANCELLED' ||
+        clientProduct.status === 'DECOMMISSIONED'
+      ) {
+        throw new Error(
+          'Feature composition cannot be changed for a cancelled or decommissioned product relationship.',
+        );
+      }
+      const featureIds = new Set(input.featureIds);
+      if (featureIds.size !== input.featureIds.length) {
+        throw new Error('Feature composition contains duplicate entries.');
+      }
+      clientProductFeatures[input.clientProductId] = [...featureIds];
+      clientProduct.updatedAt = now();
     },
 
     async transitionClientProductStatus(input) {
