@@ -87,7 +87,7 @@ export function ClientCapabilitiesSection({
     <DCard variant="outlined">
       <DCardContent>
         <div className="client-capability-section">
-          <div className="client-composition-copy">
+          <div className="client-capability-section-copy">
             <strong>Reusable capability entitlements</strong>
             <p>
               Capabilities are granted to the client, not to an individual
@@ -97,7 +97,7 @@ export function ClientCapabilitiesSection({
           </div>
 
           {assignmentsQuery.isPending || compatibility.isPending ? (
-            <div className="client-product-tab-state">
+            <div className="client-capability-section-state">
               <DLoadingIndicator label="Loading capability composition" />
             </div>
           ) : assignmentsQuery.isError || compatibility.isError ? (
