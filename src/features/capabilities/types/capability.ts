@@ -1,11 +1,14 @@
 export type CapabilityStatus = 'DRAFT' | 'ACTIVE' | 'RETIRED';
 
-export interface Capability {
+export interface CapabilitySummary {
   id: string;
   code: string;
   name: string;
   description?: string;
   status: CapabilityStatus;
+}
+
+export interface Capability extends CapabilitySummary {
   createdAt: string;
   updatedAt: string;
 }
