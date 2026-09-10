@@ -1,4 +1,4 @@
-import type { Capability } from '../../capabilities/types/capability';
+import type { CapabilitySummary } from '../../capabilities/types/capability';
 
 export type ProductStatus = 'DRAFT' | 'ACTIVE' | 'RETIRED';
 export type ProductFeatureStatus = 'DRAFT' | 'ACTIVE' | 'RETIRED';
@@ -44,7 +44,7 @@ export interface ProductListItem extends Product {
 export interface ProductDetail {
   product: Product;
   features: ProductFeature[];
-  capabilities: Capability[];
+  capabilities: CapabilitySummary[];
 }
 
 export interface CreateProductInput {
