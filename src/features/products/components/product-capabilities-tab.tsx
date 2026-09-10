@@ -9,10 +9,11 @@ import {
 } from '@digvation/ui';
 import { useState } from 'react';
 
+import { CapabilityStatusBadge } from '../../capabilities/components/capability-status-badge';
+import type { Capability } from '../../capabilities/types/capability';
 import { useCapabilityCatalog } from '../hooks/use-capability-catalog';
 import { useReplaceProductCapabilities } from '../hooks/use-product-mutations';
-import type { Capability, Product } from '../types/product';
-import { ProductStatusBadge } from './product-status-badge';
+import type { Product } from '../types/product';
 
 function CapabilityList({
   capabilities,
@@ -53,7 +54,7 @@ function CapabilityList({
             </span>
             {capability.description ? <span>{capability.description}</span> : null}
           </span>
-          <ProductStatusBadge status={capability.status} />
+          <CapabilityStatusBadge status={capability.status} />
         </label>
       ))}
     </div>
