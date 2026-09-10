@@ -71,7 +71,8 @@
 }
 
 .product-dialog-actions,
-.product-capability-actions {
+.product-capability-actions,
+.product-feature-row-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -105,10 +106,16 @@
   cursor: pointer;
 }
 
-.product-lifecycle-menu-item:hover,
-.product-lifecycle-menu-item:focus-visible {
+.product-lifecycle-menu-item:hover:not(:disabled),
+.product-lifecycle-menu-item:focus-visible:not(:disabled) {
   background: var(--color-surface-muted);
   outline: none;
+}
+
+.product-lifecycle-menu-item:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .product-lifecycle-menu-item.is-danger {
@@ -172,7 +179,7 @@
   border-top: 1px solid var(--color-border);
 }
 
-.product-feature-list article > div,
+.product-feature-copy,
 .product-client-list article > div,
 .product-capability-copy {
   display: grid;
@@ -184,24 +191,28 @@
 .product-feature-list strong,
 .product-client-list strong,
 .product-capability-list strong,
-.product-capability-heading > div > strong {
+.product-capability-heading > div > strong,
+.product-feature-heading > div > strong {
   font-size: 0.82rem;
 }
 
-.product-feature-list span,
+.product-feature-copy > span:last-child,
 .product-capability-copy > span:last-child,
 .product-capability-heading p,
-.product-capability-note {
+.product-capability-note,
+.product-feature-heading p {
   font-size: 0.7rem;
   line-height: 1.55;
   color: var(--color-text-muted);
 }
 
+.product-feature-section,
 .product-capability-section {
   display: grid;
   gap: 16px;
 }
 
+.product-feature-heading,
 .product-capability-heading {
   display: flex;
   gap: 20px;
@@ -209,22 +220,29 @@
   justify-content: space-between;
 }
 
+.product-feature-heading > div,
 .product-capability-heading > div {
   display: grid;
   max-width: 680px;
   gap: 5px;
 }
 
+.product-feature-heading p,
 .product-capability-heading p,
 .product-capability-note {
   margin: 0;
 }
 
+.product-feature-identity,
 .product-capability-identity {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+}
+
+.product-feature-row-actions {
+  flex-shrink: 0;
 }
 
 .product-capability-row {
@@ -253,11 +271,14 @@
 
 @media (max-width: 760px) {
   .products-page-heading,
-  .product-capability-heading {
+  .product-feature-heading,
+  .product-capability-heading,
+  .product-feature-list article {
     flex-direction: column;
   }
 
-  .product-capability-actions {
+  .product-capability-actions,
+  .product-feature-row-actions {
     width: 100%;
     justify-content: flex-start;
   }
