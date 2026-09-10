@@ -1,6 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PRODUCT_QUERY_KEYS } from '../data/product-query-keys';
-import type { CreateProductInput, ProductStatusTransitionInput, UpdateProductInput } from '../types/product';
+import type {
+  CreateProductInput,
+  ProductStatusTransitionInput,
+  ReplaceProductCapabilitiesInput,
+  UpdateProductInput,
+} from '../types/product';
 import { productDataSource } from './use-product-list';
 
 function invalidateProducts(queryClient: ReturnType<typeof useQueryClient>) {
@@ -20,4 +25,12 @@ export function useUpdateProduct(productId: string) {
 export function useProductStatusTransition() {
   const queryClient = useQueryClient();
   return useMutation({ mutationFn: (input: ProductStatusTransitionInput) => productDataSource.transitionProductStatus(input), onSuccess: () => invalidateProducts(queryClient) });
+}
+
+export function useReplaceProductCapabilities() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ReplaceProductCapabilitiesInput) => productDataSource.replaceProductCapabilities(input),
+    onSuccess: () => invalidateProducts(queryClient),
+  });
 }
