@@ -36,3 +36,8 @@ export interface ClientProductStatusTransitionInput {
   targetStatus: ClientProductStatus;
   reason: string;
 }
+
+export interface ReplaceClientProductFeaturesInput {
+  clientProductId: string;
+  featureIds: string[];
+}
