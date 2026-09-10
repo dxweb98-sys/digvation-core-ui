@@ -142,7 +142,7 @@ export function ClientCapabilityLifecycleAction({
         title="Confirm capability change"
         description="Provide a reason before changing the client capability lifecycle state."
         footer={
-          <div className="client-product-dialog-actions">
+          <div className="client-capability-dialog-actions">
             <DButton
               variant="outline"
               onClick={closeDialog}
