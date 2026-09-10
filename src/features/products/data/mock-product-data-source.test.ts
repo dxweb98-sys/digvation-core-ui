@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { getMockCapabilitiesSnapshot } from '../../capabilities/data/mock-capability-store';
 import { createMockProductDataSource } from './mock-product-data-source';
 
 describe('mock product data source', () => {
@@ -31,13 +32,12 @@ describe('mock product data source', () => {
       'pos.cashier-sessions',
     ]);
 
-    await expect(dataSource.getProductDetail('product-workshop')).resolves.toMatchObject({
-      features: [],
-    });
-    await expect(dataSource.getProductDetail('product-inventory')).resolves.toMatchObject({
-      features: [],
-      capabilities: [],
-    });
+    await expect(
+      dataSource.getProductDetail('product-workshop'),
+    ).resolves.toMatchObject({ features: [] });
+    await expect(
+      dataSource.getProductDetail('product-inventory'),
+    ).resolves.toMatchObject({ features: [], capabilities: [] });
   });
 
   it('keeps ProductCapability as compatibility catalog rather than client entitlement', async () => {
@@ -57,7 +57,7 @@ describe('mock product data source', () => {
 
   it('replaces product capability compatibility without mutating the capability catalog', async () => {
     const dataSource = createMockProductDataSource();
-    const catalog = await dataSource.getCapabilities();
+    const catalog = getMockCapabilitiesSnapshot();
     const membership = catalog.find((capability) => capability.code === 'MEMBERSHIP');
     const promotions = catalog.find((capability) => capability.code === 'PROMOTIONS');
 
@@ -74,7 +74,67 @@ describe('mock product data source', () => {
       'MEMBERSHIP',
       'PROMOTIONS',
     ]);
-    expect(await dataSource.getCapabilities()).toHaveLength(catalog.length);
+    expect(getMockCapabilitiesSnapshot()).toHaveLength(catalog.length);
+  });
+
+  it('creates, updates, and transitions product-owned features inside their product', async () => {
+    const dataSource = createMockProductDataSource();
+
+    await dataSource.createProductFeature({
+      productId: 'product-workshop',
+      code: 'workshop.intake',
+      name: 'Service Intake',
+      description: 'Accepted workshop intake behavior.',
+    });
+
+    const createdDetail = await dataSource.getProductDetail('product-workshop');
+    const feature = createdDetail?.features.find(
+      (candidate) => candidate.code === 'workshop.intake',
+    );
+    expect(feature).toMatchObject({
+      name: 'Service Intake',
+      status: 'DRAFT',
+    });
+
+    await dataSource.updateProductFeature({
+      productId: 'product-workshop',
+      featureId: feature!.id,
+      name: 'Workshop Intake',
+      description: 'Updated accepted workshop intake behavior.',
+    });
+
+    await expect(
+      dataSource.transitionProductFeatureStatus({
+        productId: 'product-workshop',
+        featureId: feature!.id,
+        targetStatus: 'ACTIVE',
+        reason: 'Ready for activation.',
+      }),
+    ).rejects.toThrow('Product must be active');
+
+    await dataSource.transitionProductStatus({
+      productId: 'product-workshop',
+      targetStatus: 'ACTIVE',
+      reason: 'Workshop catalog approved.',
+    });
+    await dataSource.transitionProductFeatureStatus({
+      productId: 'product-workshop',
+      featureId: feature!.id,
+      targetStatus: 'ACTIVE',
+      reason: 'Feature catalog approved.',
+    });
+
+    await expect(
+      dataSource.getProductDetail('product-workshop'),
+    ).resolves.toMatchObject({
+      features: [
+        expect.objectContaining({
+          id: feature!.id,
+          name: 'Workshop Intake',
+          status: 'ACTIVE',
+        }),
+      ],
+    });
   });
 
   it('normalizes a new product code and starts the product in draft', async () => {
@@ -104,7 +164,7 @@ describe('mock product data source', () => {
     expect(detail.product.name).toBe('Digvation POS Suite');
   });
 
-  it('enforces valid lifecycle transitions with a reason', async () => {
+  it('enforces product retirement prerequisites instead of hiding backend lifecycle rules in the UI mock', async () => {
     const dataSource = createMockProductDataSource();
 
     await expect(
@@ -121,16 +181,16 @@ describe('mock product data source', () => {
         reason: 'Incorrect transition.',
       }),
     ).rejects.toThrow('Cannot transition ACTIVE to DRAFT');
-
-    const detail = await dataSource.transitionProductStatus({
-      productId: 'product-pos',
-      targetStatus: 'RETIRED',
-      reason: 'Product consolidation.',
-    });
-    expect(detail.product.status).toBe('RETIRED');
+    await expect(
+      dataSource.transitionProductStatus({
+        productId: 'product-pos',
+        targetStatus: 'RETIRED',
+        reason: 'Product consolidation.',
+      }),
+    ).rejects.toThrow('Product features must be retired');
   });
 
-  it('allows a draft product to transition directly to retired and freezes compatibility changes', async () => {
+  it('allows a draft product without open features to retire and freezes compatibility changes', async () => {
     const dataSource = createMockProductDataSource();
     const detail = await dataSource.transitionProductStatus({
       productId: 'product-workshop',
