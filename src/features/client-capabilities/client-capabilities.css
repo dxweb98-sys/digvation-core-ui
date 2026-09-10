@@ -1,0 +1,113 @@
+.client-capability-section {
+  display: grid;
+  gap: 16px;
+}
+
+.client-capability-list {
+  display: grid;
+  gap: 8px;
+}
+
+.client-capability-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-card);
+}
+
+.client-capability-row.is-unavailable {
+  opacity: 0.78;
+}
+
+.client-capability-copy,
+.client-capability-identity {
+  display: grid;
+  gap: 4px;
+}
+
+.client-capability-copy > span,
+.client-capability-copy > small {
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.client-capability-identity strong {
+  font-size: 0.8rem;
+}
+
+.client-capability-identity code {
+  width: fit-content;
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+}
+
+.client-capability-state,
+.client-capability-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.client-capability-lifecycle-menu {
+  display: grid;
+  min-width: 150px;
+  gap: 2px;
+  padding: 4px;
+}
+
+.client-capability-lifecycle-menu-item {
+  width: 100%;
+  padding: 8px 10px;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.78rem;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-menu-item);
+  cursor: pointer;
+}
+
+.client-capability-lifecycle-menu-item:hover,
+.client-capability-lifecycle-menu-item:focus-visible {
+  background: var(--color-surface-muted);
+  outline: none;
+}
+
+.client-capability-lifecycle-menu-item.is-danger {
+  color: var(--color-danger);
+}
+
+.client-capability-transition-dialog {
+  display: grid;
+  gap: 18px;
+}
+
+.client-capability-transition-dialog > p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 720px) {
+  .client-capability-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .client-capability-state,
+  .client-capability-actions,
+  .client-capability-row > .client-capability-lifecycle-menu {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
