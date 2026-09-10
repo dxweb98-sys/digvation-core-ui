@@ -50,7 +50,6 @@ describe('mock product data source', () => {
         'MEMBERSHIP',
         'PROMOTIONS',
         'TAX_FISCAL',
-        'FINANCE_OPERATIONS',
         'LOYALTY_POINTS',
       ]),
     );
