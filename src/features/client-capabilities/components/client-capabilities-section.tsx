@@ -9,7 +9,10 @@ import {
 
 import { CapabilityStatusBadge } from '../../capabilities/components/capability-status-badge';
 import type { ClientProductSummary } from '../../client-products/types/client-product';
-import { useAssignClientCapability, useClientCapabilityStatusTransition } from '../hooks/use-client-capability-mutations';
+import {
+  useAssignClientCapability,
+  useClientCapabilityStatusTransition,
+} from '../hooks/use-client-capability-mutations';
 import { useClientCapabilities } from '../hooks/use-client-capabilities';
 import { useCompatibleClientCapabilities } from '../hooks/use-compatible-client-capabilities';
 import type {
@@ -18,6 +21,7 @@ import type {
 } from '../types/client-capability';
 import { ClientCapabilityLifecycleAction } from './client-capability-lifecycle-action';
 import { ClientCapabilityStatusBadge } from './client-capability-status-badge';
+import '../client-capabilities.css';
 
 export function ClientCapabilitiesSection({
   clientId,
@@ -70,9 +74,6 @@ export function ClientCapabilitiesSection({
 
   const assignments = assignmentsQuery.data ?? [];
   const compatible = compatibility.items;
-  const assignedCapabilityIds = new Set(
-    assignments.map((assignment) => assignment.capabilityId),
-  );
   const compatibilityByCapabilityId = new Map(
     compatible.map((item) => [item.capability.id, item]),
   );
@@ -87,8 +88,9 @@ export function ClientCapabilitiesSection({
           <div className="client-composition-copy">
             <strong>Reusable capability entitlements</strong>
             <p>
-              Capabilities are granted to the client, not to an individual client-product relationship.
-              Only capabilities supported by at least one eligible assigned product can be added.
+              Capabilities are granted to the client, not to an individual
+              client-product relationship. Only capabilities supported by at
+              least one eligible assigned product can be added.
             </p>
           </div>
 
@@ -121,10 +123,14 @@ export function ClientCapabilitiesSection({
             <div className="client-capability-list">
               {compatible.map((item) => {
                 const assignment = assignments.find(
-                  (candidate) => candidate.capabilityId === item.capability.id,
+                  (candidate) =>
+                    candidate.capabilityId === item.capability.id,
                 );
                 return (
-                  <article key={item.capability.id} className="client-capability-row">
+                  <article
+                    key={item.capability.id}
+                    className="client-capability-row"
+                  >
                     <div className="client-capability-copy">
                       <div className="client-capability-identity">
                         <strong>{item.capability.name}</strong>
@@ -140,7 +146,9 @@ export function ClientCapabilitiesSection({
                     <div className="client-capability-state">
                       <CapabilityStatusBadge status={item.capability.status} />
                       {assignment ? (
-                        <ClientCapabilityStatusBadge status={assignment.status} />
+                        <ClientCapabilityStatusBadge
+                          status={assignment.status}
+                        />
                       ) : null}
                     </div>
                     <div className="client-capability-actions">
@@ -158,8 +166,7 @@ export function ClientCapabilitiesSection({
                           variant="outline"
                           disabled={
                             item.capability.status !== 'ACTIVE' ||
-                            assignCapability.isPending ||
-                            assignedCapabilityIds.has(item.capability.id)
+                            assignCapability.isPending
                           }
                           onClick={() => void assign(item)}
                         >
@@ -184,11 +191,14 @@ export function ClientCapabilitiesSection({
                       <code>{assignment.capability.code}</code>
                     </div>
                     <span>
-                      No currently eligible assigned product declares compatibility with this capability.
+                      No currently eligible assigned product declares
+                      compatibility with this capability.
                     </span>
                   </div>
                   <div className="client-capability-state">
-                    <CapabilityStatusBadge status={assignment.capability.status} />
+                    <CapabilityStatusBadge
+                      status={assignment.capability.status}
+                    />
                     <ClientCapabilityStatusBadge status={assignment.status} />
                   </div>
                   <ClientCapabilityLifecycleAction
