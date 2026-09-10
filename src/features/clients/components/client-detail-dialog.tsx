@@ -96,7 +96,7 @@ export function ClientDetailDialog({
                 <div><dt>Updated</dt><dd>{formatDate(client.updatedAt)}</dd></div>
               </dl><ClientContactsSection clientId={client.id} /></DCardContent></DCard>
             </DTabsContent>
-            <DTabsContent value="products"><ClientProductsTab clientId={client.id} /></DTabsContent>
+            <DTabsContent value="products"><ClientProductsTab clientId={client.id} canManageComposition={client.status === 'ACTIVE'} /></DTabsContent>
             <DTabsContent value="commercial"><ClientCommercialTab clientId={client.id} /></DTabsContent>
             <DTabsContent value="installations"><ClientInstallationsTab clientId={client.id} /></DTabsContent>
             <DTabsContent value="monitoring"><ClientMonitoringTab clientId={client.id} /></DTabsContent>
