@@ -171,7 +171,7 @@ export function ProductCapabilitiesTab({
 
           {product.status === 'RETIRED' ? (
             <p className="product-capability-note">
-              Retired products keep their historical compatibility mapping, but it can no longer be changed.
+              Capability compatibility cannot be edited from a retired product. Current mappings remain visible while they still exist.
             </p>
           ) : null}
 
