@@ -44,6 +44,10 @@ Use explicit backend contracts.
 
 `ProductCapability` is compatibility catalog metadata. Showing a Capability under a Product does not mean every Client of that Product owns it. Client entitlement remains a separate control-plane decision.
 
+Do not display mandatory platform foundations as optional Product capabilities. For example, the shared Catalog foundation belongs to base platform architecture and must not appear as a selectable `CATALOG` capability unless the ecosystem contract is explicitly changed.
+
+A planned/draft Product may expose compatibility metadata that is already decided, but the UI must not invent detailed ProductFeature scope for a Product whose feature contract has not been locked. Draft Products must not be presented as assignable/effective Client Products.
+
 Commercial catalog/list price and per-Client agreed price must be presented separately. Do not overwrite or visually reinterpret the canonical Product price when a Client has negotiated/promotional pricing.
 
 Product is the default billable unit. Capability may be bundled or sold as an add-on. ProductFeature is not a per-feature pricing unit by default.
