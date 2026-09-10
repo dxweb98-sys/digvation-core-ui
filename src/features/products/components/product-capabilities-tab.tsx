@@ -151,6 +151,9 @@ export function ProductCapabilitiesTab({
                 <DButton
                   onClick={() => void saveCompatibility()}
                   loading={replaceCapabilities.isPending}
+                  disabled={
+                    capabilityCatalog.isPending || capabilityCatalog.isError
+                  }
                 >
                   Save Compatibility
                 </DButton>
@@ -181,6 +184,14 @@ export function ProductCapabilitiesTab({
               <DEmptyState
                 title="Capability catalog unavailable"
                 description="The reusable capability catalog could not be loaded."
+                action={
+                  <DButton
+                    variant="outline"
+                    onClick={() => void capabilityCatalog.refetch()}
+                  >
+                    Retry
+                  </DButton>
+                }
               />
             </div>
           ) : (
