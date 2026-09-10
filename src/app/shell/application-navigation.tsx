@@ -12,7 +12,13 @@ interface NavigationGroup {
 
 const NAVIGATION_GROUPS: NavigationGroup[] = [
   { label: 'Customers', items: [{ label: 'Clients', to: '/clients' }] },
-  { label: 'Products', items: [{ label: 'Products', to: '/products' }] },
+  {
+    label: 'Products',
+    items: [
+      { label: 'Products', to: '/products' },
+      { label: 'Capabilities', to: '/capabilities' },
+    ],
+  },
   {
     label: 'Operations',
     items: [
