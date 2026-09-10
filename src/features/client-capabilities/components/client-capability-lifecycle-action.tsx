@@ -25,6 +25,12 @@ const VALID_TRANSITIONS: Record<
   DECOMMISSIONED: ['PROVISIONING'],
 };
 
+const PARENT_ACTIVE_REQUIRED = new Set<ClientCapabilityStatus>([
+  'PROVISIONING',
+  'TRIAL',
+  'ACTIVE',
+]);
+
 const TRANSITION_LABELS: Record<ClientCapabilityStatus, string> = {
   PROVISIONING: 'Re-provision',
   TRIAL: 'Start Trial',
@@ -36,10 +42,12 @@ const TRANSITION_LABELS: Record<ClientCapabilityStatus, string> = {
 
 export function ClientCapabilityLifecycleAction({
   assignment,
+  canBecomeEffective,
   isSubmitting,
   onTransition,
 }: {
   assignment: ClientCapabilitySummary;
+  canBecomeEffective: boolean;
   isSubmitting: boolean;
   onTransition: (
     targetStatus: ClientCapabilityStatus,
@@ -51,6 +59,9 @@ export function ClientCapabilityLifecycleAction({
   const [reason, setReason] = useState('');
   const [reasonError, setReasonError] = useState<string | null>(null);
   const { showToast } = useToast();
+  const availableTransitions = VALID_TRANSITIONS[assignment.status].filter(
+    (status) => canBecomeEffective || !PARENT_ACTIVE_REQUIRED.has(status),
+  );
 
   function closeDialog() {
     if (isSubmitting) return;
@@ -97,13 +108,18 @@ export function ClientCapabilityLifecycleAction({
             variant="outline"
             size="sm"
             aria-label={`Actions for ${assignment.capability.name}`}
-            title="Actions"
+            title={
+              availableTransitions.length
+                ? 'Actions'
+                : 'No lifecycle actions available'
+            }
+            disabled={availableTransitions.length === 0}
           >
             •••
           </DButton>
         )}
       >
-        {VALID_TRANSITIONS[assignment.status].map((status) => (
+        {availableTransitions.map((status) => (
           <button
             className={
               status === 'CANCELLED' || status === 'DECOMMISSIONED'
