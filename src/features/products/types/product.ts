@@ -1,5 +1,6 @@
 export type ProductStatus = 'DRAFT' | 'ACTIVE' | 'RETIRED';
 export type ProductFeatureStatus = 'DRAFT' | 'ACTIVE' | 'RETIRED';
+export type CapabilityStatus = 'DRAFT' | 'ACTIVE' | 'RETIRED';
 
 export interface Product {
   id: string;
@@ -19,6 +20,14 @@ export interface ProductFeature {
   status: ProductFeatureStatus;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Capability {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  status: CapabilityStatus;
 }
 
 export interface ProductListQuery {
@@ -42,6 +51,7 @@ export interface ProductListItem extends Product {
 export interface ProductDetail {
   product: Product;
   features: ProductFeature[];
+  capabilities: Capability[];
 }
 
 export interface CreateProductInput {
@@ -59,4 +69,9 @@ export interface ProductStatusTransitionInput {
   productId: string;
   targetStatus: ProductStatus;
   reason: string;
+}
+
+export interface ReplaceProductCapabilitiesInput {
+  productId: string;
+  capabilityIds: string[];
 }
