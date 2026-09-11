@@ -106,6 +106,7 @@ export function SubscriptionAddOnDialog({
   const [adjustmentReason, setAdjustmentReason] = useState('');
 
   const currentTerm = summary.currentTerm;
+  const subscription = summary.subscription;
   const offerings = (offeringsQuery.data ?? []).filter(
     (offering) =>
       offering.status === 'ACTIVE' &&
@@ -139,12 +140,22 @@ export function SubscriptionAddOnDialog({
         })
       : undefined;
 
-  if (!summary.subscription || !currentTerm) return null;
+  if (!subscription || !currentTerm) return null;
+  if (subscription.status !== 'ACTIVE' && subscription.status !== 'TRIAL') {
+    return (
+      <DDialog
+        open
+        onClose={onClose}
+        title={`Add commercial add-on · ${summary.productName}`}
+        description="Add-ons can only be activated while the parent subscription is in trial or active state."
+        footer={<DButton onClick={onClose}>Close</DButton>}
+      />
+    );
+  }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (
-      !summary.subscription ||
       !offering ||
       !effectiveFrom ||
       !catalogPrice ||
@@ -155,7 +166,7 @@ export function SubscriptionAddOnDialog({
     if (adjustmentType !== 'NONE' && !adjustmentReason.trim()) return;
     try {
       await mutation.mutateAsync({
-        subscriptionId: summary.subscription.id,
+        subscriptionId: subscription.id,
         addOnOfferingId: offering.id,
         effectiveFrom: `${effectiveFrom}T00:00:00.000Z`,
         agreedAmountMinor: agreed,
@@ -183,7 +194,9 @@ export function SubscriptionAddOnDialog({
       size="lg"
       footer={
         <div className="client-dialog-actions">
-          <DButton variant="outline" onClick={onClose}>Cancel</DButton>
+          <DButton variant="outline" onClick={onClose}>
+            Cancel
+          </DButton>
           <DButton
             form="subscription-add-on-form"
             type="submit"
@@ -195,7 +208,11 @@ export function SubscriptionAddOnDialog({
         </div>
       }
     >
-      <form id="subscription-add-on-form" className="client-contact-form" onSubmit={submit}>
+      <form
+        id="subscription-add-on-form"
+        className="client-contact-form"
+        onSubmit={submit}
+      >
         <DSelect
           label="Add-on Offering *"
           value={offeringId}
