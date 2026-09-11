@@ -11,6 +11,7 @@ import {
 } from '@digvation/ui';
 import { useState } from 'react';
 import { useClientProducts } from '../../client-products/hooks/use-client-products';
+import { formatMoney } from '../../commercial-catalog/utils/money';
 import {
   useTransitionSubscriptionAddOn,
   useUpdateProductConfiguration,
@@ -22,21 +23,18 @@ import type {
   SubscriptionAddOnStatus,
   SubscriptionTerm,
 } from '../types/subscription';
-import { InitialSubscriptionDialog, RenewalDialog } from './subscription-term-dialogs';
+import {
+  InitialSubscriptionDialog,
+  RenewalDialog,
+} from './subscription-term-dialogs';
 import { SubscriptionAddOnDialog } from './subscription-add-on-dialog';
 import '../subscriptions.css';
 
-function money(amountMinor: number, currency: string) {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(amountMinor / 100);
-}
-
 function date(value?: string) {
   return value
-    ? new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date(value))
+    ? new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(
+        new Date(value),
+      )
     : 'No end date';
 }
 
@@ -60,12 +58,12 @@ const TERM_COLUMNS: TableColumn<SubscriptionTerm>[] = [
   {
     key: 'listAmountMinor',
     label: 'List Price',
-    render: (term) => money(term.listAmountMinor, term.currency),
+    render: (term) => formatMoney(term.listAmountMinor, term.currency),
   },
   {
     key: 'agreedAmountMinor',
     label: 'Agreed Price',
-    render: (term) => money(term.agreedAmountMinor, term.currency),
+    render: (term) => formatMoney(term.agreedAmountMinor, term.currency),
   },
   {
     key: 'adjustmentType',
@@ -94,17 +92,19 @@ const ADD_ON_COLUMNS: TableColumn<SubscriptionAddOn>[] = [
   {
     key: 'effectiveFrom',
     label: 'Effective Period',
-    render: (item) => `${date(item.effectiveFrom)} → ${date(item.effectiveUntil)}`,
+    render: (item) =>
+      `${date(item.effectiveFrom)} → ${date(item.effectiveUntil)}`,
   },
   {
     key: 'agreedAmountMinor',
     label: 'Recurring Agreed',
-    render: (item) => money(item.agreedAmountMinor, item.currency),
+    render: (item) => formatMoney(item.agreedAmountMinor, item.currency),
   },
   {
     key: 'initialProratedAmountMinor',
     label: 'Initial Prorated',
-    render: (item) => money(item.initialProratedAmountMinor, item.currency),
+    render: (item) =>
+      formatMoney(item.initialProratedAmountMinor, item.currency),
   },
 ];
 
@@ -127,7 +127,10 @@ function ConfigurationDialog({
         clientProductId: summary.clientProductId,
         configurations,
       });
-      showToast({ title: 'Product configuration updated', variant: 'success' });
+      showToast({
+        title: 'Product configuration updated',
+        variant: 'success',
+      });
       onClose();
     } catch (error) {
       showToast({
@@ -146,7 +149,9 @@ function ConfigurationDialog({
       description="Operational limits are configuration, not commercial add-ons. Paid premium functionality belongs in the add-on catalog."
       footer={
         <div className="client-dialog-actions">
-          <DButton variant="outline" onClick={onClose}>Cancel</DButton>
+          <DButton variant="outline" onClick={onClose}>
+            Cancel
+          </DButton>
           <DButton onClick={() => void save()} loading={mutation.isPending}>
             Save Changes
           </DButton>
@@ -164,13 +169,17 @@ function ConfigurationDialog({
                 { value: 'true', label: 'Enabled' },
                 { value: 'false', label: 'Disabled' },
               ]}
-              onValueChange={(value) =>
+              clearable={false}
+              onValueChange={(value) => {
+                if (value !== 'true' && value !== 'false') return;
                 setConfigurations((current) =>
                   current.map((item, itemIndex) =>
-                    itemIndex === index ? { ...item, value: value === 'true' } : item,
+                    itemIndex === index
+                      ? { ...item, value: value === 'true' }
+                      : item,
                   ),
-                )
-              }
+                );
+              }}
             />
           ) : (
             <DInput
@@ -241,14 +250,25 @@ function AddOnLifecycleDialog({
       title={`${targetStatus === 'ACTIVE' ? 'Reactivate' : targetStatus === 'SUSPENDED' ? 'Suspend' : 'Cancel'} ${addOn.addOnName}`}
       footer={
         <div className="client-dialog-actions">
-          <DButton variant="outline" onClick={onClose}>Cancel</DButton>
-          <DButton onClick={() => void confirm()} loading={mutation.isPending}>
+          <DButton variant="outline" onClick={onClose}>
+            Cancel
+          </DButton>
+          <DButton
+            onClick={() => void confirm()}
+            loading={mutation.isPending}
+            disabled={!reason.trim()}
+          >
             Confirm
           </DButton>
         </div>
       }
     >
-      <DInput label="Reason *" value={reason} onChange={setReason} />
+      <DInput
+        label="Reason *"
+        value={reason}
+        maxLength={500}
+        onChange={setReason}
+      />
     </DDialog>
   );
 }
@@ -295,17 +315,25 @@ function CommercialRecord({
             <div className="client-commercial-summary">
               <div>
                 <span>Current term</span>
-                <strong>{date(term.startsAt)} → {date(term.endsAt)}</strong>
+                <strong>
+                  {date(term.startsAt)} → {date(term.endsAt)}
+                </strong>
                 <small>{expiry(summary)}</small>
               </div>
               <div>
                 <span>List price snapshot</span>
-                <strong>{money(term.listAmountMinor, term.currency)}</strong>
-                <small>{term.billingCycle.toLowerCase().replace('_', ' ')}</small>
+                <strong>
+                  {formatMoney(term.listAmountMinor, term.currency)}
+                </strong>
+                <small>
+                  {term.billingCycle.toLowerCase().replace('_', ' ')}
+                </small>
               </div>
               <div>
                 <span>Agreed Client price</span>
-                <strong>{money(term.agreedAmountMinor, term.currency)}</strong>
+                <strong>
+                  {formatMoney(term.agreedAmountMinor, term.currency)}
+                </strong>
                 <small>
                   {term.adjustmentType === 'NONE'
                     ? 'No adjustment'
@@ -315,12 +343,17 @@ function CommercialRecord({
               <div>
                 <span>Renewal</span>
                 <strong>
-                  {summary.subscription?.autoRenew ? 'Auto renew' : 'Manual renewal'}
+                  {summary.subscription?.autoRenew
+                    ? 'Auto renew'
+                    : 'Manual renewal'}
                 </strong>
-                <small>Notice {summary.subscription?.renewalNoticeDays ?? 0} days</small>
+                <small>
+                  Notice {summary.subscription?.renewalNoticeDays ?? 0} days
+                </small>
               </div>
             </div>
-            {expiry(summary).startsWith('Follow up') || expiry(summary) === 'Expired' ? (
+            {expiry(summary).startsWith('Follow up') ||
+            expiry(summary) === 'Expired' ? (
               <p className="client-commercial-attention">{expiry(summary)}</p>
             ) : null}
           </section>
@@ -329,16 +362,26 @@ function CommercialRecord({
             <div className="client-commercial-section-heading">
               <div>
                 <h3>Commercial add-ons</h3>
-                <p>Recurring agreed prices are snapshotted per add-on. Initial mid-term activation is co-term prorated.</p>
+                <p>
+                  Recurring agreed prices are snapshotted per add-on. Initial
+                  mid-term activation is co-term prorated.
+                </p>
               </div>
               <DButton onClick={onAddOn}>Add Add-on</DButton>
             </div>
             {summary.addOns.length ? (
               <>
-                <DDataTable columns={ADD_ON_COLUMNS} data={summary.addOns} rowKey="id" />
+                <DDataTable
+                  columns={ADD_ON_COLUMNS}
+                  data={summary.addOns}
+                  rowKey="id"
+                />
                 <div className="client-commercial-addon-actions">
                   {summary.addOns
-                    .filter((item) => item.status === 'ACTIVE' || item.status === 'SUSPENDED')
+                    .filter(
+                      (item) =>
+                        item.status === 'ACTIVE' || item.status === 'SUSPENDED',
+                    )
                     .map((item) => (
                       <div key={item.id}>
                         <span>{item.addOnName}</span>
@@ -346,7 +389,10 @@ function CommercialRecord({
                           <DButton
                             variant="outline"
                             onClick={() =>
-                              setAddOnLifecycle({ addOn: item, targetStatus: 'SUSPENDED' })
+                              setAddOnLifecycle({
+                                addOn: item,
+                                targetStatus: 'SUSPENDED',
+                              })
                             }
                           >
                             Suspend
@@ -355,7 +401,10 @@ function CommercialRecord({
                           <DButton
                             variant="outline"
                             onClick={() =>
-                              setAddOnLifecycle({ addOn: item, targetStatus: 'ACTIVE' })
+                              setAddOnLifecycle({
+                                addOn: item,
+                                targetStatus: 'ACTIVE',
+                              })
                             }
                           >
                             Reactivate
@@ -364,7 +413,10 @@ function CommercialRecord({
                         <DButton
                           variant="outline"
                           onClick={() =>
-                            setAddOnLifecycle({ addOn: item, targetStatus: 'CANCELLED' })
+                            setAddOnLifecycle({
+                              addOn: item,
+                              targetStatus: 'CANCELLED',
+                            })
                           }
                         >
                           Cancel Add-on
@@ -374,14 +426,18 @@ function CommercialRecord({
                 </div>
               </>
             ) : (
-              <p className="client-commercial-empty">No commercial add-ons activated.</p>
+              <p className="client-commercial-empty">
+                No commercial add-ons activated.
+              </p>
             )}
           </section>
 
           <section className="client-commercial-section">
             <div className="client-commercial-section-heading">
               <h3>Configuration & limits</h3>
-              <DButton variant="outline" onClick={onConfigure}>Edit Limits</DButton>
+              <DButton variant="outline" onClick={onConfigure}>
+                Edit Limits
+              </DButton>
             </div>
             {summary.configurations.length ? (
               <dl className="client-configuration-list">
@@ -396,7 +452,9 @@ function CommercialRecord({
                 ))}
               </dl>
             ) : (
-              <p className="client-commercial-empty">No product-specific limits configured.</p>
+              <p className="client-commercial-empty">
+                No product-specific limits configured.
+              </p>
             )}
           </section>
 
@@ -418,7 +476,8 @@ function CommercialRecord({
         <section className="client-commercial-section">
           <h3>Current subscription</h3>
           <p className="client-commercial-empty">
-            No subscription configured. A Product catalog list price is required before setup.
+            No subscription configured. A Product catalog list price is
+            required before setup.
           </p>
           <div className="client-commercial-actions">
             <DButton onClick={onSetup}>Set Up Subscription</DButton>
@@ -441,10 +500,14 @@ function CommercialRecord({
 export function ClientCommercialTab({ clientId }: { clientId: string }) {
   const commercialQuery = useClientCommercial(clientId);
   const clientProductsQuery = useClientProducts(clientId);
-  const [settingUp, setSettingUp] = useState<ClientProductCommercialSummary | null>(null);
-  const [renewing, setRenewing] = useState<ClientProductCommercialSummary | null>(null);
-  const [configuring, setConfiguring] = useState<ClientProductCommercialSummary | null>(null);
-  const [addingAddOn, setAddingAddOn] = useState<ClientProductCommercialSummary | null>(null);
+  const [settingUp, setSettingUp] =
+    useState<ClientProductCommercialSummary | null>(null);
+  const [renewing, setRenewing] =
+    useState<ClientProductCommercialSummary | null>(null);
+  const [configuring, setConfiguring] =
+    useState<ClientProductCommercialSummary | null>(null);
+  const [addingAddOn, setAddingAddOn] =
+    useState<ClientProductCommercialSummary | null>(null);
 
   if (commercialQuery.isPending || clientProductsQuery.isPending) return null;
   if (commercialQuery.isError || clientProductsQuery.isError) {
@@ -463,18 +526,19 @@ export function ClientCommercialTab({ clientId }: { clientId: string }) {
   const known = new Map(
     commercialQuery.data.map((summary) => [summary.clientProductId, summary]),
   );
-  const summaries: ClientProductCommercialSummary[] = clientProductsQuery.data.map(
-    (relationship) =>
-      known.get(relationship.id) ?? {
-        clientProductId: relationship.id,
-        productId: relationship.productId,
-        productName: relationship.productName,
-        productCode: relationship.productCode,
-        terms: [],
-        addOns: [],
-        configurations: [],
-      },
-  );
+  const summaries: ClientProductCommercialSummary[] =
+    clientProductsQuery.data.map(
+      (relationship) =>
+        known.get(relationship.id) ?? {
+          clientProductId: relationship.id,
+          productId: relationship.productId,
+          productName: relationship.productName,
+          productCode: relationship.productCode,
+          terms: [],
+          addOns: [],
+          configurations: [],
+        },
+    );
 
   if (!summaries.length) {
     return (
