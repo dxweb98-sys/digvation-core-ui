@@ -106,10 +106,21 @@ function copy<T>(value: T): T {
   return structuredClone(value);
 }
 
-function currentTerm(terms: SubscriptionTerm[]) {
+function latestTerm(terms: SubscriptionTerm[]) {
   return [...terms].sort((left, right) =>
     right.startsAt.localeCompare(left.startsAt),
   )[0];
+}
+
+function effectiveTerm(terms: SubscriptionTerm[]) {
+  const now = Date.now();
+  return [...terms]
+    .sort((left, right) => right.startsAt.localeCompare(left.startsAt))
+    .find((term) => {
+      const startsAt = new Date(term.startsAt).getTime();
+      const endsAt = term.endsAt ? new Date(term.endsAt).getTime() : undefined;
+      return startsAt <= now && (endsAt === undefined || now < endsAt);
+    });
 }
 
 function addMonthsClamped(anchor: Date, months: number) {
@@ -226,7 +237,8 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
           return {
             ...product,
             subscription: subscription ? copy(subscription) : undefined,
-            currentTerm: currentTerm(subscriptionTerms),
+            currentTerm: effectiveTerm(subscriptionTerms),
+            latestTerm: latestTerm(subscriptionTerms),
             terms: copy(subscriptionTerms),
             addOns: subscription
               ? copy(
@@ -341,7 +353,7 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
         (item) => item.clientProductId === subscription.clientProductId,
       );
       if (!product) throw new Error('Client Product was not found.');
-      const previous = currentTerm(
+      const previous = latestTerm(
         terms.filter((term) => term.subscriptionId === subscriptionId),
       );
       if (!previous?.endsAt) {
