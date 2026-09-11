@@ -48,6 +48,29 @@ function expiry(summary: ClientProductCommercialSummary) {
     : `${days} days remaining`;
 }
 
+function termContext(summary: ClientProductCommercialSummary) {
+  if (summary.currentTerm) {
+    return {
+      term: summary.currentTerm,
+      heading: 'Current subscription',
+      label: 'Current term',
+      hint: expiry(summary),
+      isEffective: true,
+    };
+  }
+  if (!summary.latestTerm) return null;
+  const startsInFuture = new Date(summary.latestTerm.startsAt).getTime() > Date.now();
+  return {
+    term: summary.latestTerm,
+    heading: startsInFuture ? 'Scheduled subscription' : 'Subscription history',
+    label: startsInFuture ? 'Latest scheduled term' : 'Last contract term',
+    hint: startsInFuture
+      ? `Starts ${date(summary.latestTerm.startsAt)}`
+      : 'No term is effective today',
+    isEffective: false,
+  };
+}
+
 const TERM_COLUMNS: TableColumn<SubscriptionTerm>[] = [
   {
     key: 'startsAt',
@@ -286,7 +309,12 @@ function CommercialRecord({
   onSetup: () => void;
   onAddOn: () => void;
 }) {
-  const term = summary.currentTerm;
+  const context = termContext(summary);
+  const term = context?.term;
+  const subscriptionCanSellAddOns =
+    context?.isEffective === true &&
+    (summary.subscription?.status === 'ACTIVE' ||
+      summary.subscription?.status === 'TRIAL');
   const [addOnLifecycle, setAddOnLifecycle] = useState<{
     addOn: SubscriptionAddOn;
     targetStatus: SubscriptionAddOnStatus;
@@ -308,17 +336,17 @@ function CommercialRecord({
         </span>
       </header>
 
-      {term ? (
+      {term && context ? (
         <>
           <section className="client-commercial-section">
-            <h3>Current subscription</h3>
+            <h3>{context.heading}</h3>
             <div className="client-commercial-summary">
               <div>
-                <span>Current term</span>
+                <span>{context.label}</span>
                 <strong>
                   {date(term.startsAt)} → {date(term.endsAt)}
                 </strong>
-                <small>{expiry(summary)}</small>
+                <small>{context.hint}</small>
               </div>
               <div>
                 <span>List price snapshot</span>
@@ -352,8 +380,9 @@ function CommercialRecord({
                 </small>
               </div>
             </div>
-            {expiry(summary).startsWith('Follow up') ||
-            expiry(summary) === 'Expired' ? (
+            {context.isEffective &&
+            (expiry(summary).startsWith('Follow up') ||
+              expiry(summary) === 'Expired') ? (
               <p className="client-commercial-attention">{expiry(summary)}</p>
             ) : null}
           </section>
@@ -367,7 +396,17 @@ function CommercialRecord({
                   mid-term activation is co-term prorated.
                 </p>
               </div>
-              <DButton onClick={onAddOn}>Add Add-on</DButton>
+              <DButton
+                onClick={onAddOn}
+                disabled={!subscriptionCanSellAddOns}
+                title={
+                  subscriptionCanSellAddOns
+                    ? undefined
+                    : 'An active or trial subscription term must be effective today before adding an add-on.'
+                }
+              >
+                Add Add-on
+              </DButton>
             </div>
             {summary.addOns.length ? (
               <>
@@ -472,6 +511,13 @@ function CommercialRecord({
             />
           </section>
         </>
+      ) : summary.subscription ? (
+        <section className="client-commercial-section">
+          <h3>Subscription unavailable</h3>
+          <p className="client-commercial-empty">
+            The subscription exists but has no commercial term to display.
+          </p>
+        </section>
       ) : (
         <section className="client-commercial-section">
           <h3>Current subscription</h3>
