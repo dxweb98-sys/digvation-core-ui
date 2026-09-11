@@ -2,6 +2,8 @@ import { DButton, DDialog, DInput } from '@digvation/ui';
 import { useState } from 'react';
 import type { AddOnOffering } from '../types/commercial-catalog';
 
+const ADD_ON_CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]+$/;
+
 export function AddOnOfferingDialog({
   productId,
   offering,
@@ -31,6 +33,16 @@ export function AddOnOfferingDialog({
   const [code, setCode] = useState(offering?.code ?? '');
   const [name, setName] = useState(offering?.name ?? '');
   const [description, setDescription] = useState(offering?.description ?? '');
+  const normalizedCode = code.trim().toUpperCase();
+  const normalizedName = name.trim();
+  const validCode =
+    Boolean(offering) ||
+    (ADD_ON_CODE_PATTERN.test(normalizedCode) && normalizedCode.length <= 80);
+  const canSubmit =
+    validCode &&
+    Boolean(normalizedName) &&
+    normalizedName.length <= 150 &&
+    description.length <= 500;
 
   return (
     <DDialog
@@ -43,7 +55,12 @@ export function AddOnOfferingDialog({
           <DButton variant="outline" onClick={onClose} disabled={loading}>
             Cancel
           </DButton>
-          <DButton form="add-on-offering-form" type="submit" loading={loading}>
+          <DButton
+            form="add-on-offering-form"
+            type="submit"
+            loading={loading}
+            disabled={!canSubmit}
+          >
             {offering ? 'Save Changes' : 'Create Draft'}
           </DButton>
         </div>
@@ -54,19 +71,19 @@ export function AddOnOfferingDialog({
         className="commercial-form"
         onSubmit={(event) => {
           event.preventDefault();
-          if (!name.trim() || (!offering && !code.trim())) return;
+          if (!canSubmit) return;
           if (offering) {
             void onUpdate({
               addOnOfferingId: offering.id,
-              name: name.trim(),
-              description: description.trim() || undefined,
+              name: normalizedName,
+              description: description.trim(),
             });
             return;
           }
           void onCreate({
             productId,
-            code: code.trim().toUpperCase(),
-            name: name.trim(),
+            code: normalizedCode,
+            name: normalizedName,
             description: description.trim() || undefined,
           });
         }}
@@ -75,13 +92,25 @@ export function AddOnOfferingDialog({
           label="Code *"
           value={code}
           disabled={Boolean(offering)}
+          maxLength={80}
           hint="Stable machine-readable commercial SKU code."
+          error={
+            !offering && code && !validCode
+              ? 'Use at least two letters/numbers; hyphen and underscore are allowed after the first character.'
+              : undefined
+          }
           onChange={(value) => setCode(value.toUpperCase())}
         />
-        <DInput label="Name *" value={name} onChange={setName} />
+        <DInput
+          label="Name *"
+          value={name}
+          maxLength={150}
+          onChange={setName}
+        />
         <DInput
           label="Description"
           value={description}
+          maxLength={500}
           onChange={setDescription}
         />
       </form>
