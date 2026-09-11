@@ -52,6 +52,35 @@ describe('mock client product data source', () => {
     ).rejects.toThrow('already assigned');
   });
 
+  it('stores an explicit feature entitlement set for each client product', async () => {
+    const dataSource = createMockClientProductDataSource();
+
+    await expect(
+      dataSource.getClientProductFeatureIds('client-product-nova-pos'),
+    ).resolves.toEqual(
+      expect.arrayContaining([
+        'feature-pos-sales',
+        'feature-pos-checkout',
+        'feature-pos-payments',
+      ]),
+    );
+
+    await dataSource.replaceClientProductFeatures({
+      clientProductId: 'client-product-nova-pos',
+      featureIds: ['feature-pos-sales', 'feature-pos-checkout'],
+    });
+    await expect(
+      dataSource.getClientProductFeatureIds('client-product-nova-pos'),
+    ).resolves.toEqual(['feature-pos-sales', 'feature-pos-checkout']);
+
+    await expect(
+      dataSource.replaceClientProductFeatures({
+        clientProductId: 'client-product-nova-pos',
+        featureIds: ['feature-pos-sales', 'feature-pos-sales'],
+      }),
+    ).rejects.toThrow('duplicate');
+  });
+
   it('enforces lifecycle reasons and valid transitions', async () => {
     const dataSource = createMockClientProductDataSource();
 
