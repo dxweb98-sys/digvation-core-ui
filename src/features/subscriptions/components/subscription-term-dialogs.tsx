@@ -239,22 +239,22 @@ export function RenewalDialog({
   const mutation = useAddRenewalTerm();
   const pricesQuery = useProductPrices(summary.productId);
   const { showToast } = useToast();
-  const currentTerm = summary.currentTerm;
+  const renewalAnchor = summary.latestTerm ?? summary.currentTerm;
   const subscription = summary.subscription;
   const hasLiveAddOns = summary.addOns.some(
     (addOn) => addOn.status === 'ACTIVE' || addOn.status === 'SUSPENDED',
   );
   const [values, setValues] = useState<RenewalTermInput>(() => ({
     ...baseTerm(),
-    startsAt: currentTerm?.endsAt ?? '',
-    billingCycle: currentTerm?.billingCycle ?? 'MONTHLY',
-    currency: currentTerm?.currency ?? 'IDR',
+    startsAt: renewalAnchor?.endsAt ?? '',
+    billingCycle: renewalAnchor?.billingCycle ?? 'MONTHLY',
+    currency: renewalAnchor?.currency ?? 'IDR',
   }));
   const prices = pricesQuery.data ?? [];
   const catalogPrice = findCatalogPrice(prices, values);
   const submittable = canSubmitTerm(values, catalogPrice);
 
-  if (!subscription || !currentTerm) return null;
+  if (!subscription || !renewalAnchor) return null;
   if (subscription.status === 'EXPIRED' || subscription.status === 'CANCELLED') {
     return (
       <UnavailableRenewalDialog
@@ -264,11 +264,11 @@ export function RenewalDialog({
       />
     );
   }
-  if (!currentTerm.endsAt) {
+  if (!renewalAnchor.endsAt) {
     return (
       <UnavailableRenewalDialog
         title={`Renew ${summary.productName}`}
-        description="The current term is open-ended, so there is no renewal boundary yet."
+        description="The latest scheduled term is open-ended, so there is no renewal boundary yet."
         onClose={onClose}
       />
     );
@@ -304,7 +304,7 @@ export function RenewalDialog({
       title={`Renew ${summary.productName}`}
       description={
         hasLiveAddOns
-          ? 'Live add-ons remain co-termed. This renewal must start when the current term ends and keep its billing cycle and currency. Cancel the existing add-on first if its commercial basis needs to change.'
+          ? 'Live add-ons remain co-termed. This renewal must start when the latest scheduled term ends and keep its billing cycle and currency. Cancel the existing add-on first if its commercial basis needs to change.'
           : 'Renewal snapshots the list price available now and the newly agreed Client price without rewriting previous terms.'
       }
       footer={
