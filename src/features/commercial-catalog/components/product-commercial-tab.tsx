@@ -29,27 +29,28 @@ import type {
   CatalogPrice,
   UpsertCatalogPriceInput,
 } from '../types/commercial-catalog';
+import { formatMoney } from '../utils/money';
 import { AddOnGrantsDialog } from './add-on-grants-dialog';
 import { AddOnOfferingDialog } from './add-on-offering-dialog';
 import { CatalogPriceDialog } from './catalog-price-dialog';
 import '../commercial-catalog.css';
-
-function money(amountMinor: number, currency: string) {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(amountMinor / 100);
-}
 
 function cycle(value: string) {
   return value.toLowerCase().replace('_', ' ');
 }
 
 const PRICE_COLUMNS: TableColumn<CatalogPrice>[] = [
-  { key: 'billingCycle', label: 'Billing Cycle', render: (price) => cycle(price.billingCycle) },
+  {
+    key: 'billingCycle',
+    label: 'Billing Cycle',
+    render: (price) => cycle(price.billingCycle),
+  },
   { key: 'currency', label: 'Currency' },
-  { key: 'amountMinor', label: 'List Price', render: (price) => money(price.amountMinor, price.currency) },
+  {
+    key: 'amountMinor',
+    label: 'List Price',
+    render: (price) => formatMoney(price.amountMinor, price.currency),
+  },
 ];
 
 function OfferingLifecycleDialog({
@@ -74,17 +75,25 @@ function OfferingLifecycleDialog({
       description="Lifecycle changes affect whether this commercial SKU may be sold. Existing client price snapshots are not rewritten."
       footer={
         <div className="commercial-dialog-actions">
-          <DButton variant="outline" onClick={onClose} disabled={loading}>Cancel</DButton>
+          <DButton variant="outline" onClick={onClose} disabled={loading}>
+            Cancel
+          </DButton>
           <DButton
             onClick={() => reason.trim() && void onConfirm(reason.trim())}
             loading={loading}
+            disabled={!reason.trim()}
           >
             Confirm
           </DButton>
         </div>
       }
     >
-      <DInput label="Reason *" value={reason} onChange={setReason} />
+      <DInput
+        label="Reason *"
+        value={reason}
+        maxLength={500}
+        onChange={setReason}
+      />
     </DDialog>
   );
 }
@@ -102,7 +111,9 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
   const { showToast } = useToast();
 
   const [productPriceOpen, setProductPriceOpen] = useState(false);
-  const [editingOffering, setEditingOffering] = useState<AddOnOffering | null | undefined>(undefined);
+  const [editingOffering, setEditingOffering] = useState<
+    AddOnOffering | null | undefined
+  >(undefined);
   const [grantOffering, setGrantOffering] = useState<AddOnOffering | null>(null);
   const [priceOffering, setPriceOffering] = useState<AddOnOffering | null>(null);
   const [lifecycle, setLifecycle] = useState<{
@@ -143,7 +154,9 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
     }
   }
 
-  async function createOffering(input: Parameters<typeof createAddOn.mutateAsync>[0]) {
+  async function createOffering(
+    input: Parameters<typeof createAddOn.mutateAsync>[0],
+  ) {
     try {
       await createAddOn.mutateAsync(input);
       showToast({ title: 'Draft add-on created', variant: 'success' });
@@ -157,7 +170,9 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
     }
   }
 
-  async function updateOffering(input: Parameters<typeof updateAddOn.mutateAsync>[0]) {
+  async function updateOffering(
+    input: Parameters<typeof updateAddOn.mutateAsync>[0],
+  ) {
     try {
       await updateAddOn.mutateAsync(input);
       showToast({ title: 'Add-on updated', variant: 'success' });
@@ -178,7 +193,10 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
           <div className="commercial-section-heading">
             <div>
               <h3>Product List Prices</h3>
-              <p>Canonical catalog prices. Client-specific deals are captured later as immutable subscription-term snapshots.</p>
+              <p>
+                Canonical catalog prices. Client-specific deals are captured
+                later as immutable subscription-term snapshots.
+              </p>
             </div>
             <DButton
               variant="outline"
@@ -204,7 +222,11 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
           <div className="commercial-section-heading">
             <div>
               <h3>Commercial Add-ons</h3>
-              <p>A sellable add-on may grant ProductFeatures and/or compatible Capabilities. Technical catalog items themselves remain unpriced.</p>
+              <p>
+                A sellable add-on may grant ProductFeatures and/or compatible
+                Capabilities. Technical catalog items themselves remain
+                unpriced.
+              </p>
             </div>
             <DButton
               disabled={product.status === 'RETIRED'}
@@ -223,7 +245,9 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
                       <strong>{offering.name}</strong>
                       <code>{offering.code}</code>
                     </div>
-                    <span className={`commercial-status is-${offering.status.toLowerCase()}`}>
+                    <span
+                      className={`commercial-status is-${offering.status.toLowerCase()}`}
+                    >
                       {offering.status}
                     </span>
                   </header>
@@ -246,13 +270,19 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
                     <div className="commercial-price-chips">
                       {offering.prices.map((price) => (
                         <span key={price.id}>
-                          {money(price.amountMinor, price.currency)} / {cycle(price.billingCycle)}
+                          {formatMoney(price.amountMinor, price.currency)} /{' '}
+                          {cycle(price.billingCycle)}
                         </span>
                       ))}
                     </div>
                   ) : null}
                   <div className="commercial-offering-actions">
-                    <DButton variant="outline" onClick={() => setEditingOffering(offering)}>Edit</DButton>
+                    <DButton
+                      variant="outline"
+                      onClick={() => setEditingOffering(offering)}
+                    >
+                      Edit
+                    </DButton>
                     <DButton
                       variant="outline"
                       disabled={offering.status !== 'DRAFT'}
@@ -268,15 +298,48 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
                       Add / Update Price
                     </DButton>
                     {offering.status === 'DRAFT' ? (
-                      <DButton onClick={() => setLifecycle({ offering, targetStatus: 'ACTIVE' })}>Activate</DButton>
+                      <DButton
+                        disabled={product.status !== 'ACTIVE'}
+                        title={
+                          product.status === 'ACTIVE'
+                            ? undefined
+                            : 'Product must be active before an add-on can be sold.'
+                        }
+                        onClick={() =>
+                          setLifecycle({ offering, targetStatus: 'ACTIVE' })
+                        }
+                      >
+                        Activate
+                      </DButton>
                     ) : null}
                     {offering.status === 'ACTIVE' ? (
-                      <DButton variant="outline" onClick={() => setLifecycle({ offering, targetStatus: 'DRAFT' })}>Return to Draft</DButton>
+                      <DButton
+                        variant="outline"
+                        onClick={() =>
+                          setLifecycle({ offering, targetStatus: 'DRAFT' })
+                        }
+                      >
+                        Return to Draft
+                      </DButton>
                     ) : null}
                     {offering.status !== 'RETIRED' ? (
-                      <DButton variant="outline" onClick={() => setLifecycle({ offering, targetStatus: 'RETIRED' })}>Retire</DButton>
+                      <DButton
+                        variant="outline"
+                        onClick={() =>
+                          setLifecycle({ offering, targetStatus: 'RETIRED' })
+                        }
+                      >
+                        Retire
+                      </DButton>
                     ) : (
-                      <DButton variant="outline" onClick={() => setLifecycle({ offering, targetStatus: 'DRAFT' })}>Restore Draft</DButton>
+                      <DButton
+                        variant="outline"
+                        onClick={() =>
+                          setLifecycle({ offering, targetStatus: 'DRAFT' })
+                        }
+                      >
+                        Restore Draft
+                      </DButton>
                     )}
                   </div>
                 </article>
@@ -331,7 +394,10 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
                 featureIds,
                 capabilityIds,
               });
-              showToast({ title: 'Add-on grants updated', variant: 'success' });
+              showToast({
+                title: 'Add-on grants updated',
+                variant: 'success',
+              });
               setGrantOffering(null);
             } catch (error) {
               showToast({
@@ -357,7 +423,10 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
                 addOnOfferingId: priceOffering.id,
                 input,
               });
-              showToast({ title: 'Add-on list price updated', variant: 'success' });
+              showToast({
+                title: 'Add-on list price updated',
+                variant: 'success',
+              });
               setPriceOffering(null);
             } catch (error) {
               showToast({
@@ -384,7 +453,10 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
                 targetStatus: lifecycle.targetStatus,
                 reason,
               });
-              showToast({ title: 'Add-on lifecycle updated', variant: 'success' });
+              showToast({
+                title: 'Add-on lifecycle updated',
+                variant: 'success',
+              });
               setLifecycle(null);
             } catch (error) {
               showToast({
