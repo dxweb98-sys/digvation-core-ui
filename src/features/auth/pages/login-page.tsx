@@ -1,6 +1,6 @@
 import { DButton, DCheckbox, DInput } from '@digvation/ui';
 import { useEffect, useState, type FormEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { Navigate, useLocation, useNavigate } from 'react-router';
 import { applicationConfig } from '../../../shared/config/application-config';
 import { useAuth } from '../use-auth';
 import '../auth.css';
@@ -35,7 +35,9 @@ export function LoginPage() {
     }
   }
 
-  if (applicationConfig.dataSourceMode === 'mock') return null;
+  if (applicationConfig.dataSourceMode === 'mock') {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <main className="auth-page">

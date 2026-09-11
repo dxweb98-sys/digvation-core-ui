@@ -72,9 +72,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const logout = useCallback(async () => {
     if (isMock) return;
-    await coreAuthDataSource.logout();
-    setUser(null);
-    setStatus('anonymous');
+    try {
+      await coreAuthDataSource.logout();
+    } finally {
+      setUser(null);
+      setStatus('anonymous');
+    }
   }, [isMock]);
 
   const value = useMemo(
