@@ -1,0 +1,139 @@
+.product-commercial-tab,
+.commercial-offering-list,
+.commercial-form,
+.commercial-grant-list {
+  display: grid;
+  gap: 16px;
+}
+
+.commercial-section-heading,
+.commercial-offering-card > header,
+.commercial-offering-actions,
+.commercial-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.commercial-section-heading {
+  margin-bottom: 16px;
+}
+
+.commercial-section-heading h3,
+.commercial-offering-card h3,
+.commercial-grants-grid h3 {
+  margin: 0;
+}
+
+.commercial-section-heading p,
+.commercial-offering-card > p,
+.commercial-grants-grid p {
+  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+}
+
+.commercial-offering-card {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.commercial-offering-card header > div,
+.commercial-grant-row > span {
+  display: grid;
+  gap: 4px;
+}
+
+.commercial-offering-card code,
+.commercial-grant-row code {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.commercial-status {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.commercial-offering-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.commercial-offering-summary > div {
+  display: grid;
+  gap: 4px;
+}
+
+.commercial-offering-summary dt {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.commercial-offering-summary dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.commercial-price-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.commercial-price-chips span {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.commercial-offering-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.commercial-dialog-actions {
+  justify-content: flex-end;
+}
+
+.commercial-grants-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.commercial-grant-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.commercial-grant-row small {
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 800px) {
+  .commercial-section-heading,
+  .commercial-offering-card > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .commercial-offering-summary,
+  .commercial-grants-grid {
+    grid-template-columns: 1fr;
+  }
+}
