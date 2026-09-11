@@ -1,6 +1,7 @@
 import { DButton, DDialog, DInput, DToggle, useToast } from '@digvation/ui';
 import { useState } from 'react';
 import { useProductPrices } from '../../commercial-catalog/hooks/use-commercial-catalog';
+import type { CatalogPrice } from '../../commercial-catalog/types/commercial-catalog';
 import { CommercialTermFields, findCatalogPrice } from './commercial-term-fields';
 import {
   useAddRenewalTerm,
@@ -24,13 +25,56 @@ function baseTerm(): CommercialTermInput {
   };
 }
 
-function canSubmit(values: CommercialTermInput, hasPrice: boolean) {
-  if (!values.startsAt || !hasPrice) return false;
-  if (values.endsAt && values.endsAt <= values.startsAt) return false;
-  if (values.adjustmentType !== 'NONE' && !values.adjustmentReason?.trim()) {
+function validDayCount(value: number | undefined) {
+  return (
+    value === undefined ||
+    (Number.isInteger(value) && value >= 0 && value <= 365)
+  );
+}
+
+function canSubmitTerm(
+  values: CommercialTermInput,
+  catalogPrice: CatalogPrice | undefined,
+) {
+  if (!values.startsAt || !catalogPrice) return false;
+  const startsAt = new Date(values.startsAt);
+  const endsAt = values.endsAt ? new Date(values.endsAt) : undefined;
+  if (Number.isNaN(startsAt.getTime())) return false;
+  if (endsAt && (Number.isNaN(endsAt.getTime()) || endsAt <= startsAt)) {
+    return false;
+  }
+  if (!validDayCount(values.paymentTermsDays)) return false;
+
+  const agreedAmountMinor =
+    values.agreedAmountMinor ?? catalogPrice.amountMinor;
+  if (
+    !Number.isSafeInteger(agreedAmountMinor) ||
+    agreedAmountMinor < 0 ||
+    (values.adjustmentType === 'NONE' &&
+      agreedAmountMinor !== catalogPrice.amountMinor) ||
+    (values.adjustmentType === 'COMPLIMENTARY' && agreedAmountMinor !== 0)
+  ) {
+    return false;
+  }
+  if (
+    values.adjustmentType !== 'NONE' &&
+    !values.adjustmentReason?.trim()
+  ) {
     return false;
   }
   return true;
+}
+
+function canSubmitInitial(
+  values: InitialSubscriptionInput,
+  catalogPrice: CatalogPrice | undefined,
+) {
+  return (
+    canSubmitTerm(values, catalogPrice) &&
+    validDayCount(values.renewalNoticeDays) &&
+    validDayCount(values.gracePeriodDays) &&
+    (values.contractReference?.length ?? 0) <= 150
+  );
 }
 
 function UnavailableRenewalDialog({
@@ -79,10 +123,11 @@ export function InitialSubscriptionDialog({
   });
   const prices = pricesQuery.data ?? [];
   const catalogPrice = findCatalogPrice(prices, values);
+  const submittable = canSubmitInitial(values, catalogPrice);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!canSubmit(values, Boolean(catalogPrice))) return;
+    if (!submittable) return;
     try {
       await mutation.mutateAsync({
         ...values,
@@ -117,7 +162,7 @@ export function InitialSubscriptionDialog({
             form="initial-subscription-form"
             type="submit"
             loading={mutation.isPending}
-            disabled={!canSubmit(values, Boolean(catalogPrice))}
+            disabled={!submittable}
           >
             Set Up Subscription
           </DButton>
@@ -173,6 +218,7 @@ export function InitialSubscriptionDialog({
           <DInput
             label="Contract Reference"
             value={values.contractReference ?? ''}
+            maxLength={150}
             onChange={(contractReference) =>
               setValues((current) => ({ ...current, contractReference }))
             }
@@ -206,6 +252,7 @@ export function RenewalDialog({
   }));
   const prices = pricesQuery.data ?? [];
   const catalogPrice = findCatalogPrice(prices, values);
+  const submittable = canSubmitTerm(values, catalogPrice);
 
   if (!subscription || !currentTerm) return null;
   if (subscription.status === 'EXPIRED' || subscription.status === 'CANCELLED') {
@@ -229,7 +276,7 @@ export function RenewalDialog({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!canSubmit(values, Boolean(catalogPrice))) return;
+    if (!submittable) return;
     try {
       await mutation.mutateAsync({
         subscriptionId: subscription.id,
@@ -269,7 +316,7 @@ export function RenewalDialog({
             form="renewal-form"
             type="submit"
             loading={mutation.isPending}
-            disabled={!canSubmit(values, Boolean(catalogPrice))}
+            disabled={!submittable}
           >
             Add Renewal
           </DButton>
