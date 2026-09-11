@@ -5,6 +5,7 @@ import { ClientDetailPage } from '../../features/clients/pages/client-detail-pag
 import { ClientListPage } from '../../features/clients/pages/client-list-page';
 import { CreateClientPage } from '../../features/clients/pages/create-client-page';
 import { EditClientPage } from '../../features/clients/pages/edit-client-page';
+import { ClientOnboardingPage } from '../../features/client-onboarding/pages/client-onboarding-page';
 import { ProductListPage } from '../../features/products/pages/product-list-page';
 import { CapabilityListPage } from '../../features/capabilities/pages/capability-list-page';
 import { InstallationListPage } from '../../features/installations/pages/installation-list-page';
@@ -37,6 +38,7 @@ export const applicationRoutes: RouteObject[] = [
       { index: true, element: <DashboardPage /> },
       { path: 'clients', element: <ClientListPage /> },
       { path: 'clients/new', element: <CreateClientPage /> },
+      { path: 'clients/onboard', element: <ClientOnboardingPage /> },
       { path: 'clients/:clientId', element: <ClientDetailPage /> },
       { path: 'clients/:clientId/edit', element: <EditClientPage /> },
       { path: 'products', element: <ProductListPage /> },
