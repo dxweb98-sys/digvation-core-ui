@@ -1,6 +1,8 @@
 import { DAvatar, DBadge, DButton } from '@digvation/ui';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
+import { useAuth } from '../../features/auth/use-auth';
+import { applicationConfig } from '../../shared/config/application-config';
 import { ApplicationNavigation } from './application-navigation';
 
 const ROUTE_TITLES: Record<string, string> = {
@@ -8,6 +10,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/clients': 'Clients',
   '/clients/new': 'Add Client',
   '/products': 'Products',
+  '/capabilities': 'Capabilities',
   '/installations': 'Installations',
   '/infrastructure': 'Infrastructure',
   '/deployments': 'Deployments',
@@ -20,13 +23,21 @@ const ROUTE_TITLES: Record<string, string> = {
 };
 
 function OperatorProfile() {
+  const { user, logout } = useAuth();
+  if (!user) return null;
+
   return (
     <div className="operator-profile">
-      <DAvatar name="Digvation Operator" size="sm" status="online" />
-      <div>
-        <strong>Digvation Operator</strong>
-        <span>Internal access</span>
+      <DAvatar name={user.fullname} size="sm" status="online" />
+      <div className="operator-profile-details">
+        <strong>{user.fullname}</strong>
+        <span>{user.email}</span>
       </div>
+      {applicationConfig.dataSourceMode === 'core' ? (
+        <DButton variant="outline" size="sm" onClick={() => void logout()}>
+          Sign out
+        </DButton>
+      ) : null}
     </div>
   );
 }
@@ -34,8 +45,10 @@ function OperatorProfile() {
 export function ApplicationShell() {
   const location = useLocation();
   const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
-  const pageTitle = ROUTE_TITLES[location.pathname] ??
+  const pageTitle =
+    ROUTE_TITLES[location.pathname] ??
     (location.pathname.startsWith('/clients/') ? 'Client' : 'Control Center');
+  const coreMode = applicationConfig.dataSourceMode === 'core';
 
   useEffect(() => {
     document.title = `${pageTitle} · Digvation Control Center`;
@@ -45,7 +58,9 @@ export function ApplicationShell() {
     <div className="application-layout">
       <aside className="application-sidebar">
         <div className="product-identity">
-          <div className="product-mark" aria-hidden="true">D</div>
+          <div className="product-mark" aria-hidden="true">
+            D
+          </div>
           <div>
             <p className="product-name">Digvation</p>
             <p className="product-context">Control Center</p>
@@ -74,8 +89,10 @@ export function ApplicationShell() {
             </div>
           </div>
           <div className="header-status">
-            <span>Development data</span>
-            <DBadge variant="info" dot>Mock</DBadge>
+            <span>{coreMode ? 'Core API' : 'Development data'}</span>
+            <DBadge variant={coreMode ? 'success' : 'info'} dot>
+              {coreMode ? 'Connected' : 'Mock'}
+            </DBadge>
           </div>
         </header>
         <div
