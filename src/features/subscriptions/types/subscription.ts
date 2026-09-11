@@ -86,6 +86,7 @@ export interface ClientProductCommercialSummary {
   productCode: string;
   subscription?: Subscription;
   currentTerm?: SubscriptionTerm;
+  latestTerm?: SubscriptionTerm;
   terms: SubscriptionTerm[];
   addOns: SubscriptionAddOn[];
   configurations: ProductConfiguration[];
