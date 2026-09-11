@@ -1,9 +1,14 @@
-import { DInput, DSelect } from '@digvation/ui';
+import { DCurrencyInput, DInput, DSelect } from '@digvation/ui';
 import type {
   BillingCycle,
   CatalogPrice,
   CommercialAdjustmentType,
 } from '../../commercial-catalog/types/commercial-catalog';
+import {
+  formatMoney,
+  majorToMinorValue,
+  minorToMajorValue,
+} from '../../commercial-catalog/utils/money';
 import type { CommercialTermInput } from '../types/subscription';
 
 const CYCLE_OPTIONS = [
@@ -21,14 +26,6 @@ const ADJUSTMENT_OPTIONS = [
   { value: 'GRANDFATHERED', label: 'Grandfathered' },
   { value: 'COMPLIMENTARY', label: 'Complimentary' },
 ];
-
-function money(amountMinor: number, currency: string) {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(amountMinor / 100);
-}
 
 export function findCatalogPrice(
   prices: CatalogPrice[],
@@ -87,13 +84,15 @@ export function CommercialTermFields({
             label="Billing Cycle *"
             value={values.billingCycle}
             options={CYCLE_OPTIONS}
-            onValueChange={(billingCycle) =>
+            clearable={false}
+            onValueChange={(billingCycle) => {
+              if (typeof billingCycle !== 'string') return;
               onChange({
                 ...values,
                 billingCycle: billingCycle as BillingCycle,
                 agreedAmountMinor: undefined,
-              })
-            }
+              });
+            }}
           />
         )}
         <DInput
@@ -114,24 +113,28 @@ export function CommercialTermFields({
         <span>Catalog list price</span>
         <strong>
           {catalogPrice
-            ? money(catalogPrice.amountMinor, catalogPrice.currency)
+            ? formatMoney(catalogPrice.amountMinor, catalogPrice.currency)
             : 'No catalog price for this cycle/currency'}
         </strong>
       </div>
       <div className="client-form-grid">
-        <DInput
+        <DCurrencyInput
           label="Agreed Price *"
-          type="number"
           value={
             agreedAmountMinor === undefined
               ? ''
-              : String(agreedAmountMinor / 100)
+              : minorToMajorValue(agreedAmountMinor)
           }
-          disabled={!catalogPrice}
-          onChange={(amount) =>
+          currencySymbol={values.currency || '—'}
+          disabled={
+            !catalogPrice ||
+            values.adjustmentType === 'NONE' ||
+            values.adjustmentType === 'COMPLIMENTARY'
+          }
+          onValueChange={(amount) =>
             onChange({
               ...values,
-              agreedAmountMinor: Math.max(0, Number(amount || 0) * 100),
+              agreedAmountMinor: majorToMinorValue(amount),
             })
           }
         />
@@ -139,20 +142,24 @@ export function CommercialTermFields({
           label="Adjustment *"
           value={values.adjustmentType}
           options={ADJUSTMENT_OPTIONS}
-          onValueChange={(adjustmentType) =>
+          clearable={false}
+          onValueChange={(adjustmentType) => {
+            if (typeof adjustmentType !== 'string') return;
+            const next = adjustmentType as CommercialAdjustmentType;
             onChange({
               ...values,
-              adjustmentType: adjustmentType as CommercialAdjustmentType,
+              adjustmentType: next,
               agreedAmountMinor:
-                adjustmentType === 'COMPLIMENTARY'
+                next === 'COMPLIMENTARY'
                   ? 0
-                  : values.agreedAmountMinor,
+                  : next === 'NONE' ||
+                      values.adjustmentType === 'COMPLIMENTARY'
+                    ? undefined
+                    : values.agreedAmountMinor,
               adjustmentReason:
-                adjustmentType === 'NONE'
-                  ? undefined
-                  : values.adjustmentReason,
-            })
-          }
+                next === 'NONE' ? undefined : values.adjustmentReason,
+            });
+          }}
         />
       </div>
       {values.adjustmentType !== 'NONE' ? (
