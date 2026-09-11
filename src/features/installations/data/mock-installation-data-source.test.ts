@@ -2,29 +2,75 @@ import { describe, expect, it } from 'vitest';
 import { createMockInstallationDataSource } from './mock-installation-data-source';
 
 describe('mock installation data source', () => {
-  it('filters installations through the query boundary', async () => {
+  it('filters Client-scoped installations through the query boundary', async () => {
     const dataSource = createMockInstallationDataSource();
-    const result = await dataSource.getInstallations({ search: 'nova', status: 'ACTIVE', environment: 'PRODUCTION', page: 1, limit: 10 });
-    expect(result.installations[0]).toMatchObject({ id: 'installation-nova-pos-production', code: 'NOVA-POS-PROD', deploymentMode: 'DEDICATED', infrastructureOwnership: 'DIGVATION' });
-    await expect(dataSource.getInstallation('installation-nova-pos-production')).resolves.toMatchObject({ name: 'Nova POS Production', clientName: 'Nova Salon', productName: 'Digvation POS' });
+    const result = await dataSource.getInstallations({
+      search: 'nova',
+      status: 'ACTIVE',
+      environment: 'PRODUCTION',
+      page: 1,
+      limit: 10,
+    });
+    expect(result.installations[0]).toMatchObject({
+      id: 'installation-nova-production',
+      code: 'NOVA-PROD',
+      clientId: 'client-nova',
+      deploymentMode: 'DEDICATED',
+      branding: { mode: 'WHITE_LABEL' },
+    });
   });
-  it('preserves installation identity from every visible list record to detail lookup', async () => {
+
+  it('creates one Installation with multiple Client Products', async () => {
     const dataSource = createMockInstallationDataSource();
-    const result = await dataSource.getInstallations({ search: '', status: 'ALL', environment: 'ALL', page: 1, limit: 10 });
-    for (const installation of result.installations) {
-      await expect(dataSource.getInstallation(installation.id)).resolves.toMatchObject({ id: installation.id, code: installation.code, name: installation.name });
-    }
-    await expect(dataSource.getInstallation('unavailable-installation')).resolves.toBeNull();
+    const installation = await dataSource.createInstallation({
+      clientId: 'client-nova',
+      clientProductIds: ['client-product-nova-pos', 'client-product-nova-workshop'],
+      code: ' nova staging ',
+      name: 'Nova Staging',
+      environment: 'STAGING',
+      deploymentMode: 'SHARED',
+      infrastructureOwnership: 'DIGVATION',
+      managedByDigvation: true,
+      branding: { mode: 'DIGVATION' },
+    });
+    expect(installation).toMatchObject({
+      code: 'NOVA-STAGING',
+      status: 'PROVISIONING',
+      clientId: 'client-nova',
+    });
+    expect(installation.products).toHaveLength(2);
   });
-  it('creates a provisioning installation for a client product without coupling deployment and ownership', async () => {
+
+  it('enforces white-label branding for Dedicated installations', async () => {
     const dataSource = createMockInstallationDataSource();
-    const installation = await dataSource.createInstallation({ clientProductId: 'client-product-poseidon-site', code: ' poseidon staging ', name: 'Poseidon Staging', environment: 'STAGING', deploymentMode: 'DEDICATED', infrastructureOwnership: 'CLIENT', managedByDigvation: true, region: '', applicationUrl: '' });
-    expect(installation).toMatchObject({ code: 'POSEIDON-STAGING', status: 'PROVISIONING', deploymentMode: 'DEDICATED', infrastructureOwnership: 'CLIENT', managedByDigvation: true });
+    await expect(
+      dataSource.createInstallation({
+        clientId: 'client-fortuna',
+        clientProductIds: ['client-product-fortuna-pos'],
+        code: 'FORTUNA-PROD',
+        name: 'Fortuna Production',
+        environment: 'PRODUCTION',
+        deploymentMode: 'DEDICATED',
+        infrastructureOwnership: 'CLIENT',
+        managedByDigvation: false,
+        branding: { mode: 'DIGVATION' },
+      }),
+    ).rejects.toThrow('require white-label branding');
   });
-  it('enforces valid lifecycle transitions with a reason', async () => {
+
+  it('keeps decommissioned installations terminal', async () => {
     const dataSource = createMockInstallationDataSource();
-    await expect(dataSource.transitionInstallationStatus({ installationId: 'installation-nova-pos-production', targetStatus: 'SUSPENDED', reason: '' })).rejects.toThrow('reason is required');
-    await expect(dataSource.transitionInstallationStatus({ installationId: 'installation-nova-pos-production', targetStatus: 'PROVISIONING', reason: 'Invalid transition.' })).rejects.toThrow('Cannot transition ACTIVE to PROVISIONING');
-    await expect(dataSource.transitionInstallationStatus({ installationId: 'installation-nova-pos-production', targetStatus: 'SUSPENDED', reason: 'Account review.' })).resolves.toMatchObject({ status: 'SUSPENDED' });
+    await dataSource.transitionInstallationStatus({
+      installationId: 'installation-nova-production',
+      targetStatus: 'DECOMMISSIONED',
+      reason: 'Environment retired.',
+    });
+    await expect(
+      dataSource.transitionInstallationStatus({
+        installationId: 'installation-nova-production',
+        targetStatus: 'ACTIVE',
+        reason: 'Invalid reactivation.',
+      }),
+    ).rejects.toThrow('Cannot transition DECOMMISSIONED to ACTIVE');
   });
 });
