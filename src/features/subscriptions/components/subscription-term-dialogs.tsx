@@ -74,7 +74,9 @@ export function InitialSubscriptionDialog({
       showToast({
         title: 'Subscription setup failed',
         description:
-          error instanceof Error ? error.message : 'Check the commercial term values.',
+          error instanceof Error
+            ? error.message
+            : 'Check the commercial term values.',
         variant: 'danger',
       });
     }
@@ -88,7 +90,9 @@ export function InitialSubscriptionDialog({
       description="The first term snapshots both the current Product list price and the Client-agreed price."
       footer={
         <div className="client-dialog-actions">
-          <DButton variant="outline" onClick={onClose}>Cancel</DButton>
+          <DButton variant="outline" onClick={onClose}>
+            Cancel
+          </DButton>
           <DButton
             form="initial-subscription-form"
             type="submit"
@@ -100,13 +104,25 @@ export function InitialSubscriptionDialog({
         </div>
       }
     >
-      <form id="initial-subscription-form" className="client-contact-form" onSubmit={submit}>
-        <CommercialTermFields values={values} prices={prices} onChange={(next) => setValues((current) => ({ ...current, ...next }))} />
+      <form
+        id="initial-subscription-form"
+        className="client-contact-form"
+        onSubmit={submit}
+      >
+        <CommercialTermFields
+          values={values}
+          prices={prices}
+          onChange={(next) =>
+            setValues((current) => ({ ...current, ...next }))
+          }
+        />
         <div className="client-form-grid">
           <DToggle
             label="Auto renew"
             checked={values.autoRenew}
-            onChange={(autoRenew) => setValues((current) => ({ ...current, autoRenew }))}
+            onChange={(autoRenew) =>
+              setValues((current) => ({ ...current, autoRenew }))
+            }
           />
           <DInput
             label="Renewal Notice (days) *"
@@ -128,7 +144,9 @@ export function InitialSubscriptionDialog({
             onChange={(gracePeriodDays) =>
               setValues((current) => ({
                 ...current,
-                gracePeriodDays: gracePeriodDays ? Number(gracePeriodDays) : undefined,
+                gracePeriodDays: gracePeriodDays
+                  ? Number(gracePeriodDays)
+                  : undefined,
               }))
             }
           />
@@ -155,14 +173,25 @@ export function RenewalDialog({
   const mutation = useAddRenewalTerm();
   const pricesQuery = useProductPrices(summary.productId);
   const { showToast } = useToast();
-  const [values, setValues] = useState<RenewalTermInput>(baseTerm());
+  const currentTerm = summary.currentTerm;
+  const hasLiveAddOns = summary.addOns.some(
+    (addOn) => addOn.status === 'ACTIVE' || addOn.status === 'SUSPENDED',
+  );
+  const [values, setValues] = useState<RenewalTermInput>(() => ({
+    ...baseTerm(),
+    startsAt: currentTerm?.endsAt ?? '',
+    billingCycle: currentTerm?.billingCycle ?? 'MONTHLY',
+    currency: currentTerm?.currency ?? 'IDR',
+  }));
   const prices = pricesQuery.data ?? [];
   const catalogPrice = findCatalogPrice(prices, values);
   if (!summary.subscription) return null;
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!summary.subscription || !canSubmit(values, Boolean(catalogPrice))) return;
+    if (!summary.subscription || !canSubmit(values, Boolean(catalogPrice))) {
+      return;
+    }
     try {
       await mutation.mutateAsync({
         subscriptionId: summary.subscription.id,
@@ -176,7 +205,8 @@ export function RenewalDialog({
     } catch (error) {
       showToast({
         title: 'Renewal could not be added',
-        description: error instanceof Error ? error.message : 'Check the term dates.',
+        description:
+          error instanceof Error ? error.message : 'Check the term dates.',
         variant: 'danger',
       });
     }
@@ -187,10 +217,16 @@ export function RenewalDialog({
       open
       onClose={onClose}
       title={`Renew ${summary.productName}`}
-      description="Renewal snapshots the list price available now and the newly agreed Client price without rewriting previous terms."
+      description={
+        hasLiveAddOns
+          ? 'Live add-ons remain co-termed. This renewal must start when the current term ends and keep its billing cycle and currency. Cancel the existing add-on first if its commercial basis needs to change.'
+          : 'Renewal snapshots the list price available now and the newly agreed Client price without rewriting previous terms.'
+      }
       footer={
         <div className="client-dialog-actions">
-          <DButton variant="outline" onClick={onClose}>Cancel</DButton>
+          <DButton variant="outline" onClick={onClose}>
+            Cancel
+          </DButton>
           <DButton
             form="renewal-form"
             type="submit"
@@ -202,8 +238,18 @@ export function RenewalDialog({
         </div>
       }
     >
-      <form id="renewal-form" className="client-contact-form" onSubmit={submit}>
-        <CommercialTermFields values={values} prices={prices} onChange={setValues} />
+      <form
+        id="renewal-form"
+        className="client-contact-form"
+        onSubmit={submit}
+      >
+        <CommercialTermFields
+          values={values}
+          prices={prices}
+          onChange={setValues}
+          lockStart={hasLiveAddOns}
+          lockBillingBasis={hasLiveAddOns}
+        />
       </form>
     </DDialog>
   );
