@@ -1,9 +1,16 @@
-import { DButton, DDialog, DInput, DSelect } from '@digvation/ui';
+import {
+  DButton,
+  DCurrencyInput,
+  DDialog,
+  DInput,
+  DSelect,
+} from '@digvation/ui';
 import { useState } from 'react';
 import type {
   BillingCycle,
   UpsertCatalogPriceInput,
 } from '../types/commercial-catalog';
+import { majorToMinorValue, minorToMajorValue } from '../utils/money';
 
 const CYCLE_OPTIONS = [
   { value: 'MONTHLY', label: 'Monthly' },
@@ -35,6 +42,10 @@ export function CatalogPriceDialog({
       amountMinor: 0,
     },
   );
+  const canSubmit =
+    /^[A-Z]{3}$/.test(values.currency) &&
+    Number.isSafeInteger(values.amountMinor) &&
+    values.amountMinor >= 0;
 
   return (
     <DDialog
@@ -51,6 +62,7 @@ export function CatalogPriceDialog({
             form="catalog-price-form"
             type="submit"
             loading={loading}
+            disabled={!canSubmit}
           >
             Save Catalog Price
           </DButton>
@@ -62,6 +74,7 @@ export function CatalogPriceDialog({
         className="commercial-form"
         onSubmit={(event) => {
           event.preventDefault();
+          if (!canSubmit) return;
           void onSubmit(values);
         }}
       >
@@ -69,12 +82,14 @@ export function CatalogPriceDialog({
           label="Billing Cycle *"
           value={values.billingCycle}
           options={CYCLE_OPTIONS}
-          onValueChange={(billingCycle) =>
+          clearable={false}
+          onValueChange={(billingCycle) => {
+            if (typeof billingCycle !== 'string') return;
             setValues((current) => ({
               ...current,
               billingCycle: billingCycle as BillingCycle,
-            }))
-          }
+            }));
+          }}
         />
         <DInput
           label="Currency *"
@@ -87,14 +102,14 @@ export function CatalogPriceDialog({
             }))
           }
         />
-        <DInput
-          label="List Price (IDR) *"
-          type="number"
-          value={String(values.amountMinor / 100)}
-          onChange={(amount) =>
+        <DCurrencyInput
+          label="List Price *"
+          value={minorToMajorValue(values.amountMinor)}
+          currencySymbol={values.currency || '—'}
+          onValueChange={(amount) =>
             setValues((current) => ({
               ...current,
-              amountMinor: Math.max(0, Number(amount || 0) * 100),
+              amountMinor: majorToMinorValue(amount),
             }))
           }
         />
