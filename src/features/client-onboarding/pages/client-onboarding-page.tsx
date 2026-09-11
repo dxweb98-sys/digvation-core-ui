@@ -5,6 +5,7 @@ import {
   DCheckbox,
   DConnectionError,
   DCurrencyInput,
+  DDatePicker,
   DEmptyState,
   DInput,
   DLoadingIndicator,
@@ -754,16 +755,16 @@ function CommercialEditor({
                 }}
               />
               <div className="onboarding-grid two-columns">
-                <DInput
+                <DDatePicker
                   label="Starts *"
-                  type="date"
                   value={commercial.startsAt}
+                  clearable={false}
                   onChange={(value) => update({ startsAt: value })}
                 />
-                <DInput
+                <DDatePicker
                   label="Ends"
-                  type="date"
                   value={commercial.endsAt ?? ''}
+                  minDate={commercial.startsAt}
                   onChange={(value) => update({ endsAt: value })}
                 />
                 <DCurrencyInput
