@@ -45,10 +45,14 @@ export function CommercialTermFields({
   values,
   prices,
   onChange,
+  lockStart = false,
+  lockBillingBasis = false,
 }: {
   values: CommercialTermInput;
   prices: CatalogPrice[];
   onChange: (next: CommercialTermInput) => void;
+  lockStart?: boolean;
+  lockBillingBasis?: boolean;
 }) {
   const catalogPrice = findCatalogPrice(prices, values);
   const agreedAmountMinor = values.agreedAmountMinor ?? catalogPrice?.amountMinor;
@@ -60,6 +64,7 @@ export function CommercialTermFields({
           label="Starts *"
           placeholder="YYYY-MM-DD"
           value={values.startsAt}
+          disabled={lockStart}
           onChange={(startsAt) => onChange({ ...values, startsAt })}
         />
         <DInput
@@ -70,22 +75,32 @@ export function CommercialTermFields({
         />
       </div>
       <div className="client-form-grid">
-        <DSelect
-          label="Billing Cycle *"
-          value={values.billingCycle}
-          options={CYCLE_OPTIONS}
-          onValueChange={(billingCycle) =>
-            onChange({
-              ...values,
-              billingCycle: billingCycle as BillingCycle,
-              agreedAmountMinor: undefined,
-            })
-          }
-        />
+        {lockBillingBasis ? (
+          <DInput
+            label="Billing Cycle *"
+            value={values.billingCycle.replace('_', ' ')}
+            disabled
+            onChange={() => undefined}
+          />
+        ) : (
+          <DSelect
+            label="Billing Cycle *"
+            value={values.billingCycle}
+            options={CYCLE_OPTIONS}
+            onValueChange={(billingCycle) =>
+              onChange({
+                ...values,
+                billingCycle: billingCycle as BillingCycle,
+                agreedAmountMinor: undefined,
+              })
+            }
+          />
+        )}
         <DInput
           label="Currency *"
           value={values.currency}
           maxLength={3}
+          disabled={lockBillingBasis}
           onChange={(currency) =>
             onChange({
               ...values,
