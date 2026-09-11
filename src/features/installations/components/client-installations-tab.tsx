@@ -1,8 +1,84 @@
-import { DDataTable, DConnectionError, DEmptyState, DLoadingIndicator, type TableColumn } from '@digvation/ui';
+import {
+  DConnectionError,
+  DDataTable,
+  DEmptyState,
+  DLoadingIndicator,
+  type TableColumn,
+} from '@digvation/ui';
 import { useState } from 'react';
 import { useClientInstallations } from '../hooks/use-installations';
 import type { InstallationSummary } from '../types/installation';
 import { InstallationDetailDialog } from './installation-detail-dialog';
 import { InstallationStatusBadge } from './installation-status-badge';
-const COLUMNS: TableColumn<InstallationSummary>[] = [{ key: 'name', label: 'Installation', render: (installation) => <div className="installation-identity"><strong>{installation.name}</strong><code>{installation.code}</code></div> }, { key: 'productName', label: 'Product' }, { key: 'environment', label: 'Environment' }, { key: 'applicationUrl', label: 'Endpoint', render: (installation) => installation.applicationUrl ?? 'Not recorded' }, { key: 'status', label: 'Status', render: (installation) => <InstallationStatusBadge status={installation.status} /> }];
-export function ClientInstallationsTab({ clientId }: { clientId: string }) { const [detailId, setDetailId] = useState<string | null>(null); const installationsQuery = useClientInstallations(clientId); if (installationsQuery.isPending) return <div className="installation-state"><DLoadingIndicator label="Loading installations" /></div>; if (installationsQuery.isError) return <DConnectionError title="Installations unavailable" message="Client installations could not be loaded." detail={installationsQuery.error.message} onRetry={() => void installationsQuery.refetch()} />; return <><div className="client-installations-tab">{installationsQuery.data.length === 0 ? <DEmptyState title="No installations" description="This client does not have any runtime installations yet." /> : <DDataTable columns={COLUMNS} data={installationsQuery.data} rowKey="id" onRowClick={(installation) => setDetailId(installation.id)} />}</div>{detailId ? <InstallationDetailDialog installationId={detailId} open onClose={() => setDetailId(null)} /> : null}</>; }
+
+const COLUMNS: TableColumn<InstallationSummary>[] = [
+  {
+    key: 'name',
+    label: 'Installation',
+    render: (installation) => (
+      <div className="installation-identity">
+        <strong>{installation.name}</strong>
+        <code>{installation.code}</code>
+      </div>
+    ),
+  },
+  {
+    key: 'products',
+    label: 'Products',
+    render: (installation) => installation.products.map((product) => product.productName).join(', '),
+  },
+  { key: 'environment', label: 'Environment' },
+  { key: 'deploymentMode', label: 'Deployment' },
+  { key: 'branding', label: 'Branding', render: (installation) => installation.branding.mode },
+  {
+    key: 'status',
+    label: 'Status',
+    render: (installation) => <InstallationStatusBadge status={installation.status} />,
+  },
+];
+
+export function ClientInstallationsTab({ clientId }: { clientId: string }) {
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const installationsQuery = useClientInstallations(clientId);
+
+  if (installationsQuery.isPending) {
+    return <div className="installation-state"><DLoadingIndicator label="Loading installations" /></div>;
+  }
+  if (installationsQuery.isError) {
+    return (
+      <DConnectionError
+        title="Installations unavailable"
+        message="Client installations could not be loaded."
+        detail={installationsQuery.error.message}
+        onRetry={() => void installationsQuery.refetch()}
+      />
+    );
+  }
+
+  return (
+    <>
+      <div className="client-installations-tab">
+        {installationsQuery.data.length === 0 ? (
+          <DEmptyState
+            title="No installations"
+            description="This Client does not have any runtime installations yet. Create one from the global Installation workspace."
+          />
+        ) : (
+          <DDataTable
+            columns={COLUMNS}
+            data={installationsQuery.data}
+            rowKey="id"
+            onRowClick={(installation) => setDetailId(installation.id)}
+          />
+        )}
+      </div>
+      {detailId ? (
+        <InstallationDetailDialog
+          installationId={detailId}
+          open
+          onClose={() => setDetailId(null)}
+        />
+      ) : null}
+    </>
+  );
+}

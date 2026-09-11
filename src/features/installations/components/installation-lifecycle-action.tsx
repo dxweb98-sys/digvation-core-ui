@@ -2,11 +2,132 @@ import { DButton, DDialog, DDropdown, DTextarea, useToast } from '@digvation/ui'
 import { useState } from 'react';
 import type { InstallationStatus, InstallationSummary } from '../types/installation';
 import { InstallationStatusBadge } from './installation-status-badge';
-const TRANSITIONS: Record<InstallationStatus, InstallationStatus[]> = { PROVISIONING: ['ACTIVE', 'DECOMMISSIONED'], ACTIVE: ['SUSPENDED', 'DECOMMISSIONED'], SUSPENDED: ['ACTIVE', 'DECOMMISSIONED'], DECOMMISSIONED: ['PROVISIONING'] };
-function label(status: InstallationStatus) { return status === 'DECOMMISSIONED' ? 'Decommission' : status[0] + status.slice(1).toLowerCase(); }
-export function InstallationLifecycleAction({ installation, isSubmitting, onTransition }: { installation: InstallationSummary; isSubmitting: boolean; onTransition: (targetStatus: InstallationStatus, reason: string) => Promise<void> }) {
-  const [targetStatus, setTargetStatus] = useState<InstallationStatus | null>(null); const [reason, setReason] = useState(''); const [reasonError, setReasonError] = useState<string | null>(null); const { showToast } = useToast();
-  function closeDialog() { if (!isSubmitting) { setTargetStatus(null); setReason(''); setReasonError(null); } }
-  async function confirm() { if (!targetStatus) return; if (!reason.trim()) { setReasonError('A reason is required for this lifecycle change.'); return; } try { await onTransition(targetStatus, reason); showToast({ title: 'Installation lifecycle updated', description: `${installation.name} is now ${targetStatus.toLowerCase()}.`, variant: 'success' }); closeDialog(); } catch (error) { showToast({ title: 'Lifecycle update failed', description: error instanceof Error ? error.message : 'The installation lifecycle state could not be changed.', variant: 'danger' }); } }
-  return <><DDropdown placement="top-end" contentRole="menu" contentClassName="installation-lifecycle-menu" trigger={() => <DButton variant="outline">More Actions</DButton>}>{TRANSITIONS[installation.status].map((status) => <button className={status === 'DECOMMISSIONED' ? 'installation-lifecycle-menu-item is-danger' : 'installation-lifecycle-menu-item'} key={status} role="menuitem" type="button" onClick={() => setTargetStatus(status)}>Mark {label(status)}</button>)}</DDropdown><DDialog open={Boolean(targetStatus)} onClose={closeDialog} title="Confirm installation lifecycle change" description="Provide a reason before continuing." footer={<div className="installation-dialog-actions"><DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton><DButton variant={targetStatus === 'DECOMMISSIONED' ? 'danger' : 'primary'} onClick={() => void confirm()} loading={isSubmitting}>Confirm change</DButton></div>}>{targetStatus ? <div className="installation-transition-dialog"><p><strong>{installation.name}</strong> will move from <InstallationStatusBadge status={installation.status} /> to <InstallationStatusBadge status={targetStatus} />.</p><DTextarea label="Reason *" value={reason} error={reasonError} onChange={(value) => { setReason(value); if (reasonError) setReasonError(null); }} /></div> : null}</DDialog></>;
+
+const TRANSITIONS: Record<InstallationStatus, InstallationStatus[]> = {
+  PROVISIONING: ['ACTIVE', 'SUSPENDED', 'DECOMMISSIONED'],
+  ACTIVE: ['SUSPENDED', 'DECOMMISSIONED'],
+  SUSPENDED: ['ACTIVE', 'DECOMMISSIONED'],
+  DECOMMISSIONED: [],
+};
+
+function label(status: InstallationStatus) {
+  return status === 'DECOMMISSIONED'
+    ? 'Decommission'
+    : status[0] + status.slice(1).toLowerCase();
+}
+
+export function InstallationLifecycleAction({
+  installation,
+  isSubmitting,
+  onTransition,
+}: {
+  installation: InstallationSummary;
+  isSubmitting: boolean;
+  onTransition: (targetStatus: InstallationStatus, reason: string) => Promise<void>;
+}) {
+  const [targetStatus, setTargetStatus] = useState<InstallationStatus | null>(null);
+  const [reason, setReason] = useState('');
+  const [reasonError, setReasonError] = useState<string | null>(null);
+  const { showToast } = useToast();
+  const transitions = TRANSITIONS[installation.status];
+
+  if (transitions.length === 0) return null;
+
+  function closeDialog() {
+    if (!isSubmitting) {
+      setTargetStatus(null);
+      setReason('');
+      setReasonError(null);
+    }
+  }
+
+  async function confirm() {
+    if (!targetStatus) return;
+    if (!reason.trim()) {
+      setReasonError('A reason is required for this lifecycle change.');
+      return;
+    }
+    try {
+      await onTransition(targetStatus, reason.trim());
+      showToast({
+        title: 'Installation lifecycle updated',
+        description: `${installation.name} is now ${targetStatus.toLowerCase()}.`,
+        variant: 'success',
+      });
+      closeDialog();
+    } catch (error) {
+      showToast({
+        title: 'Lifecycle update failed',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'The installation lifecycle state could not be changed.',
+        variant: 'danger',
+      });
+    }
+  }
+
+  return (
+    <>
+      <DDropdown
+        placement="top-end"
+        contentRole="menu"
+        contentClassName="installation-lifecycle-menu"
+        trigger={() => <DButton variant="outline">More Actions</DButton>}
+      >
+        {transitions.map((status) => (
+          <button
+            className={
+              status === 'DECOMMISSIONED'
+                ? 'installation-lifecycle-menu-item is-danger'
+                : 'installation-lifecycle-menu-item'
+            }
+            key={status}
+            role="menuitem"
+            type="button"
+            onClick={() => setTargetStatus(status)}
+          >
+            Mark {label(status)}
+          </button>
+        ))}
+      </DDropdown>
+      <DDialog
+        open={Boolean(targetStatus)}
+        onClose={closeDialog}
+        title="Confirm installation lifecycle change"
+        description="Provide a reason before continuing. Activation also revalidates Product and branding policy in Core."
+        footer={
+          <div className="installation-dialog-actions">
+            <DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton>
+            <DButton
+              variant={targetStatus === 'DECOMMISSIONED' ? 'danger' : 'primary'}
+              onClick={() => void confirm()}
+              loading={isSubmitting}
+            >
+              Confirm change
+            </DButton>
+          </div>
+        }
+      >
+        {targetStatus ? (
+          <div className="installation-transition-dialog">
+            <p>
+              <strong>{installation.name}</strong> will move from{' '}
+              <InstallationStatusBadge status={installation.status} /> to{' '}
+              <InstallationStatusBadge status={targetStatus} />.
+            </p>
+            <DTextarea
+              label="Reason *"
+              value={reason}
+              error={reasonError}
+              onChange={(value) => {
+                setReason(value);
+                if (reasonError) setReasonError(null);
+              }}
+            />
+          </div>
+        ) : null}
+      </DDialog>
+    </>
+  );
 }
