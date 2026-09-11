@@ -20,7 +20,10 @@ const PRODUCT_PRICES: Record<string, CatalogPrice[]> = {
 
 const ADD_ONS: AddOnOffering[] = [];
 
-const VALID_TRANSITIONS: Record<AddOnOffering['status'], AddOnOffering['status'][]> = {
+const VALID_TRANSITIONS: Record<
+  AddOnOffering['status'],
+  AddOnOffering['status'][]
+> = {
   DRAFT: ['ACTIVE', 'RETIRED'],
   ACTIVE: ['DRAFT', 'RETIRED'],
   RETIRED: ['DRAFT'],
@@ -34,6 +37,12 @@ function now() {
   return new Date().toISOString();
 }
 
+function assertPriceAmount(amountMinor: number) {
+  if (!Number.isSafeInteger(amountMinor) || amountMinor < 0) {
+    throw new Error('Catalog price must be a non-negative minor-unit amount.');
+  }
+}
+
 export function createMockCommercialCatalogDataSource(): CommercialCatalogDataSource {
   const prices = copy(PRODUCT_PRICES);
   const addOns = copy(ADD_ONS);
@@ -45,9 +54,7 @@ export function createMockCommercialCatalogDataSource(): CommercialCatalogDataSo
     },
 
     async upsertProductPrice(productId, input) {
-      if (!Number.isInteger(input.amountMinor) || input.amountMinor < 0) {
-        throw new Error('Catalog price must be a non-negative minor-unit amount.');
-      }
+      assertPriceAmount(input.amountMinor);
       const currency = input.currency.trim().toUpperCase();
       const items = prices[productId] ?? [];
       const existing = items.find(
@@ -90,6 +97,12 @@ export function createMockCommercialCatalogDataSource(): CommercialCatalogDataSo
       ) {
         throw new Error('Add-on code is already in use for this product.');
       }
+      const productDetail = await productDataSource.getProductDetail(input.productId);
+      if (!productDetail) throw new Error('Product catalog was not found.');
+      if (productDetail.product.status === 'RETIRED') {
+        throw new Error('Cannot add an offering to a retired product.');
+      }
+
       const timestamp = now();
       const item: AddOnOffering = {
         id: `add-on-${input.productId}-${code.toLowerCase()}`,
@@ -126,6 +139,7 @@ export function createMockCommercialCatalogDataSource(): CommercialCatalogDataSo
       if (item.status === 'RETIRED') {
         throw new Error('Retired add-on pricing cannot be changed.');
       }
+      assertPriceAmount(input.amountMinor);
       const currency = input.currency.trim().toUpperCase();
       const existing = item.prices.find(
         (price) =>
@@ -201,17 +215,37 @@ export function createMockCommercialCatalogDataSource(): CommercialCatalogDataSo
         );
       }
       if (input.targetStatus === 'ACTIVE') {
+        const detail = await productDataSource.getProductDetail(item.productId);
+        if (!detail) throw new Error('Product catalog was not found.');
+        if (detail.product.status !== 'ACTIVE') {
+          throw new Error('Product must be active before activating an add-on offering.');
+        }
         if (!item.prices.length) {
           throw new Error('Add at least one catalog price before activation.');
         }
         if (!item.featureGrants.length && !item.capabilityGrants.length) {
           throw new Error('Add at least one entitlement grant before activation.');
         }
+
+        const currentFeatures = new Map(
+          detail.features.map((feature) => [feature.id, feature]),
+        );
+        const currentCapabilities = new Map(
+          detail.capabilities.map((capability) => [capability.id, capability]),
+        );
         if (
-          item.featureGrants.some((grant) => grant.status !== 'ACTIVE') ||
-          item.capabilityGrants.some((grant) => grant.status !== 'ACTIVE')
+          item.featureGrants.some((grant) => {
+            const feature = currentFeatures.get(grant.productFeatureId);
+            return !feature || feature.status !== 'ACTIVE';
+          }) ||
+          item.capabilityGrants.some((grant) => {
+            const capability = currentCapabilities.get(grant.capabilityId);
+            return !capability || capability.status !== 'ACTIVE';
+          })
         ) {
-          throw new Error('Every entitlement grant must be active before activation.');
+          throw new Error(
+            'Every entitlement grant must remain active and compatible before activation.',
+          );
         }
       }
       item.status = input.targetStatus;
