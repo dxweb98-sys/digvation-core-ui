@@ -1,4 +1,11 @@
-import { DButton, DDialog, DInput, DSelect, useToast } from '@digvation/ui';
+import {
+  DButton,
+  DCurrencyInput,
+  DDialog,
+  DInput,
+  DSelect,
+  useToast,
+} from '@digvation/ui';
 import { useMemo, useState } from 'react';
 import { useProductAddOns } from '../../commercial-catalog/hooks/use-commercial-catalog';
 import type {
@@ -6,6 +13,11 @@ import type {
   BillingCycle,
   CommercialAdjustmentType,
 } from '../../commercial-catalog/types/commercial-catalog';
+import {
+  formatMoney,
+  majorToMinorValue,
+  minorToMajorValue,
+} from '../../commercial-catalog/utils/money';
 import { useAddSubscriptionAddOn } from '../hooks/use-client-commercial';
 import type { ClientProductCommercialSummary } from '../types/subscription';
 
@@ -24,14 +36,6 @@ const MONTHS_PER_CYCLE: Partial<Record<BillingCycle, number>> = {
   ANNUAL: 12,
 };
 
-function money(amountMinor: number, currency: string) {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(amountMinor / 100);
-}
-
 function addMonthsClamped(anchor: Date, months: number) {
   const target = new Date(
     Date.UTC(
@@ -41,6 +45,7 @@ function addMonthsClamped(anchor: Date, months: number) {
       anchor.getUTCHours(),
       anchor.getUTCMinutes(),
       anchor.getUTCSeconds(),
+      anchor.getUTCMilliseconds(),
     ),
   );
   const lastDay = new Date(
@@ -62,7 +67,13 @@ function previewProration(input: {
   const anchor = new Date(input.startsAt);
   const effective = new Date(`${input.effectiveFrom}T00:00:00.000Z`);
   const termEnd = input.endsAt ? new Date(input.endsAt) : undefined;
-  if (Number.isNaN(effective.getTime()) || effective < anchor) return undefined;
+  if (
+    Number.isNaN(anchor.getTime()) ||
+    Number.isNaN(effective.getTime()) ||
+    effective < anchor
+  ) {
+    return undefined;
+  }
   if (termEnd && effective >= termEnd) return undefined;
 
   const monthsSinceAnchor =
@@ -100,7 +111,9 @@ export function SubscriptionAddOnDialog({
   const { showToast } = useToast();
   const [offeringId, setOfferingId] = useState('');
   const [effectiveFrom, setEffectiveFrom] = useState('');
-  const [agreedAmountMinor, setAgreedAmountMinor] = useState<number | undefined>();
+  const [agreedAmountMinor, setAgreedAmountMinor] = useState<
+    number | undefined
+  >();
   const [adjustmentType, setAdjustmentType] =
     useState<CommercialAdjustmentType>('NONE');
   const [adjustmentReason, setAdjustmentReason] = useState('');
@@ -139,6 +152,20 @@ export function SubscriptionAddOnDialog({
           amountMinor: agreed,
         })
       : undefined;
+  const adjustedReasonValid =
+    adjustmentType === 'NONE' || Boolean(adjustmentReason.trim());
+  const canSubmit = Boolean(
+    offering &&
+      catalogPrice &&
+      effectiveFrom &&
+      agreed !== undefined &&
+      Number.isSafeInteger(agreed) &&
+      agreed >= 0 &&
+      prorated !== undefined &&
+      adjustedReasonValid &&
+      (adjustmentType !== 'NONE' || agreed === catalogPrice.amountMinor) &&
+      (adjustmentType !== 'COMPLIMENTARY' || agreed === 0),
+  );
 
   if (!subscription || !currentTerm) return null;
   if (subscription.status !== 'ACTIVE' && subscription.status !== 'TRIAL') {
@@ -155,15 +182,7 @@ export function SubscriptionAddOnDialog({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (
-      !offering ||
-      !effectiveFrom ||
-      !catalogPrice ||
-      agreed === undefined
-    ) {
-      return;
-    }
-    if (adjustmentType !== 'NONE' && !adjustmentReason.trim()) return;
+    if (!offering || !catalogPrice || agreed === undefined || !canSubmit) return;
     try {
       await mutation.mutateAsync({
         subscriptionId: subscription.id,
@@ -201,7 +220,7 @@ export function SubscriptionAddOnDialog({
             form="subscription-add-on-form"
             type="submit"
             loading={mutation.isPending}
-            disabled={!offering || !catalogPrice || prorated === undefined}
+            disabled={!canSubmit}
           >
             Activate Add-on
           </DButton>
@@ -220,7 +239,9 @@ export function SubscriptionAddOnDialog({
             value: item.id,
             label: `${item.name} (${item.code})`,
           }))}
+          clearable={false}
           onValueChange={(value) => {
+            if (typeof value !== 'string') return;
             setOfferingId(value);
             setAgreedAmountMinor(undefined);
             setAdjustmentType('NONE');
@@ -237,34 +258,43 @@ export function SubscriptionAddOnDialog({
           <span>Recurring list price</span>
           <strong>
             {catalogPrice
-              ? money(catalogPrice.amountMinor, catalogPrice.currency)
+              ? formatMoney(catalogPrice.amountMinor, catalogPrice.currency)
               : offering
                 ? 'No matching price for the current subscription cycle'
                 : 'Select an add-on'}
           </strong>
         </div>
         <div className="client-form-grid">
-          <DInput
+          <DCurrencyInput
             label="Agreed Recurring Price *"
-            type="number"
-            disabled={!catalogPrice || adjustmentType === 'COMPLIMENTARY'}
-            value={agreed === undefined ? '' : String(agreed / 100)}
-            onChange={(amount) =>
-              setAgreedAmountMinor(Math.max(0, Number(amount || 0) * 100))
+            value={agreed === undefined ? '' : minorToMajorValue(agreed)}
+            currencySymbol={currentTerm.currency}
+            disabled={
+              !catalogPrice ||
+              adjustmentType === 'NONE' ||
+              adjustmentType === 'COMPLIMENTARY'
+            }
+            onValueChange={(amount) =>
+              setAgreedAmountMinor(majorToMinorValue(amount))
             }
           />
           <DSelect
             label="Adjustment *"
             value={adjustmentType}
             options={ADJUSTMENT_OPTIONS}
+            clearable={false}
             onValueChange={(value) => {
+              if (typeof value !== 'string') return;
               const next = value as CommercialAdjustmentType;
               setAdjustmentType(next);
               if (next === 'NONE') {
                 setAgreedAmountMinor(undefined);
                 setAdjustmentReason('');
+              } else if (next === 'COMPLIMENTARY') {
+                setAgreedAmountMinor(0);
+              } else if (adjustmentType === 'COMPLIMENTARY') {
+                setAgreedAmountMinor(undefined);
               }
-              if (next === 'COMPLIMENTARY') setAgreedAmountMinor(0);
             }}
           />
         </div>
@@ -272,6 +302,7 @@ export function SubscriptionAddOnDialog({
           <DInput
             label="Adjustment Reason *"
             value={adjustmentReason}
+            maxLength={500}
             onChange={setAdjustmentReason}
           />
         ) : null}
@@ -280,9 +311,9 @@ export function SubscriptionAddOnDialog({
           <strong>
             {prorated === undefined
               ? currentTerm.billingCycle === 'CUSTOM'
-                ? 'Custom cycles require an explicit billing anchor'
+                ? 'Custom billing cycles do not support automatic add-on proration'
                 : 'Choose a valid effective date'
-              : money(prorated, currentTerm.currency)}
+              : formatMoney(prorated, currentTerm.currency)}
           </strong>
           <small>
             Recurring periods after the first charge use the agreed recurring price above.
