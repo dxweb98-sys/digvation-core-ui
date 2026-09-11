@@ -33,6 +33,26 @@ function canSubmit(values: CommercialTermInput, hasPrice: boolean) {
   return true;
 }
 
+function UnavailableRenewalDialog({
+  title,
+  description,
+  onClose,
+}: {
+  title: string;
+  description: string;
+  onClose: () => void;
+}) {
+  return (
+    <DDialog
+      open
+      onClose={onClose}
+      title={title}
+      description={description}
+      footer={<DButton onClick={onClose}>Close</DButton>}
+    />
+  );
+}
+
 export function InitialSubscriptionDialog({
   summary,
   clientId,
@@ -174,6 +194,7 @@ export function RenewalDialog({
   const pricesQuery = useProductPrices(summary.productId);
   const { showToast } = useToast();
   const currentTerm = summary.currentTerm;
+  const subscription = summary.subscription;
   const hasLiveAddOns = summary.addOns.some(
     (addOn) => addOn.status === 'ACTIVE' || addOn.status === 'SUSPENDED',
   );
@@ -185,16 +206,33 @@ export function RenewalDialog({
   }));
   const prices = pricesQuery.data ?? [];
   const catalogPrice = findCatalogPrice(prices, values);
-  if (!summary.subscription) return null;
+
+  if (!subscription || !currentTerm) return null;
+  if (subscription.status === 'EXPIRED' || subscription.status === 'CANCELLED') {
+    return (
+      <UnavailableRenewalDialog
+        title={`Renew ${summary.productName}`}
+        description="This subscription is terminal. Create a new commercial subscription instead of extending a cancelled or expired contract."
+        onClose={onClose}
+      />
+    );
+  }
+  if (!currentTerm.endsAt) {
+    return (
+      <UnavailableRenewalDialog
+        title={`Renew ${summary.productName}`}
+        description="The current term is open-ended, so there is no renewal boundary yet."
+        onClose={onClose}
+      />
+    );
+  }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!summary.subscription || !canSubmit(values, Boolean(catalogPrice))) {
-      return;
-    }
+    if (!canSubmit(values, Boolean(catalogPrice))) return;
     try {
       await mutation.mutateAsync({
-        subscriptionId: summary.subscription.id,
+        subscriptionId: subscription.id,
         input: {
           ...values,
           agreedAmountMinor: values.agreedAmountMinor ?? catalogPrice?.amountMinor,
