@@ -13,6 +13,7 @@ import {
 } from '@digvation/ui';
 import { useState } from 'react';
 import { ProductClientsTab } from '../../client-products/components/product-clients-tab';
+import { ProductCommercialTab } from '../../commercial-catalog/components/product-commercial-tab';
 import { useProductDetail } from '../hooks/use-product-detail';
 import { useProductStatusTransition } from '../hooks/use-product-mutations';
 import type { ProductStatus } from '../types/product';
@@ -132,6 +133,7 @@ export function ProductDetailDialog({
               <DTabsTrigger value="overview">Overview</DTabsTrigger>
               <DTabsTrigger value="features">Features</DTabsTrigger>
               <DTabsTrigger value="capabilities">Capabilities</DTabsTrigger>
+              <DTabsTrigger value="commercial">Commercial</DTabsTrigger>
               <DTabsTrigger value="clients">Clients</DTabsTrigger>
             </DTabsList>
             <DTabsContent value="overview">
@@ -174,6 +176,9 @@ export function ProductDetailDialog({
                 product={product}
                 compatibleCapabilities={detail.capabilities}
               />
+            </DTabsContent>
+            <DTabsContent value="commercial">
+              <ProductCommercialTab detail={detail} />
             </DTabsContent>
             <DTabsContent value="clients">
               <ProductClientsTab productId={product.id} />
