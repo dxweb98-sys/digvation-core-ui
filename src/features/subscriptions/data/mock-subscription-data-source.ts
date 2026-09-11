@@ -131,14 +131,22 @@ function addMonthsClamped(anchor: Date, months: number) {
   return first;
 }
 
-function prorate(term: SubscriptionTerm, effectiveFrom: Date, amountMinor: number) {
+function prorate(
+  term: SubscriptionTerm,
+  effectiveFrom: Date,
+  amountMinor: number,
+) {
   const monthsPerCycle = MONTHS_PER_CYCLE[term.billingCycle];
   if (!monthsPerCycle) {
     throw new Error('Custom billing cycles do not support automatic proration.');
   }
   const anchor = new Date(term.startsAt);
   const end = term.endsAt ? new Date(term.endsAt) : undefined;
-  if (effectiveFrom < anchor || (end && effectiveFrom >= end)) {
+  if (
+    Number.isNaN(effectiveFrom.getTime()) ||
+    effectiveFrom < anchor ||
+    (end && effectiveFrom >= end)
+  ) {
     throw new Error('Add-on effective date must fall inside the current term.');
   }
 
@@ -171,17 +179,27 @@ function validateAdjustment(input: {
   adjustmentType: SubscriptionTerm['adjustmentType'];
   adjustmentReason?: string;
 }) {
-  if (input.agreedAmountMinor < 0) throw new Error('Agreed price cannot be negative.');
+  if (
+    !Number.isSafeInteger(input.agreedAmountMinor) ||
+    input.agreedAmountMinor < 0
+  ) {
+    throw new Error('Agreed price must be a non-negative minor-unit amount.');
+  }
   if (
     input.adjustmentType === 'NONE' &&
     input.agreedAmountMinor !== input.listAmountMinor
   ) {
-    throw new Error('Choose an adjustment type when agreed price differs from list price.');
+    throw new Error(
+      'Choose an adjustment type when agreed price differs from list price.',
+    );
   }
   if (input.adjustmentType !== 'NONE' && !input.adjustmentReason?.trim()) {
     throw new Error('Adjustment reason is required for adjusted pricing.');
   }
-  if (input.adjustmentType === 'COMPLIMENTARY' && input.agreedAmountMinor !== 0) {
+  if (
+    input.adjustmentType === 'COMPLIMENTARY' &&
+    input.agreedAmountMinor !== 0
+  ) {
     throw new Error('Complimentary pricing must use an agreed price of zero.');
   }
 }
@@ -211,7 +229,11 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
             currentTerm: currentTerm(subscriptionTerms),
             terms: copy(subscriptionTerms),
             addOns: subscription
-              ? copy(addOns.filter((item) => item.subscriptionId === subscription.id))
+              ? copy(
+                  addOns.filter(
+                    (item) => item.subscriptionId === subscription.id,
+                  ),
+                )
               : [],
             configurations: copy(
               configurations.filter(
@@ -225,24 +247,32 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
     async createInitialSubscription(input) {
       if (
         subscriptions.some(
-          (subscription) => subscription.clientProductId === input.clientProductId,
+          (subscription) =>
+            subscription.clientProductId === input.clientProductId,
         )
       ) {
-        throw new Error('A subscription is already configured for this client product.');
+        throw new Error(
+          'A subscription is already configured for this client product.',
+        );
       }
       if (!input.startsAt || (input.endsAt && input.endsAt <= input.startsAt)) {
         throw new Error('A subscription term must end after it starts.');
       }
-      const catalogPrices = await commercialCatalog.getProductPrices(input.productId);
+      const catalogPrices = await commercialCatalog.getProductPrices(
+        input.productId,
+      );
       const catalogPrice = catalogPrices.find(
         (price) =>
           price.billingCycle === input.billingCycle &&
           price.currency === input.currency.toUpperCase(),
       );
       if (!catalogPrice) {
-        throw new Error('A Product list price is required for this billing cycle and currency.');
+        throw new Error(
+          'A Product list price is required for this billing cycle and currency.',
+        );
       }
-      const agreedAmountMinor = input.agreedAmountMinor ?? catalogPrice.amountMinor;
+      const agreedAmountMinor =
+        input.agreedAmountMinor ?? catalogPrice.amountMinor;
       validateAdjustment({
         listAmountMinor: catalogPrice.amountMinor,
         agreedAmountMinor,
@@ -263,7 +293,11 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
         updatedAt: timestamp,
       };
       subscriptions.push(subscription);
-      if (!products.some((product) => product.clientProductId === input.clientProductId)) {
+      if (
+        !products.some(
+          (product) => product.clientProductId === input.clientProductId,
+        )
+      ) {
         products.push({
           clientId: input.clientId,
           clientProductId: input.clientProductId,
@@ -276,7 +310,9 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
         id: `term-${subscription.id}-initial`,
         subscriptionId: subscription.id,
         startsAt: new Date(input.startsAt).toISOString(),
-        endsAt: input.endsAt ? new Date(input.endsAt).toISOString() : undefined,
+        endsAt: input.endsAt
+          ? new Date(input.endsAt).toISOString()
+          : undefined,
         billingCycle: input.billingCycle,
         listAmountMinor: catalogPrice.amountMinor,
         agreedAmountMinor,
@@ -290,8 +326,17 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
     },
 
     async addRenewalTerm(subscriptionId, input) {
-      const subscription = subscriptions.find((item) => item.id === subscriptionId);
+      const subscription = subscriptions.find(
+        (item) => item.id === subscriptionId,
+      );
       if (!subscription) throw new Error('Subscription was not found.');
+      if (
+        subscription.status === 'EXPIRED' ||
+        subscription.status === 'CANCELLED'
+      ) {
+        throw new Error('Cancelled or expired subscriptions cannot be renewed.');
+      }
+
       const product = products.find(
         (item) => item.clientProductId === subscription.clientProductId,
       );
@@ -305,17 +350,66 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
       if (!input.startsAt || (input.endsAt && input.endsAt <= input.startsAt)) {
         throw new Error('A subscription term must end after it starts.');
       }
-      if (input.startsAt < previous.endsAt.slice(0, 10)) {
+
+      const startsAt = new Date(input.startsAt);
+      const previousEndsAt = new Date(previous.endsAt);
+      if (
+        Number.isNaN(startsAt.getTime()) ||
+        startsAt.getTime() < previousEndsAt.getTime()
+      ) {
         throw new Error('A renewal term cannot overlap the previous term.');
       }
-      const catalogPrices = await commercialCatalog.getProductPrices(product.productId);
+
+      const currency = input.currency.toUpperCase();
+      const liveAddOns = addOns.filter(
+        (addOn) =>
+          addOn.subscriptionId === subscriptionId &&
+          (addOn.status === 'ACTIVE' || addOn.status === 'SUSPENDED'),
+      );
+      if (liveAddOns.length) {
+        if (startsAt.getTime() !== previousEndsAt.getTime()) {
+          throw new Error(
+            'Renewal term must be contiguous while live add-ons are co-termed.',
+          );
+        }
+        if (
+          liveAddOns.some(
+            (addOn) =>
+              !addOn.effectiveUntil ||
+              new Date(addOn.effectiveUntil).getTime() !==
+                previousEndsAt.getTime(),
+          )
+        ) {
+          throw new Error(
+            'Live add-ons must end with the current term before renewal.',
+          );
+        }
+        if (
+          liveAddOns.some(
+            (addOn) =>
+              addOn.billingCycle !== input.billingCycle ||
+              addOn.currency !== currency,
+          )
+        ) {
+          throw new Error(
+            'Close live add-ons before changing renewal billing cycle or currency.',
+          );
+        }
+      }
+
+      const catalogPrices = await commercialCatalog.getProductPrices(
+        product.productId,
+      );
       const catalogPrice = catalogPrices.find(
         (price) =>
           price.billingCycle === input.billingCycle &&
-          price.currency === input.currency.toUpperCase(),
+          price.currency === currency,
       );
-      if (!catalogPrice) throw new Error('A current Product list price is required for renewal.');
-      const agreedAmountMinor = input.agreedAmountMinor ?? catalogPrice.amountMinor;
+      if (!catalogPrice) {
+        throw new Error('A current Product list price is required for renewal.');
+      }
+      const agreedAmountMinor =
+        input.agreedAmountMinor ?? catalogPrice.amountMinor;
       validateAdjustment({
         listAmountMinor: catalogPrice.amountMinor,
         agreedAmountMinor,
@@ -325,12 +419,14 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
       const term: SubscriptionTerm = {
         id: `term-${subscriptionId}-${Date.now()}`,
         subscriptionId,
-        startsAt: new Date(input.startsAt).toISOString(),
-        endsAt: input.endsAt ? new Date(input.endsAt).toISOString() : undefined,
+        startsAt: startsAt.toISOString(),
+        endsAt: input.endsAt
+          ? new Date(input.endsAt).toISOString()
+          : undefined,
         billingCycle: input.billingCycle,
         listAmountMinor: catalogPrice.amountMinor,
         agreedAmountMinor,
-        currency: input.currency.toUpperCase(),
+        currency,
         adjustmentType: input.adjustmentType,
         adjustmentReason: input.adjustmentReason?.trim() || undefined,
         renewedFromTermId: previous.id,
@@ -338,15 +434,9 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
         createdAt: new Date().toISOString(),
       };
       terms.push(term);
-      for (const addOn of addOns) {
-        if (
-          addOn.subscriptionId === subscriptionId &&
-          (addOn.status === 'ACTIVE' || addOn.status === 'SUSPENDED') &&
-          addOn.effectiveUntil === previous.endsAt
-        ) {
-          addOn.effectiveUntil = term.endsAt;
-          addOn.updatedAt = new Date().toISOString();
-        }
+      for (const addOn of liveAddOns) {
+        addOn.effectiveUntil = term.endsAt;
+        addOn.updatedAt = new Date().toISOString();
       }
       return copy(term);
     },
@@ -357,7 +447,9 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
       );
       if (!subscription) throw new Error('Subscription was not found.');
       if (subscription.status !== 'ACTIVE' && subscription.status !== 'TRIAL') {
-        throw new Error('Subscription must be active or trial before adding an add-on.');
+        throw new Error(
+          'Subscription must be active or trial before adding an add-on.',
+        );
       }
       if (
         addOns.some(
@@ -373,7 +465,9 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
         (item) => item.clientProductId === subscription.clientProductId,
       );
       if (!product) throw new Error('Client Product was not found.');
-      const offering = await commercialCatalog.getAddOn(input.addOnOfferingId);
+      const offering = await commercialCatalog.getAddOn(
+        input.addOnOfferingId,
+      );
       if (!offering || offering.status !== 'ACTIVE') {
         throw new Error('Add-on offering must be active.');
       }
@@ -389,14 +483,20 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
           new Date(candidate.startsAt) <= effectiveFrom &&
           (!candidate.endsAt || effectiveFrom < new Date(candidate.endsAt)),
       );
-      if (!term) throw new Error('Add-on effective date must fall inside a subscription term.');
+      if (!term) {
+        throw new Error(
+          'Add-on effective date must fall inside a subscription term.',
+        );
+      }
       const price = offering.prices.find(
         (candidate) =>
           candidate.billingCycle === term.billingCycle &&
           candidate.currency === term.currency,
       );
       if (!price) {
-        throw new Error('Add-on list price is required for the current billing cycle and currency.');
+        throw new Error(
+          'Add-on list price is required for the current billing cycle and currency.',
+        );
       }
       const agreedAmountMinor = input.agreedAmountMinor ?? price.amountMinor;
       validateAdjustment({
@@ -419,7 +519,11 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
         currency: term.currency,
         listAmountMinor: price.amountMinor,
         agreedAmountMinor,
-        initialProratedAmountMinor: prorate(term, effectiveFrom, agreedAmountMinor),
+        initialProratedAmountMinor: prorate(
+          term,
+          effectiveFrom,
+          agreedAmountMinor,
+        ),
         adjustmentType: input.adjustmentType,
         adjustmentReason: input.adjustmentReason?.trim() || undefined,
         prorationPolicy: 'CO_TERM_PRORATED',
@@ -430,13 +534,48 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
       return copy(item);
     },
 
-    async transitionSubscriptionAddOn(subscriptionAddOnId, targetStatus, reason) {
-      const item = addOns.find((candidate) => candidate.id === subscriptionAddOnId);
+    async transitionSubscriptionAddOn(
+      subscriptionAddOnId,
+      targetStatus,
+      reason,
+    ) {
+      const item = addOns.find(
+        (candidate) => candidate.id === subscriptionAddOnId,
+      );
       if (!item) throw new Error('Subscription add-on was not found.');
       if (!reason.trim()) throw new Error('A lifecycle reason is required.');
       if (!ADD_ON_TRANSITIONS[item.status].includes(targetStatus)) {
         throw new Error(`Cannot transition ${item.status} to ${targetStatus}.`);
       }
+
+      if (targetStatus === 'ACTIVE') {
+        const subscription = subscriptions.find(
+          (candidate) => candidate.id === item.subscriptionId,
+        );
+        if (
+          !subscription ||
+          (subscription.status !== 'ACTIVE' && subscription.status !== 'TRIAL')
+        ) {
+          throw new Error(
+            'Parent subscription must be trial or active before reactivating the add-on.',
+          );
+        }
+        const offering = await commercialCatalog.getAddOn(
+          item.addOnOfferingId,
+        );
+        if (!offering || offering.status !== 'ACTIVE') {
+          throw new Error(
+            'Add-on offering must be active before reactivating the client add-on.',
+          );
+        }
+        if (
+          item.effectiveUntil &&
+          new Date(item.effectiveUntil).getTime() <= Date.now()
+        ) {
+          throw new Error('Expired add-on period cannot be reactivated.');
+        }
+      }
+
       item.status = targetStatus;
       item.updatedAt = new Date().toISOString();
       return copy(item);
@@ -446,9 +585,16 @@ export function createMockSubscriptionDataSource(): SubscriptionDataSource {
       const retained = configurations.filter(
         (item) => item.clientProductId !== clientProductId,
       );
-      configurations.splice(0, configurations.length, ...retained, ...copy(next));
+      configurations.splice(
+        0,
+        configurations.length,
+        ...retained,
+        ...copy(next),
+      );
       return copy(
-        configurations.filter((item) => item.clientProductId === clientProductId),
+        configurations.filter(
+          (item) => item.clientProductId === clientProductId,
+        ),
       );
     },
   };
