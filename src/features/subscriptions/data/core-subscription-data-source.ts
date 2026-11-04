@@ -46,7 +46,8 @@ interface CoreSubscriptionAddOn {
 
 interface CoreSubscription {
   id: string;
-  client_product_id: string;
+  client_product_id: string | null;
+  client_add_on_id?: string | null;
   status: Subscription['status'];
   auto_renew: boolean;
   renewal_notice_days: number;
@@ -66,6 +67,20 @@ interface CoreCommercialProduct {
   product_code: string;
   product_name: string;
   subscription: CoreSubscription | null;
+}
+
+interface CoreCommercialSharedAddOn {
+  client_add_on_id: string;
+  add_on_offering_id: string;
+  add_on_code: string;
+  add_on_name: string;
+  status: string;
+  subscription: CoreSubscription | null;
+}
+
+interface CoreClientCommercial {
+  items: CoreCommercialProduct[];
+  client_add_ons?: CoreCommercialSharedAddOn[];
 }
 
 function mapTerm(item: CoreSubscriptionTerm): SubscriptionTerm {
@@ -112,7 +127,7 @@ function mapAddOn(item: CoreSubscriptionAddOn): SubscriptionAddOn {
 function mapSubscription(item: CoreSubscription): Subscription {
   return {
     id: item.id,
-    clientProductId: item.client_product_id,
+    clientProductId: item.client_product_id ?? undefined,
     status: item.status,
     autoRenew: item.auto_renew,
     renewalNoticeDays: item.renewal_notice_days,
@@ -157,7 +172,7 @@ async function getSubscription(subscriptionId: string) {
 
 export const coreSubscriptionDataSource: SubscriptionDataSource = {
   async getClientCommercialSummary(clientId) {
-    const response = await coreApiRequest<{ items: CoreCommercialProduct[] }>(
+    const response = await coreApiRequest<CoreClientCommercial>(
       `/clients/${clientId}/commercial`,
     );
     for (const item of response.items) {

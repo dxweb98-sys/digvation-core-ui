@@ -49,11 +49,18 @@ interface CoreProductCapability {
   name: string;
   description: string | null;
   status: CapabilitySummary['status'];
+  inclusion?: 'COMPATIBLE' | 'INCLUDED';
 }
 
 interface CoreProductDetail extends CoreProduct {
   features: CoreProductFeature[];
   capabilities: CoreProductCapability[];
+  domain_codes?: string[];
+  application_codes?: string[];
+}
+
+interface ProductCapabilityMutationResponse {
+  included_capability_ids?: string[];
 }
 
 interface CoreProductListResponse {
@@ -230,9 +237,12 @@ export const coreProductDataSource: ProductDataSource = {
   },
 
   async replaceProductCapabilities(input) {
-    await coreApiRequest(`/products/${input.productId}/capabilities`, {
-      method: 'PUT',
-      body: { capability_ids: input.capabilityIds },
-    });
+    await coreApiRequest<ProductCapabilityMutationResponse>(
+      `/products/${input.productId}/capabilities`,
+      {
+        method: 'PUT',
+        body: { capability_ids: input.capabilityIds },
+      },
+    );
   },
 };

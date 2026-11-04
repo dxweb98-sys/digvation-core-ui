@@ -20,6 +20,9 @@ describe('mock capability data source', () => {
         'LOYALTY_POINTS',
       ]),
     );
+    expect(
+      result.capabilities.find((capability) => capability.code === 'CUSTOMER_MANAGEMENT')?.status,
+    ).toBe('RETIRED');
     expect(result.capabilities.some((capability) => capability.code === 'CATALOG')).toBe(false);
     expect(result.capabilities.some((capability) => capability.code === 'FINANCE_OPERATIONS')).toBe(false);
   });

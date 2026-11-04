@@ -123,7 +123,11 @@ export function InstallationListPage() {
   const result = installationsQuery.data;
   const actions: TableAction<InstallationSummary>[] = [
     { label: 'Open Installation', onClick: (installation) => setDetailId(installation.id) },
-    { label: 'Edit Installation', onClick: setEditInstallation },
+    {
+      label: 'Edit Installation',
+      onClick: setEditInstallation,
+      show: (installation) => installation.status !== 'DECOMMISSIONED',
+    },
   ];
 
   return (
