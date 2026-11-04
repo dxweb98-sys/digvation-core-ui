@@ -1,11 +1,11 @@
 import {
   DButton,
   DCurrencyInput,
-  DDialog,
   DInput,
   DSelect,
   useToast,
 } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useMemo, useState } from 'react';
 import { useProductAddOns } from '../../commercial-catalog/hooks/use-commercial-catalog';
 import type {
@@ -170,7 +170,7 @@ export function SubscriptionAddOnDialog({
   if (!subscription || !currentTerm) return null;
   if (subscription.status !== 'ACTIVE' && subscription.status !== 'TRIAL') {
     return (
-      <DDialog
+      <AppDialog kind="form"
         open
         onClose={onClose}
         title={`Add commercial add-on · ${summary.productName}`}
@@ -205,12 +205,11 @@ export function SubscriptionAddOnDialog({
   }
 
   return (
-    <DDialog
+    <AppDialog kind="form"
       open
       onClose={onClose}
       title={`Add commercial add-on · ${summary.productName}`}
       description="The add-on starts on the selected date, co-terms with the Product subscription, and its first billing period is prorated."
-      size="lg"
       footer={
         <div className="client-dialog-actions">
           <DButton variant="outline" onClick={onClose}>
@@ -320,6 +319,6 @@ export function SubscriptionAddOnDialog({
           </small>
         </div>
       </form>
-    </DDialog>
+    </AppDialog>
   );
 }

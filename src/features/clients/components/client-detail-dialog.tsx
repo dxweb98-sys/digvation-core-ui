@@ -1,4 +1,5 @@
-import { DButton, DCard, DCardContent, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation/ui';
+import { DButton, DCard, DCardContent, DConnectionError, DEmptyState, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation/ui';
+import { AppDialog, DetailItem, DetailList, DialogActions, DialogSection } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { ClientProductsTab } from '../../client-products/components/client-products-tab';
 import { ClientInstallationsTab } from '../../installations/components/client-installations-tab';
@@ -11,6 +12,7 @@ import { ClientLifecycleAction } from './client-lifecycle-action';
 import { ClientStatusBadge } from './client-status-badge';
 import { ClientContactsSection } from './client-contacts-section';
 import { ClientMonitoringTab } from './client-monitoring-tab';
+import { ContentSkeleton } from '../../../shared/ui/content-skeleton';
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
@@ -36,15 +38,15 @@ export function ClientDetailDialog({
   const statusTransition = useClientStatusTransition();
 
   if (clientQuery.isPending) {
-    return <DDialog open={open} onClose={onClose} title="Client details" size="xl"><div className="client-dialog-state"><DLoadingIndicator label="Loading client detail" /></div></DDialog>;
+    return <AppDialog kind="detail" open={open} onClose={onClose} title="Client details"><ContentSkeleton label="Loading client detail" /></AppDialog>;
   }
 
   if (clientQuery.isError) {
-    return <DDialog open={open} onClose={onClose} title="Client unavailable" size="xl"><DConnectionError title="Client unavailable" message="Client information could not be loaded." detail={clientQuery.error.message} onRetry={() => void clientQuery.refetch()} /></DDialog>;
+    return <AppDialog kind="detail" open={open} onClose={onClose} title="Client unavailable"><DConnectionError title="Client unavailable" message="Client information could not be loaded." detail={clientQuery.error.message} onRetry={() => void clientQuery.refetch()} /></AppDialog>;
   }
 
   if (!clientQuery.data) {
-    return <DDialog open={open} onClose={onClose} title="Client not found" size="xl"><DEmptyState title="Client not found" description="The requested client record does not exist or is no longer available." /></DDialog>;
+    return <AppDialog kind="detail" open={open} onClose={onClose} title="Client not found"><DEmptyState title="Client not found" description="The requested client record does not exist or is no longer available." /></AppDialog>;
   }
 
   const detail = clientQuery.data;
@@ -56,45 +58,57 @@ export function ClientDetailDialog({
 
   return (
     <>
-      <DDialog
+      <AppDialog kind="detail"
         open={open}
         onClose={onClose}
-        size="xl"
         title={client.displayName}
-        description={<><code className="client-code">{client.code}</code>{client.legalName ? ` · ${client.legalName}` : ''}</>}
+        status={<ClientStatusBadge status={client.status} />}
+        identifier={client.code}
+        meta={client.legalName}
         footer={
-          <div className="client-dialog-actions">
-            <DButton variant="outline" onClick={onClose}>Close</DButton>
-            <DButton variant="outline" onClick={() => setIsEditDialogOpen(true)}>Edit Client</DButton>
-            <ClientLifecycleAction client={client} isSubmitting={statusTransition.isPending} onTransition={handleTransition} />
-          </div>
+          <DialogActions
+            destructive={<ClientLifecycleAction client={client} isSubmitting={statusTransition.isPending} onTransition={handleTransition} />}
+            secondary={<DButton variant="outline" onClick={onClose}>Close</DButton>}
+            primary={<DButton onClick={() => setIsEditDialogOpen(true)}>Edit Client</DButton>}
+          />
         }
       >
         <div className="client-detail-dialog">
-          <div className="client-detail-header">
-            <ClientStatusBadge status={client.status} />
-          </div>
           {statusTransition.isError ? <p className="client-form-error">{statusTransition.error.message}</p> : null}
           <DTabs defaultValue="overview" value={tab} onValueChange={setTab} className="client-detail-tabs">
             <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="products">Products</DTabsTrigger><DTabsTrigger value="commercial">Commercial</DTabsTrigger><DTabsTrigger value="installations">Installations</DTabsTrigger><DTabsTrigger value="monitoring">Monitoring</DTabsTrigger><DTabsTrigger value="activity">Activity</DTabsTrigger></DTabsList>
             <DTabsContent value="overview">
-              <DCard variant="outlined"><DCardContent><dl className="client-overview-list">
-                <div><dt>Display Name</dt><dd>{client.displayName}</dd></div>
-                <div><dt>Legal Name</dt><dd>{client.legalName ?? 'Not recorded'}</dd></div>
-                <div><dt>Client Code</dt><dd><code className="client-code">{client.code}</code></dd></div>
-                <div><dt>Status</dt><dd><ClientStatusBadge status={client.status} /></dd></div>
-                <div><dt>Organization Email</dt><dd>{client.organizationEmail ?? 'Not recorded'}</dd></div>
-                <div><dt>Organization Phone</dt><dd>{client.organizationPhone ?? 'Not recorded'}</dd></div>
-                <div><dt>Website</dt><dd>{client.website ?? 'Not recorded'}</dd></div>
-                <div><dt>Tax Identifier</dt><dd>{client.taxIdentifier ?? 'Not recorded'}</dd></div>
-                <div><dt>Country</dt><dd>{client.country ?? 'Not recorded'}</dd></div>
-                <div><dt>Timezone</dt><dd>{client.timezone ?? 'Not recorded'}</dd></div>
-                <div><dt>Address</dt><dd>{client.address ?? 'Not recorded'}</dd></div>
-                <div><dt>Notes</dt><dd>{client.notes ?? 'Not recorded'}</dd></div>
-                <div><dt>Status Changed</dt><dd>{formatDate(client.statusChangedAt)}</dd></div>
-                <div><dt>Created</dt><dd>{formatDate(client.createdAt)}</dd></div>
-                <div><dt>Updated</dt><dd>{formatDate(client.updatedAt)}</dd></div>
-              </dl><ClientContactsSection clientId={client.id} /></DCardContent></DCard>
+              <div><DialogSection title="Identity">
+              <DetailList>
+                <DetailItem label="Display Name">{client.displayName}</DetailItem>
+                <DetailItem label="Legal Name">{client.legalName}</DetailItem>
+                <DetailItem label="Client Code"><code className="client-code">{client.code}</code></DetailItem>
+                <DetailItem label="Status"><ClientStatusBadge status={client.status} /></DetailItem>
+              </DetailList>
+            </DialogSection>
+            <DialogSection title="Contact">
+              <DetailList>
+                <DetailItem label="Organization Email">{client.organizationEmail}</DetailItem>
+                <DetailItem label="Organization Phone">{client.organizationPhone}</DetailItem>
+                <DetailItem label="Website">{client.website}</DetailItem>
+              </DetailList>
+            </DialogSection>
+            <DialogSection title="Organization">
+              <DetailList>
+                <DetailItem label="Tax Identifier">{client.taxIdentifier}</DetailItem>
+                <DetailItem label="Country">{client.country}</DetailItem>
+                <DetailItem label="Timezone">{client.timezone}</DetailItem>
+                <DetailItem wide label="Address">{client.address}</DetailItem>
+                <DetailItem wide label="Notes">{client.notes}</DetailItem>
+              </DetailList>
+            </DialogSection>
+            <DialogSection title="Record">
+              <DetailList>
+                <DetailItem label="Status Changed">{formatDate(client.statusChangedAt)}</DetailItem>
+                <DetailItem label="Created">{formatDate(client.createdAt)}</DetailItem>
+                <DetailItem label="Updated">{formatDate(client.updatedAt)}</DetailItem>
+              </DetailList>
+            </DialogSection><ClientContactsSection clientId={client.id} /></div>
             </DTabsContent>
             <DTabsContent value="products"><ClientProductsTab clientId={client.id} canManageComposition={client.status === 'ACTIVE'} /></DTabsContent>
             <DTabsContent value="commercial"><ClientCommercialTab clientId={client.id} /></DTabsContent>
@@ -103,7 +117,7 @@ export function ClientDetailDialog({
             <DTabsContent value="activity"><DCard variant="outlined"><DCardContent><ActivityTimeline activity={detail.activity} /></DCardContent></DCard></DTabsContent>
           </DTabs>
         </div>
-      </DDialog>
+      </AppDialog>
       <ClientFormDialog open={isEditDialogOpen} mode="edit" client={client} onClose={() => setIsEditDialogOpen(false)} />
     </>
   );

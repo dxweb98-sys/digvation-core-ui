@@ -1,0 +1,282 @@
+.chart-card {
+  display: grid;
+  gap: var(--cc-space-3);
+  align-content: start;
+  min-width: 0;
+  padding: var(--cc-space-4);
+  margin: 0;
+  background: var(--color-surface);
+  border-radius: var(--cc-radius-lg);
+}
+
+/* Inside a glow card the card is the frame and its glow must show through. */
+.glow-card > .chart-card {
+  padding: 0;
+  background: transparent;
+}
+
+.chart-card-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2) var(--cc-space-3);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+/* In a narrow card the actions drop below the title rather than squeezing it. */
+.chart-card-heading > div:first-child {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.chart-card-heading h3 {
+  margin: 0;
+  font-size: var(--cc-text-md);
+  font-weight: 600;
+}
+
+.chart-card-heading p {
+  margin: 2px 0 0;
+  font-size: var(--cc-text-xs);
+  line-height: 1.5;
+  color: var(--cc-text-muted);
+}
+
+.chart-card-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-1) var(--cc-space-2);
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  gap: var(--cc-space-2);
+  align-items: center;
+  min-height: 32px;
+  padding: 0 var(--cc-space-2);
+  font-size: var(--cc-text-xs);
+  color: var(--cc-text);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--cc-radius-md);
+  transition: background-color var(--motion-fast) var(--ease-standard);
+}
+
+.chart-legend-item:hover {
+  background: var(--cc-raised);
+}
+
+/* Off is shown by a struck label as well as the dimmed key. */
+.chart-legend-item[aria-pressed='false'] {
+  color: var(--cc-text-muted);
+  text-decoration: line-through;
+}
+
+.chart-legend-item[aria-pressed='false'] .chart-legend-swatch {
+  opacity: 0.3;
+}
+
+.chart-legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 3px;
+}
+
+.chart-tooltip {
+  display: grid;
+  gap: var(--cc-space-1);
+  min-width: 140px;
+  padding: var(--cc-space-2) var(--cc-space-3);
+  font-size: var(--cc-text-xs);
+  color: var(--cc-text);
+  background: var(--cc-overlay);
+  border-radius: var(--cc-radius-md);
+  box-shadow: var(--cc-shadow-overlay);
+}
+
+.chart-tooltip p {
+  margin: 0;
+}
+
+.chart-tooltip-label {
+  color: var(--cc-text-muted);
+}
+
+.chart-tooltip-row {
+  display: flex;
+  gap: var(--cc-space-2);
+  align-items: center;
+}
+
+.chart-tooltip-row strong {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.chart-table-wrap {
+  overflow-x: auto;
+}
+
+.chart-table {
+  width: 100%;
+  font-size: var(--cc-text-xs);
+  font-variant-numeric: tabular-nums;
+  border-collapse: collapse;
+}
+
+.chart-table th,
+.chart-table td {
+  padding: var(--cc-space-2);
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--cc-line);
+}
+
+.chart-table th {
+  font-weight: 500;
+  color: var(--cc-text-muted);
+}
+
+.chart-sparkline {
+  width: 100%;
+  height: 32px;
+}
+
+.chart-area {
+  cursor: crosshair;
+}
+
+/* Recharts forwards `color` to the curve, so the glow follows each series. */
+.chart-area .recharts-area-curve {
+  filter: drop-shadow(0 0 4px currentcolor);
+}
+
+.ring-gauge {
+  --ring-color: var(--cc-status-success);
+  display: inline-grid;
+  gap: 2px;
+  justify-items: center;
+  min-width: 72px;
+  font-size: var(--cc-text-xs);
+  text-align: center;
+}
+
+.ring-gauge-warning {
+  --ring-color: var(--cc-status-warning);
+}
+
+.ring-gauge-critical {
+  --ring-color: var(--cc-status-danger);
+}
+
+.ring-gauge-dial {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+
+.ring-gauge-dial svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ring-gauge-track,
+.ring-gauge-value {
+  fill: none;
+  stroke-width: 6;
+}
+
+.ring-gauge-track {
+  stroke: var(--cc-line);
+}
+
+.ring-gauge-value {
+  stroke: var(--ring-color);
+  stroke-dashoffset: var(--ring-offset);
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--motion-slow) var(--ease-standard);
+  animation: ring-gauge-fill calc(var(--motion-slow) * 2.5) var(--ease-emphasized) backwards;
+}
+
+@keyframes ring-gauge-fill {
+  from {
+    stroke-dashoffset: 100;
+  }
+}
+
+.ring-gauge-text {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: var(--cc-text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ring-gauge-label {
+  color: var(--cc-text-muted);
+}
+
+.ring-gauge-note {
+  font-weight: 600;
+  color: var(--ring-color);
+}
+
+.mini-bars {
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+  height: 36px;
+}
+
+.mini-bar {
+  flex: 1 1 0;
+  min-height: 2px;
+  background: var(--cc-line-control);
+  border-radius: 2px 2px 0 0;
+  transform-origin: bottom;
+  animation: mini-bar-rise var(--motion-slow) var(--ease-emphasized) backwards;
+}
+
+.mini-bars-accent {
+  --mini-bar-latest: var(--cc-accent);
+}
+
+.mini-bars-danger {
+  --mini-bar-latest: var(--cc-status-danger);
+}
+
+.mini-bar-latest {
+  background: var(--mini-bar-latest);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--mini-bar-latest) 55%, transparent);
+}
+
+@keyframes mini-bar-rise {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-gauge-value,
+  .mini-bar {
+    transition: none;
+    animation: none;
+  }
+}

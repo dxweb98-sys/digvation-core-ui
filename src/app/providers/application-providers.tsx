@@ -9,7 +9,7 @@ export function ApplicationProviders({ children }: PropsWithChildren) {
   const [queryClient] = useState(createApplicationQueryClient);
 
   return (
-    <DThemeProvider mode="light" radius="default">
+    <DThemeProvider mode="dark" radius="default">
       <DToastProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>{children}</AuthProvider>

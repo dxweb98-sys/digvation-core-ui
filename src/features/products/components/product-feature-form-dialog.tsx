@@ -1,4 +1,5 @@
-import { DButton, DDialog, useToast } from '@digvation/ui';
+import { DButton, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import {
   useCreateProductFeature,
   useUpdateProductFeature,
@@ -75,7 +76,7 @@ export function ProductFeatureFormDialog({
   }
 
   return (
-    <DDialog
+    <AppDialog kind="form"
       open={open}
       onClose={closeDialog}
       title={
@@ -119,6 +120,6 @@ export function ProductFeatureFormDialog({
         }
         onSubmit={submitFeature}
       />
-    </DDialog>
+    </AppDialog>
   );
 }

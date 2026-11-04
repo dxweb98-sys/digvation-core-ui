@@ -1,4 +1,5 @@
-import { DButton, DDialog, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { DButton, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { Product, ProductStatus } from '../types/product';
 import { ProductStatusBadge } from './product-status-badge';
@@ -47,9 +48,9 @@ export function ProductLifecycleAction({ product, isSubmitting, onTransition }: 
       <DDropdown placement="top-end" contentRole="menu" contentClassName="product-lifecycle-menu" trigger={() => <DButton variant="outline">More Actions</DButton>}>
         {VALID_TRANSITIONS[product.status].map((status) => <button className={status === 'RETIRED' ? 'product-lifecycle-menu-item is-danger' : 'product-lifecycle-menu-item'} key={status} role="menuitem" type="button" onClick={() => setTargetStatus(status)}>Mark {formatStatus(status)}</button>)}
       </DDropdown>
-      <DDialog open={Boolean(targetStatus)} onClose={closeDialog} title="Confirm product lifecycle change" description="This change affects the product lifecycle state. Provide a reason before continuing." footer={<div className="product-dialog-actions"><DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton><DButton variant={targetStatus === 'RETIRED' ? 'danger' : 'primary'} onClick={() => void confirmTransition()} loading={isSubmitting}>Confirm change</DButton></div>}>
+      <AppDialog kind="confirm" open={Boolean(targetStatus)} onClose={closeDialog} title="Confirm product lifecycle change" description="This change affects the product lifecycle state. Provide a reason before continuing." footer={<div className="product-dialog-actions"><DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton><DButton variant={targetStatus === 'RETIRED' ? 'danger' : 'primary'} onClick={() => void confirmTransition()} loading={isSubmitting}>Confirm change</DButton></div>}>
         {targetStatus ? <div className="product-transition-dialog"><p><strong>{product.name}</strong> will move from <ProductStatusBadge status={product.status} /> to <ProductStatusBadge status={targetStatus} />.</p><DTextarea label="Reason *" placeholder="Explain why this lifecycle state is changing." value={reason} error={reasonError} onChange={(value) => { setReason(value); if (reasonError) setReasonError(null); }} /></div> : null}
-      </DDialog>
+      </AppDialog>
     </>
   );
 }

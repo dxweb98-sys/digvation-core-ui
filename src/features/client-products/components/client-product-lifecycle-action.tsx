@@ -1,4 +1,5 @@
-import { DButton, DDialog, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { DButton, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { ClientProductStatus, ClientProductSummary } from '../types/client-product';
 import { ClientProductStatusBadge } from './client-product-status-badge';
@@ -74,9 +75,9 @@ export function ClientProductLifecycleAction({
       <DDropdown placement="bottom-end" closeOnItemClick contentRole="menu" contentClassName="client-product-lifecycle-menu" trigger={() => <DButton variant="outline" size="sm" aria-label="Actions" title={availableTransitions.length ? 'Actions' : 'No lifecycle actions available'} disabled={availableTransitions.length === 0}>•••</DButton>}>
         {availableTransitions.map((status) => <button className={status === 'CANCELLED' || status === 'DECOMMISSIONED' ? 'client-product-lifecycle-menu-item is-danger' : 'client-product-lifecycle-menu-item'} key={status} role="menuitem" type="button" onClick={() => setTargetStatus(status)}>{TRANSITION_LABELS[status]}</button>)}
       </DDropdown>
-      <DDialog open={Boolean(targetStatus)} onClose={closeDialog} title="Confirm product relationship change" description="Provide a reason before changing the client product lifecycle state." footer={<div className="client-product-dialog-actions"><DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton><DButton variant={targetStatus === 'CANCELLED' || targetStatus === 'DECOMMISSIONED' ? 'danger' : 'primary'} onClick={() => void confirmTransition()} loading={isSubmitting}>Confirm change</DButton></div>}>
+      <AppDialog kind="confirm" open={Boolean(targetStatus)} onClose={closeDialog} title="Confirm product relationship change" description="Provide a reason before changing the client product lifecycle state." footer={<div className="client-product-dialog-actions"><DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton><DButton variant={targetStatus === 'CANCELLED' || targetStatus === 'DECOMMISSIONED' ? 'danger' : 'primary'} onClick={() => void confirmTransition()} loading={isSubmitting}>Confirm change</DButton></div>}>
         {targetStatus ? <div className="client-product-transition-dialog"><p><strong>{clientProduct.productName}</strong> will move from <ClientProductStatusBadge status={clientProduct.status} /> to <ClientProductStatusBadge status={targetStatus} />.</p><DTextarea label="Reason *" placeholder="Explain why this lifecycle state is changing." value={reason} error={reasonError} onChange={(value) => { setReason(value); if (reasonError) setReasonError(null); }} /></div> : null}
-      </DDialog>
+      </AppDialog>
     </>
   );
 }

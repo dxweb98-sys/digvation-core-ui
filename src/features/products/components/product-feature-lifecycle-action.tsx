@@ -1,4 +1,5 @@
-import { DButton, DDialog, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { DButton, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type {
   Product,
@@ -95,7 +96,7 @@ export function ProductFeatureLifecycleAction({
           );
         })}
       </DDropdown>
-      <DDialog
+      <AppDialog kind="confirm"
         open={Boolean(targetStatus)}
         onClose={closeDialog}
         title="Confirm product feature lifecycle change"
@@ -138,7 +139,7 @@ export function ProductFeatureLifecycleAction({
             />
           </div>
         ) : null}
-      </DDialog>
+      </AppDialog>
     </>
   );
 }

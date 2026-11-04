@@ -1,5 +1,6 @@
-import { DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, type TableAction, type TableColumn } from '@digvation/ui';
+import { DConnectionError, DDataTable, DEmptyState, type TableAction, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
+import { ContentSkeleton } from '../../../shared/ui/content-skeleton';
 import { Badge } from '../../operations/components/operations-badges';
 import { HealthBadge, ObservedStateBadge } from '../../runtime/components/runtime-status-badge';
 import type { ClientMonitoringRecord } from '../monitoring/client-monitoring';
@@ -23,7 +24,7 @@ const columns: TableColumn<ClientMonitoringRecord>[] = [
 export function ClientMonitoringTab({ clientId }: { clientId: string }) {
   const [record, setRecord] = useState<ClientMonitoringRecord | null>(null);
   const query = useClientMonitoring(clientId);
-  if (query.isPending) return <div className="client-monitoring-state"><DLoadingIndicator label="Loading client operational monitoring" /></div>;
+  if (query.isPending) return <ContentSkeleton label="Loading client operational monitoring" rows={4} />;
   if (query.isError) return <DConnectionError title="Monitoring unavailable" message="Client operational information could not be loaded." detail={query.error.message} onRetry={() => void query.refetch()} />;
   const actions: TableAction<ClientMonitoringRecord>[] = [{ label: 'View details', onClick: setRecord }];
   return <div className="client-monitoring-tab">

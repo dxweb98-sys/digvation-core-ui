@@ -4,13 +4,13 @@ import {
   DCardContent,
   DConnectionError,
   DDataTable,
-  DDialog,
   DEmptyState,
   DInput,
   DLoadingIndicator,
   useToast,
   type TableColumn,
 } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { ProductDetail } from '../../products/types/product';
 import {
@@ -68,7 +68,7 @@ function OfferingLifecycleDialog({
 }) {
   const [reason, setReason] = useState('');
   return (
-    <DDialog
+    <AppDialog kind="confirm"
       open
       onClose={onClose}
       title={`${targetStatus === 'ACTIVE' ? 'Activate' : targetStatus === 'RETIRED' ? 'Retire' : 'Return to draft'} ${offering.name}`}
@@ -94,7 +94,7 @@ function OfferingLifecycleDialog({
         maxLength={500}
         onChange={setReason}
       />
-    </DDialog>
+    </AppDialog>
   );
 }
 

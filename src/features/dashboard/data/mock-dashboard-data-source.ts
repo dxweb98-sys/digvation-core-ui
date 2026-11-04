@@ -1,7 +1,8 @@
 import type { DashboardOverview } from '../types/dashboard';
 import type { DashboardDataSource } from './dashboard-data-source';
+import { buildMockDashboardTrends } from './mock-dashboard-trends';
 
-export type MockDashboardState = 'populated' | 'empty' | 'error';
+export type MockDashboardState = 'populated' | 'no-trends' | 'empty' | 'error';
 
 const POPULATED_DASHBOARD_OVERVIEW: DashboardOverview = {
   generatedAtLabel: 'Updated moments ago',
@@ -191,6 +192,14 @@ const POPULATED_DASHBOARD_OVERVIEW: DashboardOverview = {
   ],
 };
 
+const POPULATED_WITH_TRENDS: DashboardOverview = {
+  ...POPULATED_DASHBOARD_OVERVIEW,
+  trends: buildMockDashboardTrends(
+    POPULATED_DASHBOARD_OVERVIEW.infrastructure,
+    POPULATED_DASHBOARD_OVERVIEW.summary,
+  ),
+};
+
 const EMPTY_DASHBOARD_OVERVIEW: DashboardOverview = {
   generatedAtLabel: 'Updated moments ago',
   summary: {
@@ -215,9 +224,10 @@ export function createMockDashboardDataSource(
         throw new Error('Controlled mock dashboard failure.');
       }
 
-      return state === 'empty'
-        ? EMPTY_DASHBOARD_OVERVIEW
-        : POPULATED_DASHBOARD_OVERVIEW;
+      if (state === 'empty') return EMPTY_DASHBOARD_OVERVIEW;
+      return state === 'no-trends'
+        ? POPULATED_DASHBOARD_OVERVIEW
+        : POPULATED_WITH_TRENDS;
     },
   };
 }

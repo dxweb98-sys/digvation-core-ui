@@ -1,8 +1,11 @@
-import { DDialog, useToast } from '@digvation/ui';
+import { DButton, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { ClientForm } from './client-form';
 import { useCreateClient, useUpdateClient } from '../hooks/use-client-mutations';
 import type { ClientFormValues } from '../schemas/client-form-schema';
 import type { Client } from '../types/client';
+
+const CLIENT_FORM_ID = 'client-form';
 
 export function ClientFormDialog({
   open,
@@ -47,20 +50,24 @@ export function ClientFormDialog({
   }
 
   return (
-    <DDialog
+    <AppDialog kind="form"
       open={open}
       onClose={closeDialog}
       title={isEditing ? `Edit ${client?.displayName ?? 'client'}` : 'Add client'}
       description={isEditing ? 'Update client information. The stable client code cannot be changed.' : 'Create a control-plane client record. The client code becomes immutable once created.'}
+    footer={
+        <div>
+          <DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton>
+          <DButton form={CLIENT_FORM_ID} type="submit" loading={isSubmitting}>{isEditing ? 'Save Changes' : 'Create Client'}</DButton>
+        </div>
+      }
     >
       <ClientForm
+        formId={CLIENT_FORM_ID}
         mode={mode}
         defaultValues={isEditing && client ? { code: client.code, displayName: client.displayName, legalName: client.legalName ?? '', organizationEmail: client.organizationEmail ?? '', organizationPhone: client.organizationPhone ?? '', website: client.website ?? '', taxIdentifier: client.taxIdentifier ?? '', country: client.country ?? '', timezone: client.timezone ?? '', address: client.address ?? '', notes: client.notes ?? '' } : { code: '', displayName: '', legalName: '', organizationEmail: '', organizationPhone: '', website: '', taxIdentifier: '', country: '', timezone: '', address: '', notes: '' }}
-        isSubmitting={isSubmitting}
-        submitLabel={isEditing ? 'Save Changes' : 'Create Client'}
-        onCancel={closeDialog}
         onSubmit={submitClient}
       />
-    </DDialog>
+    </AppDialog>
   );
 }

@@ -1,9 +1,6 @@
 import {
   DButton,
-  DCard,
-  DCardContent,
   DConnectionError,
-  DDialog,
   DEmptyState,
   DLoadingIndicator,
   DTabs,
@@ -11,6 +8,7 @@ import {
   DTabsList,
   DTabsTrigger,
 } from '@digvation/ui';
+import { AppDialog, DetailItem, DetailList, DialogActions, DialogSection } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { ProductClientsTab } from '../../client-products/components/product-clients-tab';
 import { ProductCommercialTab } from '../../commercial-catalog/components/product-commercial-tab';
@@ -46,35 +44,35 @@ export function ProductDetailDialog({
 
   if (productQuery.isPending) {
     return (
-      <DDialog open={open} onClose={onClose} title="Product details" size="xl">
+      <AppDialog kind="detail" open={open} onClose={onClose} title="Product details">
         <div className="product-dialog-state">
           <DLoadingIndicator label="Loading product detail" />
         </div>
-      </DDialog>
+      </AppDialog>
     );
   }
 
   if (productQuery.isError) {
     return (
-      <DDialog open={open} onClose={onClose} title="Product unavailable" size="xl">
+      <AppDialog kind="detail" open={open} onClose={onClose} title="Product unavailable">
         <DConnectionError
           title="Product unavailable"
           message="Product information could not be loaded."
           detail={productQuery.error.message}
           onRetry={() => void productQuery.refetch()}
         />
-      </DDialog>
+      </AppDialog>
     );
   }
 
   if (!productQuery.data) {
     return (
-      <DDialog open={open} onClose={onClose} title="Product not found" size="xl">
+      <AppDialog kind="detail" open={open} onClose={onClose} title="Product not found">
         <DEmptyState
           title="Product not found"
           description="The requested product record does not exist or is no longer available."
         />
-      </DDialog>
+      </AppDialog>
     );
   }
 
@@ -91,35 +89,25 @@ export function ProductDetailDialog({
 
   return (
     <>
-      <DDialog
+      <AppDialog kind="detail"
         open={open}
         onClose={onClose}
-        size="xl"
         title={product.name}
-        description={<code className="product-code">{product.code}</code>}
+        status={<ProductStatusBadge status={product.status} />}
+        identifier={product.code}
         footer={
-          <div className="product-dialog-actions">
-            <DButton variant="outline" onClick={onClose}>
-              Close
-            </DButton>
-            <DButton
-              variant="outline"
-              onClick={() => setIsEditDialogOpen(true)}
-            >
-              Edit Product
-            </DButton>
-            <ProductLifecycleAction
+          <DialogActions
+            destructive={<ProductLifecycleAction
               product={product}
               isSubmitting={statusTransition.isPending}
               onTransition={handleTransition}
-            />
-          </div>
+            />}
+            secondary={<DButton variant="outline" onClick={onClose}>Close</DButton>}
+            primary={<DButton onClick={() => setIsEditDialogOpen(true)}>Edit Product</DButton>}
+          />
         }
       >
         <div className="product-detail-dialog">
-          <div className="product-detail-header">
-            <ProductStatusBadge status={product.status} />
-          </div>
           {statusTransition.isError ? (
             <p className="product-form-error">{statusTransition.error.message}</p>
           ) : null}
@@ -137,36 +125,20 @@ export function ProductDetailDialog({
               <DTabsTrigger value="clients">Clients</DTabsTrigger>
             </DTabsList>
             <DTabsContent value="overview">
-              <DCard variant="outlined">
-                <DCardContent>
-                  <dl className="product-overview-list">
-                    <div>
-                      <dt>Product Name</dt>
-                      <dd>{product.name}</dd>
-                    </div>
-                    <div>
-                      <dt>Product Code</dt>
-                      <dd><code className="product-code">{product.code}</code></dd>
-                    </div>
-                    <div>
-                      <dt>Description</dt>
-                      <dd>{product.description ?? 'Not recorded'}</dd>
-                    </div>
-                    <div>
-                      <dt>Status</dt>
-                      <dd><ProductStatusBadge status={product.status} /></dd>
-                    </div>
-                    <div>
-                      <dt>Created</dt>
-                      <dd>{formatDate(product.createdAt)}</dd>
-                    </div>
-                    <div>
-                      <dt>Updated</dt>
-                      <dd>{formatDate(product.updatedAt)}</dd>
-                    </div>
-                  </dl>
-                </DCardContent>
-              </DCard>
+              <div><DialogSection title="Product">
+                    <DetailList>
+                      <DetailItem label="Product Name">{product.name}</DetailItem>
+                      <DetailItem label="Product Code"><code className="product-code">{product.code}</code></DetailItem>
+                      <DetailItem label="Status"><ProductStatusBadge status={product.status} /></DetailItem>
+                      <DetailItem wide label="Description">{product.description}</DetailItem>
+                    </DetailList>
+                  </DialogSection>
+                  <DialogSection title="Record">
+                    <DetailList>
+                      <DetailItem label="Created">{formatDate(product.createdAt)}</DetailItem>
+                      <DetailItem label="Updated">{formatDate(product.updatedAt)}</DetailItem>
+                    </DetailList>
+                  </DialogSection></div>
             </DTabsContent>
             <DTabsContent value="features">
               <ProductFeaturesTab product={product} features={detail.features} />
@@ -185,7 +157,7 @@ export function ProductDetailDialog({
             </DTabsContent>
           </DTabs>
         </div>
-      </DDialog>
+      </AppDialog>
       <ProductFormDialog
         open={isEditDialogOpen}
         mode="edit"

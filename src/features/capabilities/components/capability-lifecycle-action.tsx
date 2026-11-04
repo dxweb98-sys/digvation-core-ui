@@ -1,4 +1,5 @@
-import { DButton, DDialog, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { DButton, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { Capability, CapabilityStatus } from '../types/capability';
 import { CapabilityStatusBadge } from './capability-status-badge';
@@ -85,7 +86,7 @@ export function CapabilityLifecycleAction({
           </button>
         ))}
       </DDropdown>
-      <DDialog
+      <AppDialog kind="confirm"
         open={Boolean(targetStatus)}
         onClose={closeDialog}
         title="Confirm capability lifecycle change"
@@ -128,7 +129,7 @@ export function CapabilityLifecycleAction({
             />
           </div>
         ) : null}
-      </DDialog>
+      </AppDialog>
     </>
   );
 }

@@ -1,4 +1,5 @@
-import { DButton, DDialog, DInput, DToggle, useToast } from '@digvation/ui';
+import { DButton, DInput, DToggle, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { useProductPrices } from '../../commercial-catalog/hooks/use-commercial-catalog';
 import type { CatalogPrice } from '../../commercial-catalog/types/commercial-catalog';
@@ -87,7 +88,7 @@ function UnavailableRenewalDialog({
   onClose: () => void;
 }) {
   return (
-    <DDialog
+    <AppDialog kind="form"
       open
       onClose={onClose}
       title={title}
@@ -148,7 +149,7 @@ export function InitialSubscriptionDialog({
   }
 
   return (
-    <DDialog
+    <AppDialog kind="form"
       open
       onClose={onClose}
       title={`Set up ${summary.productName} subscription`}
@@ -225,7 +226,7 @@ export function InitialSubscriptionDialog({
           />
         </div>
       </form>
-    </DDialog>
+    </AppDialog>
   );
 }
 
@@ -298,7 +299,7 @@ export function RenewalDialog({
   }
 
   return (
-    <DDialog
+    <AppDialog kind="form"
       open
       onClose={onClose}
       title={`Renew ${summary.productName}`}
@@ -336,6 +337,6 @@ export function RenewalDialog({
           lockBillingBasis={hasLiveAddOns}
         />
       </form>
-    </DDialog>
+    </AppDialog>
   );
 }

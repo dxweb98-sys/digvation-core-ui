@@ -90,7 +90,7 @@ export function ApplicationShell() {
           </div>
           <div className="header-status">
             <span>{coreMode ? 'Core API' : 'Development data'}</span>
-            <DBadge variant={coreMode ? 'success' : 'info'} dot>
+            <DBadge variant={coreMode ? 'success' : 'info'} dot dotClassName={coreMode ? 'status-dot-live' : undefined}>
               {coreMode ? 'Connected' : 'Mock'}
             </DBadge>
           </div>
@@ -108,7 +108,9 @@ export function ApplicationShell() {
           <OperatorProfile />
         </div>
         <main className="application-content">
-          <Outlet />
+          <div className="page-enter" key={location.pathname}>
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

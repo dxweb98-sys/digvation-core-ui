@@ -2,9 +2,9 @@ import {
   DConnectionError,
   DDataTable,
   DEmptyState,
-  DLoadingIndicator,
   type TableColumn,
 } from '@digvation/ui';
+import { ContentSkeleton } from '../../../shared/ui/content-skeleton';
 import { useState } from 'react';
 import { useClientInstallations } from '../hooks/use-installations';
 import type { InstallationSummary } from '../types/installation';
@@ -42,7 +42,7 @@ export function ClientInstallationsTab({ clientId }: { clientId: string }) {
   const installationsQuery = useClientInstallations(clientId);
 
   if (installationsQuery.isPending) {
-    return <div className="installation-state"><DLoadingIndicator label="Loading installations" /></div>;
+    return <ContentSkeleton label="Loading installations" rows={3} />;
   }
   if (installationsQuery.isError) {
     return (

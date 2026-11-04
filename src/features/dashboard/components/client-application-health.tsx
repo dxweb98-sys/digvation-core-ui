@@ -53,10 +53,9 @@ export function ClientApplicationHealth({
   applications: ClientApplicationHealthData[];
 }) {
   return (
-    <section className="dashboard-section" aria-labelledby="application-health-title">
+    <section className="dashboard-section bento-full" aria-labelledby="application-health-title">
       <div className="dashboard-section-heading compact-heading">
         <div>
-          <p className="section-eyebrow">Live estate</p>
           <h2 id="application-health-title">Client application health</h2>
         </div>
         <span className="section-count">{applications.length} installations</span>

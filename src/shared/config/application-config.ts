@@ -4,7 +4,7 @@ const applicationConfigSchema = z.object({
   dataSourceMode: z.enum(['mock', 'core']).default('mock'),
   coreApiUrl: z.string().url().default('http://localhost:4002'),
   mockDashboardState: z
-    .enum(['populated', 'empty', 'error'])
+    .enum(['populated', 'no-trends', 'empty', 'error'])
     .default('populated'),
 });
 

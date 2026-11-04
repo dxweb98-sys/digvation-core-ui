@@ -1,11 +1,11 @@
 import {
   DButton,
   DCheckbox,
-  DDialog,
   DEmptyState,
   DLoadingIndicator,
   useToast,
 } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 
 import { ProductStatusBadge } from '../../products/components/product-status-badge';
@@ -156,12 +156,11 @@ export function ClientProductFeaturesDialog({
   const error = productDetail.error ?? featureEntitlements.error;
 
   return (
-    <DDialog
+    <AppDialog kind="wide"
       open={open}
       onClose={onClose}
       title={relationship ? `Configure ${relationship.productName}` : 'Configure product'}
       description="Manage this client product's explicit feature entitlement set."
-      size="lg"
     >
       {!relationship ? null : isPending ? (
         <div className="client-product-dialog-state">
@@ -201,6 +200,6 @@ export function ClientProductFeaturesDialog({
           onClose={onClose}
         />
       )}
-    </DDialog>
+    </AppDialog>
   );
 }

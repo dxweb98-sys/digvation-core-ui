@@ -1,4 +1,5 @@
-import { DButton, DDialog, DInput } from '@digvation/ui';
+import { DButton, DInput } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { AddOnOffering } from '../types/commercial-catalog';
 
@@ -45,7 +46,7 @@ export function AddOnOfferingDialog({
     description.length <= 500;
 
   return (
-    <DDialog
+    <AppDialog kind="form"
       open={open}
       onClose={onClose}
       title={offering ? 'Edit add-on offering' : 'Create add-on offering'}
@@ -114,6 +115,6 @@ export function AddOnOfferingDialog({
           onChange={setDescription}
         />
       </form>
-    </DDialog>
+    </AppDialog>
   );
 }

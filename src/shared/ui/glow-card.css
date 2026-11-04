@@ -1,0 +1,95 @@
+.glow-card {
+  --glow-color: var(--cc-accent);
+  /* Keyboard focus has no pointer position, so the glow starts at the top edge. */
+  --glow-x: 50%;
+  --glow-y: 0%;
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  padding: var(--cc-space-4);
+  background: var(--cc-surface);
+  border-radius: var(--cc-radius-lg);
+  box-shadow: inset 0 0 0 1px var(--cc-line);
+}
+
+.glow-card-warning {
+  --glow-color: var(--cc-status-warning);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--cc-status-warning) 45%, var(--cc-line)),
+    0 0 24px color-mix(in srgb, var(--cc-status-warning) 8%, transparent);
+}
+
+.glow-card-danger {
+  --glow-color: var(--cc-status-danger);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--cc-status-danger) 55%, var(--cc-line)),
+    0 0 24px color-mix(in srgb, var(--cc-status-danger) 10%, transparent);
+}
+
+/* A raised card keeps its chart tooltip above the next card in the grid. */
+.glow-card:hover,
+.glow-card:focus-within {
+  z-index: 1;
+}
+
+.glow-card-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.glow-card-layer::before,
+.glow-card-layer::after,
+.glow-card-grid {
+  position: absolute;
+  inset: 0;
+  content: '';
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--motion-slow) var(--ease-standard);
+}
+
+/* The border ring: only the 1px padding survives the mask. */
+.glow-card-layer::before {
+  padding: 1px;
+  background: radial-gradient(240px circle at var(--glow-x) var(--glow-y), var(--glow-color), transparent 70%);
+  mask:
+    linear-gradient(black, black) content-box exclude,
+    linear-gradient(black, black);
+}
+
+.glow-card-layer::after {
+  background: radial-gradient(
+    360px circle at var(--glow-x) var(--glow-y),
+    color-mix(in srgb, var(--glow-color) 8%, transparent),
+    transparent 70%
+  );
+}
+
+.glow-card-grid {
+  background-image:
+    linear-gradient(var(--cc-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cc-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(180px circle at var(--glow-x) var(--glow-y), black, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .glow-card:hover .glow-card-layer::before,
+  .glow-card:hover .glow-card-layer::after,
+  .glow-card:hover .glow-card-grid,
+  .glow-card:focus-within .glow-card-layer::before,
+  .glow-card:focus-within .glow-card-layer::after,
+  .glow-card:focus-within .glow-card-grid {
+    opacity: 1;
+  }
+}
+
+/* Without pointer-follow, focus still shows through a plain static border. */
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .glow-card:focus-within {
+    box-shadow: inset 0 0 0 1px var(--glow-color);
+  }
+}

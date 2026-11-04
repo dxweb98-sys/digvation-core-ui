@@ -1,12 +1,10 @@
 import {
   DButton,
-  DCard,
-  DCardContent,
   DConnectionError,
-  DDialog,
   DEmptyState,
   DLoadingIndicator,
 } from '@digvation/ui';
+import { AppDialog, DetailItem, DetailList, DialogActions, DialogSection } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { useCapabilityDetail } from '../hooks/use-capability-detail';
 import { useCapabilityStatusTransition } from '../hooks/use-capability-mutations';
@@ -37,35 +35,35 @@ export function CapabilityDetailDialog({
 
   if (capabilityQuery.isPending) {
     return (
-      <DDialog open={open} onClose={onClose} title="Capability details" size="lg">
+      <AppDialog kind="detail" open={open} onClose={onClose} title="Capability details">
         <div className="capability-page-state">
           <DLoadingIndicator label="Loading capability detail" />
         </div>
-      </DDialog>
+      </AppDialog>
     );
   }
 
   if (capabilityQuery.isError) {
     return (
-      <DDialog open={open} onClose={onClose} title="Capability unavailable" size="lg">
+      <AppDialog kind="detail" open={open} onClose={onClose} title="Capability unavailable">
         <DConnectionError
           title="Capability unavailable"
           message="Capability information could not be loaded."
           detail={capabilityQuery.error.message}
           onRetry={() => void capabilityQuery.refetch()}
         />
-      </DDialog>
+      </AppDialog>
     );
   }
 
   if (!capabilityQuery.data) {
     return (
-      <DDialog open={open} onClose={onClose} title="Capability not found" size="lg">
+      <AppDialog kind="detail" open={open} onClose={onClose} title="Capability not found">
         <DEmptyState
           title="Capability not found"
           description="The requested capability record does not exist or is no longer available."
         />
-      </DDialog>
+      </AppDialog>
     );
   }
 
@@ -81,59 +79,35 @@ export function CapabilityDetailDialog({
 
   return (
     <>
-      <DDialog
+      <AppDialog kind="detail"
         open={open}
         onClose={onClose}
-        size="lg"
         title={capability.name}
-        description={<code className="capability-code">{capability.code}</code>}
+        status={<CapabilityStatusBadge status={capability.status} />}
+        identifier={capability.code}
         footer={
-          <div className="capability-dialog-actions">
-            <DButton variant="outline" onClick={onClose}>
-              Close
-            </DButton>
-            <DButton variant="outline" onClick={() => setIsEditDialogOpen(true)}>
-              Edit Capability
-            </DButton>
-            <CapabilityLifecycleAction
-              capability={capability}
-              isSubmitting={statusTransition.isPending}
-              onTransition={handleTransition}
-            />
-          </div>
+          <DialogActions
+            destructive={<CapabilityLifecycleAction capability={capability} isSubmitting={statusTransition.isPending} onTransition={handleTransition} />}
+            secondary={<DButton variant="outline" onClick={onClose}>Close</DButton>}
+            primary={<DButton onClick={() => setIsEditDialogOpen(true)}>Edit Capability</DButton>}
+          />
         }
       >
-        <DCard variant="outlined">
-          <DCardContent>
-            <dl className="capability-overview-list">
-              <div>
-                <dt>Capability Name</dt>
-                <dd>{capability.name}</dd>
-              </div>
-              <div>
-                <dt>Capability Code</dt>
-                <dd><code className="capability-code">{capability.code}</code></dd>
-              </div>
-              <div>
-                <dt>Description</dt>
-                <dd>{capability.description ?? 'Not recorded'}</dd>
-              </div>
-              <div>
-                <dt>Status</dt>
-                <dd><CapabilityStatusBadge status={capability.status} /></dd>
-              </div>
-              <div>
-                <dt>Created</dt>
-                <dd>{formatDate(capability.createdAt)}</dd>
-              </div>
-              <div>
-                <dt>Updated</dt>
-                <dd>{formatDate(capability.updatedAt)}</dd>
-              </div>
-            </dl>
-          </DCardContent>
-        </DCard>
-      </DDialog>
+        <DialogSection title="Capability">
+          <DetailList>
+            <DetailItem label="Capability Name">{capability.name}</DetailItem>
+            <DetailItem label="Capability Code"><code className="capability-code">{capability.code}</code></DetailItem>
+            <DetailItem label="Status"><CapabilityStatusBadge status={capability.status} /></DetailItem>
+            <DetailItem wide label="Description">{capability.description}</DetailItem>
+          </DetailList>
+        </DialogSection>
+        <DialogSection title="Record">
+          <DetailList>
+            <DetailItem label="Created">{formatDate(capability.createdAt)}</DetailItem>
+            <DetailItem label="Updated">{formatDate(capability.updatedAt)}</DetailItem>
+          </DetailList>
+        </DialogSection>
+      </AppDialog>
       <CapabilityFormDialog
         open={isEditDialogOpen}
         mode="edit"

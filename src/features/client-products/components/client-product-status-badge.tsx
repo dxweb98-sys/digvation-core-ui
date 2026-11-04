@@ -15,5 +15,5 @@ function formatStatus(status: ClientProductStatus) {
 }
 
 export function ClientProductStatusBadge({ status }: { status: ClientProductStatus }) {
-  return <DBadge variant={STATUS_VARIANTS[status]} dot>{formatStatus(status)}</DBadge>;
+  return <DBadge variant={STATUS_VARIANTS[status]} dot dotClassName={status === 'PROVISIONING' ? 'status-dot-live' : undefined}>{formatStatus(status)}</DBadge>;
 }

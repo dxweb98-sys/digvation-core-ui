@@ -1,4 +1,5 @@
-import { DButton, DDialog, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { DButton, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { Client, ClientStatus } from '../types/client';
 import { ClientStatusBadge } from './client-status-badge';
@@ -80,7 +81,7 @@ export function ClientLifecycleAction({
           </button>
         ))}
       </DDropdown>
-      <DDialog
+      <AppDialog kind="confirm"
         open={Boolean(targetStatus)}
         onClose={closeDialog}
         title="Confirm client lifecycle change"
@@ -111,7 +112,7 @@ export function ClientLifecycleAction({
             />
           </div>
         ) : null}
-      </DDialog>
+      </AppDialog>
     </>
   );
 }

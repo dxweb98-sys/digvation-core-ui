@@ -1,4 +1,5 @@
-import { DAlert, DButton, DDialog, useToast } from '@digvation/ui';
+import { DAlert, DButton, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useEffect, useRef, useState } from 'react';
 import {
   useCreateInstallation,
@@ -185,10 +186,9 @@ export function InstallationFormDialog({
   const values = installation ? valuesFromInstallation(installation) : CREATE_DEFAULTS;
 
   return (
-    <DDialog
+    <AppDialog kind="wide"
       open={open}
       onClose={() => !isSubmitting && onClose()}
-      size="xl"
       title={isEditing ? `Edit ${installation?.name ?? 'installation'}` : 'Add installation'}
       description={
         isEditing
@@ -215,6 +215,6 @@ export function InstallationFormDialog({
         defaultValues={values}
         onSubmit={submit}
       />
-    </DDialog>
+    </AppDialog>
   );
 }

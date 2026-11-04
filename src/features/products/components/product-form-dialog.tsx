@@ -1,4 +1,5 @@
-import { DButton, DDialog, useToast } from '@digvation/ui';
+import { DButton, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { ProductForm } from './product-form';
 import { useCreateProduct, useUpdateProduct } from '../hooks/use-product-mutations';
 import type { ProductFormValues } from '../schemas/product-form-schema';
@@ -33,7 +34,7 @@ export function ProductFormDialog({ open, mode, product, onClose }: { open: bool
   }
 
   return (
-    <DDialog
+    <AppDialog kind="form"
       open={open}
       onClose={closeDialog}
       title={isEditing ? `Edit ${product?.name ?? 'product'}` : 'Add product'}
@@ -41,6 +42,6 @@ export function ProductFormDialog({ open, mode, product, onClose }: { open: bool
       footer={<div className="product-dialog-actions"><DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton><DButton form={PRODUCT_FORM_ID} type="submit" loading={isSubmitting}>{isEditing ? 'Save Changes' : 'Create Product'}</DButton></div>}
     >
       <ProductForm formId={PRODUCT_FORM_ID} mode={mode} defaultValues={isEditing && product ? { code: product.code, name: product.name, description: product.description ?? '' } : { code: '', name: '', description: '' }} onSubmit={submitProduct} />
-    </DDialog>
+    </AppDialog>
   );
 }

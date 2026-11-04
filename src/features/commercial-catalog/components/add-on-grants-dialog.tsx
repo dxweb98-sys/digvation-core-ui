@@ -1,4 +1,5 @@
-import { DButton, DCheckbox, DDialog } from '@digvation/ui';
+import { DButton, DCheckbox } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { CapabilitySummary } from '../../capabilities/types/capability';
 import type { ProductFeature } from '../../products/types/product';
@@ -38,12 +39,11 @@ export function AddOnGrantsDialog({
   }
 
   return (
-    <DDialog
+    <AppDialog kind="wide"
       open={open}
       onClose={onClose}
       title={`Entitlement grants · ${offering.name}`}
       description="Choose the technical contracts unlocked by purchasing this commercial add-on. Grants are editable only while the offering is draft."
-      size="lg"
       footer={
         <div className="commercial-dialog-actions">
           <DButton variant="outline" onClick={onClose} disabled={loading}>
@@ -111,6 +111,6 @@ export function AddOnGrantsDialog({
           </div>
         </section>
       </div>
-    </DDialog>
+    </AppDialog>
   );
 }

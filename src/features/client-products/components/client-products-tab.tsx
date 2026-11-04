@@ -3,9 +3,9 @@ import {
   DConnectionError,
   DDataTable,
   DEmptyState,
-  DLoadingIndicator,
   type TableColumn,
 } from '@digvation/ui';
+import { ContentSkeleton } from '../../../shared/ui/content-skeleton';
 import { useState } from 'react';
 
 import { ClientCapabilitiesSection } from '../../client-capabilities/components/client-capabilities-section';
@@ -72,9 +72,7 @@ export function ClientProductsTab({
 
   if (clientProductsQuery.isPending) {
     return (
-      <div className="client-product-tab-state">
-        <DLoadingIndicator label="Loading product relationships" />
-      </div>
+      <ContentSkeleton label="Loading product relationships" rows={3} />
     );
   }
   if (clientProductsQuery.isError) {
