@@ -1,4 +1,5 @@
-import { DButton, DDialog, useToast } from '@digvation/ui';
+import { DAlert, DButton, DDialog, useToast } from '@digvation/ui';
+import { useEffect, useRef, useState } from 'react';
 import {
   useCreateInstallation,
   useReplaceInstallationProducts,
@@ -50,6 +51,12 @@ function valuesFromInstallation(installation: InstallationSummary): Installation
   };
 }
 
+function productSetChanged(installation: InstallationSummary, clientProductIds: string[]) {
+  const current = new Set(installation.products.map((product) => product.clientProductId));
+  const next = new Set(clientProductIds);
+  return current.size !== next.size || [...next].some((id) => !current.has(id));
+}
+
 const CREATE_DEFAULTS: InstallationFormValues = {
   clientId: '',
   clientProductIds: [],
@@ -88,6 +95,8 @@ export function InstallationFormDialog({
   const replaceProducts = useReplaceInstallationProducts();
   const updateBranding = useUpdateInstallationBranding();
   const { showToast } = useToast();
+  const [saveError, setSaveError] = useState<{ title: string; message: string } | null>(null);
+  const saveErrorRef = useRef<HTMLDivElement>(null);
   const isEditing = mode === 'edit';
   const isSubmitting =
     createInstallation.isPending ||
@@ -95,7 +104,18 @@ export function InstallationFormDialog({
     replaceProducts.isPending ||
     updateBranding.isPending;
 
+  useEffect(() => {
+    if (!open) setSaveError(null);
+  }, [open]);
+
+  useEffect(() => {
+    if (saveError) saveErrorRef.current?.scrollIntoView?.({ block: 'nearest' });
+  }, [saveError]);
+
   async function submit(values: InstallationFormValues) {
+    setSaveError(null);
+    // Edits are separate CORE calls, so a later call can fail after earlier ones saved.
+    let savedEarlierStep = false;
     try {
       const branding = brandingFromValues(values);
       if (!isEditing) {
@@ -125,15 +145,19 @@ export function InstallationFormDialog({
         // Policy-safe ordering when crossing the Dedicated/white-label boundary.
         if (values.deploymentMode === 'DEDICATED') {
           await updateBranding.mutateAsync({ installationId: installation.id, branding });
+          savedEarlierStep = true;
           await updateInstallation.mutateAsync(metadata);
         } else {
           await updateInstallation.mutateAsync(metadata);
+          savedEarlierStep = true;
           await updateBranding.mutateAsync({ installationId: installation.id, branding });
         }
-        await replaceProducts.mutateAsync({
-          installationId: installation.id,
-          clientProductIds: values.clientProductIds,
-        });
+        if (productSetChanged(installation, values.clientProductIds)) {
+          await replaceProducts.mutateAsync({
+            installationId: installation.id,
+            clientProductIds: values.clientProductIds,
+          });
+        }
       }
       showToast({
         title: isEditing ? 'Installation updated' : 'Installation created',
@@ -144,11 +168,17 @@ export function InstallationFormDialog({
       });
       onClose();
     } catch (error) {
-      showToast({
-        title: isEditing ? 'Installation update failed' : 'Installation creation failed',
-        description: error instanceof Error ? error.message : 'The installation could not be saved.',
-        variant: 'danger',
-      });
+      const failure = error instanceof Error ? error.message : 'The installation could not be saved.';
+      const title = savedEarlierStep
+        ? 'Installation partly updated'
+        : isEditing
+          ? 'Installation update failed'
+          : 'Installation creation failed';
+      const message = savedEarlierStep
+        ? `${failure.replace(/\.?$/, '.')} Your other changes in this form were saved.`
+        : failure;
+      setSaveError({ title, message });
+      showToast({ title, description: message, variant: 'danger' });
     }
   }
 
@@ -174,6 +204,11 @@ export function InstallationFormDialog({
         </div>
       }
     >
+      {saveError ? (
+        <div ref={saveErrorRef} className="installation-form-save-error">
+          <DAlert variant="danger" title={saveError.title}>{saveError.message}</DAlert>
+        </div>
+      ) : null}
       <InstallationForm
         formId={FORM_ID}
         mode={mode}

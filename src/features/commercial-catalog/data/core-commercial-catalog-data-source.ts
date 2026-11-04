@@ -16,7 +16,8 @@ interface CoreCatalogPrice {
 
 interface CoreAddOnSummary {
   id: string;
-  product_id: string;
+  product_id: string | null;
+  scope?: 'PRODUCT' | 'CLIENT';
   code: string;
   name: string;
   description: string | null;
@@ -60,7 +61,7 @@ function mapPrice(item: CoreCatalogPrice): CatalogPrice {
 function mapAddOn(item: CoreAddOnDetail): AddOnOffering {
   return {
     id: item.id,
-    productId: item.product_id,
+    productId: item.product_id ?? undefined,
     code: item.code,
     name: item.name,
     description: item.description ?? undefined,
@@ -129,7 +130,13 @@ export const coreCommercialCatalogDataSource: CommercialCatalogDataSource = {
         await coreApiRequest<CoreAddOnDetail>(`/add-ons/${addOnOfferingId}`),
       );
     } catch (error) {
-      if (error instanceof CoreApiError && error.status === 404) return null;
+      // CORE answers 409 for a CLIENT-scope offering, which this catalog does not manage.
+      if (
+        error instanceof CoreApiError &&
+        (error.status === 404 || error.status === 409)
+      ) {
+        return null;
+      }
       throw error;
     }
   },

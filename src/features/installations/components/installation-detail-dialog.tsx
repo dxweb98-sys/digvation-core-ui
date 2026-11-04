@@ -5,6 +5,7 @@ import {
   DConnectionError,
   DDialog,
   DEmptyState,
+  DInfoNote,
   DLoadingIndicator,
 } from '@digvation/ui';
 import { useState } from 'react';
@@ -69,6 +70,7 @@ export function InstallationDetailDialog({
 
   const installation = installationQuery.data;
   const branding = installation.branding;
+  const isDecommissioned = installation.status === 'DECOMMISSIONED';
 
   return (
     <>
@@ -81,7 +83,9 @@ export function InstallationDetailDialog({
         footer={
           <div className="installation-dialog-actions">
             <DButton variant="outline" onClick={onClose}>Close</DButton>
-            <DButton variant="outline" onClick={() => setIsEditOpen(true)}>Edit Installation</DButton>
+            {isDecommissioned ? null : (
+              <DButton variant="outline" onClick={() => setIsEditOpen(true)}>Edit Installation</DButton>
+            )}
             <InstallationLifecycleAction
               installation={installation}
               isSubmitting={transition.isPending}
@@ -94,6 +98,11 @@ export function InstallationDetailDialog({
       >
         <div className="installation-detail">
           <InstallationStatusBadge status={installation.status} />
+          {isDecommissioned ? (
+            <DInfoNote>
+              This installation is decommissioned and can no longer be edited. Its products stay listed as history.
+            </DInfoNote>
+          ) : null}
           <DCard variant="outlined">
             <DCardContent>
               <dl className="installation-overview-list">

@@ -39,7 +39,7 @@ export interface AddOnGrantCapability {
 
 export interface AddOnOffering {
   id: string;
-  productId: string;
+  productId?: string;
   code: string;
   name: string;
   description?: string;

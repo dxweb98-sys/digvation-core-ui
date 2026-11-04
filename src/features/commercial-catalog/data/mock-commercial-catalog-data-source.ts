@@ -172,7 +172,9 @@ export function createMockCommercialCatalogDataSource(): CommercialCatalogDataSo
       if (item.status !== 'DRAFT') {
         throw new Error('Add-on grants can only be changed while draft.');
       }
-      const detail = await productDataSource.getProductDetail(item.productId);
+      const detail = item.productId
+        ? await productDataSource.getProductDetail(item.productId)
+        : null;
       if (!detail) throw new Error('Product catalog was not found.');
       const features = detail.features.filter((feature) =>
         input.featureIds.includes(feature.id),
@@ -215,7 +217,9 @@ export function createMockCommercialCatalogDataSource(): CommercialCatalogDataSo
         );
       }
       if (input.targetStatus === 'ACTIVE') {
-        const detail = await productDataSource.getProductDetail(item.productId);
+        const detail = item.productId
+          ? await productDataSource.getProductDetail(item.productId)
+          : null;
         if (!detail) throw new Error('Product catalog was not found.');
         if (detail.product.status !== 'ACTIVE') {
           throw new Error('Product must be active before activating an add-on offering.');

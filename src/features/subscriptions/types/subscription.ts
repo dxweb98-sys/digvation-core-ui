@@ -22,7 +22,7 @@ export type ProductConfigurationValueType = 'INTEGER' | 'BOOLEAN' | 'STRING';
 
 export interface Subscription {
   id: string;
-  clientProductId: string;
+  clientProductId?: string;
   status: SubscriptionStatus;
   autoRenew: boolean;
   renewalNoticeDays: number;
