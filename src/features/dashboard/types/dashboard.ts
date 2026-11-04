@@ -84,6 +84,59 @@ export interface OperationalEvent {
   severity: AttentionSeverity;
 }
 
+/**
+ * PROVISIONAL: mock data only. CORE has no dashboard endpoint yet and will own
+ * the final contract for everything from here to DashboardTrends.
+ */
+export type DashboardTrendRange = '24h' | '7d';
+
+export interface ResourceTrendPoint {
+  at: string;
+  cpu: number;
+  memory: number;
+  disk: number;
+}
+
+export interface ResourceTrendSeries {
+  nodeId: string;
+  nodeName: string;
+  points: ResourceTrendPoint[];
+}
+
+export interface DeploymentTrendPoint {
+  at: string;
+  success: number;
+  failed: number;
+  inProgress: number;
+  pending: number;
+}
+
+export interface EventTrendPoint {
+  at: string;
+  info: number;
+  warning: number;
+  critical: number;
+}
+
+export interface EstateTrendPoint {
+  at: string;
+  clientCount: number;
+  managedInstallationCount: number;
+  healthyInstallationCount: number;
+  openIncidentCount: number;
+}
+
+export interface DashboardTrendSet {
+  resources: ResourceTrendSeries[];
+  deployments: DeploymentTrendPoint[];
+  events: EventTrendPoint[];
+}
+
+export interface DashboardTrends {
+  ranges: Record<DashboardTrendRange, DashboardTrendSet>;
+  estate: EstateTrendPoint[];
+}
+
 export interface DashboardOverview {
   generatedAtLabel: string;
   summary: DashboardSummary;
@@ -92,4 +145,5 @@ export interface DashboardOverview {
   infrastructure: InfrastructureSummary[];
   recentDeployments: RecentDeployment[];
   recentEvents: OperationalEvent[];
+  trends?: DashboardTrends;
 }

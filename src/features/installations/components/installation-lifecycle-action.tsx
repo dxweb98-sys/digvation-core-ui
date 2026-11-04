@@ -1,4 +1,5 @@
-import { DButton, DDialog, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { DButton, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { InstallationStatus, InstallationSummary } from '../types/installation';
 import { InstallationStatusBadge } from './installation-status-badge';
@@ -91,7 +92,7 @@ export function InstallationLifecycleAction({
           </button>
         ))}
       </DDropdown>
-      <DDialog
+      <AppDialog kind="confirm"
         open={Boolean(targetStatus)}
         onClose={closeDialog}
         title="Confirm installation lifecycle change"
@@ -127,7 +128,7 @@ export function InstallationLifecycleAction({
             />
           </div>
         ) : null}
-      </DDialog>
+      </AppDialog>
     </>
   );
 }

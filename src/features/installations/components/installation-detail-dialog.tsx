@@ -1,13 +1,11 @@
 import {
   DButton,
-  DCard,
-  DCardContent,
   DConnectionError,
-  DDialog,
   DEmptyState,
   DInfoNote,
   DLoadingIndicator,
 } from '@digvation/ui';
+import { AppDialog, DetailItem, DetailList, DialogActions, DialogSection } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { InstallationInfrastructureTab } from '../../infrastructure/components/installation-infrastructure-tab';
 import { InstallationActionRequest } from '../../operations/components/installation-action-request';
@@ -41,30 +39,30 @@ export function InstallationDetailDialog({
 
   if (installationQuery.isPending) {
     return (
-      <DDialog open={open} onClose={onClose} size="xl" title="Installation details">
+      <AppDialog kind="detail" open={open} onClose={onClose} title="Installation details">
         <div className="installation-state"><DLoadingIndicator label="Loading installation detail" /></div>
-      </DDialog>
+      </AppDialog>
     );
   }
 
   if (installationQuery.isError) {
     return (
-      <DDialog open={open} onClose={onClose} size="xl" title="Installation unavailable">
+      <AppDialog kind="detail" open={open} onClose={onClose} title="Installation unavailable">
         <DConnectionError
           title="Installation unavailable"
           message="Installation information could not be loaded."
           detail={installationQuery.error.message}
           onRetry={() => void installationQuery.refetch()}
         />
-      </DDialog>
+      </AppDialog>
     );
   }
 
   if (!installationQuery.data) {
     return (
-      <DDialog open={open} onClose={onClose} size="xl" title="Installation not found">
+      <AppDialog kind="detail" open={open} onClose={onClose} title="Installation not found">
         <DEmptyState title="Installation not found" description="The requested installation does not exist." />
-      </DDialog>
+      </AppDialog>
     );
   }
 
@@ -74,51 +72,53 @@ export function InstallationDetailDialog({
 
   return (
     <>
-      <DDialog
+      <AppDialog kind="detail"
         open={open}
         onClose={onClose}
-        size="xl"
         title={installation.name}
-        description={<code className="installation-code">{installation.code}</code>}
+        status={<InstallationStatusBadge status={installation.status} />}
+        identifier={installation.code}
+        meta={`${installation.clientName}, ${installation.environment}`}
         footer={
-          <div className="installation-dialog-actions">
-            <DButton variant="outline" onClick={onClose}>Close</DButton>
-            {isDecommissioned ? null : (
-              <DButton variant="outline" onClick={() => setIsEditOpen(true)}>Edit Installation</DButton>
-            )}
-            <InstallationLifecycleAction
-              installation={installation}
-              isSubmitting={transition.isPending}
-              onTransition={async (targetStatus: InstallationStatus, reason) => {
-                await transition.mutateAsync({ installationId: installation.id, targetStatus, reason });
-              }}
-            />
-          </div>
+          <DialogActions
+            destructive={
+              <InstallationLifecycleAction
+                installation={installation}
+                isSubmitting={transition.isPending}
+                onTransition={async (targetStatus: InstallationStatus, reason) => {
+                  await transition.mutateAsync({ installationId: installation.id, targetStatus, reason });
+                }}
+              />
+            }
+            secondary={<DButton variant="outline" onClick={onClose}>Close</DButton>}
+            primary={isDecommissioned ? null : <DButton onClick={() => setIsEditOpen(true)}>Edit Installation</DButton>}
+          />
         }
       >
         <div className="installation-detail">
-          <InstallationStatusBadge status={installation.status} />
           {isDecommissioned ? (
             <DInfoNote>
               This installation is decommissioned and can no longer be edited. Its products stay listed as history.
             </DInfoNote>
           ) : null}
-          <DCard variant="outlined">
-            <DCardContent>
-              <dl className="installation-overview-list">
-                <div><dt>Client</dt><dd>{installation.clientName} · {installation.clientCode}</dd></div>
-                <div><dt>Environment</dt><dd>{installation.environment}</dd></div>
-                <div><dt>Lifecycle status</dt><dd><InstallationStatusBadge status={installation.status} /></dd></div>
-                <div><dt>Deployment mode</dt><dd>{installation.deploymentMode}</dd></div>
-                <div><dt>Infrastructure ownership</dt><dd>{installation.infrastructureOwnership}</dd></div>
-                <div><dt>Managed by Digvation</dt><dd>{installation.managedByDigvation ? 'Yes' : 'No'}</dd></div>
-                <div><dt>Region</dt><dd>{installation.region ?? 'Not recorded'}</dd></div>
-                <div><dt>Application URL</dt><dd>{installation.applicationUrl ? <a href={installation.applicationUrl} target="_blank" rel="noreferrer">{installation.applicationUrl}</a> : 'Not recorded'}</dd></div>
-                <div><dt>Created</dt><dd>{formatDate(installation.createdAt)}</dd></div>
-                <div><dt>Updated</dt><dd>{formatDate(installation.updatedAt)}</dd></div>
-              </dl>
-            </DCardContent>
-          </DCard>
+          <div><DialogSection title="Deployment">
+            <DetailList>
+              <DetailItem label="Client">{installation.clientName} · {installation.clientCode}</DetailItem>
+              <DetailItem label="Environment">{installation.environment}</DetailItem>
+              <DetailItem label="Lifecycle status"><InstallationStatusBadge status={installation.status} /></DetailItem>
+              <DetailItem label="Deployment mode">{installation.deploymentMode}</DetailItem>
+              <DetailItem label="Infrastructure ownership">{installation.infrastructureOwnership}</DetailItem>
+              <DetailItem label="Managed by Digvation">{installation.managedByDigvation ? 'Yes' : 'No'}</DetailItem>
+              <DetailItem label="Region">{installation.region}</DetailItem>
+              <DetailItem label="Application URL">{installation.applicationUrl ? <a href={installation.applicationUrl} target="_blank" rel="noreferrer">{installation.applicationUrl}</a> : null}</DetailItem>
+            </DetailList>
+          </DialogSection>
+          <DialogSection title="Record">
+            <DetailList>
+              <DetailItem label="Created">{formatDate(installation.createdAt)}</DetailItem>
+              <DetailItem label="Updated">{formatDate(installation.updatedAt)}</DetailItem>
+            </DetailList>
+          </DialogSection></div>
 
           <section className="installation-infrastructure-section">
             <h2>Products</h2>
@@ -137,18 +137,14 @@ export function InstallationDetailDialog({
           <section className="installation-infrastructure-section">
             <h2>Branding</h2>
             <p>Branding is independent from Product entitlement and deployment ownership.</p>
-            <DCard variant="outlined">
-              <DCardContent>
-                <dl className="installation-overview-list">
-                  <div><dt>Mode</dt><dd>{branding.mode}</dd></div>
-                  <div><dt>Brand name</dt><dd>{branding.brandName ?? (branding.mode === 'DIGVATION' ? 'Digvation' : 'Not recorded')}</dd></div>
-                  <div><dt>Custom domain</dt><dd>{branding.customDomain ?? 'Not recorded'}</dd></div>
-                  <div><dt>Primary color</dt><dd>{branding.primaryColor ?? 'Not recorded'}</dd></div>
-                  <div><dt>Secondary color</dt><dd>{branding.secondaryColor ?? 'Not recorded'}</dd></div>
-                  <div><dt>Support</dt><dd>{branding.supportName ?? branding.supportEmail ?? 'Not recorded'}</dd></div>
-                </dl>
-              </DCardContent>
-            </DCard>
+            <DetailList>
+                  <DetailItem label="Mode">{branding.mode}</DetailItem>
+                  <DetailItem label="Brand name">{branding.brandName ?? (branding.mode === 'DIGVATION' ? 'Digvation' : null)}</DetailItem>
+                  <DetailItem label="Custom domain">{branding.customDomain}</DetailItem>
+                  <DetailItem label="Primary color">{branding.primaryColor}</DetailItem>
+                  <DetailItem label="Secondary color">{branding.secondaryColor}</DetailItem>
+                  <DetailItem label="Support">{branding.supportName ?? branding.supportEmail}</DetailItem>
+                </DetailList>
           </section>
 
           <section className="installation-infrastructure-section">
@@ -163,7 +159,7 @@ export function InstallationDetailDialog({
           </section>
           <InstallationActionRequest installationId={installation.id} installationName={installation.name} />
         </div>
-      </DDialog>
+      </AppDialog>
       <InstallationFormDialog
         open={isEditOpen}
         mode="edit"

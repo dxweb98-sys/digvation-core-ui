@@ -1,10 +1,10 @@
 import {
   DButton,
   DCurrencyInput,
-  DDialog,
   DInput,
   DSelect,
 } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type {
   BillingCycle,
@@ -48,7 +48,7 @@ export function CatalogPriceDialog({
     values.amountMinor >= 0;
 
   return (
-    <DDialog
+    <AppDialog kind="form"
       open={open}
       onClose={onClose}
       title={title}
@@ -114,6 +114,6 @@ export function CatalogPriceDialog({
           }
         />
       </form>
-    </DDialog>
+    </AppDialog>
   );
 }

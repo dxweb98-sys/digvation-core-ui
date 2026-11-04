@@ -1,4 +1,5 @@
-import { DButton, DConnectionError, DDialog, DEmptyState, DLoadingIndicator, DSelect, useToast } from '@digvation/ui';
+import { DButton, DConnectionError, DEmptyState, DLoadingIndicator, DSelect, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { useAssignableProducts } from '../hooks/use-client-products';
 import { useAssignClientProduct } from '../hooks/use-client-product-mutations';
@@ -38,7 +39,7 @@ export function AssignProductDialog({ clientId, open, onClose }: { clientId: str
 
   const canAssign = Boolean(productId) && Boolean(assignableProductsQuery.data?.length);
   return (
-    <DDialog
+    <AppDialog kind="form"
       open={open}
       onClose={closeDialog}
       title="Assign product"
@@ -46,6 +47,6 @@ export function AssignProductDialog({ clientId, open, onClose }: { clientId: str
       footer={<div className="client-product-dialog-actions"><DButton variant="outline" onClick={closeDialog} disabled={assignClientProduct.isPending}>Cancel</DButton><DButton onClick={() => void assignProduct()} disabled={!canAssign} loading={assignClientProduct.isPending}>Assign Product</DButton></div>}
     >
       {content}
-    </DDialog>
+    </AppDialog>
   );
 }

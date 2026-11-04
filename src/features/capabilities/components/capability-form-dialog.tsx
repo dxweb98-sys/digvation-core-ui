@@ -1,4 +1,5 @@
-import { DButton, DDialog, useToast } from '@digvation/ui';
+import { DButton, useToast } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { CapabilityForm } from './capability-form';
 import {
   useCreateCapability,
@@ -64,7 +65,7 @@ export function CapabilityFormDialog({
   }
 
   return (
-    <DDialog
+    <AppDialog kind="form"
       open={open}
       onClose={closeDialog}
       title={
@@ -110,6 +111,6 @@ export function CapabilityFormDialog({
         }
         onSubmit={submitCapability}
       />
-    </DDialog>
+    </AppDialog>
   );
 }

@@ -2,13 +2,13 @@ import {
   DButton,
   DConnectionError,
   DDataTable,
-  DDialog,
   DEmptyState,
   DInput,
   DSelect,
   useToast,
   type TableColumn,
 } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { useClientProducts } from '../../client-products/hooks/use-client-products';
 import { formatMoney } from '../../commercial-catalog/utils/money';
@@ -166,7 +166,8 @@ function ConfigurationDialog({
   }
 
   return (
-    <DDialog
+    <AppDialog
+      kind="form"
       open
       onClose={onClose}
       title={`${summary.productName} configuration`}
@@ -231,7 +232,7 @@ function ConfigurationDialog({
           ),
         )}
       </div>
-    </DDialog>
+    </AppDialog>
   );
 }
 
@@ -268,7 +269,8 @@ function AddOnLifecycleDialog({
   }
 
   return (
-    <DDialog
+    <AppDialog
+      kind="confirm"
       open
       onClose={onClose}
       title={`${targetStatus === 'ACTIVE' ? 'Reactivate' : targetStatus === 'SUSPENDED' ? 'Suspend' : 'Cancel'} ${addOn.addOnName}`}
@@ -293,7 +295,7 @@ function AddOnLifecycleDialog({
         maxLength={500}
         onChange={setReason}
       />
-    </DDialog>
+    </AppDialog>
   );
 }
 

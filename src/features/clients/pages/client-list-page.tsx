@@ -1,5 +1,7 @@
-import { DButton, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DStatusFilter, type TableAction, type TableColumn } from '@digvation/ui';
+import { DButton, DConnectionError, DDataTable, DEmptyState, DStatusFilter, type TableAction, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
+import { ContentSkeleton } from '../../../shared/ui/content-skeleton';
+import { useFirstReveal } from '../../../shared/ui/use-first-reveal';
 import { ClientDetailDialog } from '../components/client-detail-dialog';
 import { ClientFormDialog } from '../components/client-form-dialog';
 import { ClientStatusBadge } from '../components/client-status-badge';
@@ -42,6 +44,7 @@ export function ClientListPage() {
   const [detailClientId, setDetailClientId] = useState<string | null>(null);
   const [editClient, setEditClient] = useState<ClientListItem | null>(null);
   const clientQuery = useClientList(query);
+  const isFirstReveal = useFirstReveal(clientQuery.isSuccess);
 
   function updateQuery(nextQuery: Partial<ClientListQuery>) {
     setQuery((currentQuery) => ({
@@ -52,7 +55,7 @@ export function ClientListPage() {
   }
 
   if (clientQuery.isPending) {
-    return <div className="clients-page-state"><DLoadingIndicator label="Loading clients" /></div>;
+    return <ContentSkeleton label="Loading clients" />;
   }
 
   if (clientQuery.isError) {
@@ -66,7 +69,7 @@ export function ClientListPage() {
   ];
 
   return (
-    <div className="clients-page">
+    <div className={`clients-page${isFirstReveal ? ' list-reveal' : ''}`}>
       <div className="clients-page-heading">
         <div>
           <p className="page-eyebrow">Customer control plane</p>

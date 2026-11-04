@@ -4,7 +4,7 @@ import type { ProductStatus } from '../types/product';
 const STATUS_VARIANTS: Record<ProductStatus, 'default' | 'success' | 'danger'> = {
   DRAFT: 'default',
   ACTIVE: 'success',
-  RETIRED: 'danger',
+  RETIRED: 'default',
 };
 
 function formatStatus(status: ProductStatus) {

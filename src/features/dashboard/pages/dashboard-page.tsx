@@ -1,14 +1,10 @@
 import { DConnectionError, DEmptyState } from '@digvation/ui';
-import { ClientApplicationHealth } from '../components/client-application-health';
+import { lazy, Suspense } from 'react';
 import { DashboardLoadingState } from '../components/dashboard-loading-state';
-import { DashboardSummary } from '../components/dashboard-summary';
-import { ManagedInfrastructure } from '../components/managed-infrastructure';
-import { OperationalHealthSummary } from '../components/operational-health-summary';
-import { RecentDeployments } from '../components/recent-deployments';
-import { RecentEvents } from '../components/recent-events';
-import { RequiresAttention } from '../components/requires-attention';
 import { useDashboardOverview } from '../hooks/use-dashboard-overview';
 import '../dashboard.css';
+
+const DashboardContent = lazy(() => import('../components/dashboard-content'));
 
 export function DashboardPage() {
   const dashboardQuery = useDashboardOverview();
@@ -32,9 +28,6 @@ export function DashboardPage() {
   }
 
   const dashboard = dashboardQuery.data;
-  const criticalAttentionCount = dashboard.attentionItems.filter(
-    (item) => item.severity === 'CRITICAL',
-  ).length;
   const isDashboardEmpty =
     dashboard.summary.clientCount === 0 &&
     dashboard.applicationHealth.length === 0 &&
@@ -65,16 +58,9 @@ export function DashboardPage() {
         <span className="dashboard-updated">{dashboard.generatedAtLabel}</span>
       </div>
 
-      <DashboardSummary
-        summary={dashboard.summary}
-        criticalAttentionCount={criticalAttentionCount}
-      />
-      <OperationalHealthSummary applications={dashboard.applicationHealth} />
-      <RequiresAttention items={dashboard.attentionItems} />
-      <ClientApplicationHealth applications={dashboard.applicationHealth} />
-      <ManagedInfrastructure infrastructure={dashboard.infrastructure} />
-      <RecentDeployments deployments={dashboard.recentDeployments} />
-      <RecentEvents events={dashboard.recentEvents} />
+      <Suspense fallback={<DashboardLoadingState />}>
+        <DashboardContent dashboard={dashboard} />
+      </Suspense>
     </div>
   );
 }

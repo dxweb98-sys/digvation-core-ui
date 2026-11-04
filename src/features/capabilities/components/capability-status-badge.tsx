@@ -4,7 +4,7 @@ import type { CapabilityStatus } from '../types/capability';
 const STATUS_VARIANTS: Record<CapabilityStatus, 'default' | 'success' | 'danger'> = {
   DRAFT: 'default',
   ACTIVE: 'success',
-  RETIRED: 'danger',
+  RETIRED: 'default',
 };
 
 function formatStatus(status: CapabilityStatus) {

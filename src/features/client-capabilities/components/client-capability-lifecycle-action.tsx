@@ -1,10 +1,10 @@
 import {
   DButton,
-  DDialog,
   DDropdown,
   DTextarea,
   useToast,
 } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 
 import type {
@@ -136,7 +136,7 @@ export function ClientCapabilityLifecycleAction({
         ))}
       </DDropdown>
 
-      <DDialog
+      <AppDialog kind="confirm"
         open={Boolean(targetStatus)}
         onClose={closeDialog}
         title="Confirm capability change"
@@ -183,7 +183,7 @@ export function ClientCapabilityLifecycleAction({
             />
           </div>
         ) : null}
-      </DDialog>
+      </AppDialog>
     </>
   );
 }

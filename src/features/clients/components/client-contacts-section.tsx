@@ -1,4 +1,5 @@
-import { DButton, DConfirmDialog, DConnectionError, DDataTable, DDialog, DEmptyState, DInput, DSelect, useToast, type TableAction, type TableColumn } from '@digvation/ui';
+import { DButton, DConfirmDialog, DConnectionError, DDataTable, DEmptyState, DInput, DSelect, useToast, type TableAction, type TableColumn } from '@digvation/ui';
+import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { useClientContacts, useCreateClientContact, useRemoveClientContact, useUpdateClientContact } from '../hooks/use-client-contacts';
 import type { ClientContact, ClientContactInput, ContactRole } from '../types/client-contact';
@@ -42,7 +43,7 @@ export function ClientContactsSection({ clientId }: { clientId: string }) {
   }
   return <section className="client-contacts-section"><div className="client-section-heading"><div><h2>Contacts</h2><p>Operational and commercial contacts for this organization.</p></div><DButton onClick={() => setEditing(null)}>Add Contact</DButton></div>
     {contactsQuery.isPending ? null : contacts.length ? <DDataTable columns={COLUMNS} data={contacts} rowKey="id" actions={actions} /> : <DEmptyState title="No contacts recorded" description="Add the first organization contact." />}
-    <DDialog open={editing !== undefined} onClose={() => setEditing(undefined)} title={editing ? 'Edit contact' : 'Add contact'} footer={<div className="client-dialog-actions"><DButton variant="outline" onClick={() => setEditing(undefined)}>Cancel</DButton><DButton form="client-contact-form" type="submit" loading={create.isPending || update.isPending}>{editing ? 'Save Changes' : 'Add Contact'}</DButton></div>}><ContactForm key={editing?.id ?? 'new'} contact={editing ?? undefined} onSubmit={submit} /></DDialog>
+    <AppDialog kind="form" open={editing !== undefined} onClose={() => setEditing(undefined)} title={editing ? 'Edit contact' : 'Add contact'} footer={<div className="client-dialog-actions"><DButton variant="outline" onClick={() => setEditing(undefined)}>Cancel</DButton><DButton form="client-contact-form" type="submit" loading={create.isPending || update.isPending}>{editing ? 'Save Changes' : 'Add Contact'}</DButton></div>}><ContactForm key={editing?.id ?? 'new'} contact={editing ?? undefined} onSubmit={submit} /></AppDialog>
     <DConfirmDialog open={Boolean(removing)} onClose={() => setRemoving(null)} title="Remove contact" message={`Remove ${removing?.name ?? 'this contact'} from this client?`} confirmLabel="Remove contact" variant="danger" loading={remove.isPending} onConfirm={confirmRemoval} />
   </section>;
 }

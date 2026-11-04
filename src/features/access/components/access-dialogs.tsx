@@ -1,4 +1,5 @@
-import { DBadge, DButton, DCheckbox, DConfirmDialog, DDialog, DInput, DSelect, useToast } from '@digvation/ui';
+import { DBadge, DButton, DCheckbox, DConfirmDialog, DInput, DSelect, useToast } from '@digvation/ui';
+import { AppDialog, DetailItem, DetailList, DialogActions } from '../../../shared/ui/app-dialog';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useCreateInvitation, useSaveRole, useUpdateUserRoles, useUserStatus } from '../hooks/use-access';
 import { formatAccessDate, effectivePermissions, PERMISSIONS, type AccessRole, type AccessUser, type AuditEntry, type RoleInput } from '../types/access';
@@ -30,20 +31,20 @@ export function UserDetailDialog({ user, roles, onClose }: { user: AccessUser; r
     } catch (error) { showToast({ title: 'Status update failed', description: errorMessage(error), variant: 'danger' }); }
   }
   return <>
-    <DDialog open onClose={() => { if (!busy) onClose(); }} ariaLabel={user.name} title={<span className="access-entity-title">{user.name}<DBadge variant={user.status === 'ACTIVE' ? 'success' : 'secondary'}>{user.status === 'ACTIVE' ? 'Active' : 'Inactive'}</DBadge></span>} description={user.email} size="lg" footer={<div className="access-actions">
-      <DButton variant="outline" disabled={busy} onClick={onClose}>Close</DButton>
-      <DButton variant="outline" disabled={busy} onClick={() => setConfirmStatus(true)}>{user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}</DButton>
-      <DButton loading={updateRoles.isPending} disabled={busy} onClick={() => void saveRoles()}>Save roles</DButton>
-    </div>}>
+    <AppDialog kind="detail" open onClose={() => { if (!busy) onClose(); }} title={user.name} status={<DBadge variant={user.status === 'ACTIVE' ? 'success' : 'secondary'}>{user.status === 'ACTIVE' ? 'Active' : 'Inactive'}</DBadge>} meta={user.email} footer={<DialogActions
+      destructive={<DButton variant="outline" disabled={busy} onClick={() => setConfirmStatus(true)}>{user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}</DButton>}
+      secondary={<DButton variant="outline" disabled={busy} onClick={onClose}>Close</DButton>}
+      primary={<DButton loading={updateRoles.isPending} disabled={busy} onClick={() => void saveRoles()}>Save roles</DButton>}
+    />}>
       <div className="access-detail-content">
         <section className="access-section" aria-labelledby="user-overview-title">
           <h3 id="user-overview-title">Overview</h3>
-          <dl className="access-detail">
-            <div><dt>Status</dt><dd>{user.status === 'ACTIVE' ? 'Active' : 'Inactive'}</dd></div>
-            <div><dt>Last activity</dt><dd>{user.lastActivityAt ? formatAccessDate(user.lastActivityAt) : 'Never'}</dd></div>
-            <div><dt>Created</dt><dd>{formatAccessDate(user.createdAt)}</dd></div>
-            <div><dt>Updated</dt><dd>{formatAccessDate(user.updatedAt)}</dd></div>
-          </dl>
+          <DetailList>
+            <DetailItem label="Status">{user.status === 'ACTIVE' ? 'Active' : 'Inactive'}</DetailItem>
+            <DetailItem label="Last activity">{user.lastActivityAt ? formatAccessDate(user.lastActivityAt) : 'Never'}</DetailItem>
+            <DetailItem label="Created">{formatAccessDate(user.createdAt)}</DetailItem>
+            <DetailItem label="Updated">{formatAccessDate(user.updatedAt)}</DetailItem>
+          </DetailList>
         </section>
         <section className="access-section" aria-labelledby="assigned-roles-title">
           <h3 id="assigned-roles-title">Assigned roles</h3>
@@ -58,7 +59,7 @@ export function UserDetailDialog({ user, roles, onClose }: { user: AccessUser; r
           <PermissionSummary permissions={capabilities} />
         </section>
       </div>
-    </DDialog>
+    </AppDialog>
     {confirmStatus && <DConfirmDialog open onClose={() => { if (!busy) setConfirmStatus(false); }} onConfirm={() => void changeStatus()} loading={updateStatus.isPending}
       title={`${user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'} ${user.name}?`} message="This updates the internal operator record." confirmLabel="Confirm status change" variant={user.status === 'ACTIVE' ? 'danger' : 'primary'} />}
   </>;
@@ -82,14 +83,14 @@ export function InvitationFormDialog({ roles, onClose }: { roles: AccessRole[]; 
       showToast({ title: 'Invitation failed', description: errorMessage(error), variant: 'danger' });
     }
   }
-  return <DDialog open onClose={() => { if (!mutation.isPending) onClose(); }} title="Create invitation" description="Creates a mock invitation record. No email is sent." footer={<div className="access-actions">
+  return <AppDialog kind="form" open onClose={() => { if (!mutation.isPending) onClose(); }} title="Create invitation" description="Creates a mock invitation record. No email is sent." footer={<div className="access-actions">
     <DButton variant="outline" disabled={mutation.isPending} onClick={onClose}>Cancel</DButton><DButton type="submit" form="access-invitation-form" loading={mutation.isPending} disabled={mutation.isPending || !roleId}>Create invitation</DButton>
   </div>}><form id="access-invitation-form" className="access-form" onSubmit={event => void submit(event)}>
     <DInput label="Email" type="email" value={email} onChange={setEmail} required disabled={mutation.isPending} />
     <DSelect label="Role" value={roleId} options={roles.map(role => ({ value: role.id, label: role.name }))} onValueChange={value => setRoleId(value as string)} disabled={mutation.isPending} />
     {!roles.length && <p>Create a role before inviting an operator.</p>}
     {error && <p role="alert">{error}</p>}
-  </form></DDialog>;
+  </form></AppDialog>;
 }
 
 export function RoleDialog({ role, assignedUserCount, onClose }: { role?: AccessRole; assignedUserCount: number; onClose: () => void }) {
@@ -131,7 +132,7 @@ export function RoleDialog({ role, assignedUserCount, onClose }: { role?: Access
       showToast({ title: 'Role save failed', description: errorMessage(error), variant: 'danger' });
     }
   }
-  return <DDialog open onClose={() => { if (!mutation.isPending) onClose(); }} title={savedRole ? editing ? 'Edit role' : savedRole.name : 'Create role'} description={editing ? savedRole?.name : savedRole?.description || undefined} size="lg" footer={<div className="access-actions">
+  return <AppDialog kind="wide" open onClose={() => { if (!mutation.isPending) onClose(); }} title={savedRole ? editing ? 'Edit role' : savedRole.name : 'Create role'} description={editing ? savedRole?.name : savedRole?.description || undefined} footer={<div className="access-actions">
     <DButton variant="outline" disabled={mutation.isPending} onClick={editing ? cancelEdit : onClose}>{editing ? 'Cancel' : 'Close'}</DButton>
     {editing ? <DButton form="access-role-form" type="submit" loading={mutation.isPending} disabled={mutation.isPending || !dirty}>{savedRole ? 'Save changes' : 'Save role'}</DButton> : <DButton onClick={() => setEditing(true)}>Edit role</DButton>}
   </div>}>
@@ -151,11 +152,11 @@ export function RoleDialog({ role, assignedUserCount, onClose }: { role?: Access
     </form> : <div className="access-detail-content">
       <section className="access-section" aria-labelledby="role-overview-title">
         <h3 id="role-overview-title">Overview</h3>
-        <dl className="access-detail"><div><dt>Assigned users</dt><dd>{assignedUserCount}</dd></div><div><dt>Capabilities</dt><dd>{savedRole?.permissions.length ?? 0}</dd></div></dl>
+        <DetailList><DetailItem label="Assigned users">{assignedUserCount}</DetailItem><DetailItem label="Capabilities">{savedRole?.permissions.length ?? 0}</DetailItem></DetailList>
       </section>
       <section className="access-section" aria-labelledby="role-permissions-title"><h3 id="role-permissions-title">Permissions</h3><PermissionSummary permissions={savedRole?.permissions ?? []} /></section>
     </div>}</div>
-  </DDialog>;
+  </AppDialog>;
 }
 
 export function AuditDetailDialog({ entry, roles = [], onClose }: { entry: AuditEntry; roles?: AccessRole[]; onClose: () => void }) {
@@ -165,11 +166,11 @@ export function AuditDetailDialog({ entry, roles = [], onClose }: { entry: Audit
   const statuses: Record<string, string> = { ACTIVE: 'Active', INACTIVE: 'Inactive', PENDING: 'Pending', REVOKED: 'Revoked' };
   const previousStatus = statuses[entry.metadata?.before ?? ''];
   const nextStatus = statuses[entry.metadata?.after ?? ''];
-  return <DDialog open onClose={onClose} ariaLabel={title} title={<span className="access-entity-title">{title}<DBadge variant={entry.result === 'SUCCESS' ? 'success' : 'secondary'}>{entry.result === 'SUCCESS' ? 'Success' : 'Revoked'}</DBadge></span>} description={entry.target} size="lg" footer={<div className="access-actions"><DButton variant="outline" onClick={onClose}>Close</DButton></div>}>
+  return <AppDialog kind="detail" open onClose={onClose} title={title} status={<DBadge variant={entry.result === 'SUCCESS' ? 'success' : 'secondary'}>{entry.result === 'SUCCESS' ? 'Success' : 'Revoked'}</DBadge>} meta={entry.target} footer={<div className="access-actions"><DButton variant="outline" onClick={onClose}>Close</DButton></div>}>
     <div className="access-detail-content">
       <section className="access-section" aria-labelledby="audit-event-title">
         <h3 id="audit-event-title">Event details</h3>
-        <dl className="access-detail">{Object.entries({ Actor: entry.actor, Time: formatAccessDate(entry.timestamp), Domain: entry.domain, Target: entry.target, Reason: entry.reason ?? 'Not recorded' }).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+        <DetailList>{Object.entries({ Actor: entry.actor, Time: formatAccessDate(entry.timestamp), Domain: entry.domain, Target: entry.target, Reason: entry.reason }).map(([label, value]) => <DetailItem key={label} label={label}>{value}</DetailItem>)}</DetailList>
       </section>
       <section className="access-section" aria-labelledby="audit-changes-title">
         <h3 id="audit-changes-title">Changes</h3>
@@ -179,5 +180,5 @@ export function AuditDetailDialog({ entry, roles = [], onClose }: { entry: Audit
         </div> : previousStatus && nextStatus ? <p>{previousStatus} → {nextStatus}</p> : <p className="access-secondary">No additional change details recorded.</p>}
       </section>
     </div>
-  </DDialog>;
+  </AppDialog>;
 }
