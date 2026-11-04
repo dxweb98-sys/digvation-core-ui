@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { useClientProducts } from '../../client-products/hooks/use-client-products';
 import { formatMoney } from '../../commercial-catalog/utils/money';
 import {
+  useClientCommercial,
   useTransitionSubscriptionAddOn,
   useUpdateProductConfiguration,
 } from '../hooks/use-client-commercial';
