@@ -3,6 +3,7 @@ import type { AccessInvitation, AccessRole, AccessUser, AccessUserStatus, AuditE
 export interface AccessDataSource {
   getUsers(): Promise<AccessUser[]>;
   getRoles(): Promise<AccessRole[]>;
+  getPermissions(): Promise<string[]>;
   getInvitations(): Promise<AccessInvitation[]>;
   getAudit(): Promise<AuditEntry[]>;
   updateUserRoles(id: string, roleIds: string[]): Promise<AccessUser>;

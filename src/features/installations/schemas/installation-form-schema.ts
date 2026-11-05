@@ -35,14 +35,14 @@ export const installationFormSchema = z
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['brandingMode'],
-        message: 'Dedicated installations require white-label branding.',
+        message: 'Dedicated installations must use white label branding.',
       });
     }
     if (values.brandingMode === 'WHITE_LABEL' && !values.brandName?.trim()) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['brandName'],
-        message: 'Brand name is required for white-label installations.',
+        message: 'Enter a brand name for white label installations.',
       });
     }
   });

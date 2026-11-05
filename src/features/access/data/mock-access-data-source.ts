@@ -26,13 +26,14 @@ export function createMockAccessDataSource(): AccessDataSource {
             throw Error('Role name is required.');
         if (roles.some(role => role.id !== id && role.name.toLowerCase() === name.toLowerCase()))
             throw Error('A role with this name already exists.');
-        if (!input.permissions.every(permission => PERMISSIONS.includes(permission)))
+        if (!input.permissions.every(permission => (PERMISSIONS as readonly string[]).includes(permission)))
             throw Error('Unknown permission.');
         return { name, description: input.description.trim(), permissions: [...new Set(input.permissions)] };
     }
     return {
         async getUsers() { return copy(users); },
         async getRoles() { return copy(roles); },
+        async getPermissions() { return [...PERMISSIONS]; },
         async getInvitations() { expireInvitations(); return copy(invitations); },
         async getAudit() { return copy(audit).sort((a, b) => b.timestamp.localeCompare(a.timestamp)); },
         async updateUserRoles(id, roleIds) {

@@ -1,0 +1,72 @@
+/* Specificity beats the DS utility classes without targeting them. */
+:root[data-ds-mode] .app-action {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+:root[data-ds-mode] .app-action > span {
+  white-space: nowrap;
+}
+
+:root[data-ds-mode] .app-action-secondary {
+  color: var(--cc-text);
+  background: var(--cc-raised);
+  border: 1px solid var(--cc-line-control);
+}
+
+:root[data-ds-mode] .app-action-secondary:not(:disabled):hover {
+  background: var(--cc-overlay);
+  border-color: var(--cc-text-muted);
+}
+
+:root[data-ds-mode] .app-action-tertiary {
+  color: var(--cc-accent);
+  background: transparent;
+  border: 0;
+}
+
+:root[data-ds-mode] .app-action-tertiary:not(:disabled):hover {
+  color: var(--cc-accent-hover);
+  background: var(--cc-raised);
+}
+
+:root[data-ds-mode] .app-action-danger-subtle {
+  color: var(--cc-status-danger);
+  background: transparent;
+  border: 1px solid var(--cc-status-danger);
+}
+
+:root[data-ds-mode] .app-action-danger-subtle:not(:disabled):hover {
+  background: color-mix(in srgb, var(--cc-status-danger) 14%, transparent);
+}
+
+/* The DS dims disabled controls to 50%, below AA on these surfaces. */
+:root[data-ds-mode] .app-action:disabled {
+  opacity: 0.85;
+}
+
+:root[data-ds-mode] .app-action.app-action-danger:disabled {
+  opacity: 0.9;
+}
+
+/* A pressed toggle is a selection, not a second primary action. */
+:root[data-ds-mode] .app-action-secondary[aria-pressed='true'] {
+  color: var(--cc-text);
+  background: color-mix(in srgb, var(--cc-accent) 18%, var(--cc-raised));
+  border-color: var(--cc-accent);
+}
+
+:root[data-ds-mode] .app-icon-action {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.app-action-group {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2);
+  align-items: center;
+  justify-content: flex-end;
+}

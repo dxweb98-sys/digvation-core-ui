@@ -1,4 +1,6 @@
-import { DButton, DCard, DCardContent, DEmptyState } from '@digvation/ui';
+import { Pencil, Plus } from 'lucide-react';
+import { AppAction, AppIconAction } from '../../../shared/ui/app-action';
+import { DCard, DCardContent, DEmptyState } from '@digvation/ui';
 import { useState } from 'react';
 import { useProductFeatureStatusTransition } from '../hooks/use-product-mutations';
 import type {
@@ -41,23 +43,20 @@ export function ProductFeaturesTab({
           <div className="product-feature-section">
             <div className="product-feature-heading">
               <div>
-                <strong>Product-owned features</strong>
-                <p>
-                  Maintain behavior owned by this Product. Reusable cross-product behavior belongs in the Capability catalog.
-                </p>
-              </div>
-              <DButton
+                <strong>Features</strong>
+                </div>
+              <AppAction icon={Plus} tone="secondary"
                 onClick={() => setIsCreateDialogOpen(true)}
                 disabled={product.status === 'RETIRED'}
               >
-                Add Feature
-              </DButton>
+                Add feature
+              </AppAction>
             </div>
 
             {features.length === 0 ? (
               <DEmptyState
                 title="No product features"
-                description="This Product does not have feature definitions yet. Add only features whose scope is already accepted for this Product."
+                description="Add a feature to this product."
               />
             ) : (
               <div className="product-feature-list">
@@ -72,12 +71,8 @@ export function ProductFeaturesTab({
                     </div>
                     <div className="product-feature-row-actions">
                       <ProductStatusBadge status={feature.status} />
-                      <DButton
-                        variant="outline"
-                        onClick={() => setEditFeature(feature)}
-                      >
-                        Edit
-                      </DButton>
+                      <AppIconAction icon={Pencil} label={`Edit ${feature.name}`}
+                        onClick={() => setEditFeature(feature)} />
                       <ProductFeatureLifecycleAction
                         product={product}
                         feature={feature}

@@ -1,3 +1,4 @@
+import { labelFor } from '../../../shared/labels/labels';
 import { DBadge } from '@digvation/ui';
 
 import type { ClientCapabilityStatus } from '../types/client-capability';
@@ -14,8 +15,8 @@ const STATUS_VARIANTS: Record<
   DECOMMISSIONED: 'default',
 };
 
-function formatStatus(status: ClientCapabilityStatus) {
-  return status[0] + status.slice(1).toLowerCase();
+function formatStatus(status: string) {
+  return labelFor(status);
 }
 
 export function ClientCapabilityStatusBadge({

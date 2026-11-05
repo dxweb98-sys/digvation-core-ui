@@ -1,18 +1,27 @@
 import { PERMISSIONS, type AccessPermission, type AccessRole, type AuditEntry } from '../types/access';
 
-const readableLabel = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+const readableLabel = (value: string) => {
+  const words = value.replace(/-/g, ' ');
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+const rank = (permission: string) => {
+  const index = (PERMISSIONS as readonly string[]).indexOf(permission);
+  return index === -1 ? PERMISSIONS.length : index;
+};
 
 export function permissionGroups(permissions: readonly AccessPermission[]) {
-  const selected = new Set(permissions);
-  const domains = [...new Set(PERMISSIONS.map(permission => permission.split('.')[0]))];
+  const ordered = [...new Set(permissions)]
+    .filter(permission => permission.includes('.'))
+    .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+  const domains = [...new Set(ordered.map(permission => permission.split('.')[0]))];
   return domains.map(domain => ({
     domain,
     label: readableLabel(domain),
-    permissions: PERMISSIONS.filter(permission => permission.startsWith(`${domain}.`) && selected.has(permission)).map(permission => ({
+    permissions: ordered.filter(permission => permission.startsWith(`${domain}.`)).map(permission => ({
       id: permission,
-      label: readableLabel(permission.split('.')[1]),
+      label: readableLabel(permission.split('.').slice(1).join(' ')),
     })),
-  })).filter(group => group.permissions.length > 0);
+  }));
 }
 
 function parseValues(value?: string): string[] {

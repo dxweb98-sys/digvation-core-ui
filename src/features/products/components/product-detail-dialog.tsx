@@ -1,13 +1,5 @@
-import {
-  DButton,
-  DConnectionError,
-  DEmptyState,
-  DLoadingIndicator,
-  DTabs,
-  DTabsContent,
-  DTabsList,
-  DTabsTrigger,
-} from '@digvation/ui';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DConnectionError, DEmptyState, DLoadingIndicator, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation/ui';
 import { AppDialog, DetailItem, DetailList, DialogActions, DialogSection } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { ProductClientsTab } from '../../client-products/components/product-clients-tab';
@@ -102,8 +94,8 @@ export function ProductDetailDialog({
               isSubmitting={statusTransition.isPending}
               onTransition={handleTransition}
             />}
-            secondary={<DButton variant="outline" onClick={onClose}>Close</DButton>}
-            primary={<DButton onClick={() => setIsEditDialogOpen(true)}>Edit Product</DButton>}
+            secondary={<AppAction tone="secondary" onClick={onClose}>Close</AppAction>}
+            primary={<AppAction onClick={() => setIsEditDialogOpen(true)}>Edit</AppAction>}
           />
         }
       >
@@ -127,8 +119,8 @@ export function ProductDetailDialog({
             <DTabsContent value="overview">
               <div><DialogSection title="Product">
                     <DetailList>
-                      <DetailItem label="Product Name">{product.name}</DetailItem>
-                      <DetailItem label="Product Code"><code className="product-code">{product.code}</code></DetailItem>
+                      <DetailItem label="Product name">{product.name}</DetailItem>
+                      <DetailItem label="Product code"><code className="product-code">{product.code}</code></DetailItem>
                       <DetailItem label="Status"><ProductStatusBadge status={product.status} /></DetailItem>
                       <DetailItem wide label="Description">{product.description}</DetailItem>
                     </DetailList>

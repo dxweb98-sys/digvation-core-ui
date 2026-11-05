@@ -1,3 +1,5 @@
+import { RecordButton } from '../../../shared/ui/record-button';
+import { labelFor } from '../../../shared/labels/labels';
 import {
   DConnectionError,
   DDataTable,
@@ -17,7 +19,7 @@ const COLUMNS: TableColumn<InstallationSummary>[] = [
     label: 'Installation',
     render: (installation) => (
       <div className="installation-identity">
-        <strong>{installation.name}</strong>
+        <RecordButton><strong>{installation.name}</strong></RecordButton>
         <code>{installation.code}</code>
       </div>
     ),
@@ -27,9 +29,9 @@ const COLUMNS: TableColumn<InstallationSummary>[] = [
     label: 'Products',
     render: (installation) => installation.products.map((product) => product.productName).join(', '),
   },
-  { key: 'environment', label: 'Environment' },
-  { key: 'deploymentMode', label: 'Deployment' },
-  { key: 'branding', label: 'Branding', render: (installation) => installation.branding.mode },
+  { key: 'environment', label: 'Environment', render: (installation) => labelFor(installation.environment) },
+  { key: 'deploymentMode', label: 'Deployment', render: (installation) => labelFor(installation.deploymentMode) },
+  { key: 'branding', label: 'Branding', render: (installation) => labelFor(installation.branding.mode) },
   {
     key: 'status',
     label: 'Status',
@@ -61,7 +63,7 @@ export function ClientInstallationsTab({ clientId }: { clientId: string }) {
         {installationsQuery.data.length === 0 ? (
           <DEmptyState
             title="No installations"
-            description="This Client does not have any runtime installations yet. Create one from the global Installation workspace."
+            description="Add an installation from the Installations page."
           />
         ) : (
           <DDataTable

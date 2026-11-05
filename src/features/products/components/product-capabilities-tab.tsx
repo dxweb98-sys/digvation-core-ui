@@ -1,12 +1,6 @@
-import {
-  DButton,
-  DCard,
-  DCardContent,
-  DCheckbox,
-  DEmptyState,
-  DLoadingIndicator,
-  useToast,
-} from '@digvation/ui';
+import { Pencil } from 'lucide-react';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DCard, DCardContent, DCheckbox, DEmptyState, DLoadingIndicator, useToast } from '@digvation/ui';
 import { useState } from 'react';
 
 import { CapabilityStatusBadge } from '../../capabilities/components/capability-status-badge';
@@ -32,8 +26,8 @@ function CapabilityList({
   if (capabilities.length === 0) {
     return (
       <DEmptyState
-        title="No compatible capabilities"
-        description="This product does not currently declare any reusable capability compatibility."
+        title="No capabilities"
+        description="Edit to add the capabilities this product supports."
       />
     );
   }
@@ -139,43 +133,39 @@ export function ProductCapabilitiesTab({
           <div className="product-capability-heading">
             <div>
               <strong>Compatible capabilities</strong>
-              <p>
-                Define which reusable capabilities this product can support. Client entitlement is granted separately and does not come from this mapping alone.
-              </p>
-            </div>
+              </div>
             {isEditing ? (
               <div className="product-capability-actions">
-                <DButton
-                  variant="outline"
+                <AppAction
+                  tone="secondary"
                   onClick={cancelEditing}
                   disabled={replaceCapabilities.isPending}
                 >
                   Cancel
-                </DButton>
-                <DButton
+                </AppAction>
+                <AppAction
                   onClick={() => void saveCompatibility()}
                   loading={replaceCapabilities.isPending}
                   disabled={
                     capabilityCatalog.isPending || capabilityCatalog.isError
                   }
                 >
-                  Save Compatibility
-                </DButton>
+                  Save
+                </AppAction>
               </div>
             ) : (
-              <DButton
-                variant="outline"
+              <AppAction icon={Pencil} tone="secondary"
                 onClick={beginEditing}
                 disabled={product.status === 'RETIRED'}
               >
-                Manage Capabilities
-              </DButton>
+                Edit
+              </AppAction>
             )}
           </div>
 
           {product.status === 'RETIRED' ? (
             <p className="product-capability-note">
-              Capability compatibility cannot be edited from a retired product. Current mappings remain visible while they still exist.
+              Retired products cannot be edited.
             </p>
           ) : null}
 
@@ -186,15 +176,15 @@ export function ProductCapabilitiesTab({
           ) : isEditing && capabilityCatalog.isError ? (
             <div className="product-capability-state">
               <DEmptyState
-                title="Capability catalog unavailable"
-                description="The reusable capability catalog could not be loaded."
+                title="Capabilities unavailable"
+                description="Capabilities could not be loaded."
                 action={
-                  <DButton
-                    variant="outline"
+                  <AppAction
+                    tone="secondary"
                     onClick={() => void capabilityCatalog.refetch()}
                   >
                     Retry
-                  </DButton>
+                  </AppAction>
                 }
               />
             </div>

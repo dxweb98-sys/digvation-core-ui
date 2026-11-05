@@ -1,0 +1,33 @@
+.not-connected {
+  display: grid;
+  gap: var(--cc-space-1);
+  padding: var(--cc-space-4);
+  border: 1px dashed var(--cc-border, var(--color-border));
+  border-radius: var(--cc-radius-md, 8px);
+}
+
+.not-connected h2 {
+  margin: 0 0 var(--cc-space-1);
+  font-size: var(--cc-text-sm);
+  font-weight: 600;
+}
+
+.not-connected strong {
+  font-size: var(--cc-text-sm);
+  font-weight: 600;
+}
+
+.not-connected p {
+  margin: 0;
+  font-size: var(--cc-text-sm);
+  color: var(--cc-text-muted);
+}
+
+.not-connected-page {
+  display: grid;
+  gap: var(--cc-space-4);
+}
+
+.not-connected-page h1 {
+  margin: 0;
+}

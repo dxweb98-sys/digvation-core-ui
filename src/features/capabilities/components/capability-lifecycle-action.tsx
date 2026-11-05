@@ -1,4 +1,10 @@
-import { DButton, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { focusFirstInvalid } from '../../../shared/ui/form-fields';
+import { AppTextarea } from '../../../shared/ui/form-fields';
+import { transitionLabel } from '../../../shared/labels/labels';
+import { labelFor } from '../../../shared/labels/labels';
+import { ChevronDown } from 'lucide-react';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DDropdown, useToast } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { Capability, CapabilityStatus } from '../types/capability';
@@ -10,8 +16,8 @@ const VALID_TRANSITIONS: Record<CapabilityStatus, CapabilityStatus[]> = {
   RETIRED: ['DRAFT'],
 };
 
-function formatStatus(status: CapabilityStatus) {
-  return status[0] + status.slice(1).toLowerCase();
+function formatStatus(status: string) {
+  return labelFor(status);
 }
 
 export function CapabilityLifecycleAction({
@@ -39,24 +45,25 @@ export function CapabilityLifecycleAction({
   async function confirmTransition() {
     if (!targetStatus) return;
     if (!reason.trim()) {
-      setReasonError('A reason is required for this lifecycle change.');
+      setReasonError('Enter a reason.');
+      focusFirstInvalid('lifecycle-reason');
       return;
     }
     try {
       await onTransition(targetStatus, reason);
       showToast({
-        title: 'Capability lifecycle updated',
+        title: 'Capability status updated',
         description: `${capability.name} is now ${formatStatus(targetStatus).toLowerCase()}.`,
         variant: 'success',
       });
       closeDialog();
     } catch (error) {
       showToast({
-        title: 'Lifecycle update failed',
+        title: 'Status update failed',
         description:
           error instanceof Error
             ? error.message
-            : 'The capability lifecycle state could not be changed.',
+            : 'The status could not be changed. Try again.',
         variant: 'danger',
       });
     }
@@ -64,11 +71,11 @@ export function CapabilityLifecycleAction({
 
   return (
     <>
-      <DDropdown
+      <DDropdown closeOnItemClick
         placement="bottom-end"
         contentRole="menu"
         contentClassName="capability-lifecycle-menu"
-        trigger={() => <DButton variant="outline">More Actions</DButton>}
+        trigger={() => <AppAction tone="secondary" trailingIcon={ChevronDown}>More</AppAction>}
       >
         {VALID_TRANSITIONS[capability.status].map((status) => (
           <button
@@ -82,46 +89,46 @@ export function CapabilityLifecycleAction({
             type="button"
             onClick={() => setTargetStatus(status)}
           >
-            Mark {formatStatus(status)}
+            {transitionLabel(status)}
           </button>
         ))}
       </DDropdown>
       <AppDialog kind="confirm"
         open={Boolean(targetStatus)}
         onClose={closeDialog}
-        title="Confirm capability lifecycle change"
-        description="Lifecycle changes can affect Product compatibility and Client entitlement. Provide a reason before continuing."
+        title="Change capability status"
+        description="Add a reason to continue."
         footer={
           <div className="capability-dialog-actions">
-            <DButton
-              variant="outline"
+            <AppAction
+              tone="secondary"
               onClick={closeDialog}
               disabled={isSubmitting}
             >
               Cancel
-            </DButton>
-            <DButton
-              variant={targetStatus === 'RETIRED' ? 'danger' : 'primary'}
+            </AppAction>
+            <AppAction
+              tone={targetStatus === 'RETIRED' ? 'danger' : 'primary'}
               onClick={() => void confirmTransition()}
               loading={isSubmitting}
             >
-              Confirm change
-            </DButton>
+              Confirm
+            </AppAction>
           </div>
         }
       >
         {targetStatus ? (
-          <div className="capability-transition-dialog">
+          <div className="capability-transition-dialog" id="lifecycle-reason">
             <p>
               <strong>{capability.name}</strong> will move from{' '}
               <CapabilityStatusBadge status={capability.status} /> to{' '}
-              <CapabilityStatusBadge status={targetStatus} />.
+              <CapabilityStatusBadge status={targetStatus} />
             </p>
-            <DTextarea
-              label="Reason *"
-              placeholder="Explain why this lifecycle state is changing."
+            <AppTextarea
+              label="Reason"
+              placeholder="For example, contract ended on 30 June"
               value={reason}
-              error={reasonError}
+              error={reasonError} onBlur={() => { if (!reason.trim()) setReasonError('Enter a reason.'); }}
               onChange={(value) => {
                 setReason(value);
                 if (reasonError) setReasonError(null);

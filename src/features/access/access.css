@@ -30,3 +30,6 @@
   .access-detail-content { gap: 20px; }
   .access-section + .access-section { padding-top: 20px; }
 }
+
+:root[data-ds-mode] .access-section h3 { margin: 0 0 12px; }
+.access-checks { align-content: start; }

@@ -65,10 +65,10 @@ describe('DialogActions', () => {
 });
 
 describe('DetailItem', () => {
-  it.each([[null], [undefined], ['']])('shows one mark for the empty value %s', (value) => {
+  it.each([[null], [undefined], ['']])('shows Not set for the empty value %s', (value) => {
     render(<DetailList><DetailItem label="Region">{value}</DetailItem></DetailList>);
 
-    expect(screen.getByText('Region').nextElementSibling).toHaveTextContent('—');
+    expect(screen.getByText('Region').nextElementSibling).toHaveTextContent('Not set');
   });
 
   it('keeps a zero and other real values', () => {

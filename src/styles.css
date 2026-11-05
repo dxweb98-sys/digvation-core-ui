@@ -346,6 +346,13 @@ samp {
 }
 
 .header-leading,
+/* The DS placeholder measures 3.77:1 on field surfaces, below AA. */
+:root[data-ds-mode] input::placeholder,
+:root[data-ds-mode] textarea::placeholder {
+  color: var(--cc-text-subtle);
+  opacity: 1;
+}
+
 .header-status {
   display: flex;
   gap: var(--cc-space-3);
@@ -680,4 +687,9 @@ samp {
   .placeholder-heading {
     flex-direction: column;
   }
+}
+
+/* The DS checkbox border is nearly invisible on raised surfaces. */
+:root[data-ds-mode] [data-ds-component='checkbox'] > input:not(:checked) + span {
+  border-color: var(--cc-text-subtle);
 }

@@ -1,13 +1,8 @@
-import {
-  DButton,
-  DConnectionError,
-  DDataTable,
-  DEmptyState,
-  DLoadingIndicator,
-  DStatusFilter,
-  type TableAction,
-  type TableColumn,
-} from '@digvation/ui';
+import { RecordButton } from '../../../shared/ui/record-button';
+import { labelFor } from '../../../shared/labels/labels';
+import { Plus } from 'lucide-react';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DStatusFilter, type TableAction, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
 import { InstallationDetailDialog } from '../components/installation-detail-dialog';
 import { InstallationFormDialog } from '../components/installation-form-dialog';
@@ -54,16 +49,16 @@ const COLUMNS: TableColumn<InstallationSummary>[] = [
     label: 'Installation',
     render: (installation) => (
       <div className="installation-identity">
-        <strong>{installation.name}</strong>
+        <RecordButton><strong>{installation.name}</strong></RecordButton>
         <code>{installation.code}</code>
       </div>
     ),
   },
   { key: 'clientName', label: 'Client' },
   { key: 'products', label: 'Products', render: productsLabel },
-  { key: 'environment', label: 'Environment' },
-  { key: 'deploymentMode', label: 'Deployment' },
-  { key: 'branding', label: 'Branding', render: (installation) => installation.branding.mode },
+  { key: 'environment', label: 'Environment', render: (installation) => labelFor(installation.environment) },
+  { key: 'deploymentMode', label: 'Deployment', render: (installation) => labelFor(installation.deploymentMode) },
+  { key: 'branding', label: 'Branding', render: (installation) => labelFor(installation.branding.mode) },
   {
     key: 'status',
     label: 'Status',
@@ -111,8 +106,8 @@ export function InstallationListPage() {
     return (
       <div className="installations-page-state">
         <DConnectionError
-          title="Installation list unavailable"
-          message="Installation records could not be loaded from Core."
+          title="Installations unavailable"
+          message="Installations could not be loaded."
           detail={installationsQuery.error.message}
           onRetry={() => void installationsQuery.refetch()}
         />
@@ -122,9 +117,9 @@ export function InstallationListPage() {
 
   const result = installationsQuery.data;
   const actions: TableAction<InstallationSummary>[] = [
-    { label: 'Open Installation', onClick: (installation) => setDetailId(installation.id) },
+    { label: 'Open', onClick: (installation) => setDetailId(installation.id) },
     {
-      label: 'Edit Installation',
+      label: 'Edit',
       onClick: setEditInstallation,
       show: (installation) => installation.status !== 'DECOMMISSIONED',
     },
@@ -134,10 +129,8 @@ export function InstallationListPage() {
     <div className="installations-page">
       <div className="installations-page-heading">
         <div>
-          <p className="page-eyebrow">Runtime control plane</p>
           <h1>Installations</h1>
-          <p>Manage Client-scoped runtime boundaries, delivered Products, deployment policy, and branding.</p>
-        </div>
+          </div>
       </div>
       <DDataTable
         columns={COLUMNS}
@@ -167,14 +160,14 @@ export function InstallationListPage() {
             />
           </>
         }
-        headerActions={<DButton onClick={() => setIsCreateOpen(true)}>Add Installation</DButton>}
+        headerActions={<AppAction icon={Plus} tone="primary" onClick={() => setIsCreateOpen(true)}>Add installation</AppAction>}
         pagination={{ page: query.page, pageSize: query.limit, total: result.total }}
         onPageChange={(page) => updateQuery({ page })}
         onPageSizeChange={(limit) => updateQuery({ limit, page: 1 })}
         emptyMessage={
           <DEmptyState
             title="No installations found"
-            description="Try another search or filter, or add the first Client-scoped installation."
+            description="Try another search or filter, or add an installation."
           />
         }
         onRowClick={(installation) => setDetailId(installation.id)}

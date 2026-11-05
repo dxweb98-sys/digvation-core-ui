@@ -1,4 +1,8 @@
-import { DButton, DConnectionError, DDataTable, DEmptyState, DStatusFilter, type TableAction, type TableColumn } from '@digvation/ui';
+import { RecordButton } from '../../../shared/ui/record-button';
+import { valueOrNotSet } from '../../../shared/ui/not-set';
+import { Plus } from 'lucide-react';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DConnectionError, DDataTable, DEmptyState, DStatusFilter, type TableAction, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
 import { ContentSkeleton } from '../../../shared/ui/content-skeleton';
 import { useFirstReveal } from '../../../shared/ui/use-first-reveal';
@@ -23,8 +27,8 @@ const CLIENT_COLUMNS: TableColumn<ClientListItem>[] = [
     label: 'Client',
     render: (client) => (
       <div className="client-table-identity">
-        <strong>{client.displayName}</strong>
-        <span>{client.legalName ?? 'No legal name recorded'}</span>
+        <RecordButton><strong>{client.displayName}</strong></RecordButton>
+        <span>{valueOrNotSet(client.legalName, 'Legal name')}</span>
       </div>
     ),
   },
@@ -59,23 +63,21 @@ export function ClientListPage() {
   }
 
   if (clientQuery.isError) {
-    return <div className="clients-page-state"><DConnectionError title="Client list unavailable" message="Client records could not be loaded from the selected data source." detail={clientQuery.error.message} isRetrying={clientQuery.isFetching} onRetry={() => void clientQuery.refetch()} /></div>;
+    return <div className="clients-page-state"><DConnectionError title="Clients unavailable" message="Clients could not be loaded." detail={clientQuery.error.message} isRetrying={clientQuery.isFetching} onRetry={() => void clientQuery.refetch()} /></div>;
   }
 
   const result = clientQuery.data;
   const tableActions: TableAction<ClientListItem>[] = [
-    { label: 'Quick Detail', onClick: (client) => setDetailClientId(client.id) },
-    { label: 'Edit Client', onClick: setEditClient },
+    { label: 'View', onClick: (client) => setDetailClientId(client.id) },
+    { label: 'Edit', onClick: setEditClient },
   ];
 
   return (
     <div className={`clients-page${isFirstReveal ? ' list-reveal' : ''}`}>
       <div className="clients-page-heading">
         <div>
-          <p className="page-eyebrow">Customer control plane</p>
           <h1>Clients</h1>
-          <p>Manage the organizations registered in Digvation’s control plane and their lifecycle state.</p>
-        </div>
+          </div>
       </div>
       <DDataTable
         columns={CLIENT_COLUMNS}
@@ -94,11 +96,11 @@ export function ClientListPage() {
             onChange={(status) => updateQuery({ status: status as ClientStatus | 'ALL' })}
           />
         }
-        headerActions={<DButton onClick={() => setIsCreateDialogOpen(true)}>Add Client</DButton>}
+        headerActions={<AppAction icon={Plus} tone="primary" onClick={() => setIsCreateDialogOpen(true)}>Add client</AppAction>}
         pagination={{ page: query.page, pageSize: query.limit, total: result.total }}
         onPageChange={(page) => updateQuery({ page })}
         onPageSizeChange={(limit) => updateQuery({ limit, page: 1 })}
-        emptyMessage={<DEmptyState title="No clients found" description="Try another search or status filter, or add the first client." />}
+        emptyMessage={<DEmptyState title="No clients found" description="Try another search, or add a client." />}
         onRowClick={(client) => setDetailClientId(client.id)}
         actions={tableActions}
       />

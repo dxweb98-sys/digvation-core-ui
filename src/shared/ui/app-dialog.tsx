@@ -1,3 +1,4 @@
+import { valueOrNotSet } from './not-set';
 import { DDialog } from '@digvation/ui';
 import type { ComponentProps, ReactNode } from 'react';
 import './app-dialog.css';
@@ -109,9 +110,7 @@ export function DetailList({ children }: { children: ReactNode }) {
   return <dl className="app-detail-list">{children}</dl>;
 }
 
-export const EMPTY_VALUE = '—';
-
-/** Empty values read as one consistent mark; long values wrap inside the column. */
+/** Empty values follow the NotSet rule; long values wrap inside the column. */
 export function DetailItem({
   label,
   children,
@@ -121,12 +120,11 @@ export function DetailItem({
   children?: ReactNode;
   wide?: boolean;
 }) {
-  const isEmpty = children === null || children === undefined || children === '';
 
   return (
     <div className={wide ? 'app-detail-item app-detail-item-wide' : 'app-detail-item'}>
       <dt>{label}</dt>
-      <dd>{isEmpty ? EMPTY_VALUE : children}</dd>
+      <dd>{valueOrNotSet(children)}</dd>
     </div>
   );
 }

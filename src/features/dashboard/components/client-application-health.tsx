@@ -5,7 +5,7 @@ import { OperationalHealthBadge } from './dashboard-status-badges';
 const APPLICATION_HEALTH_COLUMNS: TableColumn<ClientApplicationHealthData>[] = [
   {
     key: 'clientName',
-    label: 'Client / application',
+    label: 'Client',
     render: (application) => (
       <div className="table-primary-cell">
         <strong>{application.clientName}</strong>
@@ -43,7 +43,7 @@ const APPLICATION_HEALTH_COLUMNS: TableColumn<ClientApplicationHealthData>[] = [
   {
     key: 'lastDeploymentLabel',
     label: 'Last deployment',
-    render: (application) => application.lastDeploymentLabel ?? 'Not recorded',
+    render: (application) => application.lastDeploymentLabel ?? 'No deployment yet',
   },
 ];
 

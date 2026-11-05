@@ -21,16 +21,16 @@ interface FeedItem {
 }
 
 const SEVERITY_FEED: Record<AttentionSeverity, Pick<FeedItem, 'statusText' | 'mark' | 'tone'>> = {
-  CRITICAL: { statusText: 'CRITICAL', mark: '!!', tone: 'danger' },
-  WARNING: { statusText: 'WARNING', mark: '!', tone: 'warning' },
-  INFO: { statusText: 'INFO', mark: 'i', tone: 'info' },
+  CRITICAL: { statusText: 'Critical', mark: '!!', tone: 'danger' },
+  WARNING: { statusText: 'Warning', mark: '!', tone: 'warning' },
+  INFO: { statusText: 'Info', mark: 'i', tone: 'info' },
 };
 
 const DEPLOYMENT_FEED: Record<DeploymentStatus, Pick<FeedItem, 'statusText' | 'mark' | 'tone'>> = {
-  SUCCESS: { statusText: 'SUCCESS', mark: '✓', tone: 'success' },
-  FAILED: { statusText: 'FAILED', mark: '✕', tone: 'danger' },
-  IN_PROGRESS: { statusText: 'IN PROGRESS', mark: '…', tone: 'info' },
-  PENDING: { statusText: 'PENDING', mark: '·', tone: 'neutral' },
+  SUCCESS: { statusText: 'Success', mark: '✓', tone: 'success' },
+  FAILED: { statusText: 'Failed', mark: '✕', tone: 'danger' },
+  IN_PROGRESS: { statusText: 'In progress', mark: '…', tone: 'info' },
+  PENDING: { statusText: 'Pending', mark: '·', tone: 'neutral' },
 };
 
 const UNIT_MINUTES: Record<string, number> = {

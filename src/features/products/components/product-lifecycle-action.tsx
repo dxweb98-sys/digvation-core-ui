@@ -1,4 +1,10 @@
-import { DButton, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { focusFirstInvalid } from '../../../shared/ui/form-fields';
+import { AppTextarea } from '../../../shared/ui/form-fields';
+import { transitionLabel } from '../../../shared/labels/labels';
+import { labelFor } from '../../../shared/labels/labels';
+import { ChevronDown } from 'lucide-react';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DDropdown, useToast } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { Product, ProductStatus } from '../types/product';
@@ -10,8 +16,8 @@ const VALID_TRANSITIONS: Record<ProductStatus, ProductStatus[]> = {
   RETIRED: ['DRAFT'],
 };
 
-function formatStatus(status: ProductStatus) {
-  return status[0] + status.slice(1).toLowerCase();
+function formatStatus(status: string) {
+  return labelFor(status);
 }
 
 export function ProductLifecycleAction({ product, isSubmitting, onTransition }: { product: Product; isSubmitting: boolean; onTransition: (targetStatus: ProductStatus, reason: string) => Promise<void> }) {
@@ -31,25 +37,26 @@ export function ProductLifecycleAction({ product, isSubmitting, onTransition }: 
   async function confirmTransition() {
     if (!targetStatus) return;
     if (!reason.trim()) {
-      setReasonError('A reason is required for this lifecycle change.');
+      setReasonError('Enter a reason.');
+      focusFirstInvalid('lifecycle-reason');
       return;
     }
     try {
       await onTransition(targetStatus, reason);
-      showToast({ title: 'Product lifecycle updated', description: `${product.name} is now ${formatStatus(targetStatus).toLowerCase()}.`, variant: 'success' });
+      showToast({ title: 'Product status updated', description: `${product.name} is now ${formatStatus(targetStatus).toLowerCase()}.`, variant: 'success' });
       closeDialog();
     } catch (error) {
-      showToast({ title: 'Lifecycle update failed', description: error instanceof Error ? error.message : 'The product lifecycle state could not be changed.', variant: 'danger' });
+      showToast({ title: 'Status update failed', description: error instanceof Error ? error.message : 'The status could not be changed. Try again.', variant: 'danger' });
     }
   }
 
   return (
     <>
-      <DDropdown placement="top-end" contentRole="menu" contentClassName="product-lifecycle-menu" trigger={() => <DButton variant="outline">More Actions</DButton>}>
-        {VALID_TRANSITIONS[product.status].map((status) => <button className={status === 'RETIRED' ? 'product-lifecycle-menu-item is-danger' : 'product-lifecycle-menu-item'} key={status} role="menuitem" type="button" onClick={() => setTargetStatus(status)}>Mark {formatStatus(status)}</button>)}
+      <DDropdown closeOnItemClick placement="top-end" contentRole="menu" contentClassName="product-lifecycle-menu" trigger={() => <AppAction tone="secondary" trailingIcon={ChevronDown}>More</AppAction>}>
+        {VALID_TRANSITIONS[product.status].map((status) => <button className={status === 'RETIRED' ? 'product-lifecycle-menu-item is-danger' : 'product-lifecycle-menu-item'} key={status} role="menuitem" type="button" onClick={() => setTargetStatus(status)}>{transitionLabel(status)}</button>)}
       </DDropdown>
-      <AppDialog kind="confirm" open={Boolean(targetStatus)} onClose={closeDialog} title="Confirm product lifecycle change" description="This change affects the product lifecycle state. Provide a reason before continuing." footer={<div className="product-dialog-actions"><DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton><DButton variant={targetStatus === 'RETIRED' ? 'danger' : 'primary'} onClick={() => void confirmTransition()} loading={isSubmitting}>Confirm change</DButton></div>}>
-        {targetStatus ? <div className="product-transition-dialog"><p><strong>{product.name}</strong> will move from <ProductStatusBadge status={product.status} /> to <ProductStatusBadge status={targetStatus} />.</p><DTextarea label="Reason *" placeholder="Explain why this lifecycle state is changing." value={reason} error={reasonError} onChange={(value) => { setReason(value); if (reasonError) setReasonError(null); }} /></div> : null}
+      <AppDialog kind="confirm" open={Boolean(targetStatus)} onClose={closeDialog} title="Change product status" description="Add a reason to continue." footer={<div className="product-dialog-actions"><AppAction tone="secondary" onClick={closeDialog} disabled={isSubmitting}>Cancel</AppAction><AppAction tone={targetStatus === 'RETIRED' ? 'danger' : 'primary'} onClick={() => void confirmTransition()} loading={isSubmitting}>Confirm</AppAction></div>}>
+        {targetStatus ? <div className="product-transition-dialog" id="lifecycle-reason"><p><strong>{product.name}</strong> will move from <ProductStatusBadge status={product.status} /> to <ProductStatusBadge status={targetStatus} /></p><AppTextarea label="Reason" placeholder="For example, contract ended on 30 June" value={reason} error={reasonError} onBlur={() => { if (!reason.trim()) setReasonError('Enter a reason.'); }} onChange={(value) => { setReason(value); if (reasonError) setReasonError(null); }} /></div> : null}
       </AppDialog>
     </>
   );

@@ -1,4 +1,5 @@
-import { DButton, useToast } from '@digvation/ui';
+import { AppAction } from '../../../shared/ui/app-action';
+import { useToast } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import {
   useCreateProductFeature,
@@ -72,6 +73,7 @@ export function ProductFeatureFormDialog({
             : 'The product feature could not be saved.',
         variant: 'danger',
       });
+      throw error;
     }
   }
 
@@ -82,27 +84,22 @@ export function ProductFeatureFormDialog({
       title={
         isEditing ? `Edit ${feature?.name ?? 'feature'}` : 'Add product feature'
       }
-      description={
-        isEditing
-          ? `Update the ${product.name} feature definition. The stable feature code cannot be changed.`
-          : `Add product-owned behavior to ${product.name}. Reusable cross-product behavior belongs in Capabilities instead.`
-      }
       footer={
         <div className="product-dialog-actions">
-          <DButton
-            variant="outline"
+          <AppAction
+            tone="secondary"
             onClick={closeDialog}
             disabled={isSubmitting}
           >
             Cancel
-          </DButton>
-          <DButton
+          </AppAction>
+          <AppAction
             form={PRODUCT_FEATURE_FORM_ID}
             type="submit"
             loading={isSubmitting}
           >
-            {isEditing ? 'Save Changes' : 'Create Feature'}
-          </DButton>
+            {isEditing ? 'Save' : 'Create feature'}
+          </AppAction>
         </div>
       }
     >

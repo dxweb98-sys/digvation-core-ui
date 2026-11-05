@@ -85,10 +85,10 @@ describe('access dialogs follow the shared pattern', () => {
     const dialog = screen.getByRole('dialog', { name: 'Rani Putri' });
     expect(within(dialog).getByText('rani@digvation.test')).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Deactivate' }).closest('.app-dialog-actions-destructive')).not.toBeNull();
-    expect(footerButtons(dialog)).toEqual(['Deactivate', 'Close', 'Save roles']);
+    expect(footerButtons(dialog)).toEqual(['Deactivate', 'Close', 'Save']);
   });
 
-  it('shows the audit result in the header and one empty mark for a missing reason', () => {
+  it('shows the audit result in the header and Not set for a missing reason', () => {
     const entry = {
       id: 'audit-1',
       timestamp: '2026-01-01T00:00:00.000Z',
@@ -102,7 +102,7 @@ describe('access dialogs follow the shared pattern', () => {
 
     const dialog = screen.getByRole('dialog', { name: 'User deactivated' });
     expect(within(dialog).getByText('Success')).toBeInTheDocument();
-    expect(within(dialog).getByText('Reason').nextElementSibling).toHaveTextContent('—');
+    expect(within(dialog).getByText('Reason').nextElementSibling).toHaveTextContent('Not set');
   });
 
   it('keeps the invitation form and its actions', () => {
@@ -139,7 +139,7 @@ describe('incident dialog follows the shared pattern', () => {
     const code = within(dialog).getAllByText('INC-7').find((element) => element.classList.contains('app-dialog-identifier'));
     expect(code?.tagName).toBe('CODE');
     expect(within(dialog).getByRole('heading', { name: 'Incident' })).toBeInTheDocument();
-    expect(within(dialog).getByRole('heading', { name: 'Related operational actions' })).toBeInTheDocument();
+    expect(within(dialog).getByRole('heading', { name: 'Related actions' })).toBeInTheDocument();
     expect(within(dialog).getByText('Summary').closest('.app-detail-item-wide')).not.toBeNull();
   });
 });
@@ -148,7 +148,7 @@ describe('subscription dialogs follow the shared pattern', () => {
   it.each([
     ['Set up Digvation POS subscription', <InitialSubscriptionDialog key="i" summary={SUMMARY} clientId="client-1" onClose={onClose} />],
     [/renew/i, <RenewalDialog key="r" summary={ACTIVE_SUMMARY} onClose={onClose} />],
-    ['Add commercial add-on · Digvation POS', <SubscriptionAddOnDialog key="a" summary={ACTIVE_SUMMARY} onClose={onClose} />],
+    ['Add add-on to Digvation POS', <SubscriptionAddOnDialog key="a" summary={ACTIVE_SUMMARY} onClose={onClose} />],
   ])('%s uses the form width and shared footer', (name, node) => {
     render(wrap(node));
 
@@ -177,6 +177,6 @@ describe('catalog dialogs follow the shared pattern', () => {
   it('gives grants the wide dialog', () => {
     render(wrap(<AddOnGrantsDialog offering={OFFERING} features={[]} capabilities={[]} open loading={false} onClose={onClose} onSave={vi.fn()} />));
 
-    expect(screen.getByRole('dialog', { name: 'Entitlement grants · Extra seats' })).toHaveClass('sm:max-w-4xl');
+    expect(screen.getByRole('dialog', { name: 'Grants for Extra seats' })).toHaveClass('sm:max-w-4xl');
   });
 });

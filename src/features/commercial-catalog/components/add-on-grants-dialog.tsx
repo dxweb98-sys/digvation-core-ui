@@ -1,4 +1,5 @@
-import { DButton, DCheckbox } from '@digvation/ui';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DCheckbox } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { CapabilitySummary } from '../../capabilities/types/capability';
@@ -42,14 +43,13 @@ export function AddOnGrantsDialog({
     <AppDialog kind="wide"
       open={open}
       onClose={onClose}
-      title={`Entitlement grants · ${offering.name}`}
-      description="Choose the technical contracts unlocked by purchasing this commercial add-on. Grants are editable only while the offering is draft."
+      title={`Grants for ${offering.name}`}
       footer={
         <div className="commercial-dialog-actions">
-          <DButton variant="outline" onClick={onClose} disabled={loading}>
+          <AppAction tone="secondary" onClick={onClose} disabled={loading}>
             Cancel
-          </DButton>
-          <DButton
+          </AppAction>
+          <AppAction
             onClick={() =>
               void onSave({
                 featureIds: [...featureIds],
@@ -58,15 +58,15 @@ export function AddOnGrantsDialog({
             }
             loading={loading}
           >
-            Save Grants
-          </DButton>
+            Save
+          </AppAction>
         </div>
       }
     >
       <div className="commercial-grants-grid">
         <section>
-          <h3>Product Features</h3>
-          <p>Premium or packaged ProductFeature contracts for this Product.</p>
+          <h3>Features</h3>
+          <p>Features of this product.</p>
           <div className="commercial-grant-list">
             {features.map((feature) => (
               <label key={feature.id} className="commercial-grant-row">
@@ -84,12 +84,12 @@ export function AddOnGrantsDialog({
                 <small>{feature.status}</small>
               </label>
             ))}
-            {!features.length ? <p>No ProductFeatures defined.</p> : null}
+            {!features.length ? <p>No features yet.</p> : null}
           </div>
         </section>
         <section>
           <h3>Capabilities</h3>
-          <p>Reusable capabilities must already be compatible with this Product.</p>
+          <p>Only capabilities this product supports are listed.</p>
           <div className="commercial-grant-list">
             {capabilities.map((capability) => (
               <label key={capability.id} className="commercial-grant-row">
@@ -107,7 +107,7 @@ export function AddOnGrantsDialog({
                 <small>{capability.status}</small>
               </label>
             ))}
-            {!capabilities.length ? <p>No compatible Capabilities defined.</p> : null}
+            {!capabilities.length ? <p>No compatible capabilities yet.</p> : null}
           </div>
         </section>
       </div>

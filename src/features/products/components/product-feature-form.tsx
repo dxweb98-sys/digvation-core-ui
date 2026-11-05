@@ -1,11 +1,20 @@
-import { DInput, DTextarea } from '@digvation/ui';
+
+import { useValidatedForm } from '../../../shared/forms/use-validated-form';
+import { AppInput, AppTextarea } from '../../../shared/ui/form-fields';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
 import {
   normalizeProductFeatureCode,
   productFeatureFormSchema,
   type ProductFeatureFormValues,
 } from '../schemas/product-feature-form-schema';
+
+function normalizeValues(values: ProductFeatureFormValues) {
+  return {
+      ...values,
+      code: normalizeProductFeatureCode(values.code),
+      description: values.description?.trim() || undefined,
+    };
+}
 
 export function ProductFeatureForm({
   formId,
@@ -18,7 +27,12 @@ export function ProductFeatureForm({
   defaultValues: ProductFeatureFormValues;
   onSubmit: (values: ProductFeatureFormValues) => void | Promise<void>;
 }) {
-  const form = useForm<ProductFeatureFormValues>({ defaultValues });
+  const { form, field, change, onInvalid, applyServerError } = useValidatedForm<ProductFeatureFormValues>({
+    formId,
+    schema: productFeatureFormSchema,
+    defaultValues,
+    normalize: normalizeValues,
+  });
   const { code, name, description } = defaultValues;
 
   useEffect(() => {
@@ -26,11 +40,7 @@ export function ProductFeatureForm({
   }, [code, description, form, name]);
 
   async function handleSubmit(values: ProductFeatureFormValues) {
-    const normalizedValues = {
-      ...values,
-      code: normalizeProductFeatureCode(values.code),
-      description: values.description?.trim() || undefined,
-    };
+    const normalizedValues = normalizeValues(values);
     const result = productFeatureFormSchema.safeParse(normalizedValues);
     if (!result.success) {
       for (const issue of result.error.issues) {
@@ -40,48 +50,49 @@ export function ProductFeatureForm({
       }
       return;
     }
-    await onSubmit(result.data);
+    try {
+      await onSubmit(result.data);
+    } catch (error) {
+      applyServerError(error);
+    }
   }
 
   return (
     <form
       className="product-form"
       id={formId}
-      onSubmit={form.handleSubmit(handleSubmit)}
+      onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
       noValidate
     >
-      <DInput
-        label="Feature Code *"
+      <AppInput
+        label="Feature code" placeholder="pos.sales"
         hint={
           mode === 'create'
             ? 'Stable product-scoped identifier, for example pos.sales. Lowercase letters, numbers, dots, underscores, and hyphens only.'
-            : 'Feature code is immutable after creation.'
+            : 'Cannot be changed.'
         }
         value={form.watch('code')}
         readOnly={mode === 'edit'}
         disabled={mode === 'edit'}
-        error={form.formState.errors.code?.message}
+        {...field('code')}
         onChange={(value) =>
-          form.setValue('code', normalizeProductFeatureCode(value), {
-            shouldValidate: true,
-          })
+          change('code', normalizeProductFeatureCode(value))
         }
       />
-      <DInput
-        label="Feature Name *"
+      <AppInput
+        label="Feature name" placeholder="Sales"
         value={form.watch('name')}
-        error={form.formState.errors.name?.message}
+        {...field('name')}
         onChange={(value) =>
-          form.setValue('name', value, { shouldValidate: true })
+          change('name', value)
         }
       />
-      <DTextarea
-        label="Description"
-        hint="Describe product-owned behavior only. Do not duplicate a reusable Capability here."
+      <AppTextarea
+        label="Description" placeholder="Create and complete sales" optional
         value={form.watch('description') ?? ''}
-        error={form.formState.errors.description?.message}
+        {...field('description')}
         onChange={(value) =>
-          form.setValue('description', value, { shouldValidate: true })
+          change('description', value)
         }
       />
     </form>

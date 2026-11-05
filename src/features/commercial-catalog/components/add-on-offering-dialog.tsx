@@ -1,4 +1,7 @@
-import { DButton, DInput } from '@digvation/ui';
+import { useFieldErrors } from '../../../shared/forms/use-field-errors';
+import { AppInput } from '../../../shared/ui/form-fields';
+import { AppAction } from '../../../shared/ui/app-action';
+
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { AddOnOffering } from '../types/commercial-catalog';
@@ -39,31 +42,37 @@ export function AddOnOfferingDialog({
   const validCode =
     Boolean(offering) ||
     (ADD_ON_CODE_PATTERN.test(normalizedCode) && normalizedCode.length <= 80);
-  const canSubmit =
-    validCode &&
-    Boolean(normalizedName) &&
-    normalizedName.length <= 150 &&
-    description.length <= 500;
+  const { field, allowSubmit } = useFieldErrors<'code' | 'name' | 'description'>(
+    'add-on-offering-form',
+    () => ({
+      ...(validCode
+        ? {}
+        : {
+            code: 'At least two characters. Start with a letter or number; hyphens and underscores can follow.',
+          }),
+      ...(normalizedName ? {} : { name: 'Enter a name.' }),
+      ...(normalizedName.length <= 150 ? {} : { name: 'Use 150 characters or fewer.' }),
+      ...(description.length <= 500 ? {} : { description: 'Use 500 characters or fewer.' }),
+    }),
+  );
 
   return (
     <AppDialog kind="form"
       open={open}
       onClose={onClose}
       title={offering ? 'Edit add-on offering' : 'Create add-on offering'}
-      description="An add-on is a sellable commercial SKU. It grants technical ProductFeatures and/or reusable Capabilities without pricing those technical contracts directly."
       footer={
         <div className="commercial-dialog-actions">
-          <DButton variant="outline" onClick={onClose} disabled={loading}>
+          <AppAction tone="secondary" onClick={onClose} disabled={loading}>
             Cancel
-          </DButton>
-          <DButton
+          </AppAction>
+          <AppAction
             form="add-on-offering-form"
             type="submit"
             loading={loading}
-            disabled={!canSubmit}
           >
-            {offering ? 'Save Changes' : 'Create Draft'}
-          </DButton>
+            {offering ? 'Save' : 'Create draft'}
+          </AppAction>
         </div>
       }
     >
@@ -72,7 +81,7 @@ export function AddOnOfferingDialog({
         className="commercial-form"
         onSubmit={(event) => {
           event.preventDefault();
-          if (!canSubmit) return;
+          if (!allowSubmit()) return;
           if (offering) {
             void onUpdate({
               addOnOfferingId: offering.id,
@@ -89,27 +98,25 @@ export function AddOnOfferingDialog({
           });
         }}
       >
-        <DInput
-          label="Code *"
+        <AppInput
+          {...field('code')}
+          label="Code" placeholder="EXTRA-SEATS"
           value={code}
           disabled={Boolean(offering)}
           maxLength={80}
-          hint="Stable machine-readable commercial SKU code."
-          error={
-            !offering && code && !validCode
-              ? 'Use at least two letters/numbers; hyphen and underscore are allowed after the first character.'
-              : undefined
-          }
+          hint="Cannot be changed later."
           onChange={(value) => setCode(value.toUpperCase())}
         />
-        <DInput
-          label="Name *"
+        <AppInput
+          {...field('name')}
+          label="Name" placeholder="Extra seats"
           value={name}
           maxLength={150}
           onChange={setName}
         />
-        <DInput
-          label="Description"
+        <AppInput
+          {...field('description')}
+          label="Description" placeholder="Ten extra operator seats" optional
           value={description}
           maxLength={500}
           onChange={setDescription}

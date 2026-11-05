@@ -1,10 +1,5 @@
-import {
-  DButton,
-  DCheckbox,
-  DEmptyState,
-  DLoadingIndicator,
-  useToast,
-} from '@digvation/ui';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DCheckbox, DEmptyState, DLoadingIndicator, useToast } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 
@@ -60,7 +55,7 @@ function FeatureSelectionForm({
       });
       showToast({
         title: 'Product features updated',
-        description: `${relationship.productName} now uses the selected feature entitlement set.`,
+        description: `${relationship.productName} features were saved.`,
         variant: 'success',
       });
       onClose();
@@ -70,7 +65,7 @@ function FeatureSelectionForm({
         description:
           error instanceof Error
             ? error.message
-            : 'Product feature entitlements could not be saved.',
+            : 'Features could not be saved. Try again.',
         variant: 'danger',
       });
     }
@@ -88,18 +83,16 @@ function FeatureSelectionForm({
   return (
     <div className="client-feature-composition">
       <div className="client-composition-copy">
-        <strong>Explicit feature entitlement</strong>
+        <strong>Features</strong>
         <p>
-          Select the active features this client may use for {relationship.productName}.
-          Product ownership alone does not imply every catalog feature is enabled.
+          Select the features this client can use in {relationship.productName}.
         </p>
       </div>
 
       {unavailableAssignedFeatures.length > 0 ? (
         <p className="client-composition-warning">
           {unavailableAssignedFeatures.length} previously selected feature
-          {unavailableAssignedFeatures.length === 1 ? ' is' : 's are'} no longer active.
-          Saving this composition will remove those inactive selections.
+          {unavailableAssignedFeatures.length === 1 ? ' is' : 's are'} no longer active. Saving removes them.
         </p>
       ) : null}
 
@@ -125,16 +118,16 @@ function FeatureSelectionForm({
       </div>
 
       <div className="client-product-dialog-actions">
-        <DButton
-          variant="outline"
+        <AppAction
+          tone="secondary"
           onClick={onClose}
           disabled={replaceFeatures.isPending}
         >
           Cancel
-        </DButton>
-        <DButton onClick={() => void save()} loading={replaceFeatures.isPending}>
-          Save Features
-        </DButton>
+        </AppAction>
+        <AppAction onClick={() => void save()} loading={replaceFeatures.isPending}>
+          Save
+        </AppAction>
       </div>
     </div>
   );
@@ -160,30 +153,29 @@ export function ClientProductFeaturesDialog({
       open={open}
       onClose={onClose}
       title={relationship ? `Configure ${relationship.productName}` : 'Configure product'}
-      description="Manage this client product's explicit feature entitlement set."
     >
       {!relationship ? null : isPending ? (
         <div className="client-product-dialog-state">
-          <DLoadingIndicator label="Loading product composition" />
+          <DLoadingIndicator label="Loading product" />
         </div>
       ) : error ? (
         <DEmptyState
-          title="Product composition unavailable"
+          title="Product unavailable"
           description={
             error instanceof Error
               ? error.message
-              : 'Product composition could not be loaded.'
+              : 'Product could not be loaded.'
           }
           action={
-            <DButton
-              variant="outline"
+            <AppAction
+              tone="secondary"
               onClick={() => {
                 void productDetail.refetch();
                 void featureEntitlements.refetch();
               }}
             >
               Retry
-            </DButton>
+            </AppAction>
           }
         />
       ) : !productDetail.data ? (

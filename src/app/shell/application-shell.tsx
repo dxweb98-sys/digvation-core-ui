@@ -1,4 +1,7 @@
-import { DAvatar, DBadge, DButton } from '@digvation/ui';
+import { CoreApiStatus } from './core-api-status';
+import { LogOut, Menu } from 'lucide-react';
+import { AppAction } from '../../shared/ui/app-action';
+import { DAvatar, DBadge } from '@digvation/ui';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { useAuth } from '../../features/auth/use-auth';
@@ -8,7 +11,7 @@ import { ApplicationNavigation } from './application-navigation';
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Dashboard',
   '/clients': 'Clients',
-  '/clients/new': 'Add Client',
+  '/clients/new': 'Add client',
   '/products': 'Products',
   '/capabilities': 'Capabilities',
   '/installations': 'Installations',
@@ -19,7 +22,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/invitations': 'Invitations',
   '/roles': 'Roles',
   '/audit': 'Audit',
-  '/platform-health': 'Platform Health',
+  '/platform-health': 'Platform health',
 };
 
 function OperatorProfile() {
@@ -34,9 +37,9 @@ function OperatorProfile() {
         <span>{user.email}</span>
       </div>
       {applicationConfig.dataSourceMode === 'core' ? (
-        <DButton variant="outline" size="sm" onClick={() => void logout()}>
+        <AppAction icon={LogOut} tone="tertiary" size="sm" onClick={() => void logout()}>
           Sign out
-        </DButton>
+        </AppAction>
       ) : null}
     </div>
   );
@@ -73,16 +76,15 @@ export function ApplicationShell() {
       <div className="application-workspace">
         <header className="application-header">
           <div className="header-leading">
-            <DButton
+            <AppAction icon={Menu} tone="tertiary"
               className="mobile-navigation-trigger"
-              variant="outline"
               size="sm"
               aria-controls="mobile-navigation"
               aria-expanded={isMobileNavigationOpen}
               onClick={() => setIsMobileNavigationOpen((isOpen) => !isOpen)}
             >
               Menu
-            </DButton>
+            </AppAction>
             <div>
               <p className="header-eyebrow">Control Center</p>
               <p className="header-title">{pageTitle}</p>
@@ -90,9 +92,7 @@ export function ApplicationShell() {
           </div>
           <div className="header-status">
             <span>{coreMode ? 'Core API' : 'Development data'}</span>
-            <DBadge variant={coreMode ? 'success' : 'info'} dot dotClassName={coreMode ? 'status-dot-live' : undefined}>
-              {coreMode ? 'Connected' : 'Mock'}
-            </DBadge>
+            {coreMode ? <CoreApiStatus /> : <DBadge variant="warning">Mock data</DBadge>}
           </div>
         </header>
         <div

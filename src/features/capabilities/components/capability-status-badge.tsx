@@ -1,3 +1,4 @@
+import { labelFor } from '../../../shared/labels/labels';
 import { DBadge } from '@digvation/ui';
 import type { CapabilityStatus } from '../types/capability';
 
@@ -7,8 +8,8 @@ const STATUS_VARIANTS: Record<CapabilityStatus, 'default' | 'success' | 'danger'
   RETIRED: 'default',
 };
 
-function formatStatus(status: CapabilityStatus) {
-  return status[0] + status.slice(1).toLowerCase();
+function formatStatus(status: string) {
+  return labelFor(status);
 }
 
 export function CapabilityStatusBadge({ status }: { status: CapabilityStatus }) {

@@ -1,9 +1,14 @@
-import { DInput, DTextarea } from '@digvation/ui';
+
+import { useValidatedForm } from '../../../shared/forms/use-validated-form';
+import { AppInput, AppTextarea } from '../../../shared/ui/form-fields';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
 import { normalizeProductCode, productFormSchema, type ProductFormValues } from '../schemas/product-form-schema';
 
 export type ProductFormMode = 'create' | 'edit';
+
+function normalizeValues(values: ProductFormValues) {
+  return { ...values, code: normalizeProductCode(values.code), description: values.description?.trim() || undefined };
+}
 
 export function ProductForm({
   formId,
@@ -16,7 +21,12 @@ export function ProductForm({
   defaultValues: ProductFormValues;
   onSubmit: (values: ProductFormValues) => void | Promise<void>;
 }) {
-  const form = useForm<ProductFormValues>({ defaultValues });
+  const { form, field, change, onInvalid, applyServerError } = useValidatedForm<ProductFormValues>({
+    formId,
+    schema: productFormSchema,
+    defaultValues,
+    normalize: normalizeValues,
+  });
   const { code, name, description } = defaultValues;
 
   useEffect(() => {
@@ -24,7 +34,7 @@ export function ProductForm({
   }, [code, description, form, name]);
 
   async function handleSubmit(values: ProductFormValues) {
-    const normalizedValues = { ...values, code: normalizeProductCode(values.code), description: values.description?.trim() || undefined };
+    const normalizedValues = normalizeValues(values);
     const result = productFormSchema.safeParse(normalizedValues);
     if (!result.success) {
       for (const issue of result.error.issues) {
@@ -32,22 +42,26 @@ export function ProductForm({
       }
       return;
     }
-    await onSubmit(result.data);
+    try {
+      await onSubmit(result.data);
+    } catch (error) {
+      applyServerError(error);
+    }
   }
 
   return (
-    <form className="product-form" id={formId} onSubmit={form.handleSubmit(handleSubmit)} noValidate>
-      <DInput
-        label="Product Code *"
-        hint={mode === 'create' ? 'Stable machine-readable identifier. Uppercase letters, numbers, and hyphens only.' : 'Product code is immutable after creation.'}
+    <form className="product-form" id={formId} onSubmit={form.handleSubmit(handleSubmit, onInvalid)} noValidate>
+      <AppInput
+        label="Product code" placeholder="POS"
+        hint={mode === 'create' ? 'Uppercase letters, numbers and hyphens. Cannot be changed later.' : 'Cannot be changed.'}
         value={form.watch('code')}
         readOnly={mode === 'edit'}
         disabled={mode === 'edit'}
-        error={form.formState.errors.code?.message}
-        onChange={(value) => form.setValue('code', normalizeProductCode(value), { shouldValidate: true })}
+        {...field('code')}
+        onChange={(value) => change('code', normalizeProductCode(value))}
       />
-      <DInput label="Product Name *" value={form.watch('name')} error={form.formState.errors.name?.message} onChange={(value) => form.setValue('name', value, { shouldValidate: true })} />
-      <DTextarea label="Description" hint="Optional concise description of the product scope." value={form.watch('description') ?? ''} error={form.formState.errors.description?.message} onChange={(value) => form.setValue('description', value, { shouldValidate: true })} />
+      <AppInput label="Product name" placeholder="Digvation POS" value={form.watch('name')} {...field('name')} onChange={(value) => change('name', value)} />
+      <AppTextarea label="Description" placeholder="Point of sale for salons and retail" optional value={form.watch('description') ?? ''} {...field('description')} onChange={(value) => change('description', value)} />
     </form>
   );
 }

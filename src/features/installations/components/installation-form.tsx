@@ -1,6 +1,8 @@
-import { DCheckbox, DInput, DSelect, DToggle } from '@digvation/ui';
+import { useValidatedForm } from '../../../shared/forms/use-validated-form';
+import { AppInput, AppSelect } from '../../../shared/ui/form-fields';
+import { labelFor } from '../../../shared/labels/labels';
+import { DCheckbox, DToggle } from '@digvation/ui';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
 import {
   installationFormSchema,
   normalizeInstallationCode,
@@ -29,31 +31,8 @@ const BRANDING_OPTIONS = [
   { value: 'WHITE_LABEL', label: 'White label' },
 ];
 
-export function InstallationForm({
-  formId,
-  mode,
-  defaultValues,
-  onSubmit,
-}: {
-  formId: string;
-  mode: 'create' | 'edit';
-  defaultValues: InstallationFormValues;
-  onSubmit: (values: InstallationFormValues) => void | Promise<void>;
-}) {
-  const form = useForm<InstallationFormValues>({ defaultValues });
-  const clientId = form.watch('clientId');
-  const deploymentMode = form.watch('deploymentMode');
-  const brandingMode = form.watch('brandingMode');
-  const selectedProducts = form.watch('clientProductIds');
-  const clientsQuery = useInstallationClientOptions();
-  const productsQuery = useClientProductOptions(clientId);
-
-  useEffect(() => {
-    form.reset(defaultValues);
-  }, [defaultValues, form]);
-
-  async function submit(values: InstallationFormValues) {
-    const result = installationFormSchema.safeParse({
+function normalizeValues(values: InstallationFormValues) {
+  return {
       ...values,
       code: normalizeInstallationCode(values.code),
       region: values.region?.trim() || undefined,
@@ -66,7 +45,39 @@ export function InstallationForm({
       customDomain: values.customDomain?.trim() || undefined,
       supportName: values.supportName?.trim() || undefined,
       supportEmail: values.supportEmail?.trim() || '',
-    });
+    };
+}
+
+export function InstallationForm({
+  formId,
+  mode,
+  defaultValues,
+  onSubmit,
+}: {
+  formId: string;
+  mode: 'create' | 'edit';
+  defaultValues: InstallationFormValues;
+  onSubmit: (values: InstallationFormValues) => void | Promise<void>;
+}) {
+  const { form, field, change, onInvalid, applyServerError } = useValidatedForm<InstallationFormValues>({
+    formId,
+    schema: installationFormSchema,
+    defaultValues,
+    normalize: normalizeValues,
+  });
+  const clientId = form.watch('clientId');
+  const deploymentMode = form.watch('deploymentMode');
+  const brandingMode = form.watch('brandingMode');
+  const selectedProducts = form.watch('clientProductIds');
+  const clientsQuery = useInstallationClientOptions();
+  const productsQuery = useClientProductOptions(clientId);
+
+  useEffect(() => {
+    form.reset(defaultValues);
+  }, [defaultValues, form]);
+
+  async function submit(values: InstallationFormValues) {
+    const result = installationFormSchema.safeParse(normalizeValues(values));
     if (!result.success) {
       result.error.issues.forEach((issue) =>
         form.setError(issue.path[0] as keyof InstallationFormValues, {
@@ -75,44 +86,47 @@ export function InstallationForm({
       );
       return;
     }
-    await onSubmit(result.data);
+    try {
+      await onSubmit(result.data);
+    } catch (error) {
+      applyServerError(error);
+    }
   }
 
   function setClient(nextClientId: string) {
-    form.setValue('clientId', nextClientId, { shouldValidate: true });
-    form.setValue('clientProductIds', [], { shouldValidate: true });
+    change('clientId', nextClientId);
+    change('clientProductIds', []);
   }
 
   function toggleProduct(clientProductId: string, checked: boolean) {
     const next = new Set(form.getValues('clientProductIds'));
     if (checked) next.add(clientProductId);
     else next.delete(clientProductId);
-    form.setValue('clientProductIds', [...next], { shouldValidate: true });
+    change('clientProductIds', [...next]);
   }
 
   return (
-    <form className="installation-form" id={formId} onSubmit={form.handleSubmit(submit)} noValidate>
+    <form className="installation-form" id={formId} onSubmit={form.handleSubmit(submit, onInvalid)} noValidate>
       <section className="installation-form-section">
         <div className="installation-form-section-heading">
-          <h2>Client &amp; Products</h2>
-          <p>An Installation belongs to one Client and can deliver multiple assigned Products.</p>
-        </div>
-        <DSelect
-          label="Client *"
+          <h2>Client and products</h2>
+          </div>
+        <AppSelect
+          label="Client"
           placeholder="Select client"
           value={clientId}
           disabled={mode === 'edit' || clientsQuery.isPending}
           options={clientsQuery.data?.map((client) => ({ value: client.id, label: client.label }))}
-          error={form.formState.errors.clientId?.message}
+          {...field('clientId')}
           clearable={false}
           onValueChange={(value) => setClient(typeof value === 'string' ? value : '')}
         />
         <div className="installation-product-selection">
-          <span className="installation-field-label">Products *</span>
-          {!clientId ? <p>Select a Client first.</p> : null}
+          <span className="installation-field-label">Products</span>
+          {!clientId ? <p className="installation-field-hint">Select a client first.</p> : null}
           {clientId && productsQuery.isPending ? <p>Loading assigned products…</p> : null}
           {clientId && productsQuery.isSuccess && productsQuery.data.length === 0 ? (
-            <p>No eligible Client Products are available.</p>
+            <p>This client has no products to install.</p>
           ) : null}
           {productsQuery.data?.map((product) => (
             <label className="installation-product-option" key={product.id}>
@@ -122,7 +136,7 @@ export function InstallationForm({
               />
               <span>
                 <strong>{product.productName}</strong>
-                <small>{product.productCode} · {product.status}</small>
+                <small>{product.productCode}, {labelFor(product.status)}</small>
               </span>
             </label>
           ))}
@@ -135,24 +149,23 @@ export function InstallationForm({
       <section className="installation-form-section">
         <div className="installation-form-section-heading">
           <h2>Installation</h2>
-          <p>Set the stable runtime identity and operator-facing name.</p>
-        </div>
+          </div>
         <div className="installation-form-grid">
-          <DInput
-            label="Installation Code *"
+          <AppInput
+            label="Installation code" placeholder="nova-production"
             value={form.watch('code')}
             disabled={mode === 'edit'}
             readOnly={mode === 'edit'}
             maxLength={80}
-            error={form.formState.errors.code?.message}
-            onChange={(value) => form.setValue('code', normalizeInstallationCode(value), { shouldValidate: true })}
+            {...field('code')}
+            onChange={(value) => change('code', normalizeInstallationCode(value))}
           />
-          <DInput
-            label="Name *"
+          <AppInput
+            label="Name" placeholder="Nova production"
             value={form.watch('name')}
             maxLength={150}
-            error={form.formState.errors.name?.message}
-            onChange={(value) => form.setValue('name', value, { shouldValidate: true })}
+            {...field('name')}
+            onChange={(value) => change('name', value)}
           />
         </div>
       </section>
@@ -160,33 +173,32 @@ export function InstallationForm({
       <section className="installation-form-section">
         <div className="installation-form-section-heading">
           <h2>Deployment</h2>
-          <p>Deployment isolation, infrastructure ownership, and operational management stay separate.</p>
-        </div>
+          </div>
         <div className="installation-form-grid">
-          <DSelect
-            label="Environment *"
+          <AppSelect {...field('environment')}
+            label="Environment" placeholder="Select an environment"
             value={form.watch('environment')}
             options={ENVIRONMENT_OPTIONS}
             clearable={false}
             onValueChange={(value) => form.setValue('environment', value as InstallationFormValues['environment'])}
           />
-          <DSelect
-            label="Deployment Mode *"
+          <AppSelect
+            label="Deployment mode" placeholder="Select a deployment mode"
             value={deploymentMode}
             options={DEPLOYMENT_OPTIONS}
             clearable={false}
             onValueChange={(value) => {
               const next = value as InstallationFormValues['deploymentMode'];
-              form.setValue('deploymentMode', next, { shouldValidate: true });
+              change('deploymentMode', next);
               if (next === 'DEDICATED') {
-                form.setValue('brandingMode', 'WHITE_LABEL', { shouldValidate: true });
+                change('brandingMode', 'WHITE_LABEL');
               }
             }}
           />
         </div>
         <div className="installation-form-grid installation-ownership-grid">
-          <DSelect
-            label="Infrastructure Ownership *"
+          <AppSelect {...field('infrastructureOwnership')}
+            label="Infrastructure ownership" placeholder="Select who owns it"
             value={form.watch('infrastructureOwnership')}
             options={OWNERSHIP_OPTIONS}
             clearable={false}
@@ -201,12 +213,12 @@ export function InstallationForm({
           </div>
         </div>
         <div className="installation-form-grid">
-          <DInput label="Region" value={form.watch('region') ?? ''} onChange={(value) => form.setValue('region', value)} />
-          <DInput
-            label="Application URL"
+          <AppInput {...field('region')} label="Region" placeholder="Jakarta, Indonesia" optional value={form.watch('region') ?? ''} onChange={(value) => form.setValue('region', value)} />
+          <AppInput
+            label="Application URL" placeholder="https://app.novasalon.id" optional
             value={form.watch('applicationUrl') ?? ''}
-            error={form.formState.errors.applicationUrl?.message}
-            onChange={(value) => form.setValue('applicationUrl', value, { shouldValidate: true })}
+            {...field('applicationUrl')}
+            onChange={(value) => change('applicationUrl', value)}
           />
         </div>
       </section>
@@ -214,39 +226,39 @@ export function InstallationForm({
       <section className="installation-form-section">
         <div className="installation-form-section-heading">
           <h2>Branding</h2>
-          <p>Dedicated installations always require white-label branding. Shared installations may use Digvation branding.</p>
+          <p>Dedicated installations must use white label branding.</p>
         </div>
-        <DSelect
-          label="Branding Mode *"
+        <AppSelect
+          label="Branding mode" placeholder="Select a branding mode"
           value={brandingMode}
           options={BRANDING_OPTIONS}
           disabled={deploymentMode === 'DEDICATED'}
           clearable={false}
-          error={form.formState.errors.brandingMode?.message}
-          onValueChange={(value) => form.setValue('brandingMode', value as InstallationFormValues['brandingMode'], { shouldValidate: true })}
+          {...field('brandingMode')}
+          onValueChange={(value) => change('brandingMode', value as InstallationFormValues['brandingMode'])}
         />
         {brandingMode === 'WHITE_LABEL' ? (
           <>
             <div className="installation-form-grid">
-              <DInput
-                label="Brand Name *"
+              <AppInput
+                label="Brand name" placeholder="Nova Salon"
                 value={form.watch('brandName') ?? ''}
-                error={form.formState.errors.brandName?.message}
-                onChange={(value) => form.setValue('brandName', value, { shouldValidate: true })}
+                {...field('brandName')}
+                onChange={(value) => change('brandName', value)}
               />
-              <DInput label="Custom Domain" value={form.watch('customDomain') ?? ''} onChange={(value) => form.setValue('customDomain', value)} />
+              <AppInput {...field('customDomain')} label="Custom domain" placeholder="app.novasalon.id" optional value={form.watch('customDomain') ?? ''} onChange={(value) => form.setValue('customDomain', value)} />
             </div>
             <div className="installation-form-grid">
-              <DInput label="Logo URL" value={form.watch('logoUrl') ?? ''} error={form.formState.errors.logoUrl?.message} onChange={(value) => form.setValue('logoUrl', value, { shouldValidate: true })} />
-              <DInput label="Favicon URL" value={form.watch('faviconUrl') ?? ''} error={form.formState.errors.faviconUrl?.message} onChange={(value) => form.setValue('faviconUrl', value, { shouldValidate: true })} />
+              <AppInput label="Logo URL" placeholder="https://novasalon.id/logo.svg" optional value={form.watch('logoUrl') ?? ''} {...field('logoUrl')} onChange={(value) => change('logoUrl', value)} />
+              <AppInput label="Favicon URL" placeholder="https://novasalon.id/favicon.ico" optional value={form.watch('faviconUrl') ?? ''} {...field('faviconUrl')} onChange={(value) => change('faviconUrl', value)} />
             </div>
             <div className="installation-form-grid">
-              <DInput label="Primary Color" placeholder="#0F172A" value={form.watch('primaryColor') ?? ''} onChange={(value) => form.setValue('primaryColor', value)} />
-              <DInput label="Secondary Color" placeholder="#FFFFFF" value={form.watch('secondaryColor') ?? ''} onChange={(value) => form.setValue('secondaryColor', value)} />
+              <AppInput {...field('primaryColor')} label="Primary color" optional placeholder="#0F172A" value={form.watch('primaryColor') ?? ''} onChange={(value) => form.setValue('primaryColor', value)} />
+              <AppInput {...field('secondaryColor')} label="Secondary color" optional placeholder="#FFFFFF" value={form.watch('secondaryColor') ?? ''} onChange={(value) => form.setValue('secondaryColor', value)} />
             </div>
             <div className="installation-form-grid">
-              <DInput label="Support Name" value={form.watch('supportName') ?? ''} onChange={(value) => form.setValue('supportName', value)} />
-              <DInput label="Support Email" value={form.watch('supportEmail') ?? ''} error={form.formState.errors.supportEmail?.message} onChange={(value) => form.setValue('supportEmail', value, { shouldValidate: true })} />
+              <AppInput {...field('supportName')} label="Support name" placeholder="Nova support" optional value={form.watch('supportName') ?? ''} onChange={(value) => form.setValue('supportName', value)} />
+              <AppInput label="Support email" placeholder="support@novasalon.id" optional value={form.watch('supportEmail') ?? ''} {...field('supportEmail')} onChange={(value) => change('supportEmail', value)} />
             </div>
           </>
         ) : null}

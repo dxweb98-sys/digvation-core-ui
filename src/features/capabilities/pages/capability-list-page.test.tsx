@@ -22,13 +22,13 @@ describe('CapabilityListPage', () => {
     expect(
       await screen.findByRole('heading', { name: 'Capabilities' }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Add Capability' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add capability' })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add Capability' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add capability' }));
     expect(
       screen.getByRole('dialog', { name: 'Add capability' }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText('Capability Code *')).toBeInTheDocument();
-    expect(screen.getByLabelText('Capability Name *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Capability code')).toBeInTheDocument();
+    expect(screen.getByLabelText('Capability name')).toBeInTheDocument();
   });
 });

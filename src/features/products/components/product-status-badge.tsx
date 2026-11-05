@@ -1,3 +1,4 @@
+import { labelFor } from '../../../shared/labels/labels';
 import { DBadge } from '@digvation/ui';
 import type { ProductStatus } from '../types/product';
 
@@ -7,8 +8,8 @@ const STATUS_VARIANTS: Record<ProductStatus, 'default' | 'success' | 'danger'> =
   RETIRED: 'default',
 };
 
-function formatStatus(status: ProductStatus) {
-  return status[0] + status.slice(1).toLowerCase();
+function formatStatus(status: string) {
+  return labelFor(status);
 }
 
 export function ProductStatusBadge({ status }: { status: ProductStatus }) {

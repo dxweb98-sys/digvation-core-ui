@@ -67,7 +67,7 @@ async function renderEditForm(installation: InstallationSummary) {
 }
 
 function saveChanges() {
-  fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 }
 
 async function saveErrorAlert() {
@@ -107,7 +107,7 @@ describe('Edit availability', () => {
     render(withProviders(<InstallationListPage />));
     await openRowActions();
 
-    expect(await screen.findByRole('button', { name: 'Edit Installation' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Edit' })).toBeInTheDocument();
   });
 
   it('removes Edit from the list for a decommissioned installation and keeps Open', async () => {
@@ -115,8 +115,8 @@ describe('Edit availability', () => {
     render(withProviders(<InstallationListPage />));
     await openRowActions();
 
-    expect(await screen.findByRole('button', { name: 'Open Installation' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Edit Installation' })).not.toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Open' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument();
   });
 
   it('removes Edit from the detail dialog for a decommissioned installation and explains why', async () => {
@@ -128,7 +128,7 @@ describe('Edit availability', () => {
     );
 
     expect(await screen.findByText(/can no longer be edited/)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Edit Installation' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
   });
 
@@ -140,7 +140,7 @@ describe('Edit availability', () => {
       ),
     );
 
-    expect(await screen.findByRole('button', { name: 'Edit Installation' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Edit' })).toBeInTheDocument();
     expect(screen.queryByText(/can no longer be edited/)).not.toBeInTheDocument();
   });
 });

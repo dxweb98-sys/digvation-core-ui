@@ -1,9 +1,5 @@
-import {
-  DButton,
-  DConnectionError,
-  DEmptyState,
-  DLoadingIndicator,
-} from '@digvation/ui';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DConnectionError, DEmptyState, DLoadingIndicator } from '@digvation/ui';
 import { AppDialog, DetailItem, DetailList, DialogActions, DialogSection } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { useCapabilityDetail } from '../hooks/use-capability-detail';
@@ -88,15 +84,15 @@ export function CapabilityDetailDialog({
         footer={
           <DialogActions
             destructive={<CapabilityLifecycleAction capability={capability} isSubmitting={statusTransition.isPending} onTransition={handleTransition} />}
-            secondary={<DButton variant="outline" onClick={onClose}>Close</DButton>}
-            primary={<DButton onClick={() => setIsEditDialogOpen(true)}>Edit Capability</DButton>}
+            secondary={<AppAction tone="secondary" onClick={onClose}>Close</AppAction>}
+            primary={<AppAction onClick={() => setIsEditDialogOpen(true)}>Edit</AppAction>}
           />
         }
       >
         <DialogSection title="Capability">
           <DetailList>
-            <DetailItem label="Capability Name">{capability.name}</DetailItem>
-            <DetailItem label="Capability Code"><code className="capability-code">{capability.code}</code></DetailItem>
+            <DetailItem label="Capability name">{capability.name}</DetailItem>
+            <DetailItem label="Capability code"><code className="capability-code">{capability.code}</code></DetailItem>
             <DetailItem label="Status"><CapabilityStatusBadge status={capability.status} /></DetailItem>
             <DetailItem wide label="Description">{capability.description}</DetailItem>
           </DetailList>

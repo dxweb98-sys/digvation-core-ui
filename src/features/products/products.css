@@ -245,3 +245,5 @@
     justify-content: flex-start;
   }
 }
+
+.product-feature-identity code { font-size: var(--cc-text-xs); }

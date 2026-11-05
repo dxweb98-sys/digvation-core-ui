@@ -1,3 +1,4 @@
+import { ConnectedOnly } from '../../shared/ui/not-connected';
 import type { RouteObject } from 'react-router';
 import { ApplicationShell } from '../shell/application-shell';
 import { DashboardPage } from '../../features/dashboard/pages/dashboard-page';
@@ -42,14 +43,14 @@ export const applicationRoutes: RouteObject[] = [
       { path: 'products', element: <ProductListPage /> },
       { path: 'capabilities', element: <CapabilityListPage /> },
       { path: 'installations', element: <InstallationListPage /> },
-      { path: 'infrastructure', element: <InfrastructureListPage /> },
-      { path: 'deployments', element: <DeploymentsPage /> },
-      { path: 'incidents', element: <IncidentsPage /> },
+      { path: 'infrastructure', element: <ConnectedOnly pageTitle="Infrastructure" description="Servers and the installations bound to them will appear here."><InfrastructureListPage /></ConnectedOnly> },
+      { path: 'deployments', element: <ConnectedOnly pageTitle="Deployments" description="Deployment history for each installation will appear here."><DeploymentsPage /></ConnectedOnly> },
+      { path: 'incidents', element: <ConnectedOnly pageTitle="Incidents" description="Open and resolved incidents will appear here."><IncidentsPage /></ConnectedOnly> },
       { path: 'users', element: <UsersPage /> },
       { path: 'invitations', element: <InvitationsPage /> },
       { path: 'roles', element: <RolesPage /> },
-      { path: 'audit', element: <AuditPage /> },
-      { path: 'platform-health', element: <PlatformHealthPage /> },
+      { path: 'audit', element: <ConnectedOnly pageTitle="Audit" description="A record of operator actions will appear here."><AuditPage /></ConnectedOnly> },
+      { path: 'platform-health', element: <ConnectedOnly pageTitle="Platform health" description="The health of each running service will appear here."><PlatformHealthPage /></ConnectedOnly> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

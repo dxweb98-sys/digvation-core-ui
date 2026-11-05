@@ -1,13 +1,9 @@
-import {
-  DButton,
-  DConnectionError,
-  DDataTable,
-  DEmptyState,
-  DInput,
-  DSelect,
-  useToast,
-  type TableColumn,
-} from '@digvation/ui';
+import { useFieldErrors } from '../../../shared/forms/use-field-errors';
+import { AppInput, AppSelect } from '../../../shared/ui/form-fields';
+import { labelFor } from '../../../shared/labels/labels';
+import { Pencil, Plus, RefreshCw } from 'lucide-react';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DConnectionError, DDataTable, DEmptyState, useToast, type TableColumn } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { useClientProducts } from '../../client-products/hooks/use-client-products';
@@ -78,21 +74,21 @@ const TERM_COLUMNS: TableColumn<SubscriptionTerm>[] = [
     label: 'Term',
     render: (term) => `${date(term.startsAt)} → ${date(term.endsAt)}`,
   },
-  { key: 'billingCycle', label: 'Billing Cycle' },
+  { key: 'billingCycle', label: 'Billing cycle', render: (term) => labelFor(term.billingCycle) },
   {
     key: 'listAmountMinor',
-    label: 'List Price',
+    label: 'List price',
     render: (term) => formatMoney(term.listAmountMinor, term.currency),
   },
   {
     key: 'agreedAmountMinor',
-    label: 'Agreed Price',
+    label: 'Agreed price',
     render: (term) => formatMoney(term.agreedAmountMinor, term.currency),
   },
   {
     key: 'adjustmentType',
     label: 'Adjustment',
-    render: (term) => term.adjustmentType.replace('_', ' '),
+    render: (term) => labelFor(term.adjustmentType),
   },
   {
     key: 'renewedFromTermId',
@@ -112,21 +108,21 @@ const ADD_ON_COLUMNS: TableColumn<SubscriptionAddOn>[] = [
       </div>
     ),
   },
-  { key: 'status', label: 'Status' },
+  { key: 'status', label: 'Status', render: (item) => labelFor(item.status) },
   {
     key: 'effectiveFrom',
-    label: 'Effective Period',
+    label: 'Effective period',
     render: (item) =>
       `${date(item.effectiveFrom)} → ${date(item.effectiveUntil)}`,
   },
   {
     key: 'agreedAmountMinor',
-    label: 'Recurring Agreed',
+    label: 'Recurring agreed',
     render: (item) => formatMoney(item.agreedAmountMinor, item.currency),
   },
   {
     key: 'initialProratedAmountMinor',
-    label: 'Initial Prorated',
+    label: 'Initial prorated',
     render: (item) =>
       formatMoney(item.initialProratedAmountMinor, item.currency),
   },
@@ -171,22 +167,21 @@ function ConfigurationDialog({
       open
       onClose={onClose}
       title={`${summary.productName} configuration`}
-      description="Operational limits are configuration, not commercial add-ons. Paid premium functionality belongs in the add-on catalog."
       footer={
         <div className="client-dialog-actions">
-          <DButton variant="outline" onClick={onClose}>
+          <AppAction tone="secondary" onClick={onClose}>
             Cancel
-          </DButton>
-          <DButton onClick={() => void save()} loading={mutation.isPending}>
-            Save Changes
-          </DButton>
+          </AppAction>
+          <AppAction onClick={() => void save()} loading={mutation.isPending}>
+            Save
+          </AppAction>
         </div>
       }
     >
       <div className="client-contact-form">
         {configurations.map((configuration, index) =>
           configuration.valueType === 'BOOLEAN' ? (
-            <DSelect
+            <AppSelect
               key={configuration.id}
               label={configuration.label}
               value={String(configuration.value)}
@@ -207,7 +202,7 @@ function ConfigurationDialog({
               }}
             />
           ) : (
-            <DInput
+            <AppInput
               key={configuration.id}
               label={configuration.label}
               type={configuration.valueType === 'INTEGER' ? 'number' : 'text'}
@@ -248,20 +243,23 @@ function AddOnLifecycleDialog({
   const mutation = useTransitionSubscriptionAddOn();
   const { showToast } = useToast();
   const [reason, setReason] = useState('');
+  const { field, allowSubmit } = useFieldErrors<'reason'>('add-on-status-reason', () =>
+    reason.trim() ? {} : { reason: 'Enter a reason.' },
+  );
 
   async function confirm() {
-    if (!reason.trim()) return;
+    if (!allowSubmit()) return;
     try {
       await mutation.mutateAsync({
         subscriptionAddOnId: addOn.id,
         targetStatus,
         reason: reason.trim(),
       });
-      showToast({ title: 'Add-on lifecycle updated', variant: 'success' });
+      showToast({ title: 'Add-on status updated', variant: 'success' });
       onClose();
     } catch (error) {
       showToast({
-        title: 'Add-on lifecycle update failed',
+        title: 'Add-on status update failed',
         description: error instanceof Error ? error.message : undefined,
         variant: 'danger',
       });
@@ -276,25 +274,28 @@ function AddOnLifecycleDialog({
       title={`${targetStatus === 'ACTIVE' ? 'Reactivate' : targetStatus === 'SUSPENDED' ? 'Suspend' : 'Cancel'} ${addOn.addOnName}`}
       footer={
         <div className="client-dialog-actions">
-          <DButton variant="outline" onClick={onClose}>
+          <AppAction tone="secondary" onClick={onClose}>
             Cancel
-          </DButton>
-          <DButton
+          </AppAction>
+          <AppAction
             onClick={() => void confirm()}
             loading={mutation.isPending}
-            disabled={!reason.trim()}
           >
             Confirm
-          </DButton>
+          </AppAction>
         </div>
       }
     >
-      <DInput
-        label="Reason *"
-        value={reason}
-        maxLength={500}
-        onChange={setReason}
-      />
+      <div id="add-on-status-reason">
+        <AppInput
+          {...field('reason')}
+          label="Reason"
+          placeholder="For example, contract ended on 30 June"
+          value={reason}
+          maxLength={500}
+          onChange={setReason}
+        />
+      </div>
     </AppDialog>
   );
 }
@@ -335,7 +336,7 @@ function CommercialRecord({
             summary.subscription?.status ?? 'pending'
           ).toLowerCase()}`}
         >
-          {summary.subscription?.status ?? 'NO SUBSCRIPTION'}
+          {summary.subscription ? labelFor(summary.subscription.status) : 'No subscription'}
         </span>
       </header>
 
@@ -352,23 +353,23 @@ function CommercialRecord({
                 <small>{context.hint}</small>
               </div>
               <div>
-                <span>List price snapshot</span>
+                <span>List price</span>
                 <strong>
                   {formatMoney(term.listAmountMinor, term.currency)}
                 </strong>
                 <small>
-                  {term.billingCycle.toLowerCase().replace('_', ' ')}
+                  {labelFor(term.billingCycle)}
                 </small>
               </div>
               <div>
-                <span>Agreed Client price</span>
+                <span>Agreed price</span>
                 <strong>
                   {formatMoney(term.agreedAmountMinor, term.currency)}
                 </strong>
                 <small>
                   {term.adjustmentType === 'NONE'
                     ? 'No adjustment'
-                    : `${term.adjustmentType.toLowerCase()} · ${term.adjustmentReason ?? 'reason missing'}`}
+                    : `${labelFor(term.adjustmentType)}: ${term.adjustmentReason ?? 'no reason given'}`}
                 </small>
               </div>
               <div>
@@ -393,23 +394,19 @@ function CommercialRecord({
           <section className="client-commercial-section">
             <div className="client-commercial-section-heading">
               <div>
-                <h3>Commercial add-ons</h3>
-                <p>
-                  Recurring agreed prices are snapshotted per add-on. Initial
-                  mid-term activation is co-term prorated.
-                </p>
-              </div>
-              <DButton
+                <h3>Add-ons</h3>
+                </div>
+              <AppAction icon={Plus} tone="secondary"
                 onClick={onAddOn}
                 disabled={!subscriptionCanSellAddOns}
                 title={
                   subscriptionCanSellAddOns
                     ? undefined
-                    : 'An active or trial subscription term must be effective today before adding an add-on.'
+                    : 'Add-ons need a subscription term that covers today.'
                 }
               >
-                Add Add-on
-              </DButton>
+                Add add-on
+              </AppAction>
             </div>
             {summary.addOns.length ? (
               <>
@@ -428,8 +425,7 @@ function CommercialRecord({
                       <div key={item.id}>
                         <span>{item.addOnName}</span>
                         {item.status === 'ACTIVE' ? (
-                          <DButton
-                            variant="outline"
+                          <AppAction size="sm" tone="secondary"
                             onClick={() =>
                               setAddOnLifecycle({
                                 addOn: item,
@@ -438,10 +434,9 @@ function CommercialRecord({
                             }
                           >
                             Suspend
-                          </DButton>
+                          </AppAction>
                         ) : (
-                          <DButton
-                            variant="outline"
+                          <AppAction size="sm" tone="secondary"
                             onClick={() =>
                               setAddOnLifecycle({
                                 addOn: item,
@@ -450,10 +445,9 @@ function CommercialRecord({
                             }
                           >
                             Reactivate
-                          </DButton>
+                          </AppAction>
                         )}
-                        <DButton
-                          variant="outline"
+                        <AppAction size="sm" tone="danger-subtle"
                           onClick={() =>
                             setAddOnLifecycle({
                               addOn: item,
@@ -461,25 +455,25 @@ function CommercialRecord({
                             })
                           }
                         >
-                          Cancel Add-on
-                        </DButton>
+                          Cancel add-on
+                        </AppAction>
                       </div>
                     ))}
                 </div>
               </>
             ) : (
               <p className="client-commercial-empty">
-                No commercial add-ons activated.
+                No add-ons yet.
               </p>
             )}
           </section>
 
           <section className="client-commercial-section">
             <div className="client-commercial-section-heading">
-              <h3>Configuration & limits</h3>
-              <DButton variant="outline" onClick={onConfigure}>
-                Edit Limits
-              </DButton>
+              <h3>Limits</h3>
+              <AppAction icon={Pencil} tone="secondary" onClick={onConfigure}>
+                Edit
+              </AppAction>
             </div>
             {summary.configurations.length ? (
               <dl className="client-configuration-list">
@@ -495,7 +489,7 @@ function CommercialRecord({
               </dl>
             ) : (
               <p className="client-commercial-empty">
-                No product-specific limits configured.
+                No limits set for this product.
               </p>
             )}
           </section>
@@ -503,7 +497,7 @@ function CommercialRecord({
           <section className="client-commercial-section">
             <div className="client-commercial-section-heading">
               <h3>Term history</h3>
-              <DButton onClick={onRenew}>Add Renewal</DButton>
+              <AppAction icon={RefreshCw} tone="secondary" onClick={onRenew}>Renew</AppAction>
             </div>
             <DDataTable
               columns={TERM_COLUMNS}
@@ -518,18 +512,17 @@ function CommercialRecord({
         <section className="client-commercial-section">
           <h3>Subscription unavailable</h3>
           <p className="client-commercial-empty">
-            The subscription exists but has no commercial term to display.
+            This subscription has no term yet.
           </p>
         </section>
       ) : (
         <section className="client-commercial-section">
           <h3>Current subscription</h3>
           <p className="client-commercial-empty">
-            No subscription configured. A Product catalog list price is
-            required before setup.
+            Set a list price on the product, then set up the subscription.
           </p>
           <div className="client-commercial-actions">
-            <DButton onClick={onSetup}>Set Up Subscription</DButton>
+            <AppAction icon={Plus} tone="secondary" onClick={onSetup}>Set up</AppAction>
           </div>
         </section>
       )}
@@ -562,8 +555,8 @@ export function ClientCommercialTab({ clientId }: { clientId: string }) {
   if (commercialQuery.isError || clientProductsQuery.isError) {
     return (
       <DConnectionError
-        title="Commercial records unavailable"
-        message="Subscription records could not be loaded."
+        title="Subscriptions unavailable"
+        message="Subscriptions could not be loaded."
         onRetry={() => {
           void commercialQuery.refetch();
           void clientProductsQuery.refetch();
@@ -592,8 +585,8 @@ export function ClientCommercialTab({ clientId }: { clientId: string }) {
   if (!summaries.length) {
     return (
       <DEmptyState
-        title="No commercial products"
-        description="Commercial records will appear after a Product is assigned to this Client."
+        title="No products"
+        description="Assign a product to this client first."
       />
     );
   }
