@@ -19,6 +19,8 @@ export class CoreApiError extends Error {
     message: string,
     public readonly status: number,
     public readonly code?: string,
+    /** Validation messages, each starting with the snake_case field name. */
+    public readonly details?: readonly string[],
   ) {
     super(message);
     this.name = 'CoreApiError';
@@ -48,9 +50,17 @@ async function readPayload(response: Response): Promise<unknown> {
   }
 }
 
+/** CORE wraps successful responses in { success, data, request_id, timestamp }. */
+function unwrapEnvelope<T>(payload: unknown): T {
+  const body = payload as { success?: unknown; data?: unknown } | null | undefined;
+  return (body && typeof body === 'object' && body.success === true && 'data' in body
+    ? body.data
+    : payload) as T;
+}
+
 function errorFromResponse(response: Response, payload: unknown) {
   const body = payload as
-    | { message?: string; error?: { code?: string; message?: string } }
+    | { message?: string; error?: { code?: string; message?: string; details?: unknown } }
     | undefined;
   return new CoreApiError(
     body?.error?.message ??
@@ -59,6 +69,9 @@ function errorFromResponse(response: Response, payload: unknown) {
       'Core API request failed',
     response.status,
     body?.error?.code,
+    Array.isArray(body?.error?.details)
+      ? body.error.details.filter((item): item is string => typeof item === 'string')
+      : undefined,
   );
 }
 
@@ -104,7 +117,7 @@ async function requestInternal<T>(
 
   const payload = await readPayload(response);
   if (!response.ok) throw errorFromResponse(response, payload);
-  return payload as T;
+  return unwrapEnvelope<T>(payload);
 }
 
 export function coreApiRequest<T>(path: string, options: CoreApiOptions = {}) {
@@ -149,7 +162,7 @@ export async function refreshCoreApiSession<
       clearCoreSessionTokens();
       return null;
     }
-    const result = payload as CoreSessionResponse;
+    const result = unwrapEnvelope<CoreSessionResponse>(payload);
     setCoreSessionTokens({
       accessToken: result.access_token,
       csrfToken: result.csrf_token,

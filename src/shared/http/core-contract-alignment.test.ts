@@ -2,7 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { coreCommercialCatalogDataSource } from '../../features/commercial-catalog/data/core-commercial-catalog-data-source';
 import { coreProductDataSource } from '../../features/products/data/core-product-data-source';
 import { coreSubscriptionDataSource } from '../../features/subscriptions/data/core-subscription-data-source';
-import { CoreApiError } from './core-api-client';
+import { coreApiRequest, CoreApiError, loginCoreApiSession } from './core-api-client';
+import {
+  clearCoreSessionTokens,
+  getCoreAccessToken,
+  getCoreCsrfToken,
+} from './core-api-session';
 
 const fetchMock = vi.fn<typeof fetch>();
 
@@ -202,5 +207,57 @@ describe('product contract', () => {
     const [, init] = fetchMock.mock.calls[0];
     expect(init?.method).toBe('PUT');
     expect(JSON.parse(String(init?.body))).toEqual({ capability_ids: ['capability'] });
+  });
+});
+
+describe('CORE response envelope', () => {
+  it('returns the data of a wrapped response', async () => {
+    respond(200, {
+      success: true,
+      data: { id: 'client-1' },
+      request_id: 'r',
+      timestamp: 't',
+    });
+
+    await expect(coreApiRequest('/clients/client-1')).resolves.toEqual({ id: 'client-1' });
+  });
+
+  it('keeps an unwrapped response as it is', async () => {
+    respond(200, { status: 'ok' });
+
+    await expect(coreApiRequest('/health')).resolves.toEqual({ status: 'ok' });
+  });
+
+  it('stores the tokens from a wrapped login, so later requests are authorized', async () => {
+    respond(200, {
+      success: true,
+      data: { access_token: 'token-1', csrf_token: 'csrf-1', remember_me: false },
+    });
+    await loginCoreApiSession({ identifier: 'a', password: 'b' });
+    expect(getCoreAccessToken()).toBe('token-1');
+    expect(getCoreCsrfToken()).toBe('csrf-1');
+
+    respond(200, { success: true, data: { id: 'me' } });
+    await coreApiRequest('/users/me');
+
+    const [, init] = fetchMock.mock.calls[1];
+    expect(new Headers(init?.headers).get('Authorization')).toBe('Bearer token-1');
+    clearCoreSessionTokens();
+  });
+
+  it('carries validation details from an error envelope', async () => {
+    respond(400, {
+      success: false,
+      error: {
+        code: 'VALIDATION',
+        message: 'Request validation failed',
+        details: ['display_name must be shorter than 150 characters'],
+      },
+    });
+
+    await expect(coreApiRequest('/clients')).rejects.toMatchObject({
+      status: 400,
+      details: ['display_name must be shorter than 150 characters'],
+    });
   });
 });
