@@ -1,6 +1,9 @@
 .access-page { display: grid; gap: 24px; width: 100%; }
 .access-page h1 { margin: 0; font-size: 2rem; }
 .access-page p { color: var(--color-text-muted); }
+.access-audit-scope { margin: 4px 0 0; font-size: .875rem; }
+.access-audit-time .record-button { white-space: nowrap; }
+.access-audit-filters { display: grid; grid-template-columns: repeat(3, minmax(0, 260px)); gap: 12px; width: 100%; }
 .access-id { display: grid; gap: 3px; }
 .access-id span { font-size: .72rem; color: var(--color-text-muted); }
 .access-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }

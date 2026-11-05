@@ -158,7 +158,7 @@ describe('access workflows', () => {
     expect(within(dialog).queryByRole('textbox')).not.toBeInTheDocument();
     expect(within(dialog).getByText('Commercial review completed.')).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
-    for (const title of ['Users', 'Invitations', 'Roles', 'Audit']) {
+    for (const title of ['Users', 'Invitations', 'Roles', 'Access audit']) {
       fireEvent.click(screen.getAllByRole('link', { name: title })[0]);
       expect(await screen.findByRole('heading', { name: title })).toBeInTheDocument();
       expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();

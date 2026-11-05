@@ -9,6 +9,7 @@ import { useState, type ReactNode } from 'react';
 import { useAccessAudit, useAccessInvitations, useAccessRoles, useAccessUsers, useRevokeInvitation } from '../hooks/use-access';
 import { AuditDetailDialog, InvitationFormDialog, RoleDialog, UserDetailDialog } from '../components/access-dialogs';
 import { ALL_PERMISSIONS, formatAccessDate, type AccessInvitation, type AccessRole, type AccessUser, type AuditEntry } from '../types/access';
+import { AccessAuditPage } from './access-audit-page';
 import '../access.css';
 
 function AccessPage({ title, children }: { title: string; children: ReactNode }) {
@@ -114,12 +115,16 @@ const AUDIT_COLUMNS: TableColumn<AuditEntry>[] = [
   { key: 'target', label: 'Target', render: entry => `${entry.domain} · ${entry.target}` }, { key: 'result', label: 'Result', render: entry => labelFor(entry.result) }, { key: 'reason', label: 'Reason', render: entry => valueOrNotSet(entry.reason) },
 ];
 export function AuditPage() {
+  return isCoreMode() ? <AccessAuditPage /> : <MockAuditPage />;
+}
+
+function MockAuditPage() {
   const audit = useAccessAudit();
   const roles = useAccessRoles();
   const [selected, setSelected] = useState<AuditEntry | null>(null);
   const [result, setResult] = useState('ALL');
   const list = useAccessList((audit.data ?? []).filter(entry => result === 'ALL' || entry.result === result), entry => `${entry.actor} ${entry.action} ${entry.target} ${entry.reason ?? ''}`, (entry, domain) => domain === 'ALL' || entry.domain === domain);
-  return <AccessPage title="Audit">{audit.isPending || audit.isError || roles.isPending || roles.isError ? <AccessQueryState queries={[audit, roles]} /> : <>
+  return <AccessPage title="Access audit">{audit.isPending || audit.isError || roles.isPending || roles.isError ? <AccessQueryState queries={[audit, roles]} /> : <>
     <DDataTable {...list.table} columns={AUDIT_COLUMNS} rowKey="id" onRowClick={setSelected} searchPlaceholder="Search actor, action or target" filters={<>
       <DStatusFilter label="Domain" value={list.status} onChange={list.changeStatus} options={[...new Set(audit.data?.map(entry => entry.domain))].map(value => ({ value, label: value }))} />
       <DStatusFilter label="Result" value={result} onChange={value => { setResult(value); list.table.onPageChange(1); }} options={['SUCCESS', 'REVOKED'].map(value => ({ value, label: value }))} />

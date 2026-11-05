@@ -44,6 +44,33 @@ export interface AuditEntry {
     reason?: string;
     metadata?: Record<string, string>;
 }
+/** Event and target codes CORE writes to its authorization audit log. */
+export const ACCESS_AUDIT_EVENTS = ['ROLE_CREATED', 'ROLE_UPDATED', 'ROLE_DEACTIVATED', 'ROLE_REACTIVATED', 'ROLE_PERMISSIONS_UPDATED', 'USER_ROLES_UPDATED', 'INVITATION_CREATED', 'INVITATION_ACCEPTED', 'INVITATION_REVOKED', 'INVITATION_REVOKED_DELIVERY_FAILURE', 'SUPER_ADMIN_ASSIGNED'] as const;
+export const ACCESS_AUDIT_TARGET_TYPES = ['role', 'user', 'invitation'] as const;
+export interface AccessAuditRecord {
+    id: string;
+    actorUserId: string | null;
+    event: string;
+    targetType: string;
+    targetId: string | null;
+    createdAt: string;
+    roleSlug?: string;
+    roleSlugs?: string[];
+    previousRoleSlugs?: string[];
+    permissionSlugs?: string[];
+    expiresAt?: string;
+}
+export interface AccessAuditQuery {
+    page: number;
+    limit: number;
+    event?: string;
+    targetType?: string;
+    actorUserId?: string;
+}
+export interface AccessAuditPage {
+    items: AccessAuditRecord[];
+    total: number;
+}
 export interface RoleInput {
     name: string;
     description: string;
