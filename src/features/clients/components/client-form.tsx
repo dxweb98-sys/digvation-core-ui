@@ -1,10 +1,19 @@
-import { DInput, DTextarea } from '@digvation/ui';
+
+import { useValidatedForm } from '../../../shared/forms/use-validated-form';
+import { AppInput, AppTextarea } from '../../../shared/ui/form-fields';
 import { DialogSection } from '../../../shared/ui/app-dialog';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
 import { clientFormSchema, normalizeClientCode, type ClientFormValues } from '../schemas/client-form-schema';
 
 export type ClientFormMode = 'create' | 'edit';
+
+function normalizeValues(values: ClientFormValues) {
+  return {
+      ...values,
+      code: normalizeClientCode(values.code),
+      legalName: values.legalName?.trim() || undefined, organizationEmail: values.organizationEmail?.trim() || undefined, organizationPhone: values.organizationPhone?.trim() || undefined, website: values.website?.trim() || undefined, taxIdentifier: values.taxIdentifier?.trim() || undefined, country: values.country?.trim() || undefined, timezone: values.timezone?.trim() || undefined, address: values.address?.trim() || undefined, notes: values.notes?.trim() || undefined,
+    };
+}
 
 export function ClientForm({
   formId,
@@ -17,7 +26,12 @@ export function ClientForm({
   defaultValues: ClientFormValues;
   onSubmit: (values: ClientFormValues) => void | Promise<void>;
 }) {
-  const form = useForm<ClientFormValues>({ defaultValues });
+  const { form, field, change, onInvalid, applyServerError } = useValidatedForm<ClientFormValues>({
+    formId,
+    schema: clientFormSchema,
+    defaultValues,
+    normalize: normalizeValues,
+  });
   const { code, displayName, legalName, organizationEmail, organizationPhone, website, taxIdentifier, country, timezone, address, notes } = defaultValues;
 
   useEffect(() => {
@@ -25,11 +39,7 @@ export function ClientForm({
   }, [address, code, country, displayName, form, legalName, notes, organizationEmail, organizationPhone, taxIdentifier, timezone, website]);
 
   async function handleSubmit(values: ClientFormValues) {
-    const normalizedValues = {
-      ...values,
-      code: normalizeClientCode(values.code),
-      legalName: values.legalName?.trim() || undefined, organizationEmail: values.organizationEmail?.trim() || undefined, organizationPhone: values.organizationPhone?.trim() || undefined, website: values.website?.trim() || undefined, taxIdentifier: values.taxIdentifier?.trim() || undefined, country: values.country?.trim() || undefined, timezone: values.timezone?.trim() || undefined, address: values.address?.trim() || undefined, notes: values.notes?.trim() || undefined,
-    };
+    const normalizedValues = normalizeValues(values);
     const result = clientFormSchema.safeParse(normalizedValues);
 
     if (!result.success) {
@@ -40,35 +50,39 @@ export function ClientForm({
       return;
     }
 
-    await onSubmit(result.data);
+    try {
+      await onSubmit(result.data);
+    } catch (error) {
+      applyServerError(error);
+    }
   }
 
   return (
-    <form className="client-form" id={formId} onSubmit={form.handleSubmit(handleSubmit)} noValidate>
+    <form className="client-form" id={formId} onSubmit={form.handleSubmit(handleSubmit, onInvalid)} noValidate>
       <DialogSection title="Identity">
-      <DInput
-        label="Client Code *"
-        hint={mode === 'create' ? 'Stable machine-readable identifier. Uppercase letters, numbers, and hyphens only.' : 'Client code is immutable after creation.'}
+      <AppInput
+        label="Client code" placeholder="NOVA-SALON"
+        hint={mode === 'create' ? 'Uppercase letters, numbers and hyphens. Cannot be changed later.' : 'Cannot be changed.'}
         value={form.watch('code')}
         readOnly={mode === 'edit'}
         disabled={mode === 'edit'}
-        error={form.formState.errors.code?.message}
-        onChange={(value) => form.setValue('code', normalizeClientCode(value), { shouldValidate: true })}
+        {...field('code')}
+        onChange={(value) => change('code', normalizeClientCode(value))}
       />
-      <DInput
-        label="Display Name *"
+      <AppInput
+        label="Display name" placeholder="Nova Salon"
         value={form.watch('displayName')}
-        error={form.formState.errors.displayName?.message}
-        onChange={(value) => form.setValue('displayName', value, { shouldValidate: true })}
+        {...field('displayName')}
+        onChange={(value) => change('displayName', value)}
       />
-      <DInput
-        label="Legal Name"
+      <AppInput
+        label="Legal name" placeholder="PT Nova Salon Indonesia" optional
         value={form.watch('legalName') ?? ''}
-        error={form.formState.errors.legalName?.message}
-        onChange={(value) => form.setValue('legalName', value, { shouldValidate: true })}
+        {...field('legalName')}
+        onChange={(value) => change('legalName', value)}
       />
       </DialogSection>
-      {mode === 'edit' ? <DialogSection title="Organization"><div className="client-form-grid"><DInput label="Organization Email" value={form.watch('organizationEmail') ?? ''} error={form.formState.errors.organizationEmail?.message} onChange={(value) => form.setValue('organizationEmail', value, { shouldValidate: true })} /><DInput label="Organization Phone" value={form.watch('organizationPhone') ?? ''} error={form.formState.errors.organizationPhone?.message} onChange={(value) => form.setValue('organizationPhone', value, { shouldValidate: true })} /></div><div className="client-form-grid"><DInput label="Website" value={form.watch('website') ?? ''} error={form.formState.errors.website?.message} onChange={(value) => form.setValue('website', value, { shouldValidate: true })} /><DInput label="Tax Identifier" value={form.watch('taxIdentifier') ?? ''} error={form.formState.errors.taxIdentifier?.message} onChange={(value) => form.setValue('taxIdentifier', value, { shouldValidate: true })} /></div><div className="client-form-grid"><DInput label="Country" value={form.watch('country') ?? ''} error={form.formState.errors.country?.message} onChange={(value) => form.setValue('country', value, { shouldValidate: true })} /><DInput label="Timezone" value={form.watch('timezone') ?? ''} error={form.formState.errors.timezone?.message} onChange={(value) => form.setValue('timezone', value, { shouldValidate: true })} /></div><DTextarea label="Address" value={form.watch('address') ?? ''} error={form.formState.errors.address?.message} onChange={(value) => form.setValue('address', value, { shouldValidate: true })} /><DTextarea label="Notes" value={form.watch('notes') ?? ''} error={form.formState.errors.notes?.message} onChange={(value) => form.setValue('notes', value, { shouldValidate: true })} /></DialogSection> : null}
+      {mode === 'edit' ? <DialogSection title="Organization"><div className="client-form-grid"><AppInput label="Organization email" placeholder="hello@novasalon.id" optional value={form.watch('organizationEmail') ?? ''} {...field('organizationEmail')} onChange={(value) => change('organizationEmail', value)} /><AppInput label="Organization phone" placeholder="+62 21 5550 1200" optional value={form.watch('organizationPhone') ?? ''} {...field('organizationPhone')} onChange={(value) => change('organizationPhone', value)} /></div><div className="client-form-grid"><AppInput label="Website" placeholder="https://novasalon.id" optional value={form.watch('website') ?? ''} {...field('website')} onChange={(value) => change('website', value)} /><AppInput label="Tax identifier" placeholder="01.234.567.8-901.000" optional value={form.watch('taxIdentifier') ?? ''} {...field('taxIdentifier')} onChange={(value) => change('taxIdentifier', value)} /></div><div className="client-form-grid"><AppInput label="Country" placeholder="Indonesia" optional value={form.watch('country') ?? ''} {...field('country')} onChange={(value) => change('country', value)} /><AppInput label="Timezone" placeholder="Asia/Jakarta" optional value={form.watch('timezone') ?? ''} {...field('timezone')} onChange={(value) => change('timezone', value)} /></div><AppTextarea label="Address" placeholder="Jl. Kemang Raya 14, Jakarta" optional value={form.watch('address') ?? ''} {...field('address')} onChange={(value) => change('address', value)} /><AppTextarea label="Notes" placeholder="Renewal handled by the finance team" optional value={form.watch('notes') ?? ''} {...field('notes')} onChange={(value) => change('notes', value)} /></DialogSection> : null}
     </form>
   );
 }

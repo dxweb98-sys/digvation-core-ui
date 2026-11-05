@@ -37,7 +37,7 @@ describe('access detail hierarchy', () => {
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     expect(screen.getByText('Assigned users').nextElementSibling).toHaveTextContent('3');
-    expect(screen.getByText('Capabilities').nextElementSibling).toHaveTextContent(String(role.permissions.length));
+    expect(screen.getAllByText('Permissions')[0].nextElementSibling).toHaveTextContent(String(role.permissions.length));
   });
 
   it('shows only added and removed capabilities and hides raw metadata', () => {

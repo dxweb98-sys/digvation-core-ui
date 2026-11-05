@@ -7,6 +7,7 @@ const refreshAccess = (queryClient: ReturnType<typeof useQueryClient>) => queryC
 
 export const useAccessUsers = () => useQuery({ queryKey: [...ACCESS_QUERY_KEY, 'users'], queryFn: () => accessDataSource.getUsers() });
 export const useAccessRoles = () => useQuery({ queryKey: [...ACCESS_QUERY_KEY, 'roles'], queryFn: () => accessDataSource.getRoles() });
+export const useAccessPermissions = () => useQuery({ queryKey: [...ACCESS_QUERY_KEY, 'permissions'], queryFn: () => accessDataSource.getPermissions() });
 export const useAccessInvitations = () => useQuery({ queryKey: [...ACCESS_QUERY_KEY, 'invitations'], queryFn: () => accessDataSource.getInvitations() });
 export const useAccessAudit = () => useQuery({ queryKey: [...ACCESS_QUERY_KEY, 'audit'], queryFn: () => accessDataSource.getAudit() });
 

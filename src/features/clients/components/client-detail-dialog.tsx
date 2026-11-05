@@ -1,4 +1,6 @@
-import { DButton, DCard, DCardContent, DConnectionError, DEmptyState, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation/ui';
+import { ConnectedOnly } from '../../../shared/ui/not-connected';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DCard, DCardContent, DConnectionError, DEmptyState, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation/ui';
 import { AppDialog, DetailItem, DetailList, DialogActions, DialogSection } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { ClientProductsTab } from '../../client-products/components/client-products-tab';
@@ -19,7 +21,7 @@ function formatDate(value: string) {
 }
 
 function ActivityTimeline({ activity }: { activity: ClientActivity[] }) {
-  if (activity.length === 0) return <DEmptyState title="No client activity" description="Administrative lifecycle activity will appear here." />;
+  if (activity.length === 0) return <DEmptyState title="No activity" description="Status changes appear here." />;
   return <div className="client-activity-list">{activity.map((entry) => <article className="client-activity-item" key={entry.id}><time>{formatDate(entry.occurredAt)}</time><span aria-hidden="true" /><div><h3>{entry.title}</h3><p>{entry.description}</p></div></article>)}</div>;
 }
 
@@ -68,8 +70,8 @@ export function ClientDetailDialog({
         footer={
           <DialogActions
             destructive={<ClientLifecycleAction client={client} isSubmitting={statusTransition.isPending} onTransition={handleTransition} />}
-            secondary={<DButton variant="outline" onClick={onClose}>Close</DButton>}
-            primary={<DButton onClick={() => setIsEditDialogOpen(true)}>Edit Client</DButton>}
+            secondary={<AppAction tone="secondary" onClick={onClose}>Close</AppAction>}
+            primary={<AppAction onClick={() => setIsEditDialogOpen(true)}>Edit</AppAction>}
           />
         }
       >
@@ -80,22 +82,22 @@ export function ClientDetailDialog({
             <DTabsContent value="overview">
               <div><DialogSection title="Identity">
               <DetailList>
-                <DetailItem label="Display Name">{client.displayName}</DetailItem>
-                <DetailItem label="Legal Name">{client.legalName}</DetailItem>
-                <DetailItem label="Client Code"><code className="client-code">{client.code}</code></DetailItem>
+                <DetailItem label="Display name">{client.displayName}</DetailItem>
+                <DetailItem label="Legal name">{client.legalName}</DetailItem>
+                <DetailItem label="Client code"><code className="client-code">{client.code}</code></DetailItem>
                 <DetailItem label="Status"><ClientStatusBadge status={client.status} /></DetailItem>
               </DetailList>
             </DialogSection>
             <DialogSection title="Contact">
               <DetailList>
-                <DetailItem label="Organization Email">{client.organizationEmail}</DetailItem>
-                <DetailItem label="Organization Phone">{client.organizationPhone}</DetailItem>
+                <DetailItem label="Organization email">{client.organizationEmail}</DetailItem>
+                <DetailItem label="Organization phone">{client.organizationPhone}</DetailItem>
                 <DetailItem label="Website">{client.website}</DetailItem>
               </DetailList>
             </DialogSection>
             <DialogSection title="Organization">
               <DetailList>
-                <DetailItem label="Tax Identifier">{client.taxIdentifier}</DetailItem>
+                <DetailItem label="Tax identifier">{client.taxIdentifier}</DetailItem>
                 <DetailItem label="Country">{client.country}</DetailItem>
                 <DetailItem label="Timezone">{client.timezone}</DetailItem>
                 <DetailItem wide label="Address">{client.address}</DetailItem>
@@ -104,17 +106,17 @@ export function ClientDetailDialog({
             </DialogSection>
             <DialogSection title="Record">
               <DetailList>
-                <DetailItem label="Status Changed">{formatDate(client.statusChangedAt)}</DetailItem>
+                <DetailItem label="Status changed">{formatDate(client.statusChangedAt)}</DetailItem>
                 <DetailItem label="Created">{formatDate(client.createdAt)}</DetailItem>
                 <DetailItem label="Updated">{formatDate(client.updatedAt)}</DetailItem>
               </DetailList>
-            </DialogSection><ClientContactsSection clientId={client.id} /></div>
+            </DialogSection><ConnectedOnly heading="Contacts" description="The people to contact at this client will appear here."><ClientContactsSection clientId={client.id} /></ConnectedOnly></div>
             </DTabsContent>
             <DTabsContent value="products"><ClientProductsTab clientId={client.id} canManageComposition={client.status === 'ACTIVE'} /></DTabsContent>
             <DTabsContent value="commercial"><ClientCommercialTab clientId={client.id} /></DTabsContent>
             <DTabsContent value="installations"><ClientInstallationsTab clientId={client.id} /></DTabsContent>
-            <DTabsContent value="monitoring"><ClientMonitoringTab clientId={client.id} /></DTabsContent>
-            <DTabsContent value="activity"><DCard variant="outlined"><DCardContent><ActivityTimeline activity={detail.activity} /></DCardContent></DCard></DTabsContent>
+            <DTabsContent value="monitoring"><ConnectedOnly description="Health and incidents for this client's installations will appear here."><ClientMonitoringTab clientId={client.id} /></ConnectedOnly></DTabsContent>
+            <DTabsContent value="activity"><ConnectedOnly description="Status changes for this client will appear here."><DCard variant="outlined"><DCardContent><ActivityTimeline activity={detail.activity} /></DCardContent></DCard></ConnectedOnly></DTabsContent>
           </DTabs>
         </div>
       </AppDialog>

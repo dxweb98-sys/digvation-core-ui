@@ -1,4 +1,5 @@
-import { DButton, useToast } from '@digvation/ui';
+import { AppAction } from '../../../shared/ui/app-action';
+import { useToast } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { CapabilityForm } from './capability-form';
 import {
@@ -47,7 +48,7 @@ export function CapabilityFormDialog({
         await createCapability.mutateAsync(values);
         showToast({
           title: 'Capability created',
-          description: `${values.name} was added to the reusable capability catalog.`,
+          description: `${values.name} was added.`,
           variant: 'success',
         });
       }
@@ -61,6 +62,7 @@ export function CapabilityFormDialog({
             : 'The capability record could not be saved.',
         variant: 'danger',
       });
+      throw error;
     }
   }
 
@@ -73,27 +75,22 @@ export function CapabilityFormDialog({
           ? `Edit ${capability?.name ?? 'capability'}`
           : 'Add capability'
       }
-      description={
-        isEditing
-          ? 'Update reusable capability information. The stable capability code cannot be changed.'
-          : 'Create a reusable business capability. Product compatibility and Client entitlement remain separate decisions.'
-      }
       footer={
         <div className="capability-dialog-actions">
-          <DButton
-            variant="outline"
+          <AppAction
+            tone="secondary"
             onClick={closeDialog}
             disabled={isSubmitting}
           >
             Cancel
-          </DButton>
-          <DButton
+          </AppAction>
+          <AppAction
             form={CAPABILITY_FORM_ID}
             type="submit"
             loading={isSubmitting}
           >
-            {isEditing ? 'Save Changes' : 'Create Capability'}
-          </DButton>
+            {isEditing ? 'Save' : 'Create capability'}
+          </AppAction>
         </div>
       }
     >

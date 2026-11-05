@@ -1,3 +1,5 @@
+import { CoreDashboard } from '../components/core-dashboard';
+import { isCoreMode } from '../../../shared/data/data-availability';
 import { DConnectionError, DEmptyState } from '@digvation/ui';
 import { lazy, Suspense } from 'react';
 import { DashboardLoadingState } from '../components/dashboard-loading-state';
@@ -7,6 +9,10 @@ import '../dashboard.css';
 const DashboardContent = lazy(() => import('../components/dashboard-content'));
 
 export function DashboardPage() {
+  return isCoreMode() ? <CoreDashboard /> : <MockDashboard />;
+}
+
+function MockDashboard() {
   const dashboardQuery = useDashboardOverview();
 
   if (dashboardQuery.isPending) {
@@ -48,12 +54,7 @@ export function DashboardPage() {
     <div className="dashboard-page">
       <div className="dashboard-page-heading">
         <div>
-          <p className="page-eyebrow">Operations overview</p>
           <h1>Dashboard</h1>
-          <p>
-            Current service health, operational risks, infrastructure pressure,
-            and recent changes across Digvation-managed client applications.
-          </p>
         </div>
         <span className="dashboard-updated">{dashboard.generatedAtLabel}</span>
       </div>

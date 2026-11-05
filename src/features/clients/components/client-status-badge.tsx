@@ -1,3 +1,4 @@
+import { labelFor } from '../../../shared/labels/labels';
 import { DBadge, type BadgeVariant } from '@digvation/ui';
 import type { ClientStatus } from '../types/client';
 
@@ -8,5 +9,5 @@ const CLIENT_STATUS_VARIANTS: Record<ClientStatus, BadgeVariant> = {
 };
 
 export function ClientStatusBadge({ status }: { status: ClientStatus }) {
-  return <DBadge variant={CLIENT_STATUS_VARIANTS[status]} dot>{status}</DBadge>;
+  return <DBadge variant={CLIENT_STATUS_VARIANTS[status]} dot>{labelFor(status)}</DBadge>;
 }

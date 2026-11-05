@@ -1,6 +1,7 @@
+import { isCoreMode, notConnectedDataSource } from '../../../shared/data/data-availability';
 import type { ClientMonitoringDataSource } from './client-monitoring-data-source';
 import { createMockClientMonitoringDataSource } from './mock-client-monitoring-data-source';
 
 export function resolveClientMonitoringDataSource(): ClientMonitoringDataSource {
-  return createMockClientMonitoringDataSource();
+  return isCoreMode() ? notConnectedDataSource<ClientMonitoringDataSource>('Client monitoring') : createMockClientMonitoringDataSource();
 }

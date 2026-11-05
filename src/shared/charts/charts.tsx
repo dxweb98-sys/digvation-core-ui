@@ -1,4 +1,4 @@
-import { DButton } from '@digvation/ui';
+import { AppAction } from '../ui/app-action';
 import { useId, useState, type ReactNode } from 'react';
 import {
   Area,
@@ -175,7 +175,7 @@ function ChartDataTable({
         <tbody>
           {rows.map((row, index) => (
             <tr key={index}>
-              {columns.map((column) => <td key={column.key}>{row[column.key] ?? '—'}</td>)}
+              {columns.map((column) => <td key={column.key}>{row[column.key] ?? 'None'}</td>)}
             </tr>
           ))}
         </tbody>
@@ -218,14 +218,14 @@ export function ChartCard({
         </div>
         <div className="chart-card-actions">
           {actions}
-          <DButton
+          <AppAction
             aria-pressed={showTable}
             onClick={() => setShowTable((current) => !current)}
             size="sm"
-            variant="ghost"
+            tone="tertiary"
           >
             {showTable ? 'View as chart' : 'View as table'}
-          </DButton>
+          </AppAction>
         </div>
       </figcaption>
       {lead}

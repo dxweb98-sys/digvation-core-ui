@@ -1,7 +1,8 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { DToastProvider } from '@digvation/ui';
+import { DToastProvider, DLocalizationProvider, enMessages } from '@digvation/ui';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
+import { AuthProvider } from '../../features/auth/auth-provider';
 import { describe, expect, it } from 'vitest';
 import { createApplicationQueryClient } from '../providers/query-client';
 import { applicationRoutes } from './application-routes';
@@ -13,9 +14,13 @@ function renderRoute(path: string) {
 
   return render(
     <QueryClientProvider client={createApplicationQueryClient()}>
-      <DToastProvider>
-        <RouterProvider router={router} />
-      </DToastProvider>
+      <DLocalizationProvider locale="en-US" messages={enMessages}>
+        <DToastProvider>
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
+        </DToastProvider>
+      </DLocalizationProvider>
     </QueryClientProvider>,
   );
 }
@@ -31,7 +36,7 @@ describe('application routing foundation', () => {
       screen.getByRole('navigation', { name: 'Primary navigation' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: 'Requires attention' }),
+      await screen.findByRole('heading', { name: 'Requires attention' }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: 'Client application health' }),
@@ -56,29 +61,29 @@ describe('application routing foundation', () => {
     fireEvent.click(menuButton);
     expect(menuButton).toHaveAttribute('aria-expanded', 'true');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add Client' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add client' }));
     expect(screen.getByRole('dialog', { name: 'Add client' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Client Code *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Client code')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Close dialog' }));
     const actionMenu = document.querySelector<HTMLElement>('[data-ds-component="data-table"] tbody [data-ds-component="dropdown-trigger"]');
     expect(actionMenu).not.toBeNull();
     fireEvent.click(actionMenu!);
-    fireEvent.click(screen.getByRole('button', { name: 'Quick Detail' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View' }));
     expect(await screen.findByRole('dialog', { name: 'Nova Salon' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Overview' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Edit Client' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Products' }));
-    expect(await screen.findByText('Assign Product')).toBeInTheDocument();
+    expect(await screen.findByText('Assign product')).toBeInTheDocument();
     expect(screen.getAllByText('Digvation POS').length).toBeGreaterThan(0);
 
     const productRelationshipTable = screen.getAllByRole('table').at(-1);
     const productRelationshipActionButton = productRelationshipTable?.querySelector<HTMLButtonElement>('tbody button');
     expect(productRelationshipActionButton).not.toBeNull();
     fireEvent.click(productRelationshipActionButton!);
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Create Installation' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Create installation' }));
     const contextualInstallationDialog = await screen.findByRole('dialog', { name: 'Add installation' });
     expect(contextualInstallationDialog).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Relationship' })).toBeInTheDocument();
@@ -92,9 +97,9 @@ describe('application routing foundation', () => {
     expect(screen.queryByRole('menuitem', { name: 'Start Trial' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Installations' }));
     expect((await screen.findAllByText('Nova POS Production')).length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole('button', { name: 'More Actions' }));
-    expect(screen.getByRole('menuitem', { name: 'Mark Suspended' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Mark Archived' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'More' }));
+    expect(screen.getByRole('menuitem', { name: 'Suspend' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Archive' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Monitoring' }));
     expect(await screen.findByText('Products monitored')).toBeInTheDocument();
     expect(screen.getByText('Requires attention')).toBeInTheDocument();
@@ -110,19 +115,19 @@ describe('application routing foundation', () => {
     renderRoute('/installations');
 
     expect(await screen.findByRole('heading', { name: 'Installations' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Add Installation' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add installation' }));
     expect(screen.getByRole('dialog', { name: 'Add installation' })).toBeInTheDocument();
-    expect(screen.getByText('Client Product *')).toBeInTheDocument();
+    expect(screen.getByText('Select a client first.')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Close dialog' }));
 
     const actionMenu = document.querySelector<HTMLElement>('[data-ds-component="data-table"] tbody [data-ds-component="dropdown-trigger"]');
     expect(actionMenu).not.toBeNull();
     fireEvent.click(actionMenu!);
-    expect(screen.getByRole('button', { name: 'Open Installation' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Edit Installation' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'More Actions' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'More' })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Open Installation' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
     expect(await screen.findByRole('dialog', { name: 'Nova POS Production' })).toBeInTheDocument();
     expect(screen.queryByText('Installation not found')).not.toBeInTheDocument();
   });
@@ -134,7 +139,7 @@ describe('application routing foundation', () => {
       await screen.findByText('Page not found'),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'Return to overview' }),
+      screen.getByRole('button', { name: 'Back to dashboard' }),
     ).toBeInTheDocument();
   });
 
@@ -142,27 +147,27 @@ describe('application routing foundation', () => {
     renderRoute('/products');
 
     expect(await screen.findByRole('heading', { name: 'Products' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Add Product' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add product' })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add Product' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add product' }));
     expect(screen.getByRole('dialog', { name: 'Add product' })).toBeInTheDocument();
-    expect(screen.getByLabelText('Product Code *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Product code')).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText('Product Code *'), { target: { value: 'ops console' } });
-    fireEvent.change(screen.getByLabelText('Product Name *'), { target: { value: 'Operations Console' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create Product' }));
+    fireEvent.change(screen.getByLabelText('Product code'), { target: { value: 'ops console' } });
+    fireEvent.change(screen.getByLabelText('Product name'), { target: { value: 'Operations Console' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create product' }));
     expect(await screen.findByText('Product created')).toBeInTheDocument();
 
     const actionMenu = document.querySelector<HTMLElement>('[data-ds-component="data-table"] tbody [data-ds-component="dropdown-trigger"]');
     expect(actionMenu).not.toBeNull();
     fireEvent.click(actionMenu!);
-    fireEvent.click(screen.getByRole('button', { name: 'Quick Detail' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View' }));
 
     expect(await screen.findByRole('dialog', { name: 'Operations Console' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Features' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Clients' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'More Actions' }));
-    expect(screen.getByRole('menuitem', { name: 'Mark Active' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Mark Retired' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'More' }));
+    expect(screen.getByRole('menuitem', { name: 'Activate' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Retire' })).toBeInTheDocument();
   });
 });

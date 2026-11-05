@@ -1,11 +1,5 @@
-import {
-  DButton,
-  DCard,
-  DCardContent,
-  DEmptyState,
-  DLoadingIndicator,
-  useToast,
-} from '@digvation/ui';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DCard, DCardContent, DEmptyState, DLoadingIndicator, useToast } from '@digvation/ui';
 
 import { CapabilityStatusBadge } from '../../capabilities/components/capability-status-badge';
 import type { ClientProductSummary } from '../../client-products/types/client-product';
@@ -46,7 +40,7 @@ export function ClientCapabilitiesSection({
       });
       showToast({
         title: 'Capability assigned',
-        description: `${capability.capability.name} was added in provisioning state. Activate it when the entitlement is ready to become effective.`,
+        description: `${capability.capability.name} was added. Activate it when it is ready.`,
         variant: 'success',
       });
     } catch (error) {
@@ -88,38 +82,33 @@ export function ClientCapabilitiesSection({
       <DCardContent>
         <div className="client-capability-section">
           <div className="client-capability-section-copy">
-            <strong>Reusable capability entitlements</strong>
-            <p>
-              Capabilities are granted to the client, not to an individual
-              client-product relationship. Only capabilities supported by at
-              least one eligible assigned product can be added.
-            </p>
-          </div>
+            <strong>Capabilities</strong>
+            </div>
 
           {assignmentsQuery.isPending || compatibility.isPending ? (
             <div className="client-capability-section-state">
-              <DLoadingIndicator label="Loading capability composition" />
+              <DLoadingIndicator label="Loading capabilities" />
             </div>
           ) : assignmentsQuery.isError || compatibility.isError ? (
             <DEmptyState
-              title="Capability composition unavailable"
+              title="Capabilities unavailable"
               description="Client capability assignments or product compatibility could not be loaded."
               action={
-                <DButton
-                  variant="outline"
+                <AppAction
+                  tone="secondary"
                   onClick={() => {
                     void assignmentsQuery.refetch();
                     void compatibility.refetch();
                   }}
                 >
                   Retry
-                </DButton>
+                </AppAction>
               }
             />
           ) : compatible.length === 0 && assignments.length === 0 ? (
             <DEmptyState
-              title="No compatible capabilities"
-              description="Assign an eligible product with capability compatibility before adding reusable capabilities to this client."
+              title="No capabilities"
+              description="Assign a product that supports capabilities first."
             />
           ) : (
             <div className="client-capability-list">
@@ -167,9 +156,9 @@ export function ClientCapabilitiesSection({
                           }
                         />
                       ) : (
-                        <DButton
+                        <AppAction
                           size="sm"
-                          variant="outline"
+                          tone="secondary"
                           disabled={
                             !canAssignCapabilities ||
                             item.capability.status !== 'ACTIVE' ||
@@ -178,11 +167,11 @@ export function ClientCapabilitiesSection({
                           onClick={() => void assign(item)}
                         >
                           {!canAssignCapabilities
-                            ? 'Client Not Active'
+                            ? 'Client inactive'
                             : item.capability.status === 'ACTIVE'
                               ? 'Assign'
-                              : 'Not Active'}
-                        </DButton>
+                              : 'Not active'}
+                        </AppAction>
                       )}
                     </div>
                   </article>
@@ -200,8 +189,7 @@ export function ClientCapabilitiesSection({
                       <code>{assignment.capability.code}</code>
                     </div>
                     <span>
-                      No currently eligible assigned product declares
-                      compatibility with this capability.
+                      No assigned product supports this capability.
                     </span>
                   </div>
                   <div className="client-capability-state">

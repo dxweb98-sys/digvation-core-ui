@@ -1,4 +1,5 @@
-import { DAlert, DButton, useToast } from '@digvation/ui';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DAlert, useToast } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -163,7 +164,7 @@ export function InstallationFormDialog({
       showToast({
         title: isEditing ? 'Installation updated' : 'Installation created',
         description: isEditing
-          ? `${values.name} composition and branding were updated.`
+          ? `${values.name} was updated.`
           : `${values.name} starts in provisioning.`,
         variant: 'success',
       });
@@ -180,6 +181,7 @@ export function InstallationFormDialog({
         : failure;
       setSaveError({ title, message });
       showToast({ title, description: message, variant: 'danger' });
+      throw error;
     }
   }
 
@@ -190,17 +192,12 @@ export function InstallationFormDialog({
       open={open}
       onClose={() => !isSubmitting && onClose()}
       title={isEditing ? `Edit ${installation?.name ?? 'installation'}` : 'Add installation'}
-      description={
-        isEditing
-          ? 'Update the Client-scoped runtime composition, deployment policy, and branding.'
-          : 'Create one Client installation that may deliver multiple assigned Products.'
-      }
       footer={
         <div className="installation-dialog-actions">
-          <DButton variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</DButton>
-          <DButton form={FORM_ID} type="submit" loading={isSubmitting}>
-            {isEditing ? 'Save Changes' : 'Create Installation'}
-          </DButton>
+          <AppAction tone="secondary" onClick={onClose} disabled={isSubmitting}>Cancel</AppAction>
+          <AppAction form={FORM_ID} type="submit" loading={isSubmitting}>
+            {isEditing ? 'Save' : 'Create installation'}
+          </AppAction>
         </div>
       }
     >

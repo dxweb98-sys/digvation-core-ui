@@ -40,28 +40,28 @@ describe('detail dialogs follow the shared pattern', () => {
       node: <ClientDetailDialog clientId="client-nova" open onClose={onClose} />,
       identifier: 'NOVA',
       sections: ['Identity', 'Contact', 'Organization', 'Record'],
-      edit: 'Edit Client',
+      edit: 'Edit',
     },
     {
       name: 'Digvation POS',
       node: <ProductDetailDialog productId="product-pos" open onClose={onClose} />,
       identifier: 'POS',
       sections: ['Product', 'Record'],
-      edit: 'Edit Product',
+      edit: 'Edit',
     },
     {
       name: 'Membership',
       node: <CapabilityDetailDialog capabilityId="capability-membership" open onClose={onClose} />,
       identifier: 'MEMBERSHIP',
       sections: ['Capability', 'Record'],
-      edit: 'Edit Capability',
+      edit: 'Edit',
     },
     {
       name: 'Nova Production',
       node: <InstallationDetailDialog installationId="installation-nova-production" open onClose={onClose} />,
       identifier: 'NOVA-PROD',
       sections: ['Deployment', 'Record'],
-      edit: 'Edit Installation',
+      edit: 'Edit',
     },
   ])('$name', async ({ name, node, identifier, sections, edit }) => {
     render(wrap(node));
@@ -90,12 +90,12 @@ describe('detail dialogs follow the shared pattern', () => {
     }
   });
 
-  it('uses one empty mark instead of a fallback sentence', async () => {
+  it('uses Not set instead of a fallback sentence', async () => {
     render(wrap(<ClientDetailDialog clientId="client-poseidon" open onClose={onClose} />));
 
     const dialog = await screen.findByRole('dialog', { name: 'Poseidon Filter' });
     expect(within(dialog).queryByText('Not recorded')).not.toBeInTheDocument();
-    expect(within(dialog).getByText('Legal Name').nextElementSibling).toHaveTextContent('—');
+    expect(within(dialog).getByText('Legal name').nextElementSibling).toHaveTextContent('Not set');
   });
 });
 
@@ -114,10 +114,10 @@ describe('form dialogs keep their fields and actions', () => {
     for (const section of ['Identity', 'Organization']) {
       expect(within(dialog).getByRole('heading', { name: section })).toBeInTheDocument();
     }
-    for (const label of ['Client Code *', 'Display Name *', 'Legal Name', 'Organization Email', 'Organization Phone', 'Website', 'Tax Identifier', 'Country', 'Timezone', 'Address', 'Notes']) {
-      expect(within(dialog).getByLabelText(label)).toBeInTheDocument();
+    for (const label of ['Client code', 'Display name', 'Legal name', 'Organization email', 'Organization phone', 'Website', 'Tax identifier', 'Country', 'Timezone', 'Address', 'Notes']) {
+      expect(within(dialog).getByLabelText(new RegExp(`^${label}`))).toBeInTheDocument();
     }
-    const save = within(dialog).getByRole('button', { name: 'Save Changes' });
+    const save = within(dialog).getByRole('button', { name: 'Save' });
     expect(save).toHaveAttribute('form', 'client-form');
     expect(save.closest('.app-dialog-footer')).not.toBeNull();
     expect(dialog.querySelector('form#client-form')).not.toBeNull();
@@ -128,14 +128,14 @@ describe('form dialogs keep their fields and actions', () => {
 
     const dialog = screen.getByRole('dialog', { name: 'Add client' });
     expect(within(dialog).queryByLabelText('Website')).not.toBeInTheDocument();
-    expect(within(dialog).getByRole('button', { name: 'Create Client' })).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Create client' })).toBeInTheDocument();
   });
 
   it.each([
-    ['Add capability', <CapabilityFormDialog key="c" open mode="create" onClose={onClose} />, 'Create Capability'],
-    ['Add product', <ProductFormDialog key="p" open mode="create" onClose={onClose} />, 'Create Product'],
-    ['Add infrastructure', <InfrastructureFormDialog key="i" open mode="create" onClose={onClose} />, 'Register Infrastructure'],
-    ['Add installation', <InstallationFormDialog key="n" open mode="create" onClose={onClose} />, 'Create Installation'],
+    ['Add capability', <CapabilityFormDialog key="c" open mode="create" onClose={onClose} />, 'Create capability'],
+    ['Add product', <ProductFormDialog key="p" open mode="create" onClose={onClose} />, 'Create product'],
+    ['Add infrastructure', <InfrastructureFormDialog key="i" open mode="create" onClose={onClose} />, 'Register'],
+    ['Add installation', <InstallationFormDialog key="n" open mode="create" onClose={onClose} />, 'Create installation'],
   ])('%s places its primary action last in the footer', (name, node, primary) => {
     render(wrap(node));
 

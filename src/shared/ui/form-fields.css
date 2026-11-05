@@ -1,0 +1,6 @@
+.app-field-optional {
+  margin-left: var(--cc-space-1);
+  font-size: var(--cc-text-xs);
+  font-weight: 400;
+  color: var(--cc-text-muted);
+}

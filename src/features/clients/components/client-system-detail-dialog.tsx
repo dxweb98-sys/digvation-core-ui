@@ -1,4 +1,6 @@
-import { DButton, DDataTable, DEmptyState, DTabs, DTabsContent, DTabsList, DTabsTrigger, type TableColumn } from '@digvation/ui';
+import { labelFor } from '../../../shared/labels/labels';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DDataTable, DEmptyState, DTabs, DTabsContent, DTabsList, DTabsTrigger, type TableColumn } from '@digvation/ui';
 import { AppDialog, DetailItem, DetailList } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { Badge } from '../../operations/components/operations-badges';
@@ -22,15 +24,15 @@ const incidentColumns: TableColumn<ClientMonitoringRecord['activeIncidents'][num
 ];
 const infrastructureColumns: TableColumn<ClientMonitoringRecord['infrastructureBindings'][number]>[] = [
   { key: 'node', label: 'Infrastructure', render: (binding) => <div className="client-monitoring-identity"><strong>{binding.node?.name ?? 'Unavailable node'}</strong><code>{binding.node?.code}</code></div> },
-  { key: 'role', label: 'Role', render: (binding) => binding.role.replace('_', ' ') },
-  { key: 'ownership', label: 'Ownership', render: (binding) => binding.node?.ownership  },
-  { key: 'lifecycle', label: 'Maintenance state', render: (binding) => binding.node?.lifecycleStatus  },
+  { key: 'role', label: 'Role', render: (binding) => labelFor(binding.role) },
+  { key: 'ownership', label: 'Ownership', render: (binding) => labelFor(binding.node?.ownership) },
+  { key: 'lifecycle', label: 'Maintenance state', render: (binding) => labelFor(binding.node?.lifecycleStatus) },
 ];
 
 export function ClientSystemDetailDialog({ record, open, onClose }: { record: ClientMonitoringRecord; open: boolean; onClose: () => void }) {
   const [tab, setTab] = useState('overview');
   const dedicated = record.installation.deploymentMode === 'DEDICATED';
-  return <AppDialog kind="detail" open={open} onClose={onClose} title={record.installation.name} status={<HealthBadge status={record.health} />} meta={`${record.clientProduct.productName}, ${record.installation.environment}`} footer={<div className="client-dialog-actions"><DButton variant="outline" onClick={onClose}>Close</DButton></div>}>
+  return <AppDialog kind="detail" open={open} onClose={onClose} title={record.installation.name} status={<HealthBadge status={record.health} />} meta={`${record.clientProduct.productName}, ${record.installation.environment}`} footer={<div className="client-dialog-actions"><AppAction tone="secondary" onClick={onClose}>Close</AppAction></div>}>
     <DTabs defaultValue="overview" value={tab} onValueChange={setTab} className="client-detail-tabs">
       <DTabsList><DTabsTrigger value="overview">Overview</DTabsTrigger><DTabsTrigger value="runtime">Runtime</DTabsTrigger><DTabsTrigger value="incidents">Incidents</DTabsTrigger><DTabsTrigger value="deployment">Deployment</DTabsTrigger>{dedicated ? <DTabsTrigger value="infrastructure">Infrastructure</DTabsTrigger> : null}</DTabsList>
       <DTabsContent value="overview"><DetailList><DetailItem label="Product">{record.clientProduct.productName}</DetailItem><DetailItem label="Installation">{record.installation.name}</DetailItem><DetailItem label="Environment">{record.installation.environment}</DetailItem><DetailItem label="Deployment mode">{record.installation.deploymentMode}</DetailItem><DetailItem label="Health"><HealthBadge status={record.health} /></DetailItem><DetailItem label="Maintenance">{record.maintenanceState === 'NOT_APPLICABLE' ? 'Not applicable for shared deployment' : record.maintenanceState}</DetailItem><DetailItem label="Current version">{record.currentDeployment?.version ?? 'Not deployed'}</DetailItem><DetailItem label="Last observed">{formatDate(record.lastObservedAt)}</DetailItem><DetailItem label="Runtime status"><ObservedStateBadge state={record.runtimeStatus} /></DetailItem><DetailItem label="Active incidents">{record.activeIncidents.length}</DetailItem>{dedicated ? <DetailItem label="Bound infrastructure">{record.infrastructureBindings.length}</DetailItem> : null}</DetailList></DTabsContent>

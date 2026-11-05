@@ -1,10 +1,7 @@
-import {
-  DButton,
-  DConnectionError,
-  DEmptyState,
-  DInfoNote,
-  DLoadingIndicator,
-} from '@digvation/ui';
+import { ConnectedOnly } from '../../../shared/ui/not-connected';
+import { labelFor } from '../../../shared/labels/labels';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DConnectionError, DEmptyState, DInfoNote, DLoadingIndicator } from '@digvation/ui';
 import { AppDialog, DetailItem, DetailList, DialogActions, DialogSection } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import { InstallationInfrastructureTab } from '../../infrastructure/components/installation-infrastructure-tab';
@@ -78,7 +75,7 @@ export function InstallationDetailDialog({
         title={installation.name}
         status={<InstallationStatusBadge status={installation.status} />}
         identifier={installation.code}
-        meta={`${installation.clientName}, ${installation.environment}`}
+        meta={`${installation.clientName}, ${labelFor(installation.environment)}`}
         footer={
           <DialogActions
             destructive={
@@ -90,8 +87,8 @@ export function InstallationDetailDialog({
                 }}
               />
             }
-            secondary={<DButton variant="outline" onClick={onClose}>Close</DButton>}
-            primary={isDecommissioned ? null : <DButton onClick={() => setIsEditOpen(true)}>Edit Installation</DButton>}
+            secondary={<AppAction tone="secondary" onClick={onClose}>Close</AppAction>}
+            primary={isDecommissioned ? null : <AppAction onClick={() => setIsEditOpen(true)}>Edit</AppAction>}
           />
         }
       >
@@ -104,10 +101,10 @@ export function InstallationDetailDialog({
           <div><DialogSection title="Deployment">
             <DetailList>
               <DetailItem label="Client">{installation.clientName} · {installation.clientCode}</DetailItem>
-              <DetailItem label="Environment">{installation.environment}</DetailItem>
-              <DetailItem label="Lifecycle status"><InstallationStatusBadge status={installation.status} /></DetailItem>
-              <DetailItem label="Deployment mode">{installation.deploymentMode}</DetailItem>
-              <DetailItem label="Infrastructure ownership">{installation.infrastructureOwnership}</DetailItem>
+              <DetailItem label="Environment">{labelFor(installation.environment)}</DetailItem>
+              <DetailItem label="Status"><InstallationStatusBadge status={installation.status} /></DetailItem>
+              <DetailItem label="Deployment mode">{labelFor(installation.deploymentMode)}</DetailItem>
+              <DetailItem label="Infrastructure ownership">{labelFor(installation.infrastructureOwnership)}</DetailItem>
               <DetailItem label="Managed by Digvation">{installation.managedByDigvation ? 'Yes' : 'No'}</DetailItem>
               <DetailItem label="Region">{installation.region}</DetailItem>
               <DetailItem label="Application URL">{installation.applicationUrl ? <a href={installation.applicationUrl} target="_blank" rel="noreferrer">{installation.applicationUrl}</a> : null}</DetailItem>
@@ -122,13 +119,12 @@ export function InstallationDetailDialog({
 
           <section className="installation-infrastructure-section">
             <h2>Products</h2>
-            <p>This Client-scoped Installation delivers the following assigned Products.</p>
             <div className="installation-product-bindings">
               {installation.products.map((product) => (
                 <div className="installation-product-binding" key={product.clientProductId}>
                   <strong>{product.productName}</strong>
                   <code>{product.productCode}</code>
-                  <span>{product.clientProductStatus}</span>
+                  <span>{labelFor(product.clientProductStatus)}</span>
                 </div>
               ))}
             </div>
@@ -136,28 +132,29 @@ export function InstallationDetailDialog({
 
           <section className="installation-infrastructure-section">
             <h2>Branding</h2>
-            <p>Branding is independent from Product entitlement and deployment ownership.</p>
             <DetailList>
-                  <DetailItem label="Mode">{branding.mode}</DetailItem>
-                  <DetailItem label="Brand name">{branding.brandName ?? (branding.mode === 'DIGVATION' ? 'Digvation' : null)}</DetailItem>
-                  <DetailItem label="Custom domain">{branding.customDomain}</DetailItem>
-                  <DetailItem label="Primary color">{branding.primaryColor}</DetailItem>
-                  <DetailItem label="Secondary color">{branding.secondaryColor}</DetailItem>
-                  <DetailItem label="Support">{branding.supportName ?? branding.supportEmail}</DetailItem>
+                  <DetailItem label="Mode">{labelFor(branding.mode)}</DetailItem>
+                  {branding.mode === 'DIGVATION' ? null : (
+                    <>
+                      <DetailItem label="Brand name">{branding.brandName}</DetailItem>
+                      <DetailItem label="Custom domain">{branding.customDomain}</DetailItem>
+                      <DetailItem label="Primary color">{branding.primaryColor}</DetailItem>
+                      <DetailItem label="Secondary color">{branding.secondaryColor}</DetailItem>
+                      <DetailItem label="Support">{branding.supportName ?? branding.supportEmail}</DetailItem>
+                    </>
+                  )}
                 </DetailList>
           </section>
 
           <section className="installation-infrastructure-section">
             <h2>Infrastructure</h2>
-            <p>Registered infrastructure remains a separate operational authority.</p>
-            <InstallationInfrastructureTab installationId={installation.id} />
+            <ConnectedOnly description="The servers this installation runs on will appear here."><InstallationInfrastructureTab installationId={installation.id} /></ConnectedOnly>
           </section>
           <section className="installation-infrastructure-section">
             <h2>Runtime</h2>
-            <p>Runtime health remains a separate operational projection.</p>
-            <InstallationRuntimeTab installationId={installation.id} />
+            <ConnectedOnly description="Running services and their health will appear here."><InstallationRuntimeTab installationId={installation.id} /></ConnectedOnly>
           </section>
-          <InstallationActionRequest installationId={installation.id} installationName={installation.name} />
+          <ConnectedOnly heading="Actions" description="Requests to start, stop or redeploy this installation will appear here."><InstallationActionRequest installationId={installation.id} installationName={installation.name} /></ConnectedOnly>
         </div>
       </AppDialog>
       <InstallationFormDialog

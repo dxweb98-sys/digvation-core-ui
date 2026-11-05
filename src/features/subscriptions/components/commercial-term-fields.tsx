@@ -1,4 +1,6 @@
-import { DCurrencyInput, DInput, DSelect } from '@digvation/ui';
+
+import { labelFor } from '../../../shared/labels/labels';
+import { AppCurrencyInput, AppInput, AppSelect } from '../../../shared/ui/form-fields';
 import type {
   BillingCycle,
   CatalogPrice,
@@ -38,16 +40,31 @@ export function findCatalogPrice(
   );
 }
 
+export type TermField =
+  | 'startsAt'
+  | 'endsAt'
+  | 'currency'
+  | 'agreedAmountMinor'
+  | 'adjustmentReason'
+  | 'paymentTermsDays';
+
+type TermFieldProps = (name: TermField) => {
+  onBlur: () => void;
+  error: string | undefined;
+};
+
 export function CommercialTermFields({
   values,
   prices,
   onChange,
+  field,
   lockStart = false,
   lockBillingBasis = false,
 }: {
   values: CommercialTermInput;
   prices: CatalogPrice[];
   onChange: (next: CommercialTermInput) => void;
+  field: TermFieldProps;
   lockStart?: boolean;
   lockBillingBasis?: boolean;
 }) {
@@ -57,15 +74,17 @@ export function CommercialTermFields({
   return (
     <>
       <div className="client-form-grid">
-        <DInput
-          label="Starts *"
+        <AppInput
+          {...field('startsAt')}
+          label="Starts"
           placeholder="YYYY-MM-DD"
           value={values.startsAt}
           disabled={lockStart}
           onChange={(startsAt) => onChange({ ...values, startsAt })}
         />
-        <DInput
-          label="Ends"
+        <AppInput
+          {...field('endsAt')}
+          label="Ends" optional
           placeholder="YYYY-MM-DD"
           value={values.endsAt ?? ''}
           onChange={(endsAt) => onChange({ ...values, endsAt })}
@@ -73,15 +92,15 @@ export function CommercialTermFields({
       </div>
       <div className="client-form-grid">
         {lockBillingBasis ? (
-          <DInput
-            label="Billing Cycle *"
-            value={values.billingCycle.replace('_', ' ')}
+          <AppInput
+            label="Billing cycle" placeholder="Select a billing cycle"
+            value={labelFor(values.billingCycle)}
             disabled
             onChange={() => undefined}
           />
         ) : (
-          <DSelect
-            label="Billing Cycle *"
+          <AppSelect
+            label="Billing cycle" placeholder="Select a billing cycle"
             value={values.billingCycle}
             options={CYCLE_OPTIONS}
             clearable={false}
@@ -95,8 +114,9 @@ export function CommercialTermFields({
             }}
           />
         )}
-        <DInput
-          label="Currency *"
+        <AppInput
+          {...field('currency')}
+          label="Currency" placeholder="IDR"
           value={values.currency}
           maxLength={3}
           disabled={lockBillingBasis}
@@ -110,22 +130,23 @@ export function CommercialTermFields({
         />
       </div>
       <div className="client-commercial-price-context">
-        <span>Catalog list price</span>
+        <span>List price</span>
         <strong>
           {catalogPrice
             ? formatMoney(catalogPrice.amountMinor, catalogPrice.currency)
-            : 'No catalog price for this cycle/currency'}
+            : 'No list price for this billing cycle and currency'}
         </strong>
       </div>
       <div className="client-form-grid">
-        <DCurrencyInput
-          label="Agreed Price *"
+        <AppCurrencyInput
+          {...field('agreedAmountMinor')}
+          label="Agreed price" placeholder="2,400,000"
           value={
             agreedAmountMinor === undefined
               ? ''
               : minorToMajorValue(agreedAmountMinor)
           }
-          currencySymbol={values.currency || '—'}
+          currencySymbol={values.currency}
           disabled={
             !catalogPrice ||
             values.adjustmentType === 'NONE' ||
@@ -138,8 +159,8 @@ export function CommercialTermFields({
             })
           }
         />
-        <DSelect
-          label="Adjustment *"
+        <AppSelect
+          label="Adjustment" placeholder="Select an adjustment"
           value={values.adjustmentType}
           options={ADJUSTMENT_OPTIONS}
           clearable={false}
@@ -163,16 +184,18 @@ export function CommercialTermFields({
         />
       </div>
       {values.adjustmentType !== 'NONE' ? (
-        <DInput
-          label="Adjustment Reason *"
+        <AppInput
+          {...field('adjustmentReason')}
+          label="Adjustment reason" placeholder="Annual contract discount"
           value={values.adjustmentReason ?? ''}
           onChange={(adjustmentReason) =>
             onChange({ ...values, adjustmentReason })
           }
         />
       ) : null}
-      <DInput
-        label="Payment Terms (days)"
+      <AppInput
+        {...field('paymentTermsDays')}
+        label="Payment terms (days)" placeholder="30" optional
         type="number"
         value={String(values.paymentTermsDays ?? '')}
         onChange={(paymentTermsDays) =>

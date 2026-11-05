@@ -1,4 +1,5 @@
-import { DButton, useToast } from '@digvation/ui';
+import { AppAction } from '../../../shared/ui/app-action';
+import { useToast } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { ClientForm } from './client-form';
 import { useCreateClient, useUpdateClient } from '../hooks/use-client-mutations';
@@ -37,7 +38,7 @@ export function ClientFormDialog({
         showToast({ title: 'Client updated', description: `${values.displayName} was updated.`, variant: 'success' });
       } else {
         await createClient.mutateAsync(values);
-        showToast({ title: 'Client created', description: `${values.displayName} was added to the control plane.`, variant: 'success' });
+        showToast({ title: 'Client created', description: `${values.displayName} was added.`, variant: 'success' });
       }
       onClose();
     } catch (error) {
@@ -46,6 +47,7 @@ export function ClientFormDialog({
         description: error instanceof Error ? error.message : 'The client record could not be saved.',
         variant: 'danger',
       });
+      throw error;
     }
   }
 
@@ -54,11 +56,10 @@ export function ClientFormDialog({
       open={open}
       onClose={closeDialog}
       title={isEditing ? `Edit ${client?.displayName ?? 'client'}` : 'Add client'}
-      description={isEditing ? 'Update client information. The stable client code cannot be changed.' : 'Create a control-plane client record. The client code becomes immutable once created.'}
     footer={
         <div>
-          <DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton>
-          <DButton form={CLIENT_FORM_ID} type="submit" loading={isSubmitting}>{isEditing ? 'Save Changes' : 'Create Client'}</DButton>
+          <AppAction tone="secondary" onClick={closeDialog} disabled={isSubmitting}>Cancel</AppAction>
+          <AppAction form={CLIENT_FORM_ID} type="submit" loading={isSubmitting}>{isEditing ? 'Save' : 'Create client'}</AppAction>
         </div>
       }
     >

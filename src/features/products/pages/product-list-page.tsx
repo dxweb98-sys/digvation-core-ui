@@ -1,4 +1,8 @@
-import { DButton, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DStatusFilter, type TableAction, type TableColumn } from '@digvation/ui';
+import { RecordButton } from '../../../shared/ui/record-button';
+import { valueOrNotSet } from '../../../shared/ui/not-set';
+import { Plus } from 'lucide-react';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DStatusFilter, type TableAction, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
 import { ProductDetailDialog } from '../components/product-detail-dialog';
 import { ProductFormDialog } from '../components/product-form-dialog';
@@ -11,7 +15,7 @@ const PAGE_LIMIT = 10;
 const PRODUCT_STATUS_OPTIONS = [{ value: 'DRAFT', label: 'Draft' }, { value: 'ACTIVE', label: 'Active' }, { value: 'RETIRED', label: 'Retired' }];
 
 const PRODUCT_COLUMNS: TableColumn<ProductListItem>[] = [
-  { key: 'name', label: 'Product', render: (product) => <div className="product-table-identity"><strong>{product.name}</strong><span>{product.description ?? 'No description recorded'}</span></div> },
+  { key: 'name', label: 'Product', render: (product) => <div className="product-table-identity"><RecordButton><strong>{product.name}</strong></RecordButton><span>{valueOrNotSet(product.description, 'Description')}</span></div> },
   { key: 'code', label: 'Code', render: (product) => <code className="product-code">{product.code}</code> },
   { key: 'status', label: 'Status', render: (product) => <ProductStatusBadge status={product.status} /> },
   { key: 'featureCount', label: 'Features', render: (product) => `${product.featureCount} feature${product.featureCount === 1 ? '' : 's'}` },
@@ -35,18 +39,18 @@ export function ProductListPage() {
   }
 
   if (productQuery.isPending) return <div className="products-page-state"><DLoadingIndicator label="Loading products" /></div>;
-  if (productQuery.isError) return <div className="products-page-state"><DConnectionError title="Product list unavailable" message="Product records could not be loaded from the selected data source." detail={productQuery.error.message} isRetrying={productQuery.isFetching} onRetry={() => void productQuery.refetch()} /></div>;
+  if (productQuery.isError) return <div className="products-page-state"><DConnectionError title="Products unavailable" message="Products could not be loaded." detail={productQuery.error.message} isRetrying={productQuery.isFetching} onRetry={() => void productQuery.refetch()} /></div>;
 
   const result = productQuery.data;
   const tableActions: TableAction<ProductListItem>[] = [
-    { label: 'Quick Detail', onClick: (product) => setDetailProductId(product.id) },
-    { label: 'Edit Product', onClick: setEditProduct },
+    { label: 'View', onClick: (product) => setDetailProductId(product.id) },
+    { label: 'Edit', onClick: setEditProduct },
   ];
 
   return (
     <div className="products-page">
-      <div className="products-page-heading"><div><p className="page-eyebrow">Product control plane</p><h1>Products</h1><p>Manage Digvation product definitions, their lifecycle, and the catalog available for client relationships.</p></div></div>
-      <DDataTable columns={PRODUCT_COLUMNS} data={result.products} rowKey="id" searchable searchPlaceholder="Search product name, description, or code" searchValue={query.search} onSearchChange={(search) => updateQuery({ search })} filters={<DStatusFilter label="Status" allLabel="All statuses" options={PRODUCT_STATUS_OPTIONS} value={query.status} onChange={(status) => updateQuery({ status: status as ProductStatus | 'ALL' })} />} headerActions={<DButton onClick={() => setIsCreateDialogOpen(true)}>Add Product</DButton>} pagination={{ page: query.page, pageSize: query.limit, total: result.total }} onPageChange={(page) => updateQuery({ page })} onPageSizeChange={(limit) => updateQuery({ limit, page: 1 })} emptyMessage={<DEmptyState title="No products found" description="Try another search or status filter, or add the first product." />} onRowClick={(product) => setDetailProductId(product.id)} actions={tableActions} />
+      <div className="products-page-heading"><div><h1>Products</h1></div></div>
+      <DDataTable columns={PRODUCT_COLUMNS} data={result.products} rowKey="id" searchable searchPlaceholder="Search product name, description, or code" searchValue={query.search} onSearchChange={(search) => updateQuery({ search })} filters={<DStatusFilter label="Status" allLabel="All statuses" options={PRODUCT_STATUS_OPTIONS} value={query.status} onChange={(status) => updateQuery({ status: status as ProductStatus | 'ALL' })} />} headerActions={<AppAction icon={Plus} tone="primary" onClick={() => setIsCreateDialogOpen(true)}>Add product</AppAction>} pagination={{ page: query.page, pageSize: query.limit, total: result.total }} onPageChange={(page) => updateQuery({ page })} onPageSizeChange={(limit) => updateQuery({ limit, page: 1 })} emptyMessage={<DEmptyState title="No products found" description="Try another search, or add a product." />} onRowClick={(product) => setDetailProductId(product.id)} actions={tableActions} />
       <ProductFormDialog open={isCreateDialogOpen} mode="create" onClose={() => setIsCreateDialogOpen(false)} />
       <ProductFormDialog open={editProduct !== null} mode="edit" product={editProduct ?? undefined} onClose={() => setEditProduct(null)} />
       {detailProductId ? <ProductDetailDialog productId={detailProductId} open onClose={() => setDetailProductId(null)} /> : null}

@@ -600,3 +600,28 @@
     grid-column: span 12;
   }
 }
+
+.core-dashboard-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-8, 32px);
+  margin: 0;
+}
+
+.core-dashboard-counts dt {
+  font-size: var(--cc-text-sm);
+  color: var(--cc-text-muted);
+}
+
+.core-dashboard-counts dd {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.core-dashboard-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--cc-space-4);
+}

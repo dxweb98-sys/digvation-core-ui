@@ -1,10 +1,8 @@
-import {
-  DButton,
-  DCurrencyInput,
-  DInput,
-  DSelect,
-  useToast,
-} from '@digvation/ui';
+import { dateInputToInstant } from '../../../shared/format/date-field';
+import { useFieldErrors } from '../../../shared/forms/use-field-errors';
+import { AppCurrencyInput, AppInput, AppSelect } from '../../../shared/ui/form-fields';
+import { AppAction } from '../../../shared/ui/app-action';
+import { useToast } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useMemo, useState } from 'react';
 import { useProductAddOns } from '../../commercial-catalog/hooks/use-commercial-catalog';
@@ -65,7 +63,7 @@ function previewProration(input: {
   const monthsPerCycle = MONTHS_PER_CYCLE[input.cycle];
   if (!monthsPerCycle || !input.effectiveFrom) return undefined;
   const anchor = new Date(input.startsAt);
-  const effective = new Date(`${input.effectiveFrom}T00:00:00.000Z`);
+  const effective = new Date(input.effectiveFrom);
   const termEnd = input.endsAt ? new Date(input.endsAt) : undefined;
   if (
     Number.isNaN(anchor.getTime()) ||
@@ -111,6 +109,7 @@ export function SubscriptionAddOnDialog({
   const { showToast } = useToast();
   const [offeringId, setOfferingId] = useState('');
   const [effectiveFrom, setEffectiveFrom] = useState('');
+  const [submitError, setSubmitError] = useState('');
   const [agreedAmountMinor, setAgreedAmountMinor] = useState<
     number | undefined
   >();
@@ -142,30 +141,48 @@ export function SubscriptionAddOnDialog({
     adjustmentType === 'COMPLIMENTARY'
       ? 0
       : agreedAmountMinor ?? catalogPrice?.amountMinor;
+  const effectiveInstant = dateInputToInstant(effectiveFrom);
   const prorated =
     currentTerm && agreed !== undefined
       ? previewProration({
           startsAt: currentTerm.startsAt,
           endsAt: currentTerm.endsAt,
           cycle: currentTerm.billingCycle,
-          effectiveFrom,
+          effectiveFrom: effectiveInstant ?? '',
           amountMinor: agreed,
         })
       : undefined;
-  const adjustedReasonValid =
-    adjustmentType === 'NONE' || Boolean(adjustmentReason.trim());
-  const canSubmit = Boolean(
-    offering &&
+  const { field, allowSubmit } = useFieldErrors<
+    'offeringId' | 'effectiveFrom' | 'agreed' | 'adjustmentReason'
+  >('subscription-add-on-form', () => {
+    const errors: Partial<
+      Record<'offeringId' | 'effectiveFrom' | 'agreed' | 'adjustmentReason', string>
+    > = {};
+    if (!offering) errors.offeringId = 'Select an add-on.';
+    else if (!catalogPrice) {
+      errors.offeringId = 'This add-on has no price for the subscription billing cycle.';
+    }
+    if (!effectiveFrom.trim()) errors.effectiveFrom = 'Enter a start date.';
+    else if (!effectiveInstant) errors.effectiveFrom = 'Use the format YYYY-MM-DD.';
+    else if (catalogPrice && prorated === undefined) {
+      errors.effectiveFrom = 'Choose a valid start date.';
+    }
+    if (agreed === undefined || !Number.isSafeInteger(agreed) || agreed < 0) {
+      errors.agreed = 'Enter an amount of 0 or more.';
+    } else if (
       catalogPrice &&
-      effectiveFrom &&
-      agreed !== undefined &&
-      Number.isSafeInteger(agreed) &&
-      agreed >= 0 &&
-      prorated !== undefined &&
-      adjustedReasonValid &&
-      (adjustmentType !== 'NONE' || agreed === catalogPrice.amountMinor) &&
-      (adjustmentType !== 'COMPLIMENTARY' || agreed === 0),
-  );
+      adjustmentType === 'NONE' &&
+      agreed !== catalogPrice.amountMinor
+    ) {
+      errors.agreed = 'Choose an adjustment to change the price.';
+    } else if (adjustmentType === 'COMPLIMENTARY' && agreed !== 0) {
+      errors.agreed = 'A complimentary price must be 0.';
+    }
+    if (adjustmentType !== 'NONE' && !adjustmentReason.trim()) {
+      errors.adjustmentReason = 'Enter a reason for the adjustment.';
+    }
+    return errors;
+  });
 
   if (!subscription || !currentTerm) return null;
   if (subscription.status !== 'ACTIVE' && subscription.status !== 'TRIAL') {
@@ -173,21 +190,22 @@ export function SubscriptionAddOnDialog({
       <AppDialog kind="form"
         open
         onClose={onClose}
-        title={`Add commercial add-on · ${summary.productName}`}
-        description="Add-ons can only be activated while the parent subscription is in trial or active state."
-        footer={<DButton onClick={onClose}>Close</DButton>}
+        title={`Add add-on to ${summary.productName}`}
+        description="Add-ons need a subscription in trial or active status."
+        footer={<AppAction onClick={onClose}>Close</AppAction>}
       />
     );
   }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (!offering || !catalogPrice || agreed === undefined || !canSubmit) return;
+    setSubmitError('');
+    if (!allowSubmit() || !offering || !catalogPrice || agreed === undefined || !effectiveInstant) return;
     try {
       await mutation.mutateAsync({
         subscriptionId: subscription.id,
         addOnOfferingId: offering.id,
-        effectiveFrom: `${effectiveFrom}T00:00:00.000Z`,
+        effectiveFrom: effectiveInstant,
         agreedAmountMinor: agreed,
         adjustmentType,
         adjustmentReason:
@@ -196,6 +214,7 @@ export function SubscriptionAddOnDialog({
       showToast({ title: 'Add-on activated', variant: 'success' });
       onClose();
     } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'The add-on could not be activated.');
       showToast({
         title: 'Add-on activation failed',
         description: error instanceof Error ? error.message : undefined,
@@ -208,21 +227,20 @@ export function SubscriptionAddOnDialog({
     <AppDialog kind="form"
       open
       onClose={onClose}
-      title={`Add commercial add-on · ${summary.productName}`}
-      description="The add-on starts on the selected date, co-terms with the Product subscription, and its first billing period is prorated."
+      title={`Add add-on to ${summary.productName}`}
+      description="The add-on starts on this date and ends with the subscription term."
       footer={
         <div className="client-dialog-actions">
-          <DButton variant="outline" onClick={onClose}>
+          <AppAction tone="secondary" onClick={onClose}>
             Cancel
-          </DButton>
-          <DButton
+          </AppAction>
+          <AppAction
             form="subscription-add-on-form"
             type="submit"
             loading={mutation.isPending}
-            disabled={!canSubmit}
           >
-            Activate Add-on
-          </DButton>
+            Activate
+          </AppAction>
         </div>
       }
     >
@@ -231,8 +249,9 @@ export function SubscriptionAddOnDialog({
         className="client-contact-form"
         onSubmit={submit}
       >
-        <DSelect
-          label="Add-on Offering *"
+        <AppSelect
+          {...field('offeringId')}
+          label="Add-on offering" placeholder="Select an add-on"
           value={offeringId}
           options={offerings.map((item: AddOnOffering) => ({
             value: item.id,
@@ -247,14 +266,15 @@ export function SubscriptionAddOnDialog({
             setAdjustmentReason('');
           }}
         />
-        <DInput
-          label="Effective From *"
+        <AppInput
+          {...field('effectiveFrom')}
+          label="Effective from"
           placeholder="YYYY-MM-DD"
           value={effectiveFrom}
           onChange={setEffectiveFrom}
         />
         <div className="client-commercial-price-context">
-          <span>Recurring list price</span>
+          <span>List price</span>
           <strong>
             {catalogPrice
               ? formatMoney(catalogPrice.amountMinor, catalogPrice.currency)
@@ -264,8 +284,9 @@ export function SubscriptionAddOnDialog({
           </strong>
         </div>
         <div className="client-form-grid">
-          <DCurrencyInput
-            label="Agreed Recurring Price *"
+          <AppCurrencyInput
+            {...field('agreed')}
+            label="Agreed recurring price" placeholder="150,000"
             value={agreed === undefined ? '' : minorToMajorValue(agreed)}
             currencySymbol={currentTerm.currency}
             disabled={
@@ -277,8 +298,8 @@ export function SubscriptionAddOnDialog({
               setAgreedAmountMinor(majorToMinorValue(amount))
             }
           />
-          <DSelect
-            label="Adjustment *"
+          <AppSelect
+            label="Adjustment" placeholder="Select an adjustment"
             value={adjustmentType}
             options={ADJUSTMENT_OPTIONS}
             clearable={false}
@@ -298,8 +319,9 @@ export function SubscriptionAddOnDialog({
           />
         </div>
         {adjustmentType !== 'NONE' ? (
-          <DInput
-            label="Adjustment Reason *"
+          <AppInput
+            {...field('adjustmentReason')}
+            label="Adjustment reason" placeholder="Annual contract discount"
             value={adjustmentReason}
             maxLength={500}
             onChange={setAdjustmentReason}
@@ -311,13 +333,14 @@ export function SubscriptionAddOnDialog({
             {prorated === undefined
               ? currentTerm.billingCycle === 'CUSTOM'
                 ? 'Custom billing cycles do not support automatic add-on proration'
-                : 'Choose a valid effective date'
+                : 'Choose a valid start date'
               : formatMoney(prorated, currentTerm.currency)}
           </strong>
           <small>
-            Recurring periods after the first charge use the agreed recurring price above.
+            Later periods use the agreed recurring price.
           </small>
         </div>
+        {submitError ? <p className="client-commercial-form-error" role="alert">{submitError}</p> : null}
       </form>
     </AppDialog>
   );

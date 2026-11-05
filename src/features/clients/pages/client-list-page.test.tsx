@@ -64,11 +64,11 @@ describe('ClientListPage visual states', () => {
     expect(screen.getByRole('table')).toBeInTheDocument();
   });
 
-  it('keeps the existing copy and primary action', async () => {
+  it('keeps the page title and primary action', async () => {
     serveClients();
     render(withProviders(<ClientListPage />));
 
-    expect(await screen.findByText('Customer control plane')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Add Client' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Clients' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add client' })).toBeInTheDocument();
   });
 });

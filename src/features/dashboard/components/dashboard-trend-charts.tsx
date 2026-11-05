@@ -1,4 +1,5 @@
-import { DButton, DEmptyState } from '@digvation/ui';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DEmptyState } from '@digvation/ui';
 import { useState } from 'react';
 import {
   AreaTrendChart,
@@ -76,15 +77,15 @@ function ToggleGroup<T extends string>({
   return (
     <div aria-label={label} className="dashboard-range-toggle" role="group">
       {options.map((option) => (
-        <DButton
+        <AppAction
           aria-pressed={value === option.value}
           key={option.value}
           onClick={() => onChange(option.value)}
           size="sm"
-          variant={value === option.value ? 'primary' : 'outline'}
+          tone="secondary"
         >
           {option.label}
-        </DButton>
+        </AppAction>
       ))}
     </div>
   );
@@ -126,7 +127,7 @@ export function DashboardHeroTrend({
       <GlowCard className="bento-hero bento-hero-empty">
         <DEmptyState
           title="No trend history yet"
-          description="Trends will appear once the control plane records dashboard history."
+          description="Trends appear here once history is recorded."
         />
       </GlowCard>
     );

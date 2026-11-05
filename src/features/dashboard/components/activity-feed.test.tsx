@@ -43,8 +43,8 @@ describe('ActivityFeed', () => {
   it('states status in words next to its mark', () => {
     render(<ActivityFeed deployments={[DEPLOYMENT]} events={[EVENT]} />);
 
-    expect(screen.getByText('FAILED')).toBeInTheDocument();
-    expect(screen.getByText('WARNING')).toBeInTheDocument();
+    expect(screen.getByText('Failed')).toBeInTheDocument();
+    expect(screen.getByText('Warning')).toBeInTheDocument();
     expect(screen.getByText('Nova Salon / Digvation POS / api')).toBeInTheDocument();
     expect(screen.getByText('nova-pos-api restarted.')).toBeInTheDocument();
   });

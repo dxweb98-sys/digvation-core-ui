@@ -11,7 +11,6 @@ export function PlaceholderPage({
     <section className="placeholder-page" aria-labelledby="placeholder-title">
       <div className="placeholder-heading">
         <div>
-          <p className="page-eyebrow">Planned workspace</p>
           <h1 id="placeholder-title">{title}</h1>
           <p>{description}</p>
         </div>
@@ -20,8 +19,7 @@ export function PlaceholderPage({
       <DCard variant="outlined">
         <DCardContent>
           <p className="placeholder-copy">
-            This route is reserved to validate Control Center navigation. Its
-            workflows and backend integration belong to a later approved checkpoint.
+            This page is not available yet.
           </p>
         </DCardContent>
       </DCard>

@@ -1,13 +1,8 @@
-import {
-  DButton,
-  DConnectionError,
-  DDataTable,
-  DEmptyState,
-  DLoadingIndicator,
-  DStatusFilter,
-  type TableAction,
-  type TableColumn,
-} from '@digvation/ui';
+import { RecordButton } from '../../../shared/ui/record-button';
+import { valueOrNotSet } from '../../../shared/ui/not-set';
+import { Plus } from 'lucide-react';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, DStatusFilter, type TableAction, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
 import { CapabilityDetailDialog } from '../components/capability-detail-dialog';
 import { CapabilityFormDialog } from '../components/capability-form-dialog';
@@ -33,8 +28,8 @@ const CAPABILITY_COLUMNS: TableColumn<Capability>[] = [
     label: 'Capability',
     render: (capability) => (
       <div className="capability-table-identity">
-        <strong>{capability.name}</strong>
-        <span>{capability.description ?? 'No description recorded'}</span>
+        <RecordButton><strong>{capability.name}</strong></RecordButton>
+        <span>{valueOrNotSet(capability.description, 'Description')}</span>
       </div>
     ),
   },
@@ -101,8 +96,8 @@ export function CapabilityListPage() {
     return (
       <div className="capability-page-state">
         <DConnectionError
-          title="Capability catalog unavailable"
-          message="Capability records could not be loaded from the selected data source."
+          title="Capabilities unavailable"
+          message="Capabilities could not be loaded."
           detail={capabilityQuery.error.message}
           isRetrying={capabilityQuery.isFetching}
           onRetry={() => void capabilityQuery.refetch()}
@@ -114,22 +109,18 @@ export function CapabilityListPage() {
   const result = capabilityQuery.data;
   const tableActions: TableAction<Capability>[] = [
     {
-      label: 'Quick Detail',
+      label: 'View',
       onClick: (capability) => setDetailCapabilityId(capability.id),
     },
-    { label: 'Edit Capability', onClick: setEditCapability },
+    { label: 'Edit', onClick: setEditCapability },
   ];
 
   return (
     <div className="capabilities-page">
       <div className="capabilities-page-heading">
         <div>
-          <p className="page-eyebrow">Reusable capability catalog</p>
           <h1>Capabilities</h1>
-          <p>
-            Manage reusable business capabilities independently from Product compatibility and Client entitlement.
-          </p>
-        </div>
+          </div>
       </div>
 
       <DDataTable
@@ -152,9 +143,9 @@ export function CapabilityListPage() {
           />
         }
         headerActions={
-          <DButton onClick={() => setIsCreateDialogOpen(true)}>
-            Add Capability
-          </DButton>
+          <AppAction icon={Plus} tone="primary" onClick={() => setIsCreateDialogOpen(true)}>
+            Add capability
+          </AppAction>
         }
         pagination={{
           page: query.page,
@@ -166,7 +157,7 @@ export function CapabilityListPage() {
         emptyMessage={
           <DEmptyState
             title="No capabilities found"
-            description="Try another search or status filter, or add the first reusable capability."
+            description="Try another search, or add a capability."
           />
         }
         onRowClick={(capability) => setDetailCapabilityId(capability.id)}

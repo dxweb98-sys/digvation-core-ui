@@ -1,8 +1,13 @@
-import { DBadge, DButton, DCheckbox, DConfirmDialog, DInput, DSelect, useToast } from '@digvation/ui';
+import { NOT_CONNECTED_TITLE } from '../../../shared/ui/not-connected';
+import { isCoreMode } from '../../../shared/data/data-availability';
+import { useFieldErrors } from '../../../shared/forms/use-field-errors';
+import { AppInput, AppSelect } from '../../../shared/ui/form-fields';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DBadge, DCheckbox, DConfirmDialog, useToast } from '@digvation/ui';
 import { AppDialog, DetailItem, DetailList, DialogActions } from '../../../shared/ui/app-dialog';
 import { useLayoutEffect, useRef, useState } from 'react';
-import { useCreateInvitation, useSaveRole, useUpdateUserRoles, useUserStatus } from '../hooks/use-access';
-import { formatAccessDate, effectivePermissions, PERMISSIONS, type AccessRole, type AccessUser, type AuditEntry, type RoleInput } from '../types/access';
+import { useAccessPermissions, useCreateInvitation, useSaveRole, useUpdateUserRoles, useUserStatus } from '../hooks/use-access';
+import { ALL_PERMISSIONS, formatAccessDate, effectivePermissions, type AccessRole, type AccessUser, type AuditEntry, type RoleInput } from '../types/access';
 
 import { PermissionSummary } from './permission-summary';
 import { auditChanges, permissionGroups } from '../presentation/access-presentation';
@@ -32,16 +37,17 @@ export function UserDetailDialog({ user, roles, onClose }: { user: AccessUser; r
   }
   return <>
     <AppDialog kind="detail" open onClose={() => { if (!busy) onClose(); }} title={user.name} status={<DBadge variant={user.status === 'ACTIVE' ? 'success' : 'secondary'}>{user.status === 'ACTIVE' ? 'Active' : 'Inactive'}</DBadge>} meta={user.email} footer={<DialogActions
-      destructive={<DButton variant="outline" disabled={busy} onClick={() => setConfirmStatus(true)}>{user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}</DButton>}
-      secondary={<DButton variant="outline" disabled={busy} onClick={onClose}>Close</DButton>}
-      primary={<DButton loading={updateRoles.isPending} disabled={busy} onClick={() => void saveRoles()}>Save roles</DButton>}
+      destructive={isCoreMode() ? undefined : <AppAction tone="secondary" disabled={busy} onClick={() => setConfirmStatus(true)}>{user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}</AppAction>}
+      secondary={<AppAction tone="secondary" disabled={busy} onClick={onClose}>Close</AppAction>}
+      primary={<AppAction loading={updateRoles.isPending} disabled={busy} onClick={() => void saveRoles()}>Save</AppAction>}
     />}>
       <div className="access-detail-content">
         <section className="access-section" aria-labelledby="user-overview-title">
           <h3 id="user-overview-title">Overview</h3>
           <DetailList>
             <DetailItem label="Status">{user.status === 'ACTIVE' ? 'Active' : 'Inactive'}</DetailItem>
-            <DetailItem label="Last activity">{user.lastActivityAt ? formatAccessDate(user.lastActivityAt) : 'Never'}</DetailItem>
+            <DetailItem label="Last activity">{isCoreMode() ? NOT_CONNECTED_TITLE : user.lastActivityAt ? formatAccessDate(user.lastActivityAt) : 'Never'}</DetailItem>
+            {isCoreMode() ? <DetailItem label="Change status">{NOT_CONNECTED_TITLE}</DetailItem> : null}
             <DetailItem label="Created">{formatAccessDate(user.createdAt)}</DetailItem>
             <DetailItem label="Updated">{formatAccessDate(user.updatedAt)}</DetailItem>
           </DetailList>
@@ -61,7 +67,7 @@ export function UserDetailDialog({ user, roles, onClose }: { user: AccessUser; r
       </div>
     </AppDialog>
     {confirmStatus && <DConfirmDialog open onClose={() => { if (!busy) setConfirmStatus(false); }} onConfirm={() => void changeStatus()} loading={updateStatus.isPending}
-      title={`${user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'} ${user.name}?`} message="This updates the internal operator record." confirmLabel="Confirm status change" variant={user.status === 'ACTIVE' ? 'danger' : 'primary'} />}
+      title={`${user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'} ${user.name}?`} message="This updates the internal operator record." confirmLabel="Confirm" variant={user.status === 'ACTIVE' ? 'danger' : 'primary'} />}
   </>;
 }
 
@@ -71,8 +77,13 @@ export function InvitationFormDialog({ roles, onClose }: { roles: AccessRole[]; 
   const [error, setError] = useState('');
   const mutation = useCreateInvitation();
   const { showToast } = useToast();
+  const { field, allowSubmit } = useFieldErrors<'email' | 'roleId'>('access-invitation-form', () => ({
+    ...(email.trim() ? {} : { email: 'Enter an email address.' }),
+    ...(roleId ? {} : { roleId: 'Select a role.' }),
+  }));
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (!allowSubmit()) return;
     setError('');
     try {
       await mutation.mutateAsync({ email, roleId });
@@ -83,11 +94,11 @@ export function InvitationFormDialog({ roles, onClose }: { roles: AccessRole[]; 
       showToast({ title: 'Invitation failed', description: errorMessage(error), variant: 'danger' });
     }
   }
-  return <AppDialog kind="form" open onClose={() => { if (!mutation.isPending) onClose(); }} title="Create invitation" description="Creates a mock invitation record. No email is sent." footer={<div className="access-actions">
-    <DButton variant="outline" disabled={mutation.isPending} onClick={onClose}>Cancel</DButton><DButton type="submit" form="access-invitation-form" loading={mutation.isPending} disabled={mutation.isPending || !roleId}>Create invitation</DButton>
-  </div>}><form id="access-invitation-form" className="access-form" onSubmit={event => void submit(event)}>
-    <DInput label="Email" type="email" value={email} onChange={setEmail} required disabled={mutation.isPending} />
-    <DSelect label="Role" value={roleId} options={roles.map(role => ({ value: role.id, label: role.name }))} onValueChange={value => setRoleId(value as string)} disabled={mutation.isPending} />
+  return <AppDialog kind="form" open onClose={() => { if (!mutation.isPending) onClose(); }} title="Create invitation" description={isCoreMode() ? "CORE emails this person a sign-up link." : "No email is sent."} footer={<div className="access-actions">
+    <AppAction tone="secondary" disabled={mutation.isPending} onClick={onClose}>Cancel</AppAction><AppAction type="submit" form="access-invitation-form" loading={mutation.isPending} disabled={mutation.isPending}>Create invitation</AppAction>
+  </div>}><form id="access-invitation-form" className="access-form" noValidate onSubmit={event => void submit(event)}>
+    <AppInput {...field('email')} label="Email" placeholder="rani@novasalon.id" type="email" value={email} onChange={setEmail} disabled={mutation.isPending} />
+    <AppSelect {...field('roleId')} label="Role" placeholder="Select a role" value={roleId} options={roles.map(role => ({ value: role.id, label: role.name }))} onValueChange={value => setRoleId(value as string)} disabled={mutation.isPending} />
     {!roles.length && <p>Create a role before inviting an operator.</p>}
     {error && <p role="alert">{error}</p>}
   </form></AppDialog>;
@@ -115,10 +126,12 @@ export function RoleDialog({ role, assignedUserCount, onClose }: { role?: Access
     setEditing(false);
   }
   const { showToast } = useToast();
-  const groups = permissionGroups(PERMISSIONS);
+  const permissionCatalog = useAccessPermissions();
+  const groups = permissionGroups(permissionCatalog.data ?? []);
+  const { field, allowSubmit } = useFieldErrors<'name'>('access-role-form', () => (input.name.trim() ? {} : { name: 'Enter a role name.' }));
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (mutation.isPending || !dirty) return;
+    if (mutation.isPending || !dirty || !allowSubmit()) return;
     setError('');
     try {
       const updated = await mutation.mutateAsync(input);
@@ -133,14 +146,14 @@ export function RoleDialog({ role, assignedUserCount, onClose }: { role?: Access
     }
   }
   return <AppDialog kind="wide" open onClose={() => { if (!mutation.isPending) onClose(); }} title={savedRole ? editing ? 'Edit role' : savedRole.name : 'Create role'} description={editing ? savedRole?.name : savedRole?.description || undefined} footer={<div className="access-actions">
-    <DButton variant="outline" disabled={mutation.isPending} onClick={editing ? cancelEdit : onClose}>{editing ? 'Cancel' : 'Close'}</DButton>
-    {editing ? <DButton form="access-role-form" type="submit" loading={mutation.isPending} disabled={mutation.isPending || !dirty}>{savedRole ? 'Save changes' : 'Save role'}</DButton> : <DButton onClick={() => setEditing(true)}>Edit role</DButton>}
+    <AppAction tone="secondary" disabled={mutation.isPending} onClick={editing ? cancelEdit : onClose}>{editing ? 'Cancel' : 'Close'}</AppAction>
+    {editing ? <AppAction form="access-role-form" type="submit" loading={mutation.isPending} disabled={mutation.isPending || !dirty}>{savedRole ? 'Save' : 'Save'}</AppAction> : savedRole?.permissions.includes(ALL_PERMISSIONS) ? null : <AppAction tone="primary" onClick={() => setEditing(true)}>Edit role</AppAction>}
   </div>}>
-    <div ref={contentRef}>{editing ? <form id="access-role-form" className="access-detail-content" onSubmit={event => void submit(event)}>
+    <div ref={contentRef}>{editing ? <form id="access-role-form" className="access-detail-content" noValidate onSubmit={event => void submit(event)}>
       <section className="access-section access-form" aria-labelledby="role-information-title">
         <h3 id="role-information-title">Role information</h3>
-        <DInput label="Role name" value={input.name} onChange={name => setInput(current => ({ ...current, name }))} required disabled={mutation.isPending} />
-        <DInput label="Description" value={input.description} onChange={description => setInput(current => ({ ...current, description }))} disabled={mutation.isPending} />
+        <AppInput {...field('name')} label="Role name" placeholder="Support lead" value={input.name} onChange={name => setInput(current => ({ ...current, name }))} disabled={mutation.isPending} />
+        <AppInput label="Description" placeholder="Who this role is for" optional value={input.description} onChange={description => setInput(current => ({ ...current, description }))} disabled={mutation.isPending} />
       </section>
       <section className="access-section" aria-labelledby="role-permissions-title">
         <h3 id="role-permissions-title">Permissions <span className="access-section-count">{input.permissions.length} selected</span></h3>
@@ -152,7 +165,7 @@ export function RoleDialog({ role, assignedUserCount, onClose }: { role?: Access
     </form> : <div className="access-detail-content">
       <section className="access-section" aria-labelledby="role-overview-title">
         <h3 id="role-overview-title">Overview</h3>
-        <DetailList><DetailItem label="Assigned users">{assignedUserCount}</DetailItem><DetailItem label="Capabilities">{savedRole?.permissions.length ?? 0}</DetailItem></DetailList>
+        <DetailList><DetailItem label="Assigned users">{assignedUserCount}</DetailItem><DetailItem label="Permissions">{savedRole?.permissions.includes(ALL_PERMISSIONS) ? 'All' : savedRole?.permissions.length ?? 0}</DetailItem></DetailList>
       </section>
       <section className="access-section" aria-labelledby="role-permissions-title"><h3 id="role-permissions-title">Permissions</h3><PermissionSummary permissions={savedRole?.permissions ?? []} /></section>
     </div>}</div>
@@ -166,7 +179,7 @@ export function AuditDetailDialog({ entry, roles = [], onClose }: { entry: Audit
   const statuses: Record<string, string> = { ACTIVE: 'Active', INACTIVE: 'Inactive', PENDING: 'Pending', REVOKED: 'Revoked' };
   const previousStatus = statuses[entry.metadata?.before ?? ''];
   const nextStatus = statuses[entry.metadata?.after ?? ''];
-  return <AppDialog kind="detail" open onClose={onClose} title={title} status={<DBadge variant={entry.result === 'SUCCESS' ? 'success' : 'secondary'}>{entry.result === 'SUCCESS' ? 'Success' : 'Revoked'}</DBadge>} meta={entry.target} footer={<div className="access-actions"><DButton variant="outline" onClick={onClose}>Close</DButton></div>}>
+  return <AppDialog kind="detail" open onClose={onClose} title={title} status={<DBadge variant={entry.result === 'SUCCESS' ? 'success' : 'secondary'}>{entry.result === 'SUCCESS' ? 'Success' : 'Revoked'}</DBadge>} meta={entry.target} footer={<div className="access-actions"><AppAction tone="secondary" onClick={onClose}>Close</AppAction></div>}>
     <div className="access-detail-content">
       <section className="access-section" aria-labelledby="audit-event-title">
         <h3 id="audit-event-title">Event details</h3>

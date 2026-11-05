@@ -1,15 +1,10 @@
-import {
-  DButton,
-  DCard,
-  DCardContent,
-  DConnectionError,
-  DDataTable,
-  DEmptyState,
-  DInput,
-  DLoadingIndicator,
-  useToast,
-  type TableColumn,
-} from '@digvation/ui';
+import { useFieldErrors } from '../../../shared/forms/use-field-errors';
+import { AppInput } from '../../../shared/ui/form-fields';
+import { valueOrNotSet } from '../../../shared/ui/not-set';
+import { labelFor } from '../../../shared/labels/labels';
+import { Pencil, Plus, Tag } from 'lucide-react';
+import { AppAction, AppIconAction } from '../../../shared/ui/app-action';
+import { DCard, DCardContent, DConnectionError, DDataTable, DEmptyState, DLoadingIndicator, useToast, type TableColumn } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { ProductDetail } from '../../products/types/product';
@@ -36,19 +31,19 @@ import { CatalogPriceDialog } from './catalog-price-dialog';
 import '../commercial-catalog.css';
 
 function cycle(value: string) {
-  return value.toLowerCase().replace('_', ' ');
+  return labelFor(value);
 }
 
 const PRICE_COLUMNS: TableColumn<CatalogPrice>[] = [
   {
     key: 'billingCycle',
-    label: 'Billing Cycle',
+    label: 'Billing cycle',
     render: (price) => cycle(price.billingCycle),
   },
   { key: 'currency', label: 'Currency' },
   {
     key: 'amountMinor',
-    label: 'List Price',
+    label: 'List price',
     render: (price) => formatMoney(price.amountMinor, price.currency),
   },
 ];
@@ -67,33 +62,40 @@ function OfferingLifecycleDialog({
   onConfirm: (reason: string) => Promise<void>;
 }) {
   const [reason, setReason] = useState('');
+  const { field, allowSubmit } = useFieldErrors<'reason'>('offering-status-reason', () =>
+    reason.trim() ? {} : { reason: 'Enter a reason.' },
+  );
   return (
     <AppDialog kind="confirm"
       open
       onClose={onClose}
       title={`${targetStatus === 'ACTIVE' ? 'Activate' : targetStatus === 'RETIRED' ? 'Retire' : 'Return to draft'} ${offering.name}`}
-      description="Lifecycle changes affect whether this commercial SKU may be sold. Existing client price snapshots are not rewritten."
       footer={
         <div className="commercial-dialog-actions">
-          <DButton variant="outline" onClick={onClose} disabled={loading}>
+          <AppAction tone="secondary" onClick={onClose} disabled={loading}>
             Cancel
-          </DButton>
-          <DButton
-            onClick={() => reason.trim() && void onConfirm(reason.trim())}
+          </AppAction>
+          <AppAction
+            onClick={() => {
+              if (allowSubmit()) void onConfirm(reason.trim());
+            }}
             loading={loading}
-            disabled={!reason.trim()}
           >
             Confirm
-          </DButton>
+          </AppAction>
         </div>
       }
     >
-      <DInput
-        label="Reason *"
-        value={reason}
-        maxLength={500}
-        onChange={setReason}
-      />
+      <div id="offering-status-reason">
+        <AppInput
+          {...field('reason')}
+          label="Reason"
+          placeholder="For example, contract ended on 30 June"
+          value={reason}
+          maxLength={500}
+          onChange={setReason}
+        />
+      </div>
     </AppDialog>
   );
 }
@@ -192,26 +194,21 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
         <DCardContent>
           <div className="commercial-section-heading">
             <div>
-              <h3>Product List Prices</h3>
-              <p>
-                Canonical catalog prices. Client-specific deals are captured
-                later as immutable subscription-term snapshots.
-              </p>
-            </div>
-            <DButton
-              variant="outline"
+              <h3>List prices</h3>
+              </div>
+            <AppAction icon={Tag} tone="secondary"
               disabled={product.status === 'RETIRED'}
               onClick={() => setProductPriceOpen(true)}
             >
-              Add / Update Price
-            </DButton>
+              Set price
+            </AppAction>
           </div>
           {prices.length ? (
             <DDataTable columns={PRICE_COLUMNS} data={prices} rowKey="id" />
           ) : (
             <DEmptyState
-              title="No Product list price"
-              description="Add a billing-cycle price before creating a client subscription for that cycle."
+              title="No list price"
+              description="Set a price before creating a subscription for that billing cycle."
             />
           )}
         </DCardContent>
@@ -221,19 +218,14 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
         <DCardContent>
           <div className="commercial-section-heading">
             <div>
-              <h3>Commercial Add-ons</h3>
-              <p>
-                A sellable add-on may grant ProductFeatures and/or compatible
-                Capabilities. Technical catalog items themselves remain
-                unpriced.
-              </p>
-            </div>
-            <DButton
+              <h3>Add-ons</h3>
+              </div>
+            <AppAction icon={Plus} tone="secondary"
               disabled={product.status === 'RETIRED'}
               onClick={() => setEditingOffering(null)}
             >
-              Add Offering
-            </DButton>
+              Add offering
+            </AppAction>
           </div>
 
           {addOns.length ? (
@@ -251,7 +243,7 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
                       {offering.status}
                     </span>
                   </header>
-                  <p>{offering.description ?? 'No description recorded.'}</p>
+                  <p>{valueOrNotSet(offering.description, 'Description')}</p>
                   <dl className="commercial-offering-summary">
                     <div>
                       <dt>Prices</dt>
@@ -277,69 +269,60 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
                     </div>
                   ) : null}
                   <div className="commercial-offering-actions">
-                    <DButton
-                      variant="outline"
-                      onClick={() => setEditingOffering(offering)}
-                    >
-                      Edit
-                    </DButton>
-                    <DButton
-                      variant="outline"
+                    <AppIconAction icon={Pencil} label={`Edit ${offering.name}`}
+                      onClick={() => setEditingOffering(offering)} />
+                    <AppAction size="sm" tone="secondary"
                       disabled={offering.status !== 'DRAFT'}
                       onClick={() => setGrantOffering(offering)}
                     >
-                      Manage Grants
-                    </DButton>
-                    <DButton
-                      variant="outline"
+                      Grants
+                    </AppAction>
+                    <AppAction icon={Tag} tone="secondary"
                       disabled={offering.status === 'RETIRED'}
                       onClick={() => setPriceOffering(offering)}
                     >
-                      Add / Update Price
-                    </DButton>
+                      Set price
+                    </AppAction>
                     {offering.status === 'DRAFT' ? (
-                      <DButton
+                      <AppAction size="sm" tone="secondary"
                         disabled={product.status !== 'ACTIVE'}
                         title={
                           product.status === 'ACTIVE'
                             ? undefined
-                            : 'Product must be active before an add-on can be sold.'
+                            : 'Activate the product to sell add-ons.'
                         }
                         onClick={() =>
                           setLifecycle({ offering, targetStatus: 'ACTIVE' })
                         }
                       >
                         Activate
-                      </DButton>
+                      </AppAction>
                     ) : null}
                     {offering.status === 'ACTIVE' ? (
-                      <DButton
-                        variant="outline"
+                      <AppAction size="sm" tone="secondary"
                         onClick={() =>
                           setLifecycle({ offering, targetStatus: 'DRAFT' })
                         }
                       >
-                        Return to Draft
-                      </DButton>
+                        Return to draft
+                      </AppAction>
                     ) : null}
                     {offering.status !== 'RETIRED' ? (
-                      <DButton
-                        variant="outline"
+                      <AppAction size="sm" tone="danger-subtle"
                         onClick={() =>
                           setLifecycle({ offering, targetStatus: 'RETIRED' })
                         }
                       >
                         Retire
-                      </DButton>
+                      </AppAction>
                     ) : (
-                      <DButton
-                        variant="outline"
+                      <AppAction size="sm" tone="secondary"
                         onClick={() =>
                           setLifecycle({ offering, targetStatus: 'DRAFT' })
                         }
                       >
-                        Restore Draft
-                      </DButton>
+                        Restore
+                      </AppAction>
                     )}
                   </div>
                 </article>
@@ -347,8 +330,8 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
             </div>
           ) : (
             <DEmptyState
-              title="No commercial add-ons"
-              description="Create a draft offering only when a ProductFeature or Capability should be sold separately from the base Product."
+              title="No add-ons"
+              description="Add an offering to sell a feature or capability separately."
             />
           )}
         </DCardContent>
@@ -454,13 +437,13 @@ export function ProductCommercialTab({ detail }: { detail: ProductDetail }) {
                 reason,
               });
               showToast({
-                title: 'Add-on lifecycle updated',
+                title: 'Add-on status updated',
                 variant: 'success',
               });
               setLifecycle(null);
             } catch (error) {
               showToast({
-                title: 'Lifecycle update failed',
+                title: 'Status update failed',
                 description: error instanceof Error ? error.message : undefined,
                 variant: 'danger',
               });

@@ -1,4 +1,9 @@
-import { DButton, DDropdown, DTextarea, useToast } from '@digvation/ui';
+import { focusFirstInvalid } from '../../../shared/ui/form-fields';
+import { AppTextarea } from '../../../shared/ui/form-fields';
+import { labelFor, transitionLabel } from '../../../shared/labels/labels';
+import { ChevronDown } from 'lucide-react';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DDropdown, useToast } from '@digvation/ui';
 import { AppDialog } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
 import type { InstallationStatus, InstallationSummary } from '../types/installation';
@@ -10,12 +15,6 @@ const TRANSITIONS: Record<InstallationStatus, InstallationStatus[]> = {
   SUSPENDED: ['ACTIVE', 'DECOMMISSIONED'],
   DECOMMISSIONED: [],
 };
-
-function label(status: InstallationStatus) {
-  return status === 'DECOMMISSIONED'
-    ? 'Decommission'
-    : status[0] + status.slice(1).toLowerCase();
-}
 
 export function InstallationLifecycleAction({
   installation,
@@ -45,24 +44,25 @@ export function InstallationLifecycleAction({
   async function confirm() {
     if (!targetStatus) return;
     if (!reason.trim()) {
-      setReasonError('A reason is required for this lifecycle change.');
+      setReasonError('Enter a reason.');
+      focusFirstInvalid('lifecycle-reason');
       return;
     }
     try {
       await onTransition(targetStatus, reason.trim());
       showToast({
-        title: 'Installation lifecycle updated',
-        description: `${installation.name} is now ${targetStatus.toLowerCase()}.`,
+        title: 'Installation status updated',
+        description: `${installation.name} is now ${labelFor(targetStatus).toLowerCase()}.`,
         variant: 'success',
       });
       closeDialog();
     } catch (error) {
       showToast({
-        title: 'Lifecycle update failed',
+        title: 'Status update failed',
         description:
           error instanceof Error
             ? error.message
-            : 'The installation lifecycle state could not be changed.',
+            : 'The status could not be changed. Try again.',
         variant: 'danger',
       });
     }
@@ -70,11 +70,11 @@ export function InstallationLifecycleAction({
 
   return (
     <>
-      <DDropdown
+      <DDropdown closeOnItemClick
         placement="top-end"
         contentRole="menu"
         contentClassName="installation-lifecycle-menu"
-        trigger={() => <DButton variant="outline">More Actions</DButton>}
+        trigger={() => <AppAction tone="secondary" trailingIcon={ChevronDown}>More</AppAction>}
       >
         {transitions.map((status) => (
           <button
@@ -88,39 +88,39 @@ export function InstallationLifecycleAction({
             type="button"
             onClick={() => setTargetStatus(status)}
           >
-            Mark {label(status)}
+            {transitionLabel(status)}
           </button>
         ))}
       </DDropdown>
       <AppDialog kind="confirm"
         open={Boolean(targetStatus)}
         onClose={closeDialog}
-        title="Confirm installation lifecycle change"
-        description="Provide a reason before continuing. Activation also revalidates Product and branding policy in Core."
+        title="Change installation status"
+        description="Add a reason to continue. Activating also rechecks products and branding."
         footer={
           <div className="installation-dialog-actions">
-            <DButton variant="outline" onClick={closeDialog} disabled={isSubmitting}>Cancel</DButton>
-            <DButton
-              variant={targetStatus === 'DECOMMISSIONED' ? 'danger' : 'primary'}
+            <AppAction tone="secondary" onClick={closeDialog} disabled={isSubmitting}>Cancel</AppAction>
+            <AppAction
+              tone={targetStatus === 'DECOMMISSIONED' ? 'danger' : 'primary'}
               onClick={() => void confirm()}
               loading={isSubmitting}
             >
-              Confirm change
-            </DButton>
+              Confirm
+            </AppAction>
           </div>
         }
       >
         {targetStatus ? (
-          <div className="installation-transition-dialog">
+          <div className="installation-transition-dialog" id="lifecycle-reason">
             <p>
               <strong>{installation.name}</strong> will move from{' '}
               <InstallationStatusBadge status={installation.status} /> to{' '}
-              <InstallationStatusBadge status={targetStatus} />.
+              <InstallationStatusBadge status={targetStatus} />
             </p>
-            <DTextarea
-              label="Reason *"
+            <AppTextarea
+              label="Reason" placeholder="For example, contract ended on 30 June"
               value={reason}
-              error={reasonError}
+              error={reasonError} onBlur={() => { if (!reason.trim()) setReasonError('Enter a reason.'); }}
               onChange={(value) => {
                 setReason(value);
                 if (reasonError) setReasonError(null);

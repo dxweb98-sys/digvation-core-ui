@@ -27,6 +27,13 @@ function renderShell(path: string) {
 }
 
 describe('ApplicationShell', () => {
+  it('keeps a mock data badge visible in the top bar', () => {
+    renderShell('/clients');
+
+    expect(screen.getByText('Mock data')).toBeVisible();
+    expect(screen.queryByText('Connected')).not.toBeInTheDocument();
+  });
+
   it('marks the active route by more than color and keeps every existing route', () => {
     renderShell('/clients');
     const navigation = within(screen.getByRole('navigation', { name: 'Primary navigation' }));
@@ -51,14 +58,14 @@ describe('ApplicationShell', () => {
     ]);
   });
 
-  it('gives every navigation item a drawn icon hidden from assistive technology', () => {
+  it('gives every navigation item an icon hidden from assistive technology', () => {
     renderShell('/');
     const links = within(screen.getByRole('navigation', { name: 'Primary navigation' })).getAllByRole('link');
 
     for (const link of links) {
       const icon = link.querySelector('svg');
       expect(icon).toHaveAttribute('aria-hidden', 'true');
-      expect(icon?.querySelector('path')?.getAttribute('d')).toBeTruthy();
+      expect(icon?.classList.contains('navigation-item-icon')).toBe(true);
     }
   });
 

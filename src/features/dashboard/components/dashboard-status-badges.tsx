@@ -1,3 +1,4 @@
+import { labelFor } from '../../../shared/labels/labels';
 import { DBadge, type BadgeVariant } from '@digvation/ui';
 import type {
   AttentionSeverity,
@@ -33,7 +34,7 @@ export function OperationalHealthBadge({
 }) {
   return (
     <DBadge variant={HEALTH_VARIANTS[status]} dot>
-      {status}
+      {labelFor(status)}
     </DBadge>
   );
 }
@@ -45,7 +46,7 @@ export function AttentionSeverityBadge({
 }) {
   return (
     <DBadge variant={SEVERITY_VARIANTS[severity]} dot>
-      {severity}
+      {labelFor(severity)}
     </DBadge>
   );
 }
@@ -57,7 +58,7 @@ export function DeploymentStatusBadge({
 }) {
   return (
     <DBadge variant={DEPLOYMENT_VARIANTS[status]} dot>
-      {status.replace('_', ' ')}
+      {labelFor(status)}
     </DBadge>
   );
 }

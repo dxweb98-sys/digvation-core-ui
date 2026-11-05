@@ -1,6 +1,7 @@
-import { DInput, DTextarea } from '@digvation/ui';
+
+import { useValidatedForm } from '../../../shared/forms/use-validated-form';
+import { AppInput, AppTextarea } from '../../../shared/ui/form-fields';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
 import {
   capabilityFormSchema,
   normalizeCapabilityCode,
@@ -8,6 +9,14 @@ import {
 } from '../schemas/capability-form-schema';
 
 export type CapabilityFormMode = 'create' | 'edit';
+
+function normalizeValues(values: CapabilityFormValues) {
+  return {
+      ...values,
+      code: normalizeCapabilityCode(values.code),
+      description: values.description?.trim() || undefined,
+    };
+}
 
 export function CapabilityForm({
   formId,
@@ -20,7 +29,12 @@ export function CapabilityForm({
   defaultValues: CapabilityFormValues;
   onSubmit: (values: CapabilityFormValues) => void | Promise<void>;
 }) {
-  const form = useForm<CapabilityFormValues>({ defaultValues });
+  const { form, field, change, onInvalid, applyServerError } = useValidatedForm<CapabilityFormValues>({
+    formId,
+    schema: capabilityFormSchema,
+    defaultValues,
+    normalize: normalizeValues,
+  });
   const { code, name, description } = defaultValues;
 
   useEffect(() => {
@@ -28,11 +42,7 @@ export function CapabilityForm({
   }, [code, description, form, name]);
 
   async function handleSubmit(values: CapabilityFormValues) {
-    const normalizedValues = {
-      ...values,
-      code: normalizeCapabilityCode(values.code),
-      description: values.description?.trim() || undefined,
-    };
+    const normalizedValues = normalizeValues(values);
     const result = capabilityFormSchema.safeParse(normalizedValues);
     if (!result.success) {
       for (const issue of result.error.issues) {
@@ -42,48 +52,49 @@ export function CapabilityForm({
       }
       return;
     }
-    await onSubmit(result.data);
+    try {
+      await onSubmit(result.data);
+    } catch (error) {
+      applyServerError(error);
+    }
   }
 
   return (
     <form
       className="capability-form"
       id={formId}
-      onSubmit={form.handleSubmit(handleSubmit)}
+      onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
       noValidate
     >
-      <DInput
-        label="Capability Code *"
+      <AppInput
+        label="Capability code" placeholder="MEMBERSHIP"
         hint={
           mode === 'create'
-            ? 'Stable reusable capability identifier. Uppercase letters, numbers, underscores, and hyphens only.'
-            : 'Capability code is immutable after creation.'
+            ? 'Uppercase letters, numbers, underscores and hyphens. Cannot be changed later.'
+            : 'Cannot be changed.'
         }
         value={form.watch('code')}
         readOnly={mode === 'edit'}
         disabled={mode === 'edit'}
-        error={form.formState.errors.code?.message}
+        {...field('code')}
         onChange={(value) =>
-          form.setValue('code', normalizeCapabilityCode(value), {
-            shouldValidate: true,
-          })
+          change('code', normalizeCapabilityCode(value))
         }
       />
-      <DInput
-        label="Capability Name *"
+      <AppInput
+        label="Capability name" placeholder="Membership"
         value={form.watch('name')}
-        error={form.formState.errors.name?.message}
+        {...field('name')}
         onChange={(value) =>
-          form.setValue('name', value, { shouldValidate: true })
+          change('name', value)
         }
       />
-      <DTextarea
-        label="Description"
-        hint="Describe the reusable business capability boundary, not a client-specific entitlement."
+      <AppTextarea
+        label="Description" placeholder="Member tiers and benefits" optional
         value={form.watch('description') ?? ''}
-        error={form.formState.errors.description?.message}
+        {...field('description')}
         onChange={(value) =>
-          form.setValue('description', value, { shouldValidate: true })
+          change('description', value)
         }
       />
     </form>

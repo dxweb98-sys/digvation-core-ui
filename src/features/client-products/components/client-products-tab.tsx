@@ -1,10 +1,6 @@
-import {
-  DButton,
-  DConnectionError,
-  DDataTable,
-  DEmptyState,
-  type TableColumn,
-} from '@digvation/ui';
+import { Plus, SlidersHorizontal } from 'lucide-react';
+import { AppAction } from '../../../shared/ui/app-action';
+import { DConnectionError, DDataTable, DEmptyState, type TableColumn } from '@digvation/ui';
 import { ContentSkeleton } from '../../../shared/ui/content-skeleton';
 import { useState } from 'react';
 
@@ -72,14 +68,14 @@ export function ClientProductsTab({
 
   if (clientProductsQuery.isPending) {
     return (
-      <ContentSkeleton label="Loading product relationships" rows={3} />
+      <ContentSkeleton label="Loading products" rows={3} />
     );
   }
   if (clientProductsQuery.isError) {
     return (
       <DConnectionError
-        title="Product relationships unavailable"
-        message="Client product relationships could not be loaded."
+        title="Products unavailable"
+        message="Products could not be loaded."
         detail={clientProductsQuery.error.message}
         onRetry={() => void clientProductsQuery.refetch()}
       />
@@ -101,31 +97,25 @@ export function ClientProductsTab({
   }
 
   const assignProductButton = (
-    <DButton
+    <AppAction icon={Plus} tone="secondary"
       disabled={!canManageComposition}
       onClick={() => setIsAssignDialogOpen(true)}
     >
-      Assign Product
-    </DButton>
+      Assign product
+    </AppAction>
   );
 
   return (
     <div className="client-products-tab">
       <div className="client-composition-heading">
         <div className="client-composition-copy">
-          <strong>Product entitlements</strong>
-          <p>
-            Assign Products first, then explicitly select the Product Features
-            this client may use.
-          </p>
-        </div>
+          <strong>Products</strong>
+          </div>
       </div>
 
       {!canManageComposition ? (
         <p className="client-composition-warning">
-          New Product, Feature, and Capability grants require an active Client.
-          Existing lifecycle actions remain available where the control-plane
-          lifecycle permits them.
+          Activate the client to add products, features or capabilities.
         </p>
       ) : null}
 
@@ -134,7 +124,7 @@ export function ClientProductsTab({
           title="No products assigned"
           description={
             canManageComposition
-              ? 'Assign a product to establish the first client product relationship.'
+              ? 'Assign a product to this client.'
               : 'Activate the client before assigning its first product.'
           }
           action={assignProductButton}
@@ -147,9 +137,7 @@ export function ClientProductsTab({
           headerActions={assignProductButton}
           actions={(relationship) => (
             <div className="client-product-row-actions">
-              <DButton
-                size="sm"
-                variant="outline"
+              <AppAction icon={SlidersHorizontal} size="sm" tone="secondary"
                 disabled={
                   !canManageComposition ||
                   relationship.status === 'CANCELLED' ||
@@ -157,8 +145,8 @@ export function ClientProductsTab({
                 }
                 onClick={() => setFeatureRelationship(relationship)}
               >
-                Manage Features
-              </DButton>
+                Features
+              </AppAction>
               <ClientProductLifecycleAction
                 clientProduct={relationship}
                 canBecomeEffective={canManageComposition}
