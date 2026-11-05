@@ -194,6 +194,9 @@ describe('product contract', () => {
     const detail = await coreProductDataSource.getProductDetail('product');
 
     expect(detail?.capabilities.map((capability) => capability.code)).toEqual(['TAX_FISCAL']);
+    expect(detail?.capabilities[0]?.inclusion).toBe('INCLUDED');
+    expect(detail?.domainCodes).toEqual(['POS']);
+    expect(detail?.applicationCodes).toEqual(['POS_SALON_APP']);
   });
 
   it('keeps sending only capability_ids so CORE preserves existing inclusions', async () => {

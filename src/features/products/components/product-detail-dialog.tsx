@@ -2,6 +2,7 @@ import { AppAction } from '../../../shared/ui/app-action';
 import { DConnectionError, DEmptyState, DLoadingIndicator, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation/ui';
 import { AppDialog, DetailItem, DetailList, DialogActions, DialogSection } from '../../../shared/ui/app-dialog';
 import { useState } from 'react';
+import { usePermissions } from '../../auth/use-permissions';
 import { ProductClientsTab } from '../../client-products/components/product-clients-tab';
 import { ProductCommercialTab } from '../../commercial-catalog/components/product-commercial-tab';
 import { useProductDetail } from '../hooks/use-product-detail';
@@ -10,6 +11,7 @@ import type { ProductStatus } from '../types/product';
 import { ProductCapabilitiesTab } from './product-capabilities-tab';
 import { ProductFeaturesTab } from './product-features-tab';
 import { ProductFormDialog } from './product-form-dialog';
+import { ProductGrantsSection } from './product-grants-section';
 import { ProductLifecycleAction } from './product-lifecycle-action';
 import { ProductStatusBadge } from './product-status-badge';
 
@@ -33,6 +35,7 @@ export function ProductDetailDialog({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const productQuery = useProductDetail(productId);
   const statusTransition = useProductStatusTransition();
+  const permissions = usePermissions();
 
   if (productQuery.isPending) {
     return (
@@ -44,7 +47,8 @@ export function ProductDetailDialog({
     );
   }
 
-  if (productQuery.isError) {
+  // With a loaded record, a failed refetch marks it out of date instead of replacing it.
+  if (productQuery.isError && !productQuery.data) {
     return (
       <AppDialog kind="detail" open={open} onClose={onClose} title="Product unavailable">
         <DConnectionError
@@ -70,6 +74,8 @@ export function ProductDetailDialog({
 
   const detail = productQuery.data;
   const { product } = detail;
+  const canUpdate = permissions.can('products.update');
+  const canManageLifecycle = permissions.can('products.lifecycle.manage');
 
   async function handleTransition(targetStatus: ProductStatus, reason: string) {
     await statusTransition.mutateAsync({
@@ -89,17 +95,24 @@ export function ProductDetailDialog({
         identifier={product.code}
         footer={
           <DialogActions
-            destructive={<ProductLifecycleAction
+            destructive={canManageLifecycle ? <ProductLifecycleAction
               product={product}
               isSubmitting={statusTransition.isPending}
+              activationBlockedReason={detail.domainCodes.length === 0 ? 'Add a domain first' : undefined}
               onTransition={handleTransition}
-            />}
+            /> : undefined}
             secondary={<AppAction tone="secondary" onClick={onClose}>Close</AppAction>}
-            primary={<AppAction onClick={() => setIsEditDialogOpen(true)}>Edit</AppAction>}
+            primary={canUpdate ? <AppAction onClick={() => setIsEditDialogOpen(true)}>Edit</AppAction> : undefined}
           />
         }
       >
         <div className="product-detail-dialog">
+          {productQuery.isError ? (
+            <div className="product-stale" role="status">
+              <p>This offering may be out of date. Saved changes were kept, but the latest version could not be loaded.</p>
+              <AppAction tone="secondary" size="sm" loading={productQuery.isFetching} onClick={() => void productQuery.refetch()}>Reload</AppAction>
+            </div>
+          ) : null}
           {statusTransition.isError ? (
             <p className="product-form-error">{statusTransition.error.message}</p>
           ) : null}
@@ -125,6 +138,11 @@ export function ProductDetailDialog({
                       <DetailItem wide label="Description">{product.description}</DetailItem>
                     </DetailList>
                   </DialogSection>
+                  <ProductGrantsSection
+                    detail={detail}
+                    canEdit={canUpdate}
+                    showReadOnlyNote={permissions.resolved}
+                  />
                   <DialogSection title="Record">
                     <DetailList>
                       <DetailItem label="Created">{formatDate(product.createdAt)}</DetailItem>
@@ -139,6 +157,8 @@ export function ProductDetailDialog({
               <ProductCapabilitiesTab
                 product={product}
                 compatibleCapabilities={detail.capabilities}
+                canEdit={canUpdate}
+                showReadOnlyNote={permissions.resolved}
               />
             </DTabsContent>
             <DTabsContent value="commercial">

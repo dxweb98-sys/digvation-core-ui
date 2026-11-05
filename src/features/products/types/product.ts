@@ -41,10 +41,28 @@ export interface ProductListItem extends Product {
   clientCount: number;
 }
 
+export type CapabilityInclusion = 'COMPATIBLE' | 'INCLUDED';
+
+export interface ProductCapability extends CapabilitySummary {
+  inclusion: CapabilityInclusion;
+}
+
 export interface ProductDetail {
   product: Product;
   features: ProductFeature[];
-  capabilities: CapabilitySummary[];
+  capabilities: ProductCapability[];
+  domainCodes: string[];
+  applicationCodes: string[];
+}
+
+export interface ProductMappingVocabulary {
+  domains: Array<{ code: string; served: boolean }>;
+  applications: Array<{ code: string; grantable: boolean; implicit: boolean }>;
+}
+
+export interface UpdateProductMappingInput {
+  domainCodes: string[];
+  applicationCodes: string[];
 }
 
 export interface CreateProductInput {
@@ -88,4 +106,6 @@ export interface ProductFeatureStatusTransitionInput {
 export interface ReplaceProductCapabilitiesInput {
   productId: string;
   capabilityIds: string[];
+  /** Absent keeps each capability's current inclusion. */
+  includedCapabilityIds?: string[];
 }

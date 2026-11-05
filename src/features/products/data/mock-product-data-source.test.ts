@@ -198,7 +198,7 @@ describe('mock product data source', () => {
       reason: 'Scope was deferred.',
     });
 
-    expect(detail.product.status).toBe('RETIRED');
+    expect(detail?.product.status).toBe('RETIRED');
     await expect(
       dataSource.replaceProductCapabilities({
         productId: 'product-workshop',
