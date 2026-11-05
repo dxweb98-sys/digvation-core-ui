@@ -49,7 +49,7 @@ export const applicationRoutes: RouteObject[] = [
       { path: 'users', element: <UsersPage /> },
       { path: 'invitations', element: <InvitationsPage /> },
       { path: 'roles', element: <RolesPage /> },
-      { path: 'audit', element: <ConnectedOnly pageTitle="Audit" description="A record of operator actions will appear here."><AuditPage /></ConnectedOnly> },
+      { path: 'audit', element: <AuditPage /> },
       { path: 'platform-health', element: <ConnectedOnly pageTitle="Platform health" description="The health of each running service will appear here."><PlatformHealthPage /></ConnectedOnly> },
       { path: '*', element: <NotFoundPage /> },
     ],

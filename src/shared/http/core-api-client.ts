@@ -27,6 +27,10 @@ export class CoreApiError extends Error {
   }
 }
 
+export function isForbiddenError(error: unknown) {
+  return error instanceof CoreApiError && error.status === 403;
+}
+
 type CoreApiOptions = Omit<RequestInit, 'body'> & {
   body?: unknown;
   auth?: boolean;

@@ -21,7 +21,7 @@ const ROUTE_TITLES: Record<string, string> = {
   '/users': 'Users',
   '/invitations': 'Invitations',
   '/roles': 'Roles',
-  '/audit': 'Audit',
+  '/audit': 'Access audit',
   '/platform-health': 'Platform health',
 };
 

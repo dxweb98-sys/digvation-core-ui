@@ -71,7 +71,7 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
       { label: 'Users', to: '/users' },
       { label: 'Invitations', to: '/invitations' },
       { label: 'Roles', to: '/roles' },
-      { label: 'Audit', to: '/audit' },
+      { label: 'Access audit', to: '/audit' },
     ],
   },
   { label: 'System', items: [{ label: 'Platform health', to: '/platform-health' }] },
