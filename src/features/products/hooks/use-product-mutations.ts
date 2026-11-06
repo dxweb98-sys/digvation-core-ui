@@ -8,6 +8,7 @@ import type {
   ReplaceProductCapabilitiesInput,
   UpdateProductFeatureInput,
   UpdateProductInput,
+  UpdateProductMappingInput,
 } from '../types/product';
 import { productDataSource } from './use-product-list';
 
@@ -28,6 +29,15 @@ export function useUpdateProduct(productId: string) {
   return useMutation({
     mutationFn: (input: UpdateProductInput) =>
       productDataSource.updateProduct(productId, input),
+    onSuccess: () => invalidateProducts(queryClient),
+  });
+}
+
+export function useUpdateProductMapping(productId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateProductMappingInput) =>
+      productDataSource.updateProductMapping(productId, input),
     onSuccess: () => invalidateProducts(queryClient),
   });
 }

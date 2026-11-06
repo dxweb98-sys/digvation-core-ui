@@ -1,27 +1,75 @@
 import { Pencil } from 'lucide-react';
 import { AppAction } from '../../../shared/ui/app-action';
-import { DCard, DCardContent, DCheckbox, DEmptyState, DLoadingIndicator, useToast } from '@digvation/ui';
+import { DBadge, DCard, DCardContent, DCheckbox, DEmptyState, DLoadingIndicator, DRadio, useToast } from '@digvation/ui';
 import { useState } from 'react';
 
 import { CapabilityStatusBadge } from '../../capabilities/components/capability-status-badge';
-import type {
-  Capability,
-  CapabilitySummary,
-} from '../../capabilities/types/capability';
+import type { Capability } from '../../capabilities/types/capability';
+import { labelFor } from '../../../shared/labels/labels';
 import { useCapabilityCatalog } from '../hooks/use-capability-catalog';
 import { useReplaceProductCapabilities } from '../hooks/use-product-mutations';
-import type { Product } from '../types/product';
+import type { Product, ProductCapability } from '../types/product';
+
+const INCLUSION_NOTE =
+  'Included is granted with the offering. Compatible can be granted separately or through an add-on.';
+const RETIRED_NOTE = 'Retired capabilities cannot be Included.';
+
+function InclusionControl({
+  capability,
+  included,
+  onChange,
+}: {
+  capability: Capability | ProductCapability;
+  included: boolean;
+  onChange: (included: boolean) => void;
+}) {
+  const includedBlocked = capability.status === 'RETIRED' && !included;
+  return (
+    <span className="product-inclusion">
+      <span
+        className="product-inclusion-control"
+        role="radiogroup"
+        aria-label={`How ${capability.name} is granted`}
+      >
+        <label>
+          <DRadio
+            name={`inclusion-${capability.id}`}
+            checked={included}
+            disabled={includedBlocked}
+            onChange={() => onChange(true)}
+          />
+          {labelFor('INCLUDED')}
+        </label>
+        <label>
+          <DRadio
+            name={`inclusion-${capability.id}`}
+            checked={!included}
+            onChange={() => onChange(false)}
+          />
+          {labelFor('COMPATIBLE')}
+        </label>
+      </span>
+      {includedBlocked ? (
+        <span className="product-grant-note">{RETIRED_NOTE}</span>
+      ) : null}
+    </span>
+  );
+}
 
 function CapabilityList({
   capabilities,
   isEditing,
   selectedCapabilityIds,
+  includedCapabilityIds,
   onToggle,
+  onInclusionChange,
 }: {
-  capabilities: Array<Capability | CapabilitySummary>;
+  capabilities: Array<Capability | ProductCapability>;
   isEditing: boolean;
   selectedCapabilityIds: Set<string>;
+  includedCapabilityIds: Set<string>;
   onToggle: (capabilityId: string, checked: boolean) => void;
+  onInclusionChange: (capabilityId: string, included: boolean) => void;
 }) {
   if (capabilities.length === 0) {
     return (
@@ -35,24 +83,38 @@ function CapabilityList({
   return (
     <div className="product-capability-list">
       {capabilities.map((capability) => (
-        <label key={capability.id} className="product-capability-row">
-          {isEditing ? (
-            <DCheckbox
-              checked={selectedCapabilityIds.has(capability.id)}
-              disabled={capability.status === 'RETIRED'}
-              aria-label={`Allow ${capability.name}`}
-              onChange={(event) => onToggle(capability.id, event.target.checked)}
+        <div key={capability.id} className="product-capability-row">
+          <label className="product-capability-pick">
+            {isEditing ? (
+              <DCheckbox
+                checked={selectedCapabilityIds.has(capability.id)}
+                disabled={capability.status === 'RETIRED'}
+                aria-label={`Allow ${capability.name}`}
+                onChange={(event) => onToggle(capability.id, event.target.checked)}
+              />
+            ) : null}
+            <span className="product-capability-copy">
+              <span className="product-capability-identity">
+                <strong>{capability.name}</strong>
+                <code className="product-code">{capability.code}</code>
+              </span>
+              {capability.description ? <span>{capability.description}</span> : null}
+            </span>
+          </label>
+          {isEditing && selectedCapabilityIds.has(capability.id) ? (
+            <InclusionControl
+              capability={capability}
+              included={includedCapabilityIds.has(capability.id)}
+              onChange={(included) => onInclusionChange(capability.id, included)}
             />
           ) : null}
-          <span className="product-capability-copy">
-            <span className="product-capability-identity">
-              <strong>{capability.name}</strong>
-              <code className="product-code">{capability.code}</code>
-            </span>
-            {capability.description ? <span>{capability.description}</span> : null}
-          </span>
+          {!isEditing && 'inclusion' in capability ? (
+            <DBadge variant={capability.inclusion === 'INCLUDED' ? 'primary' : 'secondary'}>
+              {labelFor(capability.inclusion)}
+            </DBadge>
+          ) : null}
           <CapabilityStatusBadge status={capability.status} />
-        </label>
+        </div>
       ))}
     </div>
   );
@@ -61,15 +123,23 @@ function CapabilityList({
 export function ProductCapabilitiesTab({
   product,
   compatibleCapabilities,
+  canEdit,
+  showReadOnlyNote,
 }: {
   product: Product;
-  compatibleCapabilities: CapabilitySummary[];
+  compatibleCapabilities: ProductCapability[];
+  canEdit: boolean;
+  showReadOnlyNote: boolean;
 }) {
   const capabilityCatalog = useCapabilityCatalog();
   const replaceCapabilities = useReplaceProductCapabilities();
   const { showToast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [selectedCapabilityIds, setSelectedCapabilityIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [includedCapabilityIds, setIncludedCapabilityIds] = useState<Set<string>>(
     new Set(),
   );
 
@@ -81,6 +151,14 @@ export function ProductCapabilitiesTab({
     setSelectedCapabilityIds(
       new Set(compatibleCapabilities.map((capability) => capability.id)),
     );
+    setIncludedCapabilityIds(
+      new Set(
+        compatibleCapabilities
+          .filter((capability) => capability.inclusion === 'INCLUDED')
+          .map((capability) => capability.id),
+      ),
+    );
+    setSubmitError(null);
   }
 
   function beginEditing() {
@@ -100,13 +178,25 @@ export function ProductCapabilitiesTab({
       else next.delete(capabilityId);
       return next;
     });
+    if (!checked) changeInclusion(capabilityId, false);
+  }
+
+  function changeInclusion(capabilityId: string, included: boolean) {
+    setIncludedCapabilityIds((current) => {
+      const next = new Set(current);
+      if (included) next.add(capabilityId);
+      else next.delete(capabilityId);
+      return next;
+    });
   }
 
   async function saveCompatibility() {
+    setSubmitError(null);
     try {
       await replaceCapabilities.mutateAsync({
         productId: product.id,
         capabilityIds: [...selectedCapabilityIds],
+        includedCapabilityIds: [...includedCapabilityIds],
       });
       setIsEditing(false);
       showToast({
@@ -115,12 +205,14 @@ export function ProductCapabilitiesTab({
         variant: 'success',
       });
     } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Capability compatibility could not be saved.';
+      setSubmitError(message);
       showToast({
         title: 'Capability update failed',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'Capability compatibility could not be saved.',
+        description: message,
         variant: 'danger',
       });
     }
@@ -132,7 +224,8 @@ export function ProductCapabilitiesTab({
         <div className="product-capability-section">
           <div className="product-capability-heading">
             <div>
-              <strong>Compatible capabilities</strong>
+              <strong>Capabilities</strong>
+              <p>{INCLUSION_NOTE}</p>
               </div>
             {isEditing ? (
               <div className="product-capability-actions">
@@ -153,20 +246,28 @@ export function ProductCapabilitiesTab({
                   Save
                 </AppAction>
               </div>
-            ) : (
+            ) : canEdit ? (
               <AppAction icon={Pencil} tone="secondary"
                 onClick={beginEditing}
                 disabled={product.status === 'RETIRED'}
               >
                 Edit
               </AppAction>
-            )}
+            ) : null}
           </div>
 
           {product.status === 'RETIRED' ? (
             <p className="product-capability-note">
               Retired products cannot be edited.
             </p>
+          ) : !canEdit && showReadOnlyNote ? (
+            <p className="product-capability-note">
+              Changing this needs the Update permission under Products.
+            </p>
+          ) : null}
+
+          {submitError ? (
+            <p className="product-form-error" role="alert">{submitError}</p>
           ) : null}
 
           {isEditing && capabilityCatalog.isPending ? (
@@ -193,7 +294,9 @@ export function ProductCapabilitiesTab({
               capabilities={displayCapabilities}
               isEditing={isEditing}
               selectedCapabilityIds={selectedCapabilityIds}
+              includedCapabilityIds={includedCapabilityIds}
               onToggle={toggleCapability}
+              onInclusionChange={changeInclusion}
             />
           )}
         </div>

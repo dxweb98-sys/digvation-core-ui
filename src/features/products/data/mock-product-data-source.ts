@@ -5,6 +5,7 @@ import type {
   Product,
   ProductDetail,
   ProductFeature,
+  ProductMappingVocabulary,
   ProductFeatureStatus,
   ProductStatus,
 } from '../types/product';
@@ -123,6 +124,41 @@ const PRODUCT_CAPABILITIES: Record<string, string[]> = {
   'product-inventory': [],
 };
 
+const PRODUCT_INCLUDED_CAPABILITIES: Record<string, string[]> = {
+  'product-pos': ['capability-tax-fiscal'],
+  'product-workshop': [],
+  'product-inventory': [],
+};
+
+const PRODUCT_DOMAINS: Record<string, string[]> = {
+  'product-pos': ['POS'],
+  'product-workshop': ['WORKSHOP'],
+  'product-inventory': ['INVENTORY'],
+};
+
+const PRODUCT_APPLICATIONS: Record<string, string[]> = {
+  'product-pos': ['OPERATIONAL_APP'],
+  'product-workshop': [],
+  'product-inventory': [],
+};
+
+// Same content as CORE's GET /products/mapping-vocabulary.
+const MAPPING_VOCABULARY: ProductMappingVocabulary = {
+  domains: [
+    { code: 'POS', served: true },
+    { code: 'WORKSHOP', served: false },
+    { code: 'INVENTORY', served: false },
+  ],
+  applications: [
+    { code: 'OPERATIONAL_APP', grantable: true, implicit: false },
+    { code: 'POS_SALON_APP', grantable: true, implicit: false },
+    { code: 'BACKOFFICE', grantable: false, implicit: true },
+  ],
+};
+
+const normalizeCodes = (values: readonly string[]) =>
+  [...new Set(values.map((value) => value.trim().toUpperCase()))].sort();
+
 const CLIENT_COUNTS: Record<string, number> = {
   'product-pos': 1,
   'product-workshop': 0,
@@ -153,14 +189,25 @@ function getDetail(
   product: Product,
   features: Record<string, ProductFeature[]>,
   productCapabilities: Record<string, string[]>,
+  mapping: {
+    included: Record<string, string[]>;
+    domains: Record<string, string[]>;
+    applications: Record<string, string[]>;
+  },
 ): ProductDetail {
   const capabilityIds = new Set(productCapabilities[product.id] ?? []);
+  const included = new Set(mapping.included[product.id] ?? []);
   return {
     product: copyProduct(product),
     features: structuredClone(features[product.id] ?? []),
     capabilities: getMockCapabilityStore()
       .filter((capability) => capabilityIds.has(capability.id))
-      .map((capability) => ({ ...capability })),
+      .map((capability) => ({
+        ...capability,
+        inclusion: included.has(capability.id) ? 'INCLUDED' : 'COMPATIBLE',
+      })),
+    domainCodes: [...(mapping.domains[product.id] ?? [])],
+    applicationCodes: [...(mapping.applications[product.id] ?? [])],
   };
 }
 
@@ -187,6 +234,21 @@ export function createMockProductDataSource(): ProductDataSource {
   const features = structuredClone(FEATURES);
   const productCapabilities = structuredClone(PRODUCT_CAPABILITIES);
   const clientCounts = { ...CLIENT_COUNTS };
+  const mapping = {
+    included: structuredClone(PRODUCT_INCLUDED_CAPABILITIES),
+    domains: structuredClone(PRODUCT_DOMAINS),
+    applications: structuredClone(PRODUCT_APPLICATIONS),
+  };
+  const detailOf = (product: Product) =>
+    getDetail(product, features, productCapabilities, mapping);
+  const assertMappingChangeAllowed = (product: Product) => {
+    const holders = clientCounts[product.id] ?? 0;
+    if (product.status === 'ACTIVE' && holders > 0) {
+      throw new Error(
+        `Offering mapping change would alter ${holders} client product(s) holding this active product; transition them explicitly before changing the mapping`,
+      );
+    }
+  };
 
   return {
     async getProducts(query) {
@@ -219,7 +281,7 @@ export function createMockProductDataSource(): ProductDataSource {
 
     async getProductDetail(productId) {
       const product = products.find((candidate) => candidate.id === productId);
-      return product ? getDetail(product, features, productCapabilities) : null;
+      return product ? detailOf(product) : null;
     },
 
     async createProduct(input) {
@@ -241,7 +303,10 @@ export function createMockProductDataSource(): ProductDataSource {
       features[product.id] = [];
       productCapabilities[product.id] = [];
       clientCounts[product.id] = 0;
-      return getDetail(product, features, productCapabilities);
+      mapping.included[product.id] = [];
+      mapping.domains[product.id] = [];
+      mapping.applications[product.id] = [];
+      return detailOf(product);
     },
 
     async updateProduct(productId, input) {
@@ -249,7 +314,60 @@ export function createMockProductDataSource(): ProductDataSource {
       product.name = input.name.trim();
       product.description = input.description?.trim() || undefined;
       product.updatedAt = getNow();
-      return getDetail(product, features, productCapabilities);
+      return detailOf(product);
+    },
+
+    async getMappingVocabulary() {
+      return structuredClone(MAPPING_VOCABULARY);
+    },
+
+    async updateProductMapping(productId, input) {
+      const product = findProduct(products, productId);
+      const domains = normalizeCodes(input.domainCodes);
+      const applications = normalizeCodes(input.applicationCodes);
+      if (applications.includes('BACKOFFICE')) {
+        throw new Error(
+          'BACKOFFICE is granted implicitly with any active offering and cannot be a product application grant',
+        );
+      }
+      const knownDomains = MAPPING_VOCABULARY.domains.map(({ code }) => code);
+      const grantable = MAPPING_VOCABULARY.applications
+        .filter((application) => application.grantable)
+        .map(({ code }) => code);
+      for (const [kind, codes, allowed] of [
+        ['domain', domains, knownDomains],
+        ['application', applications, grantable],
+      ] as const) {
+        const unknown = codes.filter((code) => !allowed.includes(code));
+        if (unknown.length) {
+          throw new Error(
+            `Unknown ${kind} code(s): ${unknown.join(', ')}. Allowed: ${allowed.join(', ')}`,
+          );
+        }
+      }
+      if (product.status === 'RETIRED') {
+        throw new Error(
+          'Offering mapping cannot be changed for a retired product',
+        );
+      }
+      if (product.status === 'ACTIVE' && domains.length === 0) {
+        throw new Error(
+          `Active product ${product.code} must keep at least one domain grant`,
+        );
+      }
+      const same = (current: string[] | undefined, next: string[]) =>
+        normalizeCodes(current ?? []).join() === next.join();
+      if (
+        same(mapping.domains[product.id], domains) &&
+        same(mapping.applications[product.id], applications)
+      ) {
+        return detailOf(product);
+      }
+      assertMappingChangeAllowed(product);
+      mapping.domains[product.id] = domains;
+      mapping.applications[product.id] = applications;
+      product.updatedAt = getNow();
+      return detailOf(product);
     },
 
     async transitionProductStatus(input) {
@@ -268,9 +386,17 @@ export function createMockProductDataSource(): ProductDataSource {
       ) {
         throw new Error('Product features must be retired before retiring the product.');
       }
+      if (
+        input.targetStatus === 'ACTIVE' &&
+        (mapping.domains[product.id] ?? []).length === 0
+      ) {
+        throw new Error(
+          `Product ${product.code} needs a domain grant before it can be activated`,
+        );
+      }
       product.status = input.targetStatus;
       product.updatedAt = getNow();
-      return getDetail(product, features, productCapabilities);
+      return detailOf(product);
     },
 
     async createProductFeature(input) {
@@ -347,6 +473,24 @@ export function createMockProductDataSource(): ProductDataSource {
           );
         }
       }
+      const included = input.includedCapabilityIds;
+      if (included?.some((capabilityId) => !capabilityIds.has(capabilityId))) {
+        throw new Error(
+          'Included capabilities must be part of the compatibility set',
+        );
+      }
+      const currentIncluded = mapping.included[product.id] ?? [];
+      const nextIncluded =
+        included ??
+        currentIncluded.filter((capabilityId) =>
+          capabilityIds.has(capabilityId),
+        );
+      if (
+        [...currentIncluded].sort().join() !== [...nextIncluded].sort().join()
+      ) {
+        assertMappingChangeAllowed(product);
+      }
+      mapping.included[product.id] = [...new Set(nextIncluded)];
       productCapabilities[product.id] = capabilities
         .filter((capability) => capabilityIds.has(capability.id))
         .map((capability) => capability.id);

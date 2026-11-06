@@ -77,6 +77,23 @@
   justify-content: flex-end;
 }
 
+.product-stale {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.product-stale p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
 .product-form-error {
   margin: 14px 0 0;
   font-size: 0.78rem;
@@ -182,6 +199,12 @@
   justify-content: space-between;
 }
 
+.product-capability-heading > .product-capability-actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+
 .product-feature-heading > div,
 .product-capability-heading > div {
   display: grid;
@@ -207,12 +230,130 @@
   flex-shrink: 0;
 }
 
-.product-capability-row {
-  cursor: default;
+.product-capability-pick {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: 0;
 }
 
-.product-capability-row:has(input:not(:disabled)) {
+.product-capability-pick:has(input:not(:disabled)) {
   cursor: pointer;
+}
+
+.product-inclusion {
+  display: grid;
+  flex-shrink: 0;
+  gap: 4px;
+  justify-items: end;
+}
+
+.product-inclusion-control {
+  display: inline-flex;
+  gap: 14px;
+  font-size: 0.8rem;
+}
+
+.product-inclusion-control label {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.product-inclusion-control label:has(input:disabled) {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.product-grants,
+.product-grants-form {
+  display: grid;
+  gap: 16px;
+}
+
+.product-grants-form fieldset {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.product-grants-form legend,
+.product-grant-group h5 {
+  margin: 0 0 8px;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.product-grant-group ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.product-grant-group li,
+.product-grant-option {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+label.product-grant-option {
+  cursor: pointer;
+}
+
+.product-code {
+  white-space: nowrap;
+}
+
+.product-grant-group .not-set {
+  font-size: 0.85rem;
+}
+
+.product-grant-name {
+  display: inline-flex;
+  gap: 8px;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.product-grant-note {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.product-grants-error {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--color-danger);
+}
+
+.product-grants-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.product-lifecycle-menu-reason {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.7rem;
+  white-space: nowrap;
 }
 
 .product-capability-state {

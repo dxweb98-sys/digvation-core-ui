@@ -5,9 +5,11 @@ import {
 import type { ProductDataSource } from './product-data-source';
 import type {
   Product,
+  ProductCapability,
   ProductDetail,
   ProductFeature,
   ProductListItem,
+  ProductMappingVocabulary,
 } from '../types/product';
 import type { CapabilitySummary } from '../../capabilities/types/capability';
 
@@ -113,13 +115,14 @@ function mapFeature(item: CoreProductFeature): ProductFeature {
   };
 }
 
-function mapCapability(item: CoreProductCapability): CapabilitySummary {
+function mapCapability(item: CoreProductCapability): ProductCapability {
   return {
     id: item.capability_id,
     code: item.code,
     name: item.name,
     description: item.description ?? undefined,
     status: item.status,
+    inclusion: item.inclusion ?? 'COMPATIBLE',
   };
 }
 
@@ -128,7 +131,21 @@ function mapDetail(item: CoreProductDetail): ProductDetail {
     product: mapProduct(item),
     features: item.features.map(mapFeature),
     capabilities: item.capabilities.map(mapCapability),
+    domainCodes: item.domain_codes ?? [],
+    applicationCodes: item.application_codes ?? [],
   };
+}
+
+/**
+ * The write already succeeded. A failed read afterwards must not turn it into a failure:
+ * the detail query refetches and shows itself as out of date instead.
+ */
+async function detailAfterWrite(productId: string) {
+  try {
+    return await coreProductDataSource.getProductDetail(productId);
+  } catch {
+    return null;
+  }
 }
 
 async function detailOrThrow(productId: string) {
@@ -188,6 +205,23 @@ export const coreProductDataSource: ProductDataSource = {
     return detailOrThrow(productId);
   },
 
+  getMappingVocabulary() {
+    return coreApiRequest<ProductMappingVocabulary>(
+      '/products/mapping-vocabulary',
+    );
+  },
+
+  async updateProductMapping(productId, input) {
+    await coreApiRequest<ProductMutationResponse>(`/products/${productId}`, {
+      method: 'PATCH',
+      body: {
+        domain_codes: input.domainCodes,
+        application_codes: input.applicationCodes,
+      },
+    });
+    return detailAfterWrite(productId);
+  },
+
   async transitionProductStatus(input) {
     await coreApiRequest(`/products/${input.productId}/status`, {
       method: 'PATCH',
@@ -196,7 +230,7 @@ export const coreProductDataSource: ProductDataSource = {
         reason: input.reason,
       },
     });
-    return detailOrThrow(input.productId);
+    return detailAfterWrite(input.productId);
   },
 
   async createProductFeature(input) {
@@ -241,7 +275,12 @@ export const coreProductDataSource: ProductDataSource = {
       `/products/${input.productId}/capabilities`,
       {
         method: 'PUT',
-        body: { capability_ids: input.capabilityIds },
+        body: {
+          capability_ids: input.capabilityIds,
+          ...(input.includedCapabilityIds
+            ? { included_capability_ids: input.includedCapabilityIds }
+            : {}),
+        },
       },
     );
   },
