@@ -98,4 +98,16 @@ Run only the scoped CORE UI validation at the complete work-unit boundary.
 
 Full test/build/release checks belong to explicit acceptance/release preparation.
 
-STOP for manual review before merge/release/deployment. The current user has explicitly authorized committing and pushing feature branches so the branch can be reviewed locally; that authorization does not permit merge, release, or deployment.
+STOP for manual review before merge/release/deployment.
+
+## Review and commit
+
+Follow the review and commit protocol in the lifecycle delivery standard (`standards/DELIVERY_RELEASE_STANDARD.md`, section 6A, at the lifecycle root). Nothing is committed or pushed without the product owner's explicit written approval. In addition, for CORE UI:
+
+- **Package manager.** npm: `package-lock.json` is the lockfile. Install with `npm ci`; do not create another lockfile.
+- **Checks before a commit.** All of these must pass; stop if any fails:
+  - `npm run typecheck` (`tsc -b`, covering `tsconfig.app.json` and `tsconfig.node.json`)
+  - `npm run lint`
+  - `npm run test` (all Vitest tests)
+- **Never staged.** `dist/` and `*.tsbuildinfo` (both ignored).
+- **Work branch.** Never commit on `main` or on the shared dev branch `digvation-core-ui-dev`.
