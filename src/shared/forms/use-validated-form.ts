@@ -7,7 +7,7 @@ import {
   type Resolver,
 } from 'react-hook-form';
 import type { ZodType } from 'zod';
-import { CoreApiError } from '../http/core-api-client';
+import { fieldErrors } from '../api/error-messages';
 import { focusFirstInvalid } from '../ui/form-fields';
 
 /**
@@ -64,16 +64,18 @@ export function useValidatedForm<T extends FieldValues>({
    * else stays with the toast the form's dialog already shows.
    */
   const applyServerError = (error: unknown) => {
-    if (!(error instanceof CoreApiError) || !error.details) return;
     const known = Object.keys(form.getValues());
-    for (const detail of error.details) {
-      const [name] = detail.split(' ');
+    let applied = false;
+    for (const [name, message] of Object.entries(fieldErrors(error))) {
       const camel = name.replace(/_(\w)/g, (_, letter: string) => letter.toUpperCase());
-      if (known.includes(camel)) {
-        form.setError(camel as Path<T>, { message: detail });
+      const target = known.includes(name) ? name : known.includes(camel) ? camel : undefined;
+      if (target) {
+        form.setError(target as Path<T>, { message });
+        applied = true;
       }
     }
-    onInvalid();
+    if (applied) onInvalid();
+    return applied;
   };
 
   return { form, field, change, onInvalid, applyServerError };

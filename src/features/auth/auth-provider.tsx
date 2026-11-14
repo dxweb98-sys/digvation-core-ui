@@ -1,44 +1,33 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type PropsWithChildren,
-} from 'react';
-import { applicationConfig } from '../../shared/config/application-config';
-import { CORE_AUTH_LOST_EVENT } from '../../shared/http/core-api-client';
-import { AuthContext } from './auth-context';
-import { coreAuthDataSource } from './data/core-auth-data-source';
-import type { AuthStatus, AuthUser, LoginInput } from './types/auth';
+  AUTH_LOST_EVENT,
+  api,
+  login as loginRequest,
+  logout as logoutRequest,
+  refreshSession,
+} from '../../shared/api/client';
+import { AuthContext, type AuthStatus, type AuthUser, type LoginInput } from './auth-context';
 
-const MOCK_USER: AuthUser = {
-  id: 'mock-operator',
-  fullname: 'Digvation Operator',
-  phoneNumber: null,
-  email: 'operator@digvation.local',
-  username: 'operator',
-  isActive: true,
-  emailVerifiedAt: null,
-  createdAt: new Date(0).toISOString(),
-  updatedAt: new Date(0).toISOString(),
-};
+const currentUser = () => api.get<AuthUser>('/users/me');
 
+/**
+ * The CORE session. The access token lives in memory only; on load the
+ * HttpOnly refresh cookie (with its CSRF token) restores it.
+ */
 export function AuthProvider({ children }: PropsWithChildren) {
-  const isMock = applicationConfig.dataSourceMode === 'mock';
-  const [status, setStatus] = useState<AuthStatus>(
-    isMock ? 'authenticated' : 'loading',
-  );
-  const [user, setUser] = useState<AuthUser | null>(isMock ? MOCK_USER : null);
+  const queryClient = useQueryClient();
+  const [status, setStatus] = useState<AuthStatus>('loading');
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    if (isMock) return;
     let active = true;
-    void coreAuthDataSource
-      .restore()
-      .then((restoredUser) => {
+    void refreshSession()
+      .then((session) => (session ? currentUser() : null))
+      .then((restored) => {
         if (!active) return;
-        setUser(restoredUser);
-        setStatus(restoredUser ? 'authenticated' : 'anonymous');
+        setUser(restored);
+        setStatus(restored ? 'authenticated' : 'anonymous');
       })
       .catch(() => {
         if (!active) return;
@@ -48,40 +37,40 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return () => {
       active = false;
     };
-  }, [isMock]);
+  }, []);
 
   useEffect(() => {
-    if (isMock || typeof window === 'undefined') return;
     const onAuthLost = () => {
       setUser(null);
       setStatus('anonymous');
+      queryClient.clear();
     };
-    window.addEventListener(CORE_AUTH_LOST_EVENT, onAuthLost);
-    return () => window.removeEventListener(CORE_AUTH_LOST_EVENT, onAuthLost);
-  }, [isMock]);
+    window.addEventListener(AUTH_LOST_EVENT, onAuthLost);
+    return () => window.removeEventListener(AUTH_LOST_EVENT, onAuthLost);
+  }, [queryClient]);
 
-  const login = useCallback(
-    async (input: LoginInput) => {
-      if (isMock) return;
-      const authenticatedUser = await coreAuthDataSource.login(input);
-      setUser(authenticatedUser);
-      setStatus('authenticated');
-    },
-    [isMock],
-  );
+  const login = useCallback(async (input: LoginInput) => {
+    await loginRequest({
+      identifier: input.identifier,
+      password: input.password,
+      remember_me: input.rememberMe,
+    });
+    setUser(await currentUser());
+    setStatus('authenticated');
+  }, []);
 
   const logout = useCallback(async () => {
-    if (isMock) return;
     try {
-      await coreAuthDataSource.logout();
+      await logoutRequest();
     } finally {
       setUser(null);
       setStatus('anonymous');
+      queryClient.clear();
     }
-  }, [isMock]);
+  }, [queryClient]);
 
   const value = useMemo(
-    () => ({ status, user, login, logout }),
+    () => ({ status, user, login, logout, setUser }),
     [status, user, login, logout],
   );
 

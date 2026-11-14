@@ -1,28 +1,33 @@
 # Data Access Standard
 
-Backend-dependent features use a small, feature-owned data-source boundary:
+Every screen reads and writes CORE through one client:
 
 ```text
-page/component -> feature hook -> data-source contract -> selected implementation
+page/component -> feature query hook -> feature api module -> shared/api client -> CORE
 ```
 
 Rules:
 
-- Pages and components do not import mock arrays, call `fetch`, or read
-  environment values directly.
-- The feature data-source contract expresses only current UI needs. Do not build
-  a generic repository framework.
-- Mock fixtures and behavior live in `mock-<feature>-data-source.ts`.
-- Future CORE implementations use `core-<feature>-data-source.ts` behind the same
-  contract only after integration approval.
-- TanStack Query hooks own request caching, loading, error, and refresh state.
-- Data-source selection reads typed configuration from `src/shared/config`.
-- `VITE_DATA_SOURCE_MODE` is currently restricted to `mock`; unsupported values
-  fail configuration validation instead of silently selecting another backend.
-
-Dashboard, Client Management, Product Management, and Client Product
-Management, and Installation Management apply this pattern through their own feature-owned data-source
-contracts and mock implementations. Client Product Management returns resolved
-relationship summaries to its client and product tab compositions so those UI
-components do not manually join fixtures. Add other feature contracts only when
-their UI requires them.
+- `src/shared/api/schema.d.ts` is generated from `../core-v2/docs/openapi.json`
+  with `npm run api:types`. Do not edit it by hand; regenerate and commit it
+  when the CORE contract changes.
+- Features use the generated shapes through `Dto<'Name'>` from
+  `src/shared/api/types.ts`. Do not restate a CORE shape by hand.
+- `src/shared/api/client.ts` is the only code that calls `fetch`. It unwraps
+  `{ success, data, request_id }`, returns paged lists as
+  `{ items, pagination }`, sends the in-memory bearer token, refreshes once
+  through the HttpOnly refresh cookie plus `X-CSRF-Token`, and throws
+  `ApiError` with the stable `code`, `details` and `request_id`.
+- Operators never see CORE's English error text. Show
+  `friendlyErrorMessage(error)` (Indonesian, keyed by error code) and put
+  `fieldErrors(error)` on the matching form fields.
+- Each feature keeps its requests in `<feature>-api.ts` and its TanStack Query
+  hooks (keys, caching, invalidation) in `<feature>-queries.ts`.
+- Money stays a minor-unit string end to end; convert only at the edge with
+  `src/shared/format/money.ts`. IDR is shown and typed as whole rupiah.
+- Business dates are `YYYY-MM-DD` in Asia/Jakarta; instants are shown in
+  Asia/Jakarta (`src/shared/format/date.ts`).
+- There is no mock mode. Tests stub `fetch` with `src/test/fetch-mock.ts`;
+  application code never fakes CORE.
+- Controls the operator may not use are hidden with `usePermissions().can` or
+  `<Can>`. CORE still enforces every request.

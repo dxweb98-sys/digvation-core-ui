@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -b --pretty false"
+    "typecheck": "tsc -b --pretty false",
+    "api:types": "openapi-typescript ../core-v2/docs/openapi.json -o src/shared/api/schema.d.ts"
   },
   "dependencies": {
     "@digvation/ui": "1.1.0",
@@ -23,7 +24,6 @@
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.62.0",
     "react-router": "^7.8.2",
-    "recharts": "3.10.1",
     "zod": "^4.1.5"
   },
   "devDependencies": {
@@ -39,6 +39,7 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
     "jsdom": "^26.1.0",
+    "openapi-typescript": "^7.13.0",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.42.0",
     "vite": "^7.1.4",

@@ -22,7 +22,7 @@ For operator-facing CORE work:
 4. if an accepted UI flow exposes a legitimate control-plane need that the backend does not yet own, classify and implement the additive backend contract in the paired work unit;
 5. do not force a change in either repository when the paired side has no actual impact.
 
-The UI data-source abstraction may remain mock-backed while real API/auth transport integration is not yet established globally. Do not bypass that boundary with isolated ad-hoc `fetch` calls for one feature.
+All CORE access goes through the single client in `src/shared/api`, typed from the generated OpenAPI schema. There is no mock mode; do not add ad-hoc `fetch` calls or fake CORE data in application code.
 
 ## Product boundaries
 

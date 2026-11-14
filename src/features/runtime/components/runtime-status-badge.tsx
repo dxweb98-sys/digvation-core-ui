@@ -1,4 +1,0 @@
-import { labelFor } from '../../../shared/labels/labels';
-import { DBadge } from '@digvation/ui'; import type { HealthStatus, ObservedState } from '../types/runtime';
-const HEALTH: Record<HealthStatus, 'default' | 'success' | 'warning' | 'danger'> = { UNKNOWN: 'default', HEALTHY: 'success', DEGRADED: 'warning', UNHEALTHY: 'danger' }; const STATE: Record<ObservedState, 'default' | 'success' | 'warning' | 'danger' | 'info'> = { UNKNOWN: 'default', RUNNING: 'success', STOPPED: 'default', STARTING: 'info', STOPPING: 'warning', FAILED: 'danger' };
-export function HealthBadge({ status }: { status: HealthStatus }) { return <DBadge variant={HEALTH[status]} dot>{labelFor(status)}</DBadge>; } export function ObservedStateBadge({ state }: { state: ObservedState }) { return <DBadge variant={STATE[state]} dot>{labelFor(state)}</DBadge>; }

@@ -11,7 +11,7 @@ export function NotFoundPage() {
         title={<span id="not-found-title">Page not found</span>}
         description="This page does not exist."
         action={
-          <AppAction tone="secondary" onClick={() => navigate('/')}>Back to dashboard</AppAction>
+          <AppAction tone="secondary" onClick={() => navigate('/')}>Back to start</AppAction>
         }
       />
     </section>
