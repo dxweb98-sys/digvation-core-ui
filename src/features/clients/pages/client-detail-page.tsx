@@ -18,6 +18,7 @@ import { CLIENT_TRANSITIONS, clientsApi, type ClientDetail, type ClientStatus } 
 import { clientKeys, useClient } from '../clients-queries';
 import { BrandsSection } from '../components/brands-section';
 import { ContactsSection } from '../components/contacts-section';
+import { ClientBillingTab } from '../../billing/components/client-billing-tab';
 import { ClientContractsTab } from '../../contracts/components/client-contracts-tab';
 import { ClientServicesTab } from '../../services/components/client-services-tab';
 
@@ -86,6 +87,12 @@ const CLIENT_TABS: ClientTab[] = [
     label: 'Contracts',
     permissions: [PERMISSIONS.CONTRACTS_READ],
     render: (client) => <ClientContractsTab client={client} />,
+  },
+  {
+    value: 'billing',
+    label: 'Billing',
+    permissions: [PERMISSIONS.BILLING_READ],
+    render: (client) => <ClientBillingTab client={client} />,
   },
 ];
 

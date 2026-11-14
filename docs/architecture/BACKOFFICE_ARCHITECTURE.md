@@ -36,7 +36,8 @@ module over the single CORE client in `src/shared/api`. See
 `docs/engineering/DATA_ACCESS_STANDARD.md`.
 
 TanStack Query owns server-state lifecycle. Local React state owns ephemeral UI
-state. React Hook Form and Zod own future form state and validation. No global
+state. Form state and validation live in the shared field-spec forms
+(`src/shared/forms`). No global
 client state library is justified for the current dashboard scope.
 
 ## UI foundation

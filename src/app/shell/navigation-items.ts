@@ -1,4 +1,4 @@
-import { Building2, ClipboardList, FileSignature, Layers, Package, Puzzle, Mail, Shield, User, type LucideIcon } from 'lucide-react';
+import { Banknote, Building2, ClipboardList, FileMinus, FileSignature, Receipt, Settings, Layers, Package, Puzzle, Mail, Shield, User, type LucideIcon } from 'lucide-react';
 import { PERMISSIONS, type Permission } from '../../features/auth/permissions';
 
 export interface NavigationItem {
@@ -25,6 +25,15 @@ export const NAVIGATION_GROUPS: NavigationGroup[] = [
       { label: 'Clients', to: '/clients', icon: Building2, permissions: [PERMISSIONS.CLIENTS_READ] },
       { label: 'Services', to: '/services', icon: Layers, permissions: [PERMISSIONS.SERVICES_READ] },
       { label: 'Contracts', to: '/contracts', icon: FileSignature, permissions: [PERMISSIONS.CONTRACTS_READ] },
+    ],
+  },
+  {
+    label: 'Billing',
+    items: [
+      { label: 'Invoices', to: '/invoices', icon: Receipt, permissions: [PERMISSIONS.BILLING_READ] },
+      { label: 'Payments', to: '/payments', icon: Banknote, permissions: [PERMISSIONS.BILLING_READ] },
+      { label: 'Credit notes', to: '/credit-notes', icon: FileMinus, permissions: [PERMISSIONS.BILLING_READ] },
+      { label: 'Billing settings', to: '/billing-settings', icon: Settings, permissions: [PERMISSIONS.BILLING_READ] },
     ],
   },
   {

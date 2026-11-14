@@ -29,5 +29,8 @@ Rules:
   Asia/Jakarta (`src/shared/format/date.ts`).
 - There is no mock mode. Tests stub `fetch` with `src/test/fetch-mock.ts`;
   application code never fakes CORE.
-- Controls the operator may not use are hidden with `usePermissions().can` or
-  `<Can>`. CORE still enforces every request.
+- Controls the operator may not use are hidden with `usePermissions().can`.
+  CORE still enforces every request.
+- Forms are `FormDialog`/`ConfirmDialog` (`src/shared/forms`) driven by field
+  specs named after the CORE request fields; destructive and lifecycle actions
+  always confirm, and ask for the reason CORE records.

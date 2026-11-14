@@ -4,6 +4,12 @@ import { InvitationsPage } from '../../features/access/pages/invitations-page';
 import { ProfilePage } from '../../features/access/pages/profile-page';
 import { RolesPage } from '../../features/access/pages/roles-page';
 import { UsersPage } from '../../features/access/pages/users-page';
+import { BillingSettingsPage } from '../../features/billing/pages/billing-settings-page';
+import { CreditNoteListPage } from '../../features/billing/pages/credit-note-list-page';
+import { InvoiceDetailPage } from '../../features/billing/pages/invoice-detail-page';
+import { InvoiceListPage } from '../../features/billing/pages/invoice-list-page';
+import { PaymentDetailPage } from '../../features/billing/pages/payment-detail-page';
+import { PaymentListPage } from '../../features/billing/pages/payment-list-page';
 import { CatalogItemsPage } from '../../features/catalog/pages/catalog-items-page';
 import { ProductDetailPage } from '../../features/catalog/pages/product-detail-page';
 import { ProductListPage } from '../../features/catalog/pages/product-list-page';
@@ -43,6 +49,12 @@ export const applicationRoutes: RouteObject[] = [
       { path: 'services', element: <ServiceListPage /> },
       { path: 'contracts', element: <ContractListPage /> },
       { path: 'contracts/:contractId', element: <ContractDetailPage /> },
+      { path: 'invoices', element: <InvoiceListPage /> },
+      { path: 'invoices/:invoiceId', element: <InvoiceDetailPage /> },
+      { path: 'payments', element: <PaymentListPage /> },
+      { path: 'payments/:paymentId', element: <PaymentDetailPage /> },
+      { path: 'credit-notes', element: <CreditNoteListPage /> },
+      { path: 'billing-settings', element: <BillingSettingsPage /> },
       { path: 'products', element: <ProductListPage /> },
       { path: 'products/:productId', element: <ProductDetailPage /> },
       { path: 'catalog', element: <CatalogItemsPage /> },
