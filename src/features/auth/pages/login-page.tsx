@@ -1,6 +1,6 @@
 import { DCheckbox } from '@digvation/ui';
 import { useEffect, useState, type FormEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { loginErrorMessage } from '../login-error';
 import { useFieldErrors } from '../../../shared/forms/use-field-errors';
 import { AppAction } from '../../../shared/ui/app-action';
@@ -88,6 +88,9 @@ export function LoginPage() {
             Sign in
           </AppAction>
         </form>
+        <Link className="auth-link" to="/password-reset">
+          Forgot your password?
+        </Link>
       </section>
     </main>
   );

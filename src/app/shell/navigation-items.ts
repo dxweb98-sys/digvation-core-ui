@@ -1,5 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
-import type { Permission } from '../../features/auth/permissions';
+import { ClipboardList, Mail, Shield, User, type LucideIcon } from 'lucide-react';
+import { PERMISSIONS, type Permission } from '../../features/auth/permissions';
 
 export interface NavigationItem {
   label: string;
@@ -18,7 +18,17 @@ export interface NavigationGroup {
  * The menu. Installation, manifest, deployment and monitoring areas are not
  * part of this release and have no entry.
  */
-export const NAVIGATION_GROUPS: NavigationGroup[] = [];
+export const NAVIGATION_GROUPS: NavigationGroup[] = [
+  {
+    label: 'Access',
+    items: [
+      { label: 'Users', to: '/users', icon: User, permissions: [PERMISSIONS.USERS_READ] },
+      { label: 'Invitations', to: '/invitations', icon: Mail, permissions: [PERMISSIONS.USERS_INVITE] },
+      { label: 'Roles', to: '/roles', icon: Shield, permissions: [PERMISSIONS.ROLES_READ] },
+      { label: 'Access audit', to: '/audit', icon: ClipboardList, permissions: [PERMISSIONS.AUTHORIZATION_AUDIT_READ] },
+    ],
+  },
+];
 
 export function visibleNavigation(
   groups: readonly NavigationGroup[],
