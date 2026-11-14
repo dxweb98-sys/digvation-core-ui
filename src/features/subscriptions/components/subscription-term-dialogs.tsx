@@ -1,32 +1,38 @@
-import { dateInputToInstant, instantToDateInput } from '../../../shared/format/date-field';
-import { useFieldErrors } from '../../../shared/forms/use-field-errors';
-import { AppInput } from '../../../shared/ui/form-fields';
-import { AppAction } from '../../../shared/ui/app-action';
-import { DToggle, useToast } from '@digvation/ui';
-import { AppDialog } from '../../../shared/ui/app-dialog';
-import { useState } from 'react';
-import { useProductPrices } from '../../commercial-catalog/hooks/use-commercial-catalog';
-import type { CatalogPrice } from '../../commercial-catalog/types/commercial-catalog';
-import { CommercialTermFields, findCatalogPrice } from './commercial-term-fields';
-import type { TermField } from './commercial-term-fields';
+import {
+  dateInputToInstant,
+  instantToDateInput,
+} from "../../../shared/format/date-field";
+import { useFieldErrors } from "../../../shared/forms/use-field-errors";
+import { AppInput } from "../../../shared/ui/form-fields";
+import { AppAction } from "../../../shared/ui/app-action";
+import { DToggle, useToast } from "@digvation/ui";
+import { AppDialog } from "../../../shared/ui/app-dialog";
+import { useState } from "react";
+import { useProductPrices } from "../../commercial-catalog/hooks/use-commercial-catalog";
+import type { CatalogPrice } from "../../commercial-catalog/types/commercial-catalog";
+import {
+  CommercialTermFields,
+  findCatalogPrice,
+} from "./commercial-term-fields";
+import type { TermField } from "./commercial-term-fields";
 import {
   useAddRenewalTerm,
   useCreateInitialSubscription,
-} from '../hooks/use-client-commercial';
+} from "../hooks/use-client-commercial";
 import type {
   ClientProductCommercialSummary,
   CommercialTermInput,
   InitialSubscriptionInput,
   RenewalTermInput,
-} from '../types/subscription';
+} from "../types/subscription";
 
 function baseTerm(): CommercialTermInput {
   return {
-    startsAt: '',
-    endsAt: '',
-    billingCycle: 'MONTHLY',
-    currency: 'IDR',
-    adjustmentType: 'NONE',
+    startsAt: "",
+    endsAt: "",
+    billingCycle: "MONTHLY",
+    currency: "IDR",
+    adjustmentType: "NONE",
     paymentTermsDays: 30,
   };
 }
@@ -38,7 +44,7 @@ function validDayCount(value: number | undefined) {
   );
 }
 
-const DAY_COUNT_ERROR = 'Use a whole number from 0 to 365.';
+const DAY_COUNT_ERROR = "Use a whole number from 0 to 365.";
 
 function termErrors(
   values: CommercialTermInput,
@@ -48,42 +54,43 @@ function termErrors(
   const errors: Partial<Record<TermField, string>> = {};
   const startsAt = dateInputToInstant(values.startsAt, originalStartsAt);
   const endsAt = dateInputToInstant(values.endsAt);
-  if (!values.startsAt?.trim()) errors.startsAt = 'Enter a start date.';
-  else if (!startsAt) errors.startsAt = 'Use the format YYYY-MM-DD.';
+  if (!values.startsAt?.trim()) errors.startsAt = "Enter a start date.";
+  else if (!startsAt) errors.startsAt = "Use the format YYYY-MM-DD.";
   if (values.endsAt?.trim() && !endsAt) {
-    errors.endsAt = 'Use the format YYYY-MM-DD.';
+    errors.endsAt = "Use the format YYYY-MM-DD.";
   } else if (endsAt && startsAt && new Date(endsAt) <= new Date(startsAt)) {
-    errors.endsAt = 'The end date must be after the start date.';
+    errors.endsAt = "The end date must be after the start date.";
   }
   if (!validDayCount(values.paymentTermsDays)) {
     errors.paymentTermsDays = DAY_COUNT_ERROR;
   }
   if (!catalogPrice) {
-    errors.currency = 'Set a list price for this billing cycle and currency first.';
+    errors.currency =
+      "Set a list price for this billing cycle and currency first.";
     return errors;
   }
   const agreedAmountMinor =
     values.agreedAmountMinor ?? catalogPrice.amountMinor;
   if (!Number.isSafeInteger(agreedAmountMinor) || agreedAmountMinor < 0) {
-    errors.agreedAmountMinor = 'Enter an amount of 0 or more.';
+    errors.agreedAmountMinor = "Enter an amount of 0 or more.";
   } else if (
-    values.adjustmentType === 'NONE' &&
+    values.adjustmentType === "NONE" &&
     agreedAmountMinor !== catalogPrice.amountMinor
   ) {
-    errors.agreedAmountMinor = 'Choose an adjustment to change the price.';
+    errors.agreedAmountMinor = "Choose an adjustment to change the price.";
   } else if (
-    values.adjustmentType === 'COMPLIMENTARY' &&
+    values.adjustmentType === "COMPLIMENTARY" &&
     agreedAmountMinor !== 0
   ) {
-    errors.agreedAmountMinor = 'A complimentary price must be 0.';
+    errors.agreedAmountMinor = "A complimentary price must be 0.";
   }
-  if (values.adjustmentType !== 'NONE' && !values.adjustmentReason?.trim()) {
-    errors.adjustmentReason = 'Enter a reason for the adjustment.';
+  if (values.adjustmentType !== "NONE" && !values.adjustmentReason?.trim()) {
+    errors.adjustmentReason = "Enter a reason for the adjustment.";
   }
   return errors;
 }
 
-type InitialField = TermField | 'renewalNoticeDays' | 'gracePeriodDays';
+type InitialField = TermField | "renewalNoticeDays" | "gracePeriodDays";
 
 function initialErrors(
   values: InitialSubscriptionInput,
@@ -112,7 +119,8 @@ function UnavailableRenewalDialog({
   onClose: () => void;
 }) {
   return (
-    <AppDialog kind="form"
+    <AppDialog
+      kind="form"
       open
       onClose={onClose}
       title={title}
@@ -134,7 +142,7 @@ export function InitialSubscriptionDialog({
   const mutation = useCreateInitialSubscription();
   const pricesQuery = useProductPrices(summary.productId);
   const { showToast } = useToast();
-  const [submitError, setSubmitError] = useState('');
+  const [submitError, setSubmitError] = useState("");
   const [values, setValues] = useState<InitialSubscriptionInput>({
     ...baseTerm(),
     clientProductId: summary.clientProductId,
@@ -145,43 +153,49 @@ export function InitialSubscriptionDialog({
     autoRenew: false,
     renewalNoticeDays: 30,
     gracePeriodDays: undefined,
-    contractReference: '',
+    contractReference: "",
   });
   const prices = pricesQuery.data ?? [];
   const catalogPrice = findCatalogPrice(prices, values);
   const { field, allowSubmit } = useFieldErrors<InitialField>(
-    'initial-subscription-form',
+    "initial-subscription-form",
     () => initialErrors(values, catalogPrice),
   );
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    setSubmitError('');
+    setSubmitError("");
     if (!allowSubmit()) return;
     try {
       await mutation.mutateAsync({
         ...values,
         startsAt: dateInputToInstant(values.startsAt) as string,
         endsAt: dateInputToInstant(values.endsAt),
-        agreedAmountMinor: values.agreedAmountMinor ?? catalogPrice?.amountMinor,
+        agreedAmountMinor:
+          values.agreedAmountMinor ?? catalogPrice?.amountMinor,
       });
-      showToast({ title: 'Subscription configured', variant: 'success' });
+      showToast({ title: "Subscription configured", variant: "success" });
       onClose();
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Check the commercial term values.');
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Check the commercial term values.",
+      );
       showToast({
-        title: 'Subscription setup failed',
+        title: "Subscription setup failed",
         description:
           error instanceof Error
             ? error.message
-            : 'Check the commercial term values.',
-        variant: 'danger',
+            : "Check the commercial term values.",
+        variant: "danger",
       });
     }
   }
 
   return (
-    <AppDialog kind="form"
+    <AppDialog
+      kind="form"
       open
       onClose={onClose}
       title={`Set up ${summary.productName} subscription`}
@@ -209,9 +223,7 @@ export function InitialSubscriptionDialog({
           values={values}
           field={field}
           prices={prices}
-          onChange={(next) =>
-            setValues((current) => ({ ...current, ...next }))
-          }
+          onChange={(next) => setValues((current) => ({ ...current, ...next }))}
         />
         <div className="client-form-grid">
           <DToggle
@@ -222,8 +234,9 @@ export function InitialSubscriptionDialog({
             }
           />
           <AppInput
-            {...field('renewalNoticeDays')}
-            label="Renewal notice (days)" placeholder="30"
+            {...field("renewalNoticeDays")}
+            label="Renewal notice (days)"
+            placeholder="30"
             type="number"
             value={String(values.renewalNoticeDays)}
             onChange={(renewalNoticeDays) =>
@@ -236,10 +249,12 @@ export function InitialSubscriptionDialog({
         </div>
         <div className="client-form-grid">
           <AppInput
-            {...field('gracePeriodDays')}
-            label="Grace period (days)" placeholder="14" optional
+            {...field("gracePeriodDays")}
+            label="Grace period (days)"
+            placeholder="14"
+            optional
             type="number"
-            value={String(values.gracePeriodDays ?? '')}
+            value={String(values.gracePeriodDays ?? "")}
             onChange={(gracePeriodDays) =>
               setValues((current) => ({
                 ...current,
@@ -250,15 +265,21 @@ export function InitialSubscriptionDialog({
             }
           />
           <AppInput
-            label="Contract reference" placeholder="CTR-2026-014" optional
-            value={values.contractReference ?? ''}
+            label="Contract reference"
+            placeholder="CTR-2026-014"
+            optional
+            value={values.contractReference ?? ""}
             maxLength={150}
             onChange={(contractReference) =>
               setValues((current) => ({ ...current, contractReference }))
             }
           />
         </div>
-        {submitError ? <p className="client-commercial-form-error" role="alert">{submitError}</p> : null}
+        {submitError ? (
+          <p className="client-commercial-form-error" role="alert">
+            {submitError}
+          </p>
+        ) : null}
       </form>
     </AppDialog>
   );
@@ -274,26 +295,29 @@ export function RenewalDialog({
   const mutation = useAddRenewalTerm();
   const pricesQuery = useProductPrices(summary.productId);
   const { showToast } = useToast();
-  const [submitError, setSubmitError] = useState('');
+  const [submitError, setSubmitError] = useState("");
   const renewalAnchor = summary.latestTerm ?? summary.currentTerm;
   const subscription = summary.subscription;
   const hasLiveAddOns = summary.addOns.some(
-    (addOn) => addOn.status === 'ACTIVE' || addOn.status === 'SUSPENDED',
+    (addOn) => addOn.status === "ACTIVE" || addOn.status === "SUSPENDED",
   );
   const [values, setValues] = useState<RenewalTermInput>(() => ({
     ...baseTerm(),
     startsAt: instantToDateInput(renewalAnchor?.endsAt),
-    billingCycle: renewalAnchor?.billingCycle ?? 'MONTHLY',
-    currency: renewalAnchor?.currency ?? 'IDR',
+    billingCycle: renewalAnchor?.billingCycle ?? "MONTHLY",
+    currency: renewalAnchor?.currency ?? "IDR",
   }));
   const prices = pricesQuery.data ?? [];
   const catalogPrice = findCatalogPrice(prices, values);
-  const { field, allowSubmit } = useFieldErrors<TermField>('renewal-form', () =>
+  const { field, allowSubmit } = useFieldErrors<TermField>("renewal-form", () =>
     termErrors(values, catalogPrice, renewalAnchor?.endsAt),
   );
 
   if (!subscription || !renewalAnchor) return null;
-  if (subscription.status === 'EXPIRED' || subscription.status === 'CANCELLED') {
+  if (
+    subscription.status === "EXPIRED" ||
+    subscription.status === "CANCELLED"
+  ) {
     return (
       <UnavailableRenewalDialog
         title={`Renew ${summary.productName}`}
@@ -314,33 +338,40 @@ export function RenewalDialog({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    setSubmitError('');
+    setSubmitError("");
     if (!allowSubmit()) return;
     try {
       await mutation.mutateAsync({
-        subscriptionId: subscription.id,
+        subscriptionId: subscription!.id,
         input: {
           ...values,
-          startsAt: dateInputToInstant(values.startsAt, renewalAnchor?.endsAt) as string,
+          startsAt: dateInputToInstant(
+            values.startsAt,
+            renewalAnchor?.endsAt,
+          ) as string,
           endsAt: dateInputToInstant(values.endsAt),
-          agreedAmountMinor: values.agreedAmountMinor ?? catalogPrice?.amountMinor,
+          agreedAmountMinor:
+            values.agreedAmountMinor ?? catalogPrice?.amountMinor,
         },
       });
-      showToast({ title: 'Renewal term added', variant: 'success' });
+      showToast({ title: "Renewal term added", variant: "success" });
       onClose();
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Check the term dates.');
+      setSubmitError(
+        error instanceof Error ? error.message : "Check the term dates.",
+      );
       showToast({
-        title: 'Renewal could not be added',
+        title: "Renewal could not be added",
         description:
-          error instanceof Error ? error.message : 'Check the term dates.',
-        variant: 'danger',
+          error instanceof Error ? error.message : "Check the term dates.",
+        variant: "danger",
       });
     }
   }
 
   return (
-    <AppDialog kind="form"
+    <AppDialog
+      kind="form"
       open
       onClose={onClose}
       title={`Renew ${summary.productName}`}
@@ -359,11 +390,7 @@ export function RenewalDialog({
         </div>
       }
     >
-      <form
-        id="renewal-form"
-        className="client-contact-form"
-        onSubmit={submit}
-      >
+      <form id="renewal-form" className="client-contact-form" onSubmit={submit}>
         <CommercialTermFields
           values={values}
           field={field}
@@ -372,7 +399,11 @@ export function RenewalDialog({
           lockStart={hasLiveAddOns}
           lockBillingBasis={hasLiveAddOns}
         />
-        {submitError ? <p className="client-commercial-form-error" role="alert">{submitError}</p> : null}
+        {submitError ? (
+          <p className="client-commercial-form-error" role="alert">
+            {submitError}
+          </p>
+        ) : null}
       </form>
     </AppDialog>
   );

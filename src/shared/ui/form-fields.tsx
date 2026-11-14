@@ -3,13 +3,15 @@ import {
   DInput,
   DSelect,
   DTextarea,
+  DDatePicker,
   type CurrencyInputProps,
+  type DatePickerProps,
   type InputProps,
   type SelectProps,
   type TextareaProps,
-} from '@digvation/ui';
-import { forwardRef, useId, type ReactNode } from 'react';
-import './form-fields.css';
+} from "@digvation/ui";
+import { forwardRef, useId, type ReactNode } from "react";
+import "./form-fields.css";
 
 function OptionalTag() {
   return <span className="app-field-optional">Optional</span>;
@@ -41,12 +43,20 @@ function useFieldParts({
       label
     ),
     error: error ? <span id={errorId}>{error}</span> : undefined,
-    'aria-describedby': error ? errorId : described,
+    "aria-describedby": error ? errorId : described,
   };
 }
 
 interface FieldExtras {
   optional?: boolean;
+}
+
+type FieldDescribedProps = {
+  "aria-describedby"?: string;
+};
+
+function getDescribedBy<T extends object>(props: T): string | undefined {
+  return (props as T & FieldDescribedProps)["aria-describedby"];
 }
 
 export const AppInput = forwardRef<HTMLInputElement, InputProps & FieldExtras>(
@@ -55,7 +65,7 @@ export const AppInput = forwardRef<HTMLInputElement, InputProps & FieldExtras>(
       label,
       error,
       optional,
-      described: props['aria-describedby'],
+      described: getDescribedBy(props),
     });
     return <DInput {...props} {...parts} ref={ref} />;
   },
@@ -69,7 +79,7 @@ export const AppTextarea = forwardRef<
     label,
     error,
     optional,
-    described: props['aria-describedby'],
+    described: getDescribedBy(props),
   });
   return <DTextarea {...props} {...parts} ref={ref} />;
 });
@@ -84,7 +94,7 @@ export function AppSelect({
     label,
     error,
     optional,
-    described: props['aria-describedby'],
+    described: getDescribedBy(props),
   });
   return <DSelect {...props} {...parts} />;
 }
@@ -99,9 +109,25 @@ export function AppCurrencyInput({
     label,
     error,
     optional,
-    described: props['aria-describedby'],
+    described: getDescribedBy(props),
   });
   return <DCurrencyInput {...props} {...parts} />;
+}
+
+export function AppDateInput({
+  optional,
+  label,
+  error,
+  ...props
+}: DatePickerProps & FieldExtras) {
+  const parts = useFieldParts({
+    label,
+    error,
+    optional,
+    described: getDescribedBy(props),
+  });
+
+  return <DDatePicker {...props} {...parts} />;
 }
 
 /** Moves focus to the first invalid field after a failed submit. */
