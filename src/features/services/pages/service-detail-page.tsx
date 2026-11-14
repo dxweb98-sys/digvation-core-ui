@@ -12,6 +12,7 @@ import { Code, Identity, Page, PageHeader, QueryState, Section } from '../../../
 import { StatusBadge } from '../../../shared/ui/status-badge';
 import { PERMISSIONS } from '../../auth/permissions';
 import { usePermissions } from '../../auth/use-permissions';
+import { ServiceContractSection } from '../../contracts/components/service-contract-section';
 import { useAddOns, useFeatures } from '../../catalog/catalog-queries';
 import { clientKeys } from '../../clients/clients-queries';
 import { SERVICE_TRANSITIONS, isOpenService, servicesApi, type HeldAddOn, type Service, type ServiceStatus } from '../services-api';
@@ -120,6 +121,7 @@ function ServiceView({ service }: { service: Service }) {
             : null
         }
       />
+      <ServiceContractSection service={service} />
       <Section
         title="Features"
         actions={

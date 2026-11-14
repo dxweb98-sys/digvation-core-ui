@@ -11,6 +11,8 @@ import { ClientDetailPage } from '../../features/clients/pages/client-detail-pag
 import { ClientListPage } from '../../features/clients/pages/client-list-page';
 import { ServiceDetailPage } from '../../features/services/pages/service-detail-page';
 import { ServiceListPage } from '../../features/services/pages/service-list-page';
+import { ContractDetailPage } from '../../features/contracts/pages/contract-detail-page';
+import { ContractListPage } from '../../features/contracts/pages/contract-list-page';
 import { RequireAuthentication } from '../../features/auth/components/require-authentication';
 import { AcceptInvitationPage } from '../../features/auth/pages/accept-invitation-page';
 import { LoginPage } from '../../features/auth/pages/login-page';
@@ -39,6 +41,8 @@ export const applicationRoutes: RouteObject[] = [
       { path: 'clients/:clientId', element: <ClientDetailPage /> },
       { path: 'clients/:clientId/services/:serviceId', element: <ServiceDetailPage /> },
       { path: 'services', element: <ServiceListPage /> },
+      { path: 'contracts', element: <ContractListPage /> },
+      { path: 'contracts/:contractId', element: <ContractDetailPage /> },
       { path: 'products', element: <ProductListPage /> },
       { path: 'products/:productId', element: <ProductDetailPage /> },
       { path: 'catalog', element: <CatalogItemsPage /> },
