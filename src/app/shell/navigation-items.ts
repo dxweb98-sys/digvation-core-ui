@@ -1,4 +1,4 @@
-import { Building2, ClipboardList, Mail, Shield, User, type LucideIcon } from 'lucide-react';
+import { Building2, ClipboardList, Package, Puzzle, Mail, Shield, User, type LucideIcon } from 'lucide-react';
 import { PERMISSIONS, type Permission } from '../../features/auth/permissions';
 
 export interface NavigationItem {
@@ -22,6 +22,13 @@ export const NAVIGATION_GROUPS: NavigationGroup[] = [
   {
     label: 'Customers',
     items: [{ label: 'Clients', to: '/clients', icon: Building2, permissions: [PERMISSIONS.CLIENTS_READ] }],
+  },
+  {
+    label: 'Catalog',
+    items: [
+      { label: 'Products', to: '/products', icon: Package, permissions: [PERMISSIONS.CATALOG_READ] },
+      { label: 'Capabilities & apps', to: '/catalog', icon: Puzzle, permissions: [PERMISSIONS.CATALOG_READ] },
+    ],
   },
   {
     label: 'Access',
