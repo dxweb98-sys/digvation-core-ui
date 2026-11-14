@@ -9,9 +9,13 @@ application, a POS backoffice, a CORE replacement, or a monitoring database.
 
 ## Current scope
 
-The Control Center currently provides an operational dashboard, client and
-product management, contextual client product relationship management, and installation management using
-feature-owned mock data sources. Real integrations remain out of scope.
+The Control Center manages CORE access, clients and brands, the product
+catalog, client services, contracts and billing against the CORE API. The
+installation, manifest, deployment and monitoring areas are not part of the
+current release.
+
+API types are generated from the paired CORE repository: `npm run api:types`
+reads `../core-v2/docs/openapi.json`.
 
 ## Requirements and commands
 

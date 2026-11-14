@@ -1,31 +1,37 @@
-import { ConnectedOnly } from '../../shared/ui/not-connected';
 import type { RouteObject } from 'react-router';
-import { ApplicationShell } from '../shell/application-shell';
-import { DashboardPage } from '../../features/dashboard/pages/dashboard-page';
+import { AuditPage } from '../../features/access/pages/audit-page';
+import { InvitationsPage } from '../../features/access/pages/invitations-page';
+import { ProfilePage } from '../../features/access/pages/profile-page';
+import { RolesPage } from '../../features/access/pages/roles-page';
+import { UsersPage } from '../../features/access/pages/users-page';
+import { BillingSettingsPage } from '../../features/billing/pages/billing-settings-page';
+import { CreditNoteListPage } from '../../features/billing/pages/credit-note-list-page';
+import { InvoiceDetailPage } from '../../features/billing/pages/invoice-detail-page';
+import { InvoiceListPage } from '../../features/billing/pages/invoice-list-page';
+import { PaymentDetailPage } from '../../features/billing/pages/payment-detail-page';
+import { PaymentListPage } from '../../features/billing/pages/payment-list-page';
+import { CatalogItemsPage } from '../../features/catalog/pages/catalog-items-page';
+import { ProductDetailPage } from '../../features/catalog/pages/product-detail-page';
+import { ProductListPage } from '../../features/catalog/pages/product-list-page';
 import { ClientDetailPage } from '../../features/clients/pages/client-detail-page';
 import { ClientListPage } from '../../features/clients/pages/client-list-page';
-import { CreateClientPage } from '../../features/clients/pages/create-client-page';
-import { EditClientPage } from '../../features/clients/pages/edit-client-page';
-import { ProductListPage } from '../../features/products/pages/product-list-page';
-import { CapabilityListPage } from '../../features/capabilities/pages/capability-list-page';
-import { InstallationListPage } from '../../features/installations/pages/installation-list-page';
-import { InfrastructureListPage } from '../../features/infrastructure/pages/infrastructure-list-page';
-import { IncidentsPage } from '../../features/operations/pages/incidents-page';
-import { DeploymentsPage } from '../../features/operations/pages/deployments-page';
-import { PlatformHealthPage } from '../../features/runtime/pages/platform-health-page';
-import { LoginPage } from '../../features/auth/pages/login-page';
+import { ServiceDetailPage } from '../../features/services/pages/service-detail-page';
+import { ServiceListPage } from '../../features/services/pages/service-list-page';
+import { ContractDetailPage } from '../../features/contracts/pages/contract-detail-page';
+import { ContractListPage } from '../../features/contracts/pages/contract-list-page';
 import { RequireAuthentication } from '../../features/auth/components/require-authentication';
+import { AcceptInvitationPage } from '../../features/auth/pages/accept-invitation-page';
+import { LoginPage } from '../../features/auth/pages/login-page';
+import { PasswordResetPage } from '../../features/auth/pages/password-reset-page';
+import { ApplicationShell } from '../shell/application-shell';
+import { HomePage } from './home-page';
 import { NotFoundPage } from './not-found-page';
-import {
-  AuditPage,
-  InvitationsPage,
-  RolesPage,
-  UsersPage,
-} from '../../features/access/pages/access-pages';
 import { RouteErrorState } from './route-error-state';
 
 export const applicationRoutes: RouteObject[] = [
   { path: '/login', element: <LoginPage /> },
+  { path: '/password-reset', element: <PasswordResetPage /> },
+  { path: '/invitations/accept', element: <AcceptInvitationPage /> },
   {
     path: '/',
     element: (
@@ -35,22 +41,27 @@ export const applicationRoutes: RouteObject[] = [
     ),
     errorElement: <RouteErrorState />,
     children: [
-      { index: true, element: <DashboardPage /> },
+      { index: true, element: <HomePage /> },
+      { path: 'profile', element: <ProfilePage /> },
       { path: 'clients', element: <ClientListPage /> },
-      { path: 'clients/new', element: <CreateClientPage /> },
       { path: 'clients/:clientId', element: <ClientDetailPage /> },
-      { path: 'clients/:clientId/edit', element: <EditClientPage /> },
+      { path: 'clients/:clientId/services/:serviceId', element: <ServiceDetailPage /> },
+      { path: 'services', element: <ServiceListPage /> },
+      { path: 'contracts', element: <ContractListPage /> },
+      { path: 'contracts/:contractId', element: <ContractDetailPage /> },
+      { path: 'invoices', element: <InvoiceListPage /> },
+      { path: 'invoices/:invoiceId', element: <InvoiceDetailPage /> },
+      { path: 'payments', element: <PaymentListPage /> },
+      { path: 'payments/:paymentId', element: <PaymentDetailPage /> },
+      { path: 'credit-notes', element: <CreditNoteListPage /> },
+      { path: 'billing-settings', element: <BillingSettingsPage /> },
       { path: 'products', element: <ProductListPage /> },
-      { path: 'capabilities', element: <CapabilityListPage /> },
-      { path: 'installations', element: <InstallationListPage /> },
-      { path: 'infrastructure', element: <ConnectedOnly pageTitle="Infrastructure" description="Servers and the installations bound to them will appear here."><InfrastructureListPage /></ConnectedOnly> },
-      { path: 'deployments', element: <ConnectedOnly pageTitle="Deployments" description="Deployment history for each installation will appear here."><DeploymentsPage /></ConnectedOnly> },
-      { path: 'incidents', element: <ConnectedOnly pageTitle="Incidents" description="Open and resolved incidents will appear here."><IncidentsPage /></ConnectedOnly> },
+      { path: 'products/:productId', element: <ProductDetailPage /> },
+      { path: 'catalog', element: <CatalogItemsPage /> },
       { path: 'users', element: <UsersPage /> },
       { path: 'invitations', element: <InvitationsPage /> },
       { path: 'roles', element: <RolesPage /> },
       { path: 'audit', element: <AuditPage /> },
-      { path: 'platform-health', element: <ConnectedOnly pageTitle="Platform health" description="The health of each running service will appear here."><PlatformHealthPage /></ConnectedOnly> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

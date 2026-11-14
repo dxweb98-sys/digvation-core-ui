@@ -1,0 +1,92 @@
+.form-dialog {
+  display: grid;
+  gap: var(--cc-space-4);
+}
+
+.form-dialog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cc-space-4) var(--cc-space-3);
+}
+
+.form-dialog-cell {
+  min-width: 0;
+}
+
+.form-dialog-cell-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .form-dialog-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.form-dialog-message {
+  margin: 0;
+  font-size: var(--cc-text-sm);
+  line-height: 1.6;
+  color: var(--cc-text-muted);
+}
+
+.form-dialog-hint {
+  margin: var(--cc-space-1) 0 0;
+  font-size: var(--cc-text-xs);
+  color: var(--cc-text-muted);
+}
+
+.form-dialog-error {
+  margin: var(--cc-space-1) 0 0;
+  font-size: var(--cc-text-xs);
+  color: var(--cc-status-danger);
+}
+
+.form-dialog-reference {
+  display: block;
+  margin-top: var(--cc-space-1);
+  font-family: var(--cc-font-mono);
+  font-size: var(--cc-text-xs);
+  opacity: 0.8;
+}
+
+.form-dialog-checklist {
+  display: grid;
+  gap: var(--cc-space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.form-dialog-checklist legend {
+  display: flex;
+  gap: var(--cc-space-2);
+  align-items: center;
+  margin-bottom: var(--cc-space-1);
+  font-size: var(--cc-text-sm);
+  font-weight: 500;
+}
+
+.form-dialog-check {
+  display: flex;
+  gap: var(--cc-space-2);
+  align-items: flex-start;
+  min-height: 32px;
+  font-size: var(--cc-text-sm);
+  cursor: pointer;
+}
+
+.form-dialog-check small {
+  display: block;
+  color: var(--cc-text-muted);
+}
+
+.form-dialog-file {
+  display: grid;
+  gap: var(--cc-space-1);
+  font-size: var(--cc-text-sm);
+}
+
+.form-dialog-toggle {
+  padding-top: var(--cc-space-1);
+}

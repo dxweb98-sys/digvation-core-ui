@@ -68,3 +68,14 @@
   color: var(--color-danger);
   font-size: 14px;
 }
+
+.auth-link {
+  justify-self: start;
+  font-size: var(--cc-text-sm);
+  color: var(--cc-accent);
+}
+
+.auth-link:hover,
+.auth-link:focus-visible {
+  color: var(--cc-accent-hover);
+}

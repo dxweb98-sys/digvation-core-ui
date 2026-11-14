@@ -3,24 +3,29 @@
 | Path | Ownership |
 | --- | --- |
 | `src/app/error-boundary` | Application-level uncaught error handling |
-| `src/app/providers` | Application-wide design-system and query providers |
-| `src/app/router` | Route definitions and route-level failure handling |
-| `src/app/shell` | Operator shell and primary navigation composition |
-| `src/features/dashboard` | Operational dashboard UI, types, query hook, and mock data source |
-| `src/features/clients` | Client organization profile, contacts, lifecycle composition, forms, hooks, and mock data sources |
-| `src/features/subscriptions` | Client-product commercial terms, renewal history, and product configuration UI with mock data source |
-| `src/features/products` | Product catalog UI, lifecycle composition, forms, hooks, and mock data source |
-| `src/features/client-products` | Contextual client-to-product relationship UI, lifecycle composition, hooks, and mock data source |
-| `src/features/installations` | Installation management UI, lifecycle composition, forms, hooks, and mock data source |
+| `src/app/providers` | Design-system, query and auth providers |
+| `src/app/router` | Route definitions, home redirect and route-level failure handling |
+| `src/app/shell` | Operator shell and the permission-filtered navigation |
+| `src/features/auth` | Session, sign-in, password reset, invitation acceptance, permissions (`usePermissions`) |
+| `src/features/access` | Profile, users, roles, invitations, access audit |
+| `src/features/clients` | Clients, brands, contacts and the client page tabs |
+| `src/features/catalog` | Products, features, capabilities, add-ons, list prices, releases, catalog items |
+| `src/features/services` | Client services: provisioning, features, held add-ons, lifecycle |
+| `src/features/contracts` | Contracts, terms, renewals, one-off charges, contract add-ons |
+| `src/features/billing` | Billing settings, invoices, payments, credit notes, client balance |
+| `src/shared/api` | The single CORE client, generated OpenAPI types, error mapping |
+| `src/shared/format` | Money (minor units, whole rupiah) and Asia/Jakarta date formatting |
+| `src/shared/forms` | Field-spec form and confirmation dialogs, lifecycle transitions |
+| `src/shared/ui` | Application compositions over `@digvation/ui` |
 | `src/shared/config` | Typed environment/configuration boundary |
-| `src/test` | Shared test-environment setup only |
+| `src/test` | Test-environment setup and the test-only `fetch` stub |
 | `src/main.tsx` | Browser bootstrap |
 | `src/styles.css` | Application layout and responsive composition |
 | `docs/architecture` | Product and system ownership decisions |
 | `docs/engineering` | Operational engineering standards |
 
+A feature keeps its CORE requests in `<feature>-api.ts`, its query hooks in
+`<feature>-queries.ts`, and its screens under `pages/` and `components/`.
+
 Create feature subdirectories only when real files need them. Do not create a
 root `src/components`, speculative layers, or barrel exports.
-
-Routes for future domains use the application-owned placeholder composition
-until their checkpoint creates feature-owned implementation.

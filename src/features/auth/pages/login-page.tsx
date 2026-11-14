@@ -1,10 +1,10 @@
-import { useFieldErrors } from '../../../shared/forms/use-field-errors';
-import { AppInput } from '../../../shared/ui/form-fields';
-import { AppAction } from '../../../shared/ui/app-action';
 import { DCheckbox } from '@digvation/ui';
 import { useEffect, useState, type FormEvent } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router';
-import { applicationConfig } from '../../../shared/config/application-config';
+import { Link, useLocation, useNavigate } from 'react-router';
+import { loginErrorMessage } from '../login-error';
+import { useFieldErrors } from '../../../shared/forms/use-field-errors';
+import { AppAction } from '../../../shared/ui/app-action';
+import { AppInput } from '../../../shared/ui/form-fields';
 import { useAuth } from '../use-auth';
 import '../auth.css';
 
@@ -37,14 +37,10 @@ export function LoginPage() {
       await login({ identifier: identifier.trim(), password, rememberMe });
       navigate(from, { replace: true });
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Login failed.');
+      setError(loginErrorMessage(cause));
     } finally {
       setLoading(false);
     }
-  }
-
-  if (applicationConfig.dataSourceMode === 'mock') {
-    return <Navigate to="/" replace />;
   }
 
   return (
@@ -56,21 +52,21 @@ export function LoginPage() {
         <div>
           <p className="auth-eyebrow">Digvation Control Center</p>
           <h1 id="login-title">Sign in</h1>
-          <p className="auth-copy">
-            Use your Digvation operator account.
-          </p>
+          <p className="auth-copy">Use your Digvation operator account.</p>
         </div>
         <form className="auth-form" id="login-form" noValidate onSubmit={submit}>
           <AppInput
             {...field('identifier')}
-            label="Email or username" placeholder="operator@digvation.id"
+            label="Email or username"
+            placeholder="operator@digvation.id"
             value={identifier}
             autoComplete="username"
             onChange={setIdentifier}
           />
           <AppInput
             {...field('password')}
-            label="Password" placeholder="Your password"
+            label="Password"
+            placeholder="Your password"
             type="password"
             value={password}
             autoComplete="current-password"
@@ -83,14 +79,18 @@ export function LoginPage() {
             />
             <span>Keep me signed in</span>
           </label>
-          {error ? <p className="auth-error">{error}</p> : null}
-          <AppAction
-            type="submit"
-            loading={loading}
-          >
+          {error ? (
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <AppAction type="submit" loading={loading}>
             Sign in
           </AppAction>
         </form>
+        <Link className="auth-link" to="/password-reset">
+          Forgot your password?
+        </Link>
       </section>
     </main>
   );

@@ -1,2 +1,0 @@
-import { isCoreMode, notConnectedDataSource } from '../../../shared/data/data-availability';
-import type { RuntimeDataSource } from './runtime-data-source'; import { createMockRuntimeDataSource } from './mock-runtime-data-source'; export function resolveRuntimeDataSource(): RuntimeDataSource { return isCoreMode() ? notConnectedDataSource<RuntimeDataSource>('Runtime health') : createMockRuntimeDataSource(); }

@@ -5,9 +5,6 @@ import { LoginPage } from './login-page';
 
 const login = vi.fn();
 
-vi.mock('../../../shared/config/application-config', () => ({
-  applicationConfig: { dataSourceMode: 'core' },
-}));
 vi.mock('../use-auth', () => ({
   useAuth: () => ({ status: 'anonymous', login }),
 }));

@@ -31,13 +31,13 @@ and application-level failure handling; `src/features` owns domain UI and data
 access; `src/shared` contains only proven cross-feature configuration, libraries,
 hooks, and types.
 
-Each integrated feature exposes a minimal data-source contract. Its page calls a
-feature hook; the hook calls the selected data source. During foundation work,
-the implementation is mock-only. A later CORE implementation can replace the
-mock behind the contract without rewriting the page.
+Each feature page calls a feature query hook, which calls the feature api
+module over the single CORE client in `src/shared/api`. See
+`docs/engineering/DATA_ACCESS_STANDARD.md`.
 
 TanStack Query owns server-state lifecycle. Local React state owns ephemeral UI
-state. React Hook Form and Zod own future form state and validation. No global
+state. Form state and validation live in the shared field-spec forms
+(`src/shared/forms`). No global
 client state library is justified for the current dashboard scope.
 
 ## UI foundation

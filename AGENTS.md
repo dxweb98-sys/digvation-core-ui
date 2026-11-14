@@ -22,7 +22,7 @@ For operator-facing CORE work:
 4. if an accepted UI flow exposes a legitimate control-plane need that the backend does not yet own, classify and implement the additive backend contract in the paired work unit;
 5. do not force a change in either repository when the paired side has no actual impact.
 
-The UI data-source abstraction may remain mock-backed while real API/auth transport integration is not yet established globally. Do not bypass that boundary with isolated ad-hoc `fetch` calls for one feature.
+All CORE access goes through the single client in `src/shared/api`, typed from the generated OpenAPI schema. There is no mock mode; do not add ad-hoc `fetch` calls or fake CORE data in application code.
 
 ## Product boundaries
 
@@ -98,4 +98,16 @@ Run only the scoped CORE UI validation at the complete work-unit boundary.
 
 Full test/build/release checks belong to explicit acceptance/release preparation.
 
-STOP for manual review before merge/release/deployment. The current user has explicitly authorized committing and pushing feature branches so the branch can be reviewed locally; that authorization does not permit merge, release, or deployment.
+STOP for manual review before merge/release/deployment.
+
+## Review and commit
+
+Follow the review and commit protocol in the lifecycle delivery standard (`standards/DELIVERY_RELEASE_STANDARD.md`, section 6A, at the lifecycle root). Nothing is committed or pushed without the product owner's explicit written approval. In addition, for CORE UI:
+
+- **Package manager.** npm: `package-lock.json` is the lockfile. Install with `npm ci`; do not create another lockfile.
+- **Checks before a commit.** All of these must pass; stop if any fails:
+  - `npm run typecheck` (`tsc -b`, covering `tsconfig.app.json` and `tsconfig.node.json`)
+  - `npm run lint`
+  - `npm run test` (all Vitest tests)
+- **Never staged.** `dist/` and `*.tsbuildinfo` (both ignored).
+- **Work branch.** Never commit on `main` or on the shared dev branch `digvation-core-ui-dev`.
