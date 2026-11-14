@@ -208,11 +208,14 @@ export function FormDialog({
   children,
   onSubmit,
   onClose,
+  onValuesChange,
 }: {
   open: boolean;
   title: string;
   description?: ReactNode;
   fields: readonly FieldSpec[];
+  /** Lets a parent derive dependent options (for example features of the chosen product). */
+  onValuesChange?: (values: FormValues) => void;
   initialValues?: Partial<FormValues>;
   submitLabel: string;
   tone?: Extract<ActionTone, 'primary' | 'danger'>;
@@ -245,6 +248,7 @@ export function FormDialog({
 
   function setValue(name: string, value: FieldValue) {
     setValues((current) => ({ ...current, [name]: value }));
+    onValuesChange?.({ ...values, [name]: value });
     setServerErrors((current) => {
       if (!current[name]) return current;
       const next = { ...current };

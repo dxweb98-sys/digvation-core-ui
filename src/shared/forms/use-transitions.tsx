@@ -1,8 +1,8 @@
 import type { TableAction } from '@digvation/ui';
 import { useState } from 'react';
-import { ConfirmDialog } from '../../../shared/forms/form-dialog';
-import { read } from '../../../shared/forms/form-spec';
-import { transitionLabel } from '../../../shared/labels/labels';
+import { ConfirmDialog } from './form-dialog';
+import { read } from './form-spec';
+import { transitionLabel } from '../labels/labels';
 
 const DESTRUCTIVE = new Set(['RETIRED', 'WITHDRAWN', 'ARCHIVED', 'CANCELLED', 'ENDED']);
 

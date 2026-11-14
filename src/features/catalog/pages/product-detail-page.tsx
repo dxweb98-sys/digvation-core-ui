@@ -21,7 +21,7 @@ import {
   PricesSection,
   ReleasesSection,
 } from '../components/product-sections';
-import { targetLabel } from '../components/transition';
+import { targetLabel } from '../../../shared/forms/use-transitions';
 import { PRODUCT_FIELDS } from '../product-fields';
 
 const TRANSITION_MESSAGES: Record<CatalogStatus, string> = {

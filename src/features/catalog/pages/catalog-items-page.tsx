@@ -14,7 +14,7 @@ import { PERMISSIONS } from '../../auth/permissions';
 import { usePermissions } from '../../auth/use-permissions';
 import { CATALOG_TRANSITIONS, catalogApi, type CatalogItem, type CatalogKind } from '../catalog-api';
 import { catalogKeys, useCatalogItems } from '../catalog-queries';
-import { useTransitions } from '../components/transition';
+import { useTransitions } from '../../../shared/forms/use-transitions';
 
 const KINDS: { value: CatalogKind; label: string; singular: string; description: string }[] = [
   {

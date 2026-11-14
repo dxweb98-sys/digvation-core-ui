@@ -33,7 +33,7 @@ import {
   useReleases,
 } from '../catalog-queries';
 import { PricesTable } from './prices-table';
-import { useTransitions } from './transition';
+import { useTransitions } from '../../../shared/forms/use-transitions';
 
 const NAME_FIELDS: FieldSpec[] = [
   { name: 'name', label: 'Name', required: true, maxLength: 150 },

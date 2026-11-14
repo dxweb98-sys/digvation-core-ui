@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CATALOG_TRANSITIONS, RELEASE_TRANSITIONS } from './catalog-api';
-import { targetLabel } from './components/transition';
+import { targetLabel } from '../../shared/forms/use-transitions';
 
 describe('catalog lifecycle (core-v2 catalog.lifecycle.ts)', () => {
   it('offers only the moves CORE accepts', () => {
