@@ -4,6 +4,8 @@ import { InvitationsPage } from '../../features/access/pages/invitations-page';
 import { ProfilePage } from '../../features/access/pages/profile-page';
 import { RolesPage } from '../../features/access/pages/roles-page';
 import { UsersPage } from '../../features/access/pages/users-page';
+import { ClientDetailPage } from '../../features/clients/pages/client-detail-page';
+import { ClientListPage } from '../../features/clients/pages/client-list-page';
 import { RequireAuthentication } from '../../features/auth/components/require-authentication';
 import { AcceptInvitationPage } from '../../features/auth/pages/accept-invitation-page';
 import { LoginPage } from '../../features/auth/pages/login-page';
@@ -28,6 +30,8 @@ export const applicationRoutes: RouteObject[] = [
     children: [
       { index: true, element: <HomePage /> },
       { path: 'profile', element: <ProfilePage /> },
+      { path: 'clients', element: <ClientListPage /> },
+      { path: 'clients/:clientId', element: <ClientDetailPage /> },
       { path: 'users', element: <UsersPage /> },
       { path: 'invitations', element: <InvitationsPage /> },
       { path: 'roles', element: <RolesPage /> },
