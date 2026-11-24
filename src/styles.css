@@ -364,11 +364,6 @@ samp {
   color: var(--cc-text-subtle);
 }
 
-.header-title {
-  font-size: var(--cc-text-md);
-  font-weight: 600;
-}
-
 .header-status > span:first-child {
   font-size: var(--cc-text-xs);
   color: var(--cc-text-subtle);
@@ -382,6 +377,22 @@ samp {
 .application-content {
   width: 100%;
   padding: var(--cc-space-4) var(--cc-space-6) 56px;
+}
+
+/* Links inside content carry the single accent, never the browser default. */
+.application-content a {
+  color: var(--cc-accent);
+  text-decoration: none;
+}
+
+.application-content a:hover,
+.application-content a:focus-visible {
+  text-decoration: underline;
+}
+
+.application-content nav[aria-label='DBreadcrumb'] a {
+  color: inherit;
+  text-decoration: none;
 }
 
 .page-eyebrow {
@@ -495,42 +506,6 @@ samp {
 
 [aria-live='polite'] > section[role='status'] p {
   color: var(--cc-text);
-}
-
-[role='tablist'] {
-  gap: var(--cc-space-1);
-  padding: 0;
-  background: transparent;
-  border-radius: 0;
-  box-shadow: inset 0 -1px 0 var(--cc-line);
-}
-
-[role='tab'] {
-  position: relative;
-  min-height: 36px;
-  border-radius: var(--cc-radius-md) var(--cc-radius-md) 0 0;
-}
-
-[role='tab'][aria-selected='true'] {
-  font-weight: 600;
-  background: transparent;
-  box-shadow: none;
-}
-
-[role='tab']::after {
-  position: absolute;
-  right: var(--cc-space-2);
-  bottom: 0;
-  left: var(--cc-space-2);
-  height: 2px;
-  content: '';
-  background: var(--color-brand);
-  transform: scaleX(0);
-  transition: transform var(--motion-base) var(--ease-emphasized);
-}
-
-[role='tab'][aria-selected='true']::after {
-  transform: scaleX(1);
 }
 
 /* Motion */

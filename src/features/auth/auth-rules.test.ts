@@ -7,8 +7,8 @@ import { passwordProblems } from './password-problems';
 
 describe('auth form rules', () => {
   it('needs 12 to 128 characters and a matching confirmation', () => {
-    expect(passwordProblems('short', 'short')).toEqual({ password: 'Use at least 12 characters.' });
-    expect(passwordProblems('long enough pw', 'other')).toEqual({ confirm: 'The passwords do not match.' });
+    expect(passwordProblems('short', 'short')).toEqual({ password: 'Minimal 12 karakter.' });
+    expect(passwordProblems('long enough pw', 'other')).toEqual({ confirm: 'Kata sandi tidak cocok.' });
     expect(passwordProblems('long enough pw', 'long enough pw')).toEqual({});
   });
 

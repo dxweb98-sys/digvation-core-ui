@@ -1,5 +1,6 @@
 import { Banknote, Building2, ClipboardList, FileMinus, FileSignature, Receipt, Settings, Layers, Package, Puzzle, Mail, Shield, User, type LucideIcon } from 'lucide-react';
 import { PERMISSIONS, type Permission } from '../../features/auth/permissions';
+import { isParkedPath } from '../parked-areas';
 
 export interface NavigationItem {
   label: string;
@@ -16,9 +17,10 @@ export interface NavigationGroup {
 
 /**
  * The menu. Installation, manifest, deployment and monitoring areas are not
- * part of this release and have no entry.
+ * part of this release and have no entry. Entries of a parked area
+ * (../parked-areas.ts) are kept here but left out of the menu.
  */
-export const NAVIGATION_GROUPS: NavigationGroup[] = [
+const ALL_NAVIGATION_GROUPS: NavigationGroup[] = [
   {
     label: 'Customers',
     items: [
@@ -53,6 +55,11 @@ export const NAVIGATION_GROUPS: NavigationGroup[] = [
     ],
   },
 ];
+
+export const NAVIGATION_GROUPS: NavigationGroup[] = ALL_NAVIGATION_GROUPS.map((group) => ({
+  ...group,
+  items: group.items.filter((item) => !isParkedPath(item.to)),
+})).filter((group) => group.items.length > 0);
 
 export function visibleNavigation(
   groups: readonly NavigationGroup[],

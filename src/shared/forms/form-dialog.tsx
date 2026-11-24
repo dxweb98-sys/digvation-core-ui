@@ -64,7 +64,7 @@ function FieldControl({
         <AppSelect
           {...common}
           name={field.name}
-          placeholder={field.placeholder ?? 'Select an option'}
+          placeholder={field.placeholder ?? 'Pilih salah satu'}
           value={text || null}
           options={(field.options ?? []).map((option) => ({ value: option.value, label: option.label }))}
           clearable={!field.required}
@@ -298,7 +298,7 @@ export function FormDialog({
         <DialogActions
           secondary={
             <AppAction tone="secondary" disabled={submitting} onClick={onClose}>
-              Cancel
+              Batal
             </AppAction>
           }
           primary={
@@ -376,7 +376,7 @@ export function ConfirmDialog({
         ? [
             {
               name: reason.name ?? 'reason',
-              label: reason.label ?? 'Reason',
+              label: reason.label ?? 'Alasan',
               kind: 'textarea' as const,
               required: reason.required ?? true,
               maxLength: 500,

@@ -28,8 +28,8 @@ export class ApplicationErrorBoundary extends Component<
       return (
         <main className="application-error-page">
           <DConnectionError
-            title="Control Center could not load"
-            message="An unexpected application error interrupted this view."
+            title="Control Center tidak bisa dimuat"
+            message="Terjadi galat tak terduga sehingga tampilan ini terhenti."
             onRetry={this.handleRetry}
           />
         </main>

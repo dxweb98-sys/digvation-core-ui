@@ -7,13 +7,13 @@ import { firstVisibleRoute, NAVIGATION_GROUPS, visibleNavigation } from '../shel
 /** Sends the operator to the first area they may open. */
 export function HomePage() {
   const { resolved, canAny } = usePermissions();
-  if (!resolved) return <ContentSkeleton label="Loading your access" />;
+  if (!resolved) return <ContentSkeleton label="memuat akses Anda" />;
   const target = firstVisibleRoute(visibleNavigation(NAVIGATION_GROUPS, canAny));
   if (target) return <Navigate to={target} replace />;
   return (
     <DEmptyState
-      title="No areas available"
-      description="Your account has no access to any Control Center area yet. Ask an administrator for a role."
+      title="Belum ada area yang bisa dibuka"
+      description="Akun Anda belum punya akses ke area Control Center mana pun. Minta administrator memberikan role."
     />
   );
 }

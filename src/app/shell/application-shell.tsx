@@ -3,7 +3,9 @@ import { DAvatar } from '@digvation/ui';
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router';
 import { useAuth } from '../../features/auth/use-auth';
+import { useDisplayLocale } from '../../shared/format/locale';
 import { AppAction } from '../../shared/ui/app-action';
+import { LanguageSelect } from '../../shared/ui/language-select';
 import { ApplicationNavigation } from './application-navigation';
 import { CoreApiStatus } from './core-api-status';
 import { NAVIGATION_GROUPS } from './navigation-items';
@@ -14,7 +16,7 @@ function pageTitleFor(pathname: string) {
     .filter((item) => pathname === item.to || pathname.startsWith(`${item.to}/`))
     .sort((a, b) => b.to.length - a.to.length)[0];
   if (match) return match.label;
-  if (pathname === '/profile') return 'My profile';
+  if (pathname === '/profile') return 'Profil saya';
   return 'Control Center';
 }
 
@@ -30,7 +32,7 @@ function OperatorProfile() {
         <span>{user.email}</span>
       </Link>
       <AppAction icon={LogOut} tone="tertiary" size="sm" onClick={() => void logout()}>
-        Sign out
+        Keluar
       </AppAction>
     </div>
   );
@@ -40,6 +42,8 @@ export function ApplicationShell() {
   const location = useLocation();
   const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
   const pageTitle = pageTitleFor(location.pathname);
+  // Formats are read at render; a new language re-renders the page.
+  const locale = useDisplayLocale();
 
   useEffect(() => {
     document.title = `${pageTitle} · Digvation Control Center`;
@@ -77,12 +81,16 @@ export function ApplicationShell() {
             </AppAction>
             <div>
               <p className="header-eyebrow">Control Center</p>
-              <p className="header-title">{pageTitle}</p>
             </div>
           </div>
-          <div className="header-status">
-            <span>Core API</span>
-            <CoreApiStatus />
+          <div className="header-trailing">
+            <div className="header-language">
+              <LanguageSelect label="Format" compact />
+            </div>
+            <div className="header-status">
+              <span>Core API</span>
+              <CoreApiStatus />
+            </div>
           </div>
         </header>
         <div
@@ -96,7 +104,7 @@ export function ApplicationShell() {
           <OperatorProfile />
         </div>
         <main className="application-content">
-          <div className="page-enter" key={location.pathname}>
+          <div className="page-enter" key={`${location.pathname}:${locale}`}>
             <Outlet />
           </div>
         </main>

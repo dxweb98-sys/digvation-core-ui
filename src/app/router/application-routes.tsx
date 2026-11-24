@@ -4,21 +4,6 @@ import { InvitationsPage } from '../../features/access/pages/invitations-page';
 import { ProfilePage } from '../../features/access/pages/profile-page';
 import { RolesPage } from '../../features/access/pages/roles-page';
 import { UsersPage } from '../../features/access/pages/users-page';
-import { BillingSettingsPage } from '../../features/billing/pages/billing-settings-page';
-import { CreditNoteListPage } from '../../features/billing/pages/credit-note-list-page';
-import { InvoiceDetailPage } from '../../features/billing/pages/invoice-detail-page';
-import { InvoiceListPage } from '../../features/billing/pages/invoice-list-page';
-import { PaymentDetailPage } from '../../features/billing/pages/payment-detail-page';
-import { PaymentListPage } from '../../features/billing/pages/payment-list-page';
-import { CatalogItemsPage } from '../../features/catalog/pages/catalog-items-page';
-import { ProductDetailPage } from '../../features/catalog/pages/product-detail-page';
-import { ProductListPage } from '../../features/catalog/pages/product-list-page';
-import { ClientDetailPage } from '../../features/clients/pages/client-detail-page';
-import { ClientListPage } from '../../features/clients/pages/client-list-page';
-import { ServiceDetailPage } from '../../features/services/pages/service-detail-page';
-import { ServiceListPage } from '../../features/services/pages/service-list-page';
-import { ContractDetailPage } from '../../features/contracts/pages/contract-detail-page';
-import { ContractListPage } from '../../features/contracts/pages/contract-list-page';
 import { RequireAuthentication } from '../../features/auth/components/require-authentication';
 import { AcceptInvitationPage } from '../../features/auth/pages/accept-invitation-page';
 import { LoginPage } from '../../features/auth/pages/login-page';
@@ -28,6 +13,10 @@ import { HomePage } from './home-page';
 import { NotFoundPage } from './not-found-page';
 import { RouteErrorState } from './route-error-state';
 
+/**
+ * Areas in PARKED_AREAS (../parked-areas.ts) have no route until their backend
+ * unit returns; their paths fall through to the not-found page.
+ */
 export const applicationRoutes: RouteObject[] = [
   { path: '/login', element: <LoginPage /> },
   { path: '/password-reset', element: <PasswordResetPage /> },
@@ -43,21 +32,6 @@ export const applicationRoutes: RouteObject[] = [
     children: [
       { index: true, element: <HomePage /> },
       { path: 'profile', element: <ProfilePage /> },
-      { path: 'clients', element: <ClientListPage /> },
-      { path: 'clients/:clientId', element: <ClientDetailPage /> },
-      { path: 'clients/:clientId/services/:serviceId', element: <ServiceDetailPage /> },
-      { path: 'services', element: <ServiceListPage /> },
-      { path: 'contracts', element: <ContractListPage /> },
-      { path: 'contracts/:contractId', element: <ContractDetailPage /> },
-      { path: 'invoices', element: <InvoiceListPage /> },
-      { path: 'invoices/:invoiceId', element: <InvoiceDetailPage /> },
-      { path: 'payments', element: <PaymentListPage /> },
-      { path: 'payments/:paymentId', element: <PaymentDetailPage /> },
-      { path: 'credit-notes', element: <CreditNoteListPage /> },
-      { path: 'billing-settings', element: <BillingSettingsPage /> },
-      { path: 'products', element: <ProductListPage /> },
-      { path: 'products/:productId', element: <ProductDetailPage /> },
-      { path: 'catalog', element: <CatalogItemsPage /> },
       { path: 'users', element: <UsersPage /> },
       { path: 'invitations', element: <InvitationsPage /> },
       { path: 'roles', element: <RolesPage /> },

@@ -16,7 +16,7 @@ function RequestStep({ onSent }: { onSent: (challengeId: string, email: string) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { field, allowSubmit } = useFieldErrors<'email'>('forgot-form', () =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ? {} : { email: 'Enter your account email.' },
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ? {} : { email: 'Isi email akun Anda.' },
   );
 
   async function submit(event: FormEvent) {
@@ -39,7 +39,7 @@ function RequestStep({ onSent }: { onSent: (challengeId: string, email: string) 
       <AppInput {...field('email')} label="Email" type="email" autoComplete="email" value={email} onChange={setEmail} />
       {error ? <p className="auth-error" role="alert">{error}</p> : null}
       <AppAction type="submit" loading={loading}>
-        Send code
+        Kirim kode
       </AppAction>
     </form>
   );
@@ -52,7 +52,7 @@ function ResetStep({ challengeId, email, onDone }: { challengeId: string; email:
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { field, allowSubmit } = useFieldErrors<'otp' | 'password' | 'confirm'>('reset-form', () => ({
-    ...(/^\d{6}$/.test(otp.trim()) ? {} : { otp: 'Enter the six-digit code from the email.' }),
+    ...(/^\d{6}$/.test(otp.trim()) ? {} : { otp: 'Isi kode enam digit dari email.' }),
     ...passwordProblems(password, confirm),
   }));
 
@@ -78,13 +78,13 @@ function ResetStep({ challengeId, email, onDone }: { challengeId: string; email:
 
   return (
     <form className="auth-form" id="reset-form" noValidate onSubmit={submit}>
-      <p className="auth-copy">If {email} has an account, a six-digit code is on its way.</p>
-      <AppInput {...field('otp')} label="Code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={setOtp} />
-      <AppInput {...field('password')} label="New password" type="password" autoComplete="new-password" hint="At least 12 characters." value={password} onChange={setPassword} />
-      <AppInput {...field('confirm')} label="Confirm new password" type="password" autoComplete="new-password" value={confirm} onChange={setConfirm} />
+      <p className="auth-copy">Jika {email} punya akun, kode enam digit sedang dikirim.</p>
+      <AppInput {...field('otp')} label="Kode" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={setOtp} />
+      <AppInput {...field('password')} label="Kata sandi baru" type="password" autoComplete="new-password" hint="Minimal 12 karakter." value={password} onChange={setPassword} />
+      <AppInput {...field('confirm')} label="Konfirmasi kata sandi baru" type="password" autoComplete="new-password" value={confirm} onChange={setConfirm} />
       {error ? <p className="auth-error" role="alert">{error}</p> : null}
       <AppAction type="submit" loading={loading}>
-        Reset password
+        Reset kata sandi
       </AppAction>
     </form>
   );
@@ -98,14 +98,14 @@ export function PasswordResetPage() {
       <section className="auth-card" aria-labelledby="reset-title">
         <div>
           <p className="auth-eyebrow">Digvation Control Center</p>
-          <h1 id="reset-title">Reset password</h1>
+          <h1 id="reset-title">Reset kata sandi</h1>
         </div>
         {step.kind === 'request' ? (
           <RequestStep onSent={(challengeId, email) => setStep({ kind: 'reset', challengeId, email })} />
         ) : step.kind === 'reset' ? (
           <ResetStep challengeId={step.challengeId} email={step.email} onDone={() => setStep({ kind: 'done' })} />
         ) : (
-          <DAlert variant="success">Your password has been reset. Sign in with the new one.</DAlert>
+          <DAlert variant="success">Kata sandi Anda sudah direset. Masuk dengan kata sandi baru.</DAlert>
         )}
         <Link className="auth-link" to="/login">
           Back to sign in

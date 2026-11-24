@@ -4,6 +4,7 @@ import { FormDialog } from '../../../shared/forms/form-dialog';
 import { read } from '../../../shared/forms/form-spec';
 import { AppAction } from '../../../shared/ui/app-action';
 import { DetailItem, DetailList } from '../../../shared/ui/app-dialog';
+import { LanguageSelect } from '../../../shared/ui/language-select';
 import { Page, PageHeader, Section } from '../../../shared/ui/page';
 import { useAuth } from '../../auth/use-auth';
 import { accessApi } from '../access-api';
@@ -15,12 +16,12 @@ export function ProfilePage() {
   const [changingPassword, setChangingPassword] = useState(false);
 
   const update = useApiMutation(accessApi.updateProfile, {
-    success: 'Profile saved',
+    success: 'Profil disimpan',
     toastErrors: false,
     onSuccess: (result) => setUser(result.user),
   });
   const changePassword = useApiMutation(accessApi.changePassword, {
-    success: 'Password changed',
+    success: 'Kata sandi diganti',
     toastErrors: false,
   });
 
@@ -29,35 +30,41 @@ export function ProfilePage() {
   return (
     <Page>
       <PageHeader
-        title="My profile"
+        title="Profil saya"
         actions={
           <>
             <AppAction tone="secondary" onClick={() => setChangingPassword(true)}>
-              Change password
+              Ganti kata sandi
             </AppAction>
-            <AppAction onClick={() => setEditing(true)}>Edit profile</AppAction>
+            <AppAction onClick={() => setEditing(true)}>Edit profil</AppAction>
           </>
         }
       />
-      <Section title="Account">
+      <Section title="Akun">
         <DetailList>
-          <DetailItem label="Full name">{user.fullname}</DetailItem>
+          <DetailItem label="Nama lengkap">{user.fullname}</DetailItem>
           <DetailItem label="Email">{user.email}</DetailItem>
           <DetailItem label="Username">{user.username}</DetailItem>
-          <DetailItem label="Phone">{user.phone_number}</DetailItem>
+          <DetailItem label="Nomor telepon">{user.phone_number}</DetailItem>
         </DetailList>
+      </Section>
+
+      <Section title="Tampilan">
+        <div className="profile-language">
+          <LanguageSelect hint="Berlaku untuk tanggal, waktu dan jumlah uang di browser ini. Teks aplikasi tetap berbahasa Indonesia." />
+        </div>
       </Section>
 
       <FormDialog
         open={editing}
-        title="Edit profile"
+        title="Edit profil"
         fields={[
-          { name: 'fullname', label: 'Full name', required: true, maxLength: 150 },
-          { name: 'username', label: 'Username', required: true, maxLength: 50, validate: USERNAME_RULE, hint: '3 to 50 lowercase letters, digits, ".", "_" or "-".' },
-          { name: 'phone_number', label: 'Phone', maxLength: 30, placeholder: '+6281234567890' },
+          { name: 'fullname', label: 'Nama lengkap', required: true, maxLength: 150 },
+          { name: 'username', label: 'Username', required: true, maxLength: 50, validate: USERNAME_RULE, hint: '3 sampai 50 huruf kecil, angka, ".", "_" atau "-".' },
+          { name: 'phone_number', label: 'Nomor telepon', maxLength: 30, placeholder: '+6281234567890' },
         ]}
         initialValues={{ fullname: user.fullname, username: user.username, phone_number: user.phone_number ?? '' }}
-        submitLabel="Save profile"
+        submitLabel="Simpan profil"
         onSubmit={(values) =>
           update.mutateAsync({
             fullname: read.text(values, 'fullname'),
@@ -70,10 +77,10 @@ export function ProfilePage() {
 
       <FormDialog
         open={changingPassword}
-        title="Change password"
-        description="Other sessions stay signed in until their access token expires."
-        fields={[{ name: 'current_password', label: 'Current password', kind: 'password', required: true }, ...PASSWORD_FIELDS]}
-        submitLabel="Change password"
+        title="Ganti kata sandi"
+        description="Sesi lain tetap masuk sampai access token-nya kedaluwarsa."
+        fields={[{ name: 'current_password', label: 'Kata sandi saat ini', kind: 'password', required: true }, ...PASSWORD_FIELDS]}
+        submitLabel="Ganti kata sandi"
         onSubmit={(values) =>
           changePassword.mutateAsync({
             current_password: read.text(values, 'current_password'),

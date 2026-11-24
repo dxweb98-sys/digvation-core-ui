@@ -16,12 +16,12 @@ describe('form validation', () => {
   it('reports every required field that is empty, and skips hidden ones', () => {
     const errors = validateForm(fields, initialFormValues(fields));
     expect(Object.keys(errors).sort()).toEqual(['amount', 'code', 'roles', 'starts_on']);
-    expect(errors.roles).toBe('Choose an option.');
+    expect(errors.roles).toBe('Pilih salah satu.');
   });
 
   it('checks a field that becomes visible', () => {
     const values = { ...initialFormValues(fields), adjust: true };
-    expect(validateForm(fields, values).reason).toBe('This field is required.');
+    expect(validateForm(fields, values).reason).toBe('Isi kolom ini.');
   });
 
   it('checks length, email, calendar dates, integers and whole rupiah', () => {
@@ -35,17 +35,17 @@ describe('form validation', () => {
       adjust: false,
     });
     expect(errors).toEqual({
-      code: 'Use at most 4 characters.',
-      email: 'Enter a valid email address.',
-      starts_on: 'Use a date in the format YYYY-MM-DD.',
-      amount: 'Enter a whole rupiah amount.',
-      days: 'Enter 365 or less.',
+      code: 'Maksimal 4 karakter.',
+      email: 'Format email tidak valid.',
+      starts_on: 'Gunakan format tanggal YYYY-MM-DD.',
+      amount: 'Isi dengan jumlah rupiah utuh.',
+      days: 'Maksimal 365.',
     });
   });
 
   it('refuses negative rupiah unless the field allows it', () => {
     const negative = { ...initialFormValues(fields), amount: '-5000' };
-    expect(validateForm(fields, negative).amount).toBe('Enter an amount of 0 or more.');
+    expect(validateForm(fields, negative).amount).toBe('Isi jumlah 0 atau lebih.');
     const credit: FieldSpec[] = [{ name: 'amount', label: 'Amount', kind: 'rupiah', allowNegative: true }];
     expect(validateForm(credit, { amount: '-5000' })).toEqual({});
   });

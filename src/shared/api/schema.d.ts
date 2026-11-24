@@ -158,135 +158,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/billing/clients/{clientId}": {
+    "/business-types": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Client credit and outstanding balance, per currency */
-        get: operations["PaymentController.clientBilling"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/billing/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get the billing settings and tax rates */
-        get: operations["BillingSettingsController.get"];
         /**
-         * Replace the billing settings and tax rates
-         * @description Issuer, payment instructions, default currency, draft lead time, number patterns and every tax rate, with a reason; each save is a new revision. Patterns: {YYYY}, {MM}, {BRAND} and exactly one {SEQ:n}; tax rates must not overlap (BILLING_SETTINGS_INVALID). Issued invoices keep their snapshot.
+         * List business types
+         * @description Searches code and name.
          */
-        put: operations["BillingSettingsController.update"];
-        post?: never;
+        get: operations["BusinessTypeController.list"];
+        put?: never;
+        /** Add a business type to the master list */
+        post: operations["BusinessTypeController.create"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/billing/settings/revisions": {
+    "/business-types/active": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List the saved revisions of the billing settings, newest first */
-        get: operations["BillingSettingsController.revisions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/billing/source-exclusions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List generated sources an operator removed from drafts */
-        get: operations["InvoiceController.exclusions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/billing/source-exclusions/{exclusionId}/restore": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
         /**
-         * Bill an excluded source again, with a reason
-         * @description The next draft generation run adds it back. The exclusion stays as history (restored_at) and the restore is recorded as a lifecycle event with the actor and reason. Errors: INVOICE_SOURCE_EXCLUSION_NOT_FOUND (also for one already restored).
+         * List the business types a brand can choose
+         * @description The picker reads this: only ACTIVE values answer here.
          */
-        post: operations["InvoiceController.restore"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/catalog/applications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Applications */
-        get: operations["CatalogItemController.list"];
-        put?: never;
-        /** Register a Application (DRAFT) */
-        post: operations["CatalogItemController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/catalog/applications/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a Application */
-        get: operations["CatalogItemController.get"];
+        get: operations["BusinessTypeController.listActive"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Update a Application (the code is immutable) */
-        patch: operations["CatalogItemController.update"];
+        patch?: never;
         trace?: never;
     };
-    "/catalog/applications/{id}/status": {
+    "/business-types/{businessTypeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a business type */
+        get: operations["BusinessTypeController.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Rename a business type (the code is immutable) */
+        patch: operations["BusinessTypeController.update"];
+        trace?: never;
+    };
+    "/business-types/{businessTypeId}/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -300,139 +231,10 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Apply a Application lifecycle transition
-         * @description DRAFT -> ACTIVE or RETIRED, ACTIVE -> RETIRED, RETIRED -> DRAFT. The reason and actor are recorded.
+         * Archive or reactivate a business type
+         * @description ARCHIVED is refused while a brand still uses the value; move those brands first.
          */
-        patch: operations["CatalogItemController.transition"];
-        trace?: never;
-    };
-    "/catalog/base-domains": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Base domains */
-        get: operations["CatalogItemController.list"];
-        put?: never;
-        /** Register a Base domain (DRAFT) */
-        post: operations["CatalogItemController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/catalog/base-domains/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a Base domain */
-        get: operations["CatalogItemController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update a Base domain (the code is immutable) */
-        patch: operations["CatalogItemController.update"];
-        trace?: never;
-    };
-    "/catalog/base-domains/{id}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Apply a Base domain lifecycle transition
-         * @description DRAFT -> ACTIVE or RETIRED, ACTIVE -> RETIRED, RETIRED -> DRAFT. The reason and actor are recorded.
-         */
-        patch: operations["CatalogItemController.transition"];
-        trace?: never;
-    };
-    "/catalog/capabilities": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Capabilitys */
-        get: operations["CatalogItemController.list"];
-        put?: never;
-        /** Register a Capability (DRAFT) */
-        post: operations["CatalogItemController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/catalog/capabilities/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a Capability */
-        get: operations["CatalogItemController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update a Capability (the code is immutable) */
-        patch: operations["CatalogItemController.update"];
-        trace?: never;
-    };
-    "/catalog/capabilities/{id}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Apply a Capability lifecycle transition
-         * @description DRAFT -> ACTIVE or RETIRED, ACTIVE -> RETIRED, RETIRED -> DRAFT. The reason and actor are recorded.
-         */
-        patch: operations["CatalogItemController.transition"];
-        trace?: never;
-    };
-    "/catalog/manifest-formats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the registered manifest formats and their valid keys */
-        get: operations["ManifestFormatController.list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
+        patch: operations["BusinessTypeController.transition"];
         trace?: never;
     };
     "/clients": {
@@ -444,13 +246,13 @@ export interface paths {
         };
         /**
          * List clients
-         * @description Searches code, display name and legal name.
+         * @description Searches code and full name.
          */
         get: operations["ClientController.list"];
         put?: never;
         /**
          * Register a client
-         * @description Creates the client, its first brand (same code and name) and its primary contact in one transaction.
+         * @description One transaction: the client in DRAFT, its first business and its first brand with its business type (D22, D25).
          */
         post: operations["ClientController.create"];
         delete?: never;
@@ -466,7 +268,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a client with its brands and contacts */
+        /**
+         * Read a client from itself down
+         * @description The client, its businesses each with their brands, legal entity, contacts and the bill-to and recipients they resolve, and a summary.
+         */
         get: operations["ClientController.get"];
         put?: never;
         post?: never;
@@ -484,13 +289,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * List the brands of a client
-         * @description Each brand carries its billing contacts: its own, or the client's when it has none.
-         */
+        /** List the brands of a client */
         get: operations["BrandController.list"];
         put?: never;
-        /** Add a brand to a client */
+        /**
+         * Register a brand of a client
+         * @description A code and a name are each unique inside the client. A brand carries exactly one business type: a master value or a custom label.
+         */
         post: operations["BrandController.create"];
         delete?: never;
         options?: never;
@@ -505,7 +310,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Read a brand from itself down
+         * @description The brand, its business with that business legal entity and contacts, its business type, and the bill_to, recipients and contact it resolves.
+         */
+        get: operations["BrandController.get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -513,6 +322,46 @@ export interface paths {
         head?: never;
         /** Update brand details (the code is immutable) */
         patch: operations["BrandController.update"];
+        trace?: never;
+    };
+    "/clients/{clientId}/brands/{brandId}/bill-to": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The bill-to a brand resolves
+         * @description The bill_to, recipients and contact an invoice of this brand resolves through its business (3.3, D23, D35).
+         */
+        get: operations["BrandController.billTo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clients/{clientId}/brands/{brandId}/placement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Move a brand to another business, or change its business type
+         * @description Moving a brand to another business of the same client also moves its bill-to and recipients; the business it leaves stays, also without brands. The business type always stays exactly one of business_type_id and custom_business_type.
+         */
+        patch: operations["BrandController.move"];
         trace?: never;
     };
     "/clients/{clientId}/brands/{brandId}/status": {
@@ -530,24 +379,70 @@ export interface paths {
         head?: never;
         /**
          * Archive or reactivate a brand
-         * @description The last active brand of a client cannot be archived. The reason and actor are recorded.
+         * @description Any brand may be archived, also the last active one (D32). The guards for open services and unsettled invoices arrive with units 2b and 4.
          */
         patch: operations["BrandController.transition"];
         trace?: never;
     };
-    "/clients/{clientId}/contacts": {
+    "/clients/{clientId}/businesses": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List the contacts of a client (primary first) */
+        /**
+         * List the businesses of a client
+         * @description Each business with its brands, its legal entity and its contacts.
+         */
+        get: operations["BusinessController.list"];
+        put?: never;
+        /**
+         * Create a business for a client
+         * @description A business can be created before any brand moves in, for a writable client. Its code is unique across all clients and never changes.
+         */
+        post: operations["BusinessController.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clients/{clientId}/businesses/{businessId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one business with what belongs to it */
+        get: operations["BusinessController.get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete an empty business
+         * @description Refused with BUSINESS_NOT_EMPTY while the business still holds a brand, a contact or a legal entity.
+         */
+        delete: operations["BusinessController.remove"];
+        options?: never;
+        head?: never;
+        /** Rename a business or change its notes */
+        patch: operations["BusinessController.update"];
+        trace?: never;
+    };
+    "/clients/{clientId}/businesses/{businessId}/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the contacts of a business */
         get: operations["ClientContactController.list"];
         put?: never;
         /**
-         * Add a contact
-         * @description is_primary true moves the primary flag to the new contact. A billing contact needs an email; brand_id must be a brand of the same client.
+         * Add a contact to a business
+         * @description is_primary promotes this contact and demotes the previous primary in the same transaction. A billing contact needs an email.
          */
         post: operations["ClientContactController.create"];
         delete?: never;
@@ -556,123 +451,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/clients/{clientId}/contacts/{contactId}": {
+    "/clients/{clientId}/businesses/{businessId}/contacts/{contactId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Get one contact of a business */
+        get: operations["ClientContactController.get"];
         put?: never;
         post?: never;
-        /** Delete a contact (not the primary contact) */
+        /** Delete a contact of a business */
         delete: operations["ClientContactController.remove"];
         options?: never;
         head?: never;
-        /**
-         * Update a contact
-         * @description is_primary true makes it the primary contact and demotes the previous one; the primary contact cannot be set to false.
-         */
+        /** Update the details of a contact */
         patch: operations["ClientContactController.update"];
         trace?: never;
     };
-    "/clients/{clientId}/services": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the services of a client, newest first */
-        get: operations["ClientServiceController.list"];
-        put?: never;
-        /**
-         * Provision a product for a brand of the client
-         * @description Client, brand and product must be ACTIVE. A brand holds at most one open service per product (a CANCELLED or DECOMMISSIONED one does not count); the same product may run under two brands of one client. The service starts PROVISIONING.
-         */
-        post: operations["ClientServiceController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/clients/{clientId}/services/{serviceId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a service with its features and add-ons */
-        get: operations["ClientServiceController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/clients/{clientId}/services/{serviceId}/add-ons": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Add an add-on to an open service (PROVISIONING)
-         * @description An ACTIVE add-on of the service product; a CLIENT add-on only for its owner client. A service holds an add-on at most once while that holding is open; a CANCELLED one can be held again.
-         */
-        post: operations["ClientServiceController.addAddOn"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/clients/{clientId}/services/{serviceId}/add-ons/{clientAddOnId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Apply a held add-on lifecycle transition (same table as services) */
-        patch: operations["ClientServiceController.transitionAddOn"];
-        trace?: never;
-    };
-    "/clients/{clientId}/services/{serviceId}/features": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Replace the selected features of an open service
-         * @description ACTIVE features of the service product; a CLIENT feature only for its owner client. Refused on a CANCELLED or DECOMMISSIONED service.
-         */
-        put: operations["ClientServiceController.replaceFeatures"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/clients/{clientId}/services/{serviceId}/status": {
+    "/clients/{clientId}/businesses/{businessId}/contacts/{contactId}/flags": {
         parameters: {
             query?: never;
             header?: never;
@@ -686,10 +484,52 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Apply a service lifecycle transition
-         * @description PROVISIONING -> TRIAL, ACTIVE or CANCELLED; TRIAL -> ACTIVE, SUSPENDED or CANCELLED; ACTIVE -> SUSPENDED or CANCELLED; SUSPENDED -> ACTIVE or CANCELLED; CANCELLED -> DECOMMISSIONED. Cancelling cancels the open add-ons; decommissioning decommissions the cancelled ones and is refused while an installation that is not DECOMMISSIONED hosts the service. The reason and actor are recorded.
+         * Change the primary, billing, technical or PIC flags
+         * @description Promoting a primary demotes the previous one in the same transaction. The current primary cannot be demoted or deleted directly.
          */
-        patch: operations["ClientServiceController.transition"];
+        patch: operations["ClientContactController.setFlags"];
+        trace?: never;
+    };
+    "/clients/{clientId}/businesses/{businessId}/legal-entity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the legal entity of a business */
+        get: operations["LegalEntityController.get"];
+        put?: never;
+        /**
+         * Register the legal entity of a business
+         * @description Refused when the business already has one. Registering it changes only invoices issued afterwards (3.6).
+         */
+        post: operations["LegalEntityController.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update the legal entity of a business */
+        patch: operations["LegalEntityController.update"];
+        trace?: never;
+    };
+    "/clients/{clientId}/businesses/{businessId}/legal-entity/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Archive or reactivate the legal entity of a business
+         * @description ARCHIVED is refused while brands are still billed through the business. Issued invoices keep their snapshot either way.
+         */
+        patch: operations["LegalEntityController.transition"];
         trace?: never;
     };
     "/clients/{clientId}/status": {
@@ -707,979 +547,9 @@ export interface paths {
         head?: never;
         /**
          * Apply a client lifecycle transition
-         * @description ACTIVE <-> SUSPENDED, ACTIVE or SUSPENDED -> ARCHIVED, ARCHIVED -> ACTIVE. The reason and actor are recorded.
+         * @description DRAFT -> ACTIVE or ARCHIVED, ACTIVE <-> SUSPENDED, ACTIVE or SUSPENDED -> ARCHIVED, ARCHIVED -> ACTIVE.
          */
         patch: operations["ClientController.transition"];
-        trace?: never;
-    };
-    "/contracts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List contracts, newest first
-         * @description Filters: status, client, brand, and ends_before (the running term ends before that date).
-         */
-        get: operations["ContractController.list"];
-        put?: never;
-        /**
-         * Create the contract of a client service
-         * @description One contract per open service; it starts PENDING and follows its terms. Add-ons are billed through contract add-ons, never a separate contract. Errors: SERVICE_NOT_FOUND, CONTRACT_SERVICE_NOT_OPEN, CONTRACT_ALREADY_EXISTS.
-         */
-        post: operations["ContractController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/contracts/{contractId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a contract with its terms, charges and add-ons */
-        get: operations["ContractController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Change contract settings
-         * @description Reference, auto-renew, renewal notice, grace period and billable. Refused for a CANCELLED contract (CONTRACT_CLOSED).
-         */
-        patch: operations["ContractController.update"];
-        trace?: never;
-    };
-    "/contracts/{contractId}/add-ons": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Bill a held add-on under the contract
-         * @description CO_TERM_PRORATED: the first charge is agreed_amount x days from effective_from to the end of the billing period running then (whole term with PER_TERM) / days of that period, rounded half up in minor units. Errors: CONTRACT_ADD_ON_INVALID, CONTRACT_ADD_ON_ALREADY_EXISTS, CONTRACT_ADJUSTMENT_REASON_REQUIRED.
-         */
-        post: operations["ContractController.addAddOn"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/contracts/{contractId}/add-ons/{contractAddOnId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Set the last billed day of a contract add-on */
-        patch: operations["ContractController.endAddOn"];
-        trace?: never;
-    };
-    "/contracts/{contractId}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Cancel a contract
-         * @description Needs a reason and an effective date inside the running term: the term ends that day, drafts and scheduled terms are cancelled at once, and the contract and its service become CANCELLED once the day has passed (at once without a running term). Errors: CONTRACT_CLOSED, CONTRACT_CANCEL_INVALID.
-         */
-        post: operations["ContractController.cancel"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/contracts/{contractId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Suspend or resume a contract
-         * @description SUSPENDED pauses a TRIAL or ACTIVE contract and suspends its service; ACTIVE resumes a SUSPENDED contract with a running term. Other statuses follow the terms and the daily job. An overdue invoice never suspends a contract (D4). Errors: CONTRACT_INVALID_TRANSITION.
-         */
-        patch: operations["ContractController.transition"];
-        trace?: never;
-    };
-    "/contracts/{contractId}/terms": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the terms of a contract in period order */
-        get: operations["ContractController.terms"];
-        put?: never;
-        /**
-         * Add a DRAFT term
-         * @description Fixed dates (starts_on with ends_on or a duration) or starts_at_go_live with a duration. Periods of one contract never overlap. The catalog price is snapshot as list_amount (empty without a catalog price); an agreed price that differs needs an adjustment and a reason. Errors: CONTRACT_TERM_INVALID, CONTRACT_TERM_OVERLAP, CONTRACT_ADJUSTMENT_REASON_REQUIRED, CONTRACT_CLOSED.
-         */
-        post: operations["ContractController.createTerm"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/contracts/{contractId}/terms/{termId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Change a DRAFT term
-         * @description SCHEDULED, ACTIVE, ENDED and CANCELLED terms never change (CONTRACT_TERM_NOT_EDITABLE). A renewal draft whose price leaves its prefilled amount needs adjustment_reason (CONTRACT_PRICE_CHANGE_REASON_REQUIRED).
-         */
-        patch: operations["ContractController.updateTerm"];
-        trace?: never;
-    };
-    "/contracts/{contractId}/terms/{termId}/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Confirm a DRAFT term (SCHEDULED)
-         * @description A dated term whose first day has come starts at once when no term runs; a go-live term starts at once when a PRODUCTION installation hosting the service is live. Otherwise the daily job starts it. A reason is required only when a renewal draft differs from its prefilled amount or cycle (CONTRACT_PRICE_CHANGE_REASON_REQUIRED).
-         */
-        post: operations["ContractController.confirmTerm"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/contracts/{contractId}/terms/{termId}/one-off-charges": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Add a one-off charge to a DRAFT term
-         * @description Billed on the first invoice of the term as its own line, separate from the term charge.
-         */
-        post: operations["ContractController.addCharge"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/contracts/{contractId}/terms/{termId}/one-off-charges/{chargeId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Remove a one-off charge from a DRAFT term */
-        delete: operations["ContractController.removeCharge"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/credit-notes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List credit notes, newest first */
-        get: operations["CreditNoteController.list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/credit-notes/{creditNoteId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a credit note */
-        get: operations["CreditNoteController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/credit-notes/{creditNoteId}/pdf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Download the PDF of a credit note
-         * @description Rendered once from its snapshot, stored, and served from storage afterwards; X-Content-SHA256 is its hash.
-         */
-        get: operations["CreditNoteController.pdf"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/credit-notes/{creditNoteId}/send": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Email the credit note PDF to the brand billing contacts
-         * @description Recipients are resolved now; every attempt is recorded, a failed one too (CREDIT_NOTE_SEND_FAILED, 503).
-         */
-        post: operations["CreditNoteController.send"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/deployments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List deployment operations, newest first
-         * @description Filters: installation_id and status.
-         */
-        get: operations["DeploymentController.list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/deployments/{deploymentId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a deployment operation with its targets */
-        get: operations["DeploymentController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/deployments/{deploymentId}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Cancel a PENDING or CLAIMED deployment
-         * @description A RUNNING one is never cancelled from CORE (DEPLOYMENT_INVALID_TRANSITION).
-         */
-        post: operations["DeploymentController.cancel"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/host-agent/deployments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the open operations (PENDING, CLAIMED, RUNNING) on this host */
-        get: operations["HostDeploymentController.open"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/host-agent/deployments/{deploymentId}/claim": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Claim a PENDING operation
-         * @description Claiming a CLAIMED or RUNNING operation again answers it unchanged.
-         */
-        post: operations["HostDeploymentController.claim"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/host-agent/deployments/{deploymentId}/result": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Report the result (SUCCEEDED or FAILED)
-         * @description Accepted from PENDING, CLAIMED, RUNNING or OUTCOME_UNKNOWN with the real timestamps (a deploy done while CORE was unreachable). The same result again answers it unchanged; a different one is refused. SUCCEEDED records the running releases and manifest; a PROVISION in PRODUCTION sets go_live_at when empty.
-         */
-        post: operations["HostDeploymentController.result"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/host-agent/deployments/{deploymentId}/running": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Report that the operation runs
-         * @description From PENDING (claimed on the way) or CLAIMED; reporting RUNNING again answers it unchanged.
-         */
-        post: operations["HostDeploymentController.running"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/host-agent/installations/{installationCode}/manifest": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Fetch the ISSUED manifest of an installation on this host
-         * @description Answers the content with its sha256, revision and format, and an ETag (the quoted sha256); If-None-Match with that ETag answers 304 without a body. An installation on another host answers 404.
-         */
-        get: operations["HostManifestController.current"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/host-agent/installations/{installationCode}/manifest/revisions/{revision}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Fetch one ISSUED or SUPERSEDED revision of an installation on this host
-         * @description A DRAFT is never served. Same ETag behaviour as the current manifest.
-         */
-        get: operations["HostManifestController.byRevision"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/host-agent/self": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Identify the host behind the presented credential
-         * @description Any scope. Answers 401 for an unknown, revoked or rotated token and for a token of a RETIRED host.
-         */
-        get: operations["HostAgentController.self"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hosts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List hosts
-         * @description Filter by status and infrastructure_ownership; search matches code, name, address, provider and region.
-         */
-        get: operations["HostController.list"];
-        put?: never;
-        /** Register a host (ACTIVE) */
-        post: operations["HostController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hosts/{hostId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a host */
-        get: operations["HostController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Update host details
-         * @description The code never changes; a RETIRED host is read-only.
-         */
-        patch: operations["HostController.update"];
-        trace?: never;
-    };
-    "/hosts/{hostId}/credentials": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the credentials of a host, newest first (no tokens) */
-        get: operations["HostController.listCredentials"];
-        put?: never;
-        /**
-         * Issue the credential of an ACTIVE host
-         * @description The token is returned once and stored only as a hash. A host has at most one active credential; rotate or revoke it first.
-         */
-        post: operations["HostController.issueCredential"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hosts/{hostId}/credentials/revoke": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Revoke the active credential */
-        post: operations["HostController.revokeCredential"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hosts/{hostId}/credentials/rotate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Rotate the active credential
-         * @description Revokes the active credential and issues a new one with the same scopes, in one transaction. The new token is returned once.
-         */
-        post: operations["HostController.rotateCredential"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/hosts/{hostId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Apply a host lifecycle transition
-         * @description ACTIVE -> RETIRED (final), refused while an installation on the host is not DECOMMISSIONED. Revokes the active credential in the same step. The reason and actor are recorded.
-         */
-        patch: operations["HostController.transition"];
-        trace?: never;
-    };
-    "/installations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List installations
-         * @description Filter by host_id, owner_client_id, deployment_mode, environment and status; search matches code and name.
-         */
-        get: operations["InstallationController.list"];
-        put?: never;
-        /**
-         * Create an installation (PROVISIONING)
-         * @description DEDICATED: owner_client_id required (not ARCHIVED) and service_ids are open services of that client, from one or several brands; a service runs in at most one installation per environment. SHARED: no owner; product_ids are ACTIVE products. The enabled set is filled from the allowed set.
-         */
-        post: operations["InstallationController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get an installation with its services, products, branding and enabled set */
-        get: operations["InstallationController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Update name, management, URLs or branding
-         * @description Code, mode, environment, host and owner never change; a DECOMMISSIONED installation is read-only.
-         */
-        patch: operations["InstallationController.update"];
-        trace?: never;
-    };
-    "/installations/{installationId}/coverage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Contract coverage of every enabled or allowed item
-         * @description COVERED, OVERRIDE (not covered by contract), NOT_COVERED (enabled but no longer allowed) and NOT_ENABLED (allowed, not enabled).
-         */
-        get: operations["InstallationController.coverage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/deployments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Request a deployment of an installation
-         * @description PENDING operation with the target release of every hosted product and the ISSUED manifest revision. At most one open operation per installation (DEPLOYMENT_ALREADY_OPEN). The same idempotency_key answers the operation it created. Errors: DEPLOYMENT_TARGET_MISSING, DEPLOYMENT_MANIFEST_REQUIRED, DEPLOYMENT_IDEMPOTENCY_CONFLICT, INSTALLATION_DECOMMISSIONED.
-         */
-        post: operations["DeploymentController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/enabled-items": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Enable a catalog item of a hosted product
-         * @description An allowed item is enabled as COVERED. An item outside the allowed set needs override_reason and is kept as an OVERRIDE, not covered by contract; a NOT_COVERED item can be kept as an override the same way.
-         */
-        post: operations["InstallationController.enableItem"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/enabled-items/{itemId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Remove an item from the enabled set, with a reason in the body
-         * @description The item row is kept with the actor, time and reason of the removal; the item can be enabled again later.
-         */
-        delete: operations["InstallationController.removeItem"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/go-live": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Set go_live_at of a PRODUCTION installation, with a reason
-         * @description Not in the future. Once set it cannot be cleared; a correction may move it earlier or later. Recorded as an INSTALLATION_GO_LIVE lifecycle event with the old and new value.
-         */
-        put: operations["InstallationController.setGoLive"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/host": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Move the installation to another ACTIVE host, with a reason
-         * @description Refused for a DECOMMISSIONED installation. Recorded as an INSTALLATION_HOST lifecycle event with the old and new host id.
-         */
-        put: operations["InstallationController.moveHost"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/manifests": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List the manifest revisions of an installation
-         * @description Per format, newest revision first, without content.
-         */
-        get: operations["ManifestController.list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/manifests/import": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Import a manifest that already runs as ISSUED
-         * @description The content is read through the format schema (MANIFEST_CONTENT_INVALID with every problem otherwise), stored as ISSUED IMPORTED with its source evidence, supersedes the ISSUED revision, and the DRAFT is regenerated. The first generated DRAFT after an import may be issued only when it enables exactly the same keys (MANIFEST_IMPORT_MISMATCH).
-         */
-        post: operations["ManifestController.import"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/manifests/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Bring the DRAFT of each format up to date with the enabled set
-         * @description Normally automatic on every enabled-set change. Creates a DRAFT when none exists and the content differs from the ISSUED revision. Errors: MANIFEST_RENDER_CONFLICT, MANIFEST_MAPPING_INCOMPLETE, MANIFEST_FORMAT_UNKNOWN.
-         */
-        post: operations["ManifestController.refresh"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/manifests/{revisionId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a revision with its content and diff against the ISSUED revision */
-        get: operations["ManifestController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/manifests/{revisionId}/issue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Issue a DRAFT revision
-         * @description The previous ISSUED revision becomes SUPERSEDED. Every removed key must be listed in confirm_removed (MANIFEST_REMOVAL_NOT_CONFIRMED). Errors: MANIFEST_REVISION_NOT_DRAFT, MANIFEST_IMPORT_MISMATCH.
-         */
-        post: operations["ManifestController.issue"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/products": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * SHARED: host one more ACTIVE product
-         * @description Its ACTIVE items are added to the enabled set.
-         */
-        post: operations["InstallationController.addProduct"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/products/{productId}/target-release": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Set or clear the target release of a hosted product
-         * @description A RELEASED release of that product; null clears it.
-         */
-        put: operations["InstallationController.setTargetRelease"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/services": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * DEDICATED: host one more open service of the owner client
-         * @description Its allowed items are added to the enabled set.
-         */
-        post: operations["InstallationController.addService"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/services/{serviceId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Stop hosting a service, with a reason in the body
-         * @description The product and enabled items stay; items only this service paid for show as NOT_COVERED. An ACTIVE installation keeps at least one open service. Recorded as an INSTALLATION_SERVICE lifecycle event; afterwards the service can be decommissioned.
-         */
-        delete: operations["InstallationController.removeService"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/installations/{installationId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Apply an installation lifecycle transition
-         * @description PROVISIONING -> ACTIVE (ACTIVE host and at least one open service or product) or DECOMMISSIONED; ACTIVE <-> SUSPENDED; ACTIVE or SUSPENDED -> DECOMMISSIONED (final). The reason and actor are recorded.
-         */
-        patch: operations["InstallationController.transition"];
         trace?: never;
     };
     "/invitations": {
@@ -1764,357 +634,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/invoices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List invoices, newest first
-         * @description Filters: client_id, brand_id, status, currency, issue date range and period start range; search matches the number.
-         */
-        get: operations["InvoiceController.list"];
-        put?: never;
-        /**
-         * Open an empty DRAFT for ad-hoc items of a brand
-         * @description Generated drafts come from the daily job.
-         */
-        post: operations["InvoiceController.createDraft"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{invoiceId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get an invoice with its lines and send history */
-        get: operations["InvoiceController.get"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete an empty DRAFT
-         * @description INVOICE_NOT_EMPTY while it has lines; INVOICE_NOT_DRAFT once issued.
-         */
-        delete: operations["InvoiceController.deleteDraft"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{invoiceId}/credit-notes": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Issue a credit note against an invoice
-         * @description For an ISSUED or PARTIALLY_PAID invoice; the amount, tax included, is at most the balance (CREDIT_NOTE_EXCEEDS_BALANCE) and whole rupiah for IDR. Numbered from the credit note pattern with its own gap-free counter. The invoice balance drops (0 is PAID); amount_paid counts payments only. A credit note never changes and is never deleted.
-         */
-        post: operations["CreditNoteController.issue"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{invoiceId}/issue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Issue a DRAFT
-         * @description Assigns the next number of the shared gap-free counter (D9), issue date today, due date after the shortest payment terms of its terms (14 days for ad-hoc items only), and snapshots issuer, bill-to, brand, billing contacts and tax. Needs a line, a total of at least zero and a billing contact for the brand. Errors: INVOICE_EMPTY, INVOICE_TOTAL_NEGATIVE, INVOICE_BILLING_CONTACT_MISSING, BILLING_SETTINGS_REQUIRED, INVOICE_NOT_DRAFT.
-         */
-        post: operations["InvoiceController.issue"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{invoiceId}/lines": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Add an ad-hoc item to a DRAFT
-         * @description Description, quantity and price per unit before tax.
-         */
-        post: operations["InvoiceController.addLine"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{invoiceId}/lines/{lineId}/remove": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Remove a line from a DRAFT, with a reason
-         * @description A generated line is not generated again for its period until its exclusion is restored (POST /billing/source-exclusions/{id}/restore).
-         */
-        post: operations["InvoiceController.removeLine"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{invoiceId}/pdf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Download the PDF of an issued invoice
-         * @description Rendered once from the issue snapshot, stored, and served from storage afterwards; X-Content-SHA256 is its hash.
-         */
-        get: operations["InvoiceController.pdf"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{invoiceId}/send": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Email the invoice PDF to the brand billing contacts
-         * @description For ISSUED, PARTIALLY_PAID or PAID invoices. Recipients are resolved now (the brand’s billing contacts, or the client’s); every attempt is recorded, a failed one too (INVOICE_SEND_FAILED, 503). Sending again is allowed (D2).
-         */
-        post: operations["InvoiceController.send"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/invoices/{invoiceId}/void": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Void an ISSUED invoice, with a reason
-         * @description Only an ISSUED invoice without payment allocations or credit notes (INVOICE_HAS_ALLOCATIONS, INVOICE_HAS_CREDIT_NOTES, INVOICE_NOT_VOIDABLE). The number stays used, the stored PDF is unchanged, and the lines are released: the next draft run bills their periods still in the window; earlier periods are billed with ad-hoc lines.
-         */
-        post: operations["InvoiceController.voidInvoice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/notifications/deliveries": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List recorded reminders, newest first
-         * @description Each reminder is recorded once per event, subject and threshold, with its status, attempts and last error.
-         */
-        get: operations["NotificationController.deliveries"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/notifications/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get the operator reminder settings
-         * @description Recipients and thresholds in effect. Until they are saved, the env defaults apply (source DEFAULT).
-         */
-        get: operations["NotificationController.settings"];
-        /**
-         * Replace the operator reminder settings
-         * @description Recipients and the day thresholds of each reminder. Reminders already sent are not sent again.
-         */
-        put: operations["NotificationController.replace"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/payments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List payments, newest received first */
-        get: operations["PaymentController.list"];
-        put?: never;
-        /**
-         * Record a payment, optionally allocated at once
-         * @description received_at is a business date, not in the future; IDR amounts are whole rupiah. Allocations go to ISSUED or PARTIALLY_PAID invoices of the same client (any brand) and currency, at most each invoice balance and together at most the amount; the rest is client credit. Errors: PAYMENT_ALLOCATION_CLIENT_MISMATCH, PAYMENT_ALLOCATION_CURRENCY_MISMATCH, PAYMENT_ALLOCATION_INVOICE_NOT_OPEN, PAYMENT_ALLOCATION_EXCEEDS_BALANCE, PAYMENT_ALLOCATION_EXCEEDS_UNALLOCATED.
-         */
-        post: operations["PaymentController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/payments/{paymentId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a payment with every allocation */
-        get: operations["PaymentController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/payments/{paymentId}/allocations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Allocate part of a RECORDED payment to an invoice
-         * @description Same rules as at creation. The invoice amount_paid, balance and status (PARTIALLY_PAID or PAID) change in the same transaction.
-         */
-        post: operations["PaymentController.allocate"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/payments/{paymentId}/allocations/{allocationId}/release": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Release an allocation, with a reason
-         * @description The amount returns to the payment (client credit) and the invoice to its status before; both are recorded.
-         */
-        post: operations["PaymentController.release"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/payments/{paymentId}/proof": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Download the proof file of a payment
-         * @description X-Content-SHA256 is its hash.
-         */
-        get: operations["PaymentController.proof"];
-        put?: never;
-        /**
-         * Attach the proof file of a RECORDED payment (once)
-         * @description A PDF, JPEG or PNG recognised by its content (not its name or declared type), at most 5 MB, stored with its sha256 under a generated name. Errors: PAYMENT_PROOF_INVALID, PAYMENT_PROOF_EXISTS, PAYMENT_NOT_RECORDED.
-         */
-        post: operations["PaymentController.attachProof"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/payments/{paymentId}/reverse": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Reverse a mistaken payment, with a reason
-         * @description Every allocation is released and its invoice returns to its status before; the payment becomes REVERSED. Payments are never deleted.
-         */
-        post: operations["PaymentController.reverse"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/permissions": {
         parameters: {
             query?: never;
@@ -2133,449 +652,6 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
-        trace?: never;
-    };
-    "/products": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Digvation products */
-        get: operations["ProductController.list"];
-        put?: never;
-        /** Register a product */
-        post: operations["ProductController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a product */
-        get: operations["ProductController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update product details */
-        patch: operations["ProductController.update"];
-        trace?: never;
-    };
-    "/products/{productId}/add-ons": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the add-ons of a product with grants and prices */
-        get: operations["AddOnController.list"];
-        put?: never;
-        /**
-         * Add an add-on (DRAFT)
-         * @description scope CLIENT ties it to owner_client_id (existing, not archived). Scope and owner are immutable.
-         */
-        post: operations["AddOnController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/add-ons/{addOnId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get an add-on with grants and prices */
-        get: operations["AddOnController.get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update an add-on (code and scope are immutable) */
-        patch: operations["AddOnController.update"];
-        trace?: never;
-    };
-    "/products/{productId}/add-ons/{addOnId}/grants": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Replace the features and capabilities an add-on grants
-         * @description Features of the add-on's product (not RETIRED) and capabilities linked to it as COMPATIBLE (INCLUDED ones are always on). A CLIENT feature only by an add-on of the same owner client. An ACTIVE add-on keeps at least one grant.
-         */
-        put: operations["AddOnController.replaceGrants"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/add-ons/{addOnId}/prices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the catalog prices of an add-on */
-        get: operations["AddOnController.listPrices"];
-        /** Set the add-on price for a billing cycle and currency */
-        put: operations["AddOnController.setPrice"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/add-ons/{addOnId}/prices/{priceId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete an add-on price (catalog prices are optional) */
-        delete: operations["AddOnController.removePrice"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/add-ons/{addOnId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Apply an add-on lifecycle transition
-         * @description ACTIVE needs at least one grant; a catalog price is optional.
-         */
-        patch: operations["AddOnController.transition"];
-        trace?: never;
-    };
-    "/products/{productId}/applications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Replace the applications of a product
-         * @description Newly linked applications must be ACTIVE and, on an ACTIVE product whose manifest format carries applications, already mapped.
-         */
-        put: operations["ProductController.replaceApplications"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/base-domains": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Replace the base domains of a product
-         * @description Zero base domains is valid. Newly linked base domains must be ACTIVE and, on an ACTIVE product with a manifest format, already mapped.
-         */
-        put: operations["ProductController.replaceBaseDomains"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/capabilities": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the capability links of a product, retired ones included */
-        get: operations["ProductCapabilityController.list"];
-        put?: never;
-        /**
-         * Link an ACTIVE capability as INCLUDED or COMPATIBLE
-         * @description One active link per capability. On an ACTIVE product with a manifest format, the capability mapping is needed first.
-         */
-        post: operations["ProductCapabilityController.link"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/capabilities/{linkId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Retire a capability link (kept as history) */
-        patch: operations["ProductCapabilityController.retire"];
-        trace?: never;
-    };
-    "/products/{productId}/features": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the features of a product */
-        get: operations["FeatureController.list"];
-        put?: never;
-        /**
-         * Add a feature (DRAFT)
-         * @description scope CLIENT makes it a custom feature of owner_client_id (an existing, non-archived client); only that client can use it. Scope and owner are immutable.
-         */
-        post: operations["FeatureController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/features/{featureId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update a feature (code and scope are immutable) */
-        patch: operations["FeatureController.update"];
-        trace?: never;
-    };
-    "/products/{productId}/features/{featureId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Apply a feature lifecycle transition
-         * @description On an ACTIVE product with a manifest format, ACTIVE needs the feature mapping first.
-         */
-        patch: operations["FeatureController.transition"];
-        trace?: never;
-    };
-    "/products/{productId}/manifest-mappings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the product's manifest key mappings and what is missing */
-        get: operations["ManifestMappingController.list"];
-        /**
-         * Map a catalog item to a manifest key
-         * @description Creates or replaces the mapping of the item for the product's manifest format. Unknown keys, keys for another item kind and keys already used by another item are refused.
-         */
-        put: operations["ManifestMappingController.upsert"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/manifest-mappings/{mappingId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a mapping (refused while an ACTIVE product needs it) */
-        delete: operations["ManifestMappingController.remove"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/prices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List the catalog prices of a product */
-        get: operations["PriceController.list"];
-        /**
-         * Set the product price for a billing cycle and currency
-         * @description Creates the price or replaces its amount (minor units). Existing contracts keep their own snapshot.
-         */
-        put: operations["PriceController.set"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/prices/{priceId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a product price */
-        delete: operations["PriceController.remove"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/releases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List releases, highest semantic version first
-         * @description current_version is the highest RELEASED version.
-         */
-        get: operations["ReleaseController.list"];
-        put?: never;
-        /**
-         * Register a release (DRAFT)
-         * @description version is a semantic version 2.0.0, unique per product by precedence.
-         */
-        post: operations["ReleaseController.create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{productId}/releases/{releaseId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update a DRAFT release (the version is immutable) */
-        patch: operations["ReleaseController.update"];
-        trace?: never;
-    };
-    "/products/{productId}/releases/{releaseId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Release or withdraw
-         * @description DRAFT -> RELEASED (needs artifact_ref; released_at defaults to now) -> WITHDRAWN.
-         */
-        patch: operations["ReleaseController.transition"];
-        trace?: never;
-    };
-    "/products/{productId}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Apply a validated product lifecycle transition
-         * @description ACTIVE needs no base domain; a product with a manifest format needs a key mapping for every carried item first. RETIRED needs every feature RETIRED.
-         */
-        patch: operations["ProductController.transition"];
         trace?: never;
     };
     "/roles": {
@@ -2635,26 +711,6 @@ export interface paths {
          * @description SUPER_ADMIN bypasses permission assignments and cannot be modified here. System ADMIN/MEMBER permissions are configurable only by SUPER_ADMIN.
          */
         put: operations["RoleController.setPermissions"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/services": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List services across clients
-         * @description Filter by client_id, brand_id, product_id and status.
-         */
-        get: operations["ServiceCatalogController.list"];
-        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -2775,77 +831,6 @@ export interface components {
             /** Format: password */
             confirm_password: string;
         };
-        AddClientAddOnDto: {
-            /**
-             * Format: uuid
-             * @description An ACTIVE add-on of the service product; a CLIENT add-on only for its owner client.
-             */
-            add_on_id: string;
-        };
-        AddInvoiceLineDto: {
-            /** @example Pelatihan staf (2 sesi) */
-            description: string;
-            /** @default 1 */
-            quantity: number;
-            /**
-             * @description Price per unit before tax, in minor units (Rp250.000 is 25000000); negative for a discount.
-             * @example 25000000
-             */
-            unit_amount: string;
-            /** Format: date */
-            period_start?: string;
-            /** Format: date */
-            period_end?: string;
-        };
-        AddOnDto: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            product_id: string;
-            code: string;
-            name: string;
-            description?: string | null;
-            /** @enum {string} */
-            scope: "PRODUCT" | "CLIENT";
-            /** Format: uuid */
-            owner_client_id?: string | null;
-            /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "RETIRED";
-            /** @description Granted feature codes */
-            features: string[];
-            /** @description Granted capability codes */
-            capabilities: string[];
-            prices: components["schemas"]["PriceDto"][];
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-        };
-        AddOnListDto: {
-            items: components["schemas"]["AddOnDto"][];
-        };
-        AllocatePaymentDto: {
-            /**
-             * Format: uuid
-             * @description An ISSUED or PARTIALLY_PAID invoice of the payment client (any brand), in the payment currency.
-             */
-            invoice_id: string;
-            /**
-             * @description At most the invoice balance and the unallocated payment. Minor units as a string of digits, greater than zero (Rp350.000 is 35000000); IDR must be whole rupiah.
-             * @example 35000000
-             */
-            amount: string;
-        };
-        AllocationInvoiceDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example INV/2026/11/00001 */
-            number: string | null;
-            /** Format: uuid */
-            brand_id: string;
-            /** @enum {string} */
-            status: "DRAFT" | "ISSUED" | "PARTIALLY_PAID" | "PAID" | "VOID";
-        };
         ApiErrorDetailDto: {
             /** @example username */
             field?: string;
@@ -2949,65 +934,86 @@ export interface components {
              */
             permissions: string[];
         };
-        BillingSettingsDto: {
-            /** @description False until the settings are saved; invoices cannot be issued before. */
-            configured: boolean;
-            issuer_legal_name: string | null;
-            /** @description NPWP. */
-            issuer_tax_identifier: string | null;
-            issuer_address: string | null;
-            issuer_email: string | null;
-            issuer_phone: string | null;
-            payment_instructions: string | null;
-            /** @example IDR */
-            default_currency: string;
-            /** @example 7 */
-            draft_lead_days: number;
-            /** @example INV/{YYYY}/{MM}/{SEQ:5} */
-            invoice_number_pattern: string;
-            /** @example CN/{YYYY}/{MM}/{SEQ:5} */
-            credit_note_number_pattern: string;
-            /** @description Revision of the saved settings. */
-            revision: number | null;
-            tax_rates: components["schemas"]["TaxRateDto"][];
+        BillToDto: {
+            /**
+             * @description The legal name of the legal entity, else the business alias. Issued invoices keep their own snapshot.
+             * @example PT Digital Innovation
+             */
+            name: string;
+            /** @enum {string} */
+            name_source: "LEGAL_ENTITY" | "ALIAS";
+            address?: string | null;
+            /** @enum {string|null} */
+            address_source?: "LEGAL_ENTITY" | "BUSINESS" | "CLIENT" | null;
         };
-        BillingSettingsRevisionDto: {
-            /** @example 3 */
-            revision: number;
-            /** @description The settings and tax rates as saved. */
-            snapshot: {
-                [key: string]: unknown;
-            };
-            /** @example Bank account changed */
-            reason: string;
+        BrandBusinessRefDto: {
             /** Format: uuid */
-            changed_by_id: string | null;
-            /** @example user */
-            source: string;
+            id: string;
+            /** @example DBIZ-261124-0001 */
+            code: string;
+            /** @example POSEIDON */
+            alias: string;
+            /**
+             * Format: uuid
+             * @description The single legal entity of this business, when registered.
+             */
+            legal_entity_id?: string | null;
+            /** @description The contacts of this business (0..n). */
+            contact_ids: unknown[];
+        };
+        BrandDetailDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            client_id: string;
+            /** Format: uuid */
+            business_id: string;
+            /** @example SALON */
+            code: string;
+            /** @example Nova Salon */
+            name: string;
+            description?: string | null;
+            logo_url?: string | null;
+            website?: string | null;
+            primary_color?: string | null;
+            secondary_color?: string | null;
+            /** @description The master business type, or null when the brand carries custom_business_type. */
+            business_type?: components["schemas"]["BusinessTypeRefDto"] | null;
+            /** @description The custom business type label, when no master value fits. */
+            custom_business_type?: string | null;
+            /** @enum {string} */
+            status: "ACTIVE" | "ARCHIVED";
             /** Format: date-time */
             created_at: string;
-        };
-        BillingSettingsRevisionListDto: {
-            items: components["schemas"]["BillingSettingsRevisionDto"][];
+            /** Format: date-time */
+            updated_at: string;
+            business: components["schemas"]["BrandBusinessRefDto"];
+            bill_to: components["schemas"]["BillToDto"];
+            recipients: components["schemas"]["RecipientsDto"];
+            contact: components["schemas"]["ResolvedContactDto"];
         };
         BrandDto: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             client_id: string;
-            /** @example NOVA_BARBER */
+            /** Format: uuid */
+            business_id: string;
+            /** @example SALON */
             code: string;
+            /** @example Nova Salon */
             name: string;
             description?: string | null;
             logo_url?: string | null;
             website?: string | null;
-            /** @example #1A2B3C */
             primary_color?: string | null;
             secondary_color?: string | null;
+            /** @description The master business type, or null when the brand carries custom_business_type. */
+            business_type?: components["schemas"]["BusinessTypeRefDto"] | null;
+            /** @description The custom business type label, when no master value fits. */
+            custom_business_type?: string | null;
             /** @enum {string} */
             status: "ACTIVE" | "ARCHIVED";
-            /** Format: date-time */
-            status_changed_at: string;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -3021,149 +1027,113 @@ export interface components {
             /** @enum {string} */
             status: "ACTIVE" | "ARCHIVED";
         };
-        BrandLifecycleTransitionDto: {
-            /**
-             * @example ARCHIVED
-             * @enum {string}
-             */
-            target_status: "ACTIVE" | "ARCHIVED";
-            /** @example Brand discontinued */
-            reason: string;
-        };
-        BrandListDto: {
-            items: components["schemas"]["BrandWithBillingDto"][];
-        };
         BrandMutationResponseDto: {
             /** @example Brand created successfully */
             message: string;
             /** Format: uuid */
             brand_id: string;
         };
-        BrandWithBillingDto: {
+        BrandResolutionDto: {
+            /** Format: uuid */
+            business_id: string;
+            bill_to: components["schemas"]["BillToDto"];
+            recipients: components["schemas"]["RecipientsDto"];
+            contact: components["schemas"]["ResolvedContactDto"];
+        };
+        BrandStatusDto: {
+            /**
+             * @example ARCHIVED
+             * @enum {string}
+             */
+            target_status: "ACTIVE" | "ARCHIVED";
+            /** @example The line closed; the owner kept the client */
+            reason: string;
+        };
+        BusinessDetailDto: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             client_id: string;
-            /** @example NOVA_BARBER */
+            /**
+             * @description Generated (D31).
+             * @example DBIZ-261124-0001
+             */
             code: string;
+            /**
+             * @description The {ALIAS} token; never changes (D32).
+             * @example POSEIDON
+             */
+            alias: string;
+            /** @description Empty means the client address. */
+            address?: string | null;
+            /** @description Empty means the client email. */
+            email?: string | null;
+            /** @description Empty means the client phone. */
+            phone?: string | null;
+            notes?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** @description The single legal entity of this business, or null when none is registered. */
+            legal_entity?: components["schemas"]["LegalEntityDto"] | null;
+            brands: components["schemas"]["BrandDto"][];
+            /** @description The optional contacts of this business; without one the client email and phone are used. */
+            contacts: components["schemas"]["ClientContactDto"][];
+        };
+        BusinessMutationResponseDto: {
+            /** @example Business created successfully */
+            message: string;
+            /** Format: uuid */
+            business_id: string;
+        };
+        BusinessTypeDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example FNB */
+            code: string;
+            /** @example Food and Beverage */
             name: string;
-            description?: string | null;
-            logo_url?: string | null;
-            website?: string | null;
-            /** @example #1A2B3C */
-            primary_color?: string | null;
-            secondary_color?: string | null;
             /** @enum {string} */
             status: "ACTIVE" | "ARCHIVED";
             /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
             created_at: string;
             /** Format: date-time */
             updated_at: string;
-            /** @description The brand's own billing contacts, or the client-level ones when it has none. */
-            billing_contacts: components["schemas"]["ClientContactDto"][];
+        };
+        BusinessTypeLifecycleResponseDto: {
+            /** @example Business type created successfully */
+            message: string;
+            /** Format: uuid */
+            business_type_id: string;
             /** @enum {string} */
-            billing_contact_source: "BRAND" | "CLIENT" | "NONE";
+            status: "ACTIVE" | "ARCHIVED";
         };
-        BrandingDto: {
-            /** @enum {string} */
-            mode?: "DIGVATION" | "WHITE_LABEL";
-            /** @example Nova Salon */
-            brand_name?: string | null;
-            /** @example https://cdn.example/nova.png */
-            logo_url?: string | null;
-            /** @example https://cdn.example/nova.ico */
-            favicon_url?: string | null;
-            /** @example #1A2B3C */
-            primary_color?: string | null;
-            /** @example #FFFFFF */
-            secondary_color?: string | null;
-            /** @example app.novasalon.co.id */
-            custom_domain?: string | null;
-            /** @example support@novasalon.co.id */
-            support_email?: string | null;
-            /** @example +62 21 555 0100 */
-            support_phone?: string | null;
+        BusinessTypeMutationResponseDto: {
+            /** @example Business type created successfully */
+            message: string;
+            /** Format: uuid */
+            business_type_id: string;
         };
-        BrandingResponseDto: {
-            /** @enum {string} */
-            mode: "DIGVATION" | "WHITE_LABEL";
-            brand_name: string | null;
-            logo_url: string | null;
-            favicon_url: string | null;
-            primary_color: string | null;
-            secondary_color: string | null;
-            custom_domain: string | null;
-            support_email: string | null;
-            support_phone: string | null;
-        };
-        CancelContractDto: {
-            /** @example Agreed with the client */
-            reason: string;
-            /**
-             * Format: date
-             * @description Last day of the running term. Drafts and scheduled terms are cancelled at once; the contract becomes CANCELLED once this day has passed. A calendar date (YYYY-MM-DD) in the business time zone.
-             * @example 2026-12-01
-             */
-            effective_on: string;
-        };
-        CancelDeploymentDto: {
-            /** @example Release 1.1.0 for Nova */
-            reason: string;
-        };
-        CatalogItemDto: {
+        BusinessTypeRefDto: {
             /** Format: uuid */
             id: string;
-            /** @example POS */
+            /** @example WATER_TREATMENT */
             code: string;
+            /** @example Water Treatment */
             name: string;
-            description?: string | null;
-            /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "RETIRED";
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
         };
-        CatalogItemLifecycleResponseDto: {
-            /** @example Created successfully */
-            message: string;
-            /** Format: uuid */
-            id: string;
-            /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "RETIRED";
-        };
-        CatalogItemMutationResponseDto: {
-            /** @example Created successfully */
-            message: string;
-            /** Format: uuid */
-            id: string;
-        };
-        CatalogLifecycleResponseDto: {
-            /** @example Saved successfully */
-            message: string;
-            /** Format: uuid */
-            id: string;
-            /** @example ACTIVE */
-            status: string;
-        };
-        CatalogLifecycleTransitionDto: {
+        BusinessTypeStatusDto: {
             /**
-             * @example ACTIVE
+             * @example ARCHIVED
              * @enum {string}
              */
-            target_status: "DRAFT" | "ACTIVE" | "RETIRED";
-            /** @example Ready for sale */
+            target_status: "ACTIVE" | "ARCHIVED";
+            /**
+             * @description Required: every state change names an actor, a reason and a time.
+             * @example Merged into Salon & Beauty
+             */
             reason: string;
-        };
-        CatalogMutationResponseDto: {
-            /** @example Saved successfully */
-            message: string;
-            /** Format: uuid */
-            id: string;
         };
         ChallengeResponseDto: {
             /** @example Verification code sent */
@@ -3193,51 +1163,17 @@ export interface components {
             /** @example Left the company */
             reason: string;
         };
-        ClientAddOnDto: {
-            /**
-             * Format: uuid
-             * @description The held add-on id
-             */
-            id: string;
-            /** Format: uuid */
-            add_on_id: string;
-            /** @example PRO */
-            code: string;
-            name: string;
-            /** @enum {string} */
-            status: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-        };
-        ClientAddOnLifecycleResponseDto: {
-            /** @example Add-on added to the service */
-            message: string;
-            /** Format: uuid */
-            client_add_on_id: string;
-            /** @enum {string} */
-            status: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
-        };
-        ClientAddOnMutationResponseDto: {
-            /** @example Add-on added to the service */
-            message: string;
-            /** Format: uuid */
-            client_add_on_id: string;
-        };
-        ClientBillingDto: {
-            /** Format: uuid */
-            client_id: string;
-            /** @description Unallocated RECORDED payments, per currency. */
-            credit: components["schemas"]["CurrencyAmountDto"][];
-            /** @description Balance of ISSUED and PARTIALLY_PAID invoices, per currency. */
-            outstanding: components["schemas"]["CurrencyAmountDto"][];
-        };
         ClientContactDto: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
+            business_id: string;
+            /**
+             * Format: uuid
+             * @description The brand this contact is narrowed to, when it is.
+             */
             brand_id?: string | null;
+            /** @example Rina */
             name: string;
             position?: string | null;
             /** Format: email */
@@ -3246,13 +1182,17 @@ export interface components {
             is_primary: boolean;
             is_billing: boolean;
             is_technical: boolean;
+            is_pic: boolean;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
             updated_at: string;
         };
-        ClientContactListDto: {
-            items: components["schemas"]["ClientContactDto"][];
+        ClientContactFlagsDto: {
+            is_primary?: boolean;
+            is_billing?: boolean;
+            is_technical?: boolean;
+            is_pic?: boolean;
         };
         ClientContactMutationResponseDto: {
             /** @example Contact created successfully */
@@ -3260,53 +1200,116 @@ export interface components {
             /** Format: uuid */
             contact_id: string;
         };
-        ClientCreatedResponseDto: {
-            /** @example Client created successfully */
-            message: string;
-            /** Format: uuid */
-            client_id: string;
-            /** Format: uuid */
-            brand_id: string;
-            /** Format: uuid */
-            primary_contact_id: string;
-        };
-        ClientCreditDto: {
-            /** @example IDR */
-            currency: string;
-            /**
-             * @description Minor units as a string of digits.
-             * @example 15000000
-             */
-            amount: string;
-        };
-        ClientDetailDto: {
+        ClientDetailBrandDto: {
             /** Format: uuid */
             id: string;
-            /** @example NOVA */
+            /** @example SALON */
             code: string;
-            /** @example Nova */
-            display_name: string;
-            legal_name?: string | null;
-            tax_identifier?: string | null;
-            email?: string | null;
-            phone?: string | null;
+            /** @example Nova Salon */
+            name: string;
+            description?: string | null;
+            logo_url?: string | null;
             website?: string | null;
-            address?: string | null;
-            country?: string | null;
-            timezone?: string | null;
-            notes?: string | null;
+            primary_color?: string | null;
+            secondary_color?: string | null;
+            /** @description The master business type, or null when the brand carries custom_business_type. */
+            business_type?: components["schemas"]["BusinessTypeRefDto"] | null;
+            /** @description The custom business type label, when no master value fits. */
+            custom_business_type?: string | null;
             /** @enum {string} */
-            status: "ACTIVE" | "SUSPENDED" | "ARCHIVED";
-            /** Format: date-time */
-            status_changed_at: string;
+            status: "ACTIVE" | "ARCHIVED";
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
             updated_at: string;
-            brands: components["schemas"]["BrandDto"][];
-            contacts: components["schemas"]["ClientContactDto"][];
-            /** @description Client credit: what RECORDED payments have left unallocated, per currency (currencies with credit only). */
-            credit: components["schemas"]["ClientCreditDto"][];
+        };
+        ClientDetailBusinessDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Generated (D31).
+             * @example DBIZ-261124-0001
+             */
+            code: string;
+            /**
+             * @description The {ALIAS} token; never changes (D32).
+             * @example POSEIDON
+             */
+            alias: string;
+            /** @description Empty means the client address. */
+            address?: string | null;
+            /** @description Empty means the client email. */
+            email?: string | null;
+            /** @description Empty means the client phone. */
+            phone?: string | null;
+            notes?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            legal_entity: components["schemas"]["ClientDetailLegalEntityDto"] | null;
+            brands: components["schemas"]["ClientDetailBrandDto"][];
+            contacts: components["schemas"]["ClientDetailContactDto"][];
+            bill_to: components["schemas"]["BillToDto"];
+            recipients: components["schemas"]["RecipientsDto"];
+            contact: components["schemas"]["ResolvedContactDto"];
+        };
+        ClientDetailContactDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * Format: uuid
+             * @description The brand this contact is narrowed to, when it is.
+             */
+            brand_id?: string | null;
+            /** @example Rina */
+            name: string;
+            position?: string | null;
+            /** Format: email */
+            email?: string | null;
+            phone?: string | null;
+            is_primary: boolean;
+            is_billing: boolean;
+            is_technical: boolean;
+            is_pic: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        ClientDetailDto: {
+            client: components["schemas"]["ClientDto"];
+            businesses: components["schemas"]["ClientDetailBusinessDto"][];
+            summary: components["schemas"]["ClientDetailSummaryDto"];
+        };
+        ClientDetailLegalEntityDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example PT Nova Karya Salon */
+            legal_name: string;
+            tax_identifier?: string | null;
+            address?: string | null;
+            /** @example ID */
+            country?: string | null;
+            /** @example Asia/Jakarta */
+            timezone?: string | null;
+            notes?: string | null;
+            /** @enum {string} */
+            status: "ACTIVE" | "ARCHIVED";
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        ClientDetailSummaryDto: {
+            /** @example 1 */
+            businesses: number;
+            /** @example 1 */
+            brands: number;
+            /** @example 0 */
+            legal_entities: number;
+            /** @example 0 */
+            contacts: number;
         };
         ClientDto: {
             /** Format: uuid */
@@ -3314,18 +1317,13 @@ export interface components {
             /** @example NOVA */
             code: string;
             /** @example Nova */
-            display_name: string;
-            legal_name?: string | null;
-            tax_identifier?: string | null;
+            full_name?: string | null;
+            /** Format: email */
             email?: string | null;
             phone?: string | null;
-            website?: string | null;
             address?: string | null;
-            country?: string | null;
-            timezone?: string | null;
-            notes?: string | null;
             /** @enum {string} */
-            status: "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+            status: "DRAFT" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
             /** Format: date-time */
             status_changed_at: string;
             /** Format: date-time */
@@ -3339,15 +1337,18 @@ export interface components {
             /** Format: uuid */
             client_id: string;
             /** @enum {string} */
-            status: "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+            status: "DRAFT" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
         };
         ClientLifecycleTransitionDto: {
             /**
              * @example SUSPENDED
              * @enum {string}
              */
-            target_status: "ACTIVE" | "SUSPENDED" | "ARCHIVED";
-            /** @example Paused at the client request */
+            target_status: "DRAFT" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+            /**
+             * @description Required: every state change names an actor, a reason and a time.
+             * @example Registration confirmed by the owner
+             */
             reason: string;
         };
         ClientMutationResponseDto: {
@@ -3356,553 +1357,103 @@ export interface components {
             /** Format: uuid */
             client_id: string;
         };
-        ClientServiceDto: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            client_id: string;
-            brand: components["schemas"]["ServiceRefDto"];
-            product: components["schemas"]["ServiceRefDto"];
-            /** @enum {string} */
-            status: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
-            features: components["schemas"]["SelectedFeatureDto"][];
-            add_ons: components["schemas"]["ClientAddOnDto"][];
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        ClientServiceListDto: {
-            items: components["schemas"]["ClientServiceDto"][];
-        };
-        ConfirmTermDto: {
-            /**
-             * @description Required only when agreed_amount or billing_cycle differs from the prefilled values of a renewal draft (CONTRACT_PRICE_CHANGE_REASON_REQUIRED); an unchanged renewal or a term without prefilled values is confirmed without one.
-             * @example Hosting costs went up
-             */
-            reason?: string;
-        };
-        ContractAddOnDto: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            client_add_on_id: string;
-            add_on: components["schemas"]["ContractRefDto"];
-            /** Format: uuid */
-            term_id: string;
-            /**
-             * Format: date
-             * @description First billed day.
-             * @example 2026-12-31
-             */
-            effective_from: string | null;
-            /**
-             * Format: date
-             * @description Last billed day; null while it runs with the service.
-             * @example 2026-12-31
-             */
-            effective_until: string | null;
-            /** @example IDR */
-            currency: string;
-            /**
-             * @description Catalog price snapshot; null when the catalog had no price. Minor units as a string.
-             * @example 40000000
-             */
-            list_amount: string | null;
-            /**
-             * @description Agreed price per billing cycle of the term. Minor units as a string.
-             * @example 40000000
-             */
-            agreed_amount: string;
-            /** @enum {string} */
-            adjustment_type: "NONE" | "PROMOTIONAL" | "NEGOTIATED" | "GRANDFATHERED" | "COMPLIMENTARY";
-            adjustment_reason: string | null;
-            /** @enum {string} */
-            proration: "CO_TERM_PRORATED";
-            /**
-             * @description First charge: agreed amount x days from effective_from to the end of the billing period running then / days of that period, rounded half up. Minor units as a string.
-             * @example 40000000
-             */
-            initial_prorated_amount: string;
-            /** Format: date-time */
-            created_at: string;
-        };
-        ContractAddOnMutationResponseDto: {
-            /** @example Contract created successfully */
-            message: string;
-            /** Format: uuid */
-            contract_id: string;
-            /** Format: uuid */
-            contract_add_on_id: string;
-            /**
-             * @description Minor units as a string.
-             * @example 6451613
-             */
-            initial_prorated_amount: string;
-        };
-        ContractClientRefDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example NOVA */
-            code: string;
-            /** @example Nova Group */
-            display_name: string;
-        };
-        ContractDto: {
-            /** Format: uuid */
-            id: string;
-            service: components["schemas"]["ContractServiceDto"];
-            /** @enum {string} */
-            status: "PENDING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "EXPIRED" | "CANCELLED";
-            contract_reference: string | null;
-            auto_renew: boolean;
-            /** @example 30 */
-            renewal_notice_days: number;
-            /** @example 0 */
-            grace_period_days: number;
-            billable: boolean;
-            /**
-             * Format: date
-             * @description Last day of the running term after a cancellation.
-             * @example 2026-12-31
-             */
-            cancel_effective_on: string | null;
-            cancel_reason: string | null;
-            terms: components["schemas"]["ContractTermDto"][];
-            add_ons: components["schemas"]["ContractAddOnDto"][];
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        ContractLifecycleResponseDto: {
-            /** @example Contract created successfully */
-            message: string;
-            /** Format: uuid */
-            contract_id: string;
-            /** @enum {string} */
-            status: "PENDING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "EXPIRED" | "CANCELLED";
-        };
-        ContractMutationResponseDto: {
-            /** @example Contract created successfully */
-            message: string;
-            /** Format: uuid */
-            contract_id: string;
-        };
-        ContractRefDto: {
-            /** Format: uuid */
-            id: string;
-            code: string;
-            name: string;
-        };
-        ContractServiceDto: {
-            /** Format: uuid */
-            id: string;
-            /**
-             * @description Follows the contract (TRIAL, ACTIVE, SUSPENDED, CANCELLED).
-             * @enum {string}
-             */
-            status: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
-            client: components["schemas"]["ContractClientRefDto"];
-            brand: components["schemas"]["ContractRefDto"];
-            product: components["schemas"]["ContractRefDto"];
-        };
-        ContractTermDto: {
-            /** Format: uuid */
-            id: string;
-            /** @enum {string} */
-            status: "DRAFT" | "SCHEDULED" | "ACTIVE" | "ENDED" | "CANCELLED";
-            /**
-             * Format: date
-             * @description First day; null until go-live for a term that starts at go-live.
-             * @example 2026-12-31
-             */
-            starts_on: string | null;
-            /**
-             * Format: date
-             * @description Last day, inclusive.
-             * @example 2026-12-31
-             */
-            ends_on: string | null;
-            starts_at_go_live: boolean;
-            /** @example 12 */
-            duration_value: number;
-            /** @enum {string} */
-            duration_unit: "MONTH" | "DAY";
-            /**
-             * Format: uuid
-             * @description The installation whose go-live set the dates.
-             */
-            go_live_installation_id: string | null;
-            /** @enum {string} */
-            billing_cycle: "MONTHLY" | "QUARTERLY" | "SEMI_ANNUAL" | "ANNUAL" | "PER_TERM";
-            /** @example IDR */
-            currency: string;
-            /**
-             * @description Catalog price snapshot; null when the catalog had no price. Minor units as a string.
-             * @example 40000000
-             */
-            list_amount: string | null;
-            /**
-             * @description Agreed price per billing cycle, or for the whole term with PER_TERM. Minor units as a string.
-             * @example 40000000
-             */
-            agreed_amount: string;
-            /** @enum {string} */
-            adjustment_type: "NONE" | "PROMOTIONAL" | "NEGOTIATED" | "GRANDFATHERED" | "COMPLIMENTARY";
-            adjustment_reason: string | null;
-            /** @example 14 */
-            payment_terms_days: number;
-            /**
-             * Format: date
-             * @description Last day of the trial.
-             * @example 2026-12-31
-             */
-            trial_ends_on: string | null;
-            /**
-             * @description Indicative price of the next term. Minor units as a string.
-             * @example 40000000
-             */
-            planned_renewal_amount: string | null;
-            /** @enum {string|null} */
-            planned_renewal_cycle: "MONTHLY" | "QUARTERLY" | "SEMI_ANNUAL" | "ANNUAL" | "PER_TERM" | null;
-            /**
-             * Format: uuid
-             * @description The term this one renews.
-             */
-            renewed_from_id: string | null;
-            /**
-             * @description Amount a renewal draft was prefilled with. Minor units as a string.
-             * @example 40000000
-             */
-            prefilled_amount: string | null;
-            /** @enum {string|null} */
-            prefilled_cycle: "MONTHLY" | "QUARTERLY" | "SEMI_ANNUAL" | "ANNUAL" | "PER_TERM" | null;
-            /** Format: date-time */
-            confirmed_at: string | null;
-            /** Format: date-time */
-            activated_at: string | null;
-            /** Format: date-time */
-            ended_at: string | null;
-            one_off_charges: components["schemas"]["OneOffChargeDto"][];
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        ContractTermListDto: {
-            items: components["schemas"]["ContractTermDto"][];
-        };
-        ContractTransitionDto: {
-            /**
-             * @description SUSPENDED pauses a TRIAL or ACTIVE contract; ACTIVE resumes a SUSPENDED one (TRIAL while its trial runs). Other statuses follow the terms.
-             * @enum {string}
-             */
-            target_status: "ACTIVE" | "SUSPENDED";
-            /** @example Agreed with the client */
-            reason: string;
-        };
-        CoverageItemDto: {
-            /** Format: uuid */
-            product_id: string;
-            /** @enum {string} */
-            entity_type: "BASE_DOMAIN" | "APPLICATION" | "FEATURE" | "CAPABILITY";
-            /** Format: uuid */
-            entity_id: string;
-            /** @description Empty when the item left the product */
-            code: string;
-            name: string;
-            /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "RETIRED";
-            /**
-             * Format: uuid
-             * @description Null when the item is allowed but not enabled
-             */
-            enabled_item_id: string | null;
-            is_override: boolean;
-            override_reason: string | null;
-            allowed_by: ("PRODUCT_BASE_DOMAIN" | "PRODUCT_APPLICATION" | "INCLUDED_CAPABILITY" | "SELECTED_FEATURE" | "ADD_ON_GRANT" | "CLIENT_FEATURE" | "SHARED_PRODUCT_ITEM")[];
-            /**
-             * @description COVERED: allowed by the contract. OVERRIDE: enabled by an operator with a reason, not covered by contract. NOT_COVERED: enabled but no longer allowed, waiting for an operator. NOT_ENABLED: allowed but not enabled.
-             * @enum {string}
-             */
-            coverage: "COVERED" | "OVERRIDE" | "NOT_COVERED" | "NOT_ENABLED";
-            /** @description False for OVERRIDE and NOT_COVERED: not covered by contract */
-            covered_by_contract: boolean;
-        };
-        CoverageReportDto: {
-            /** @description Enabled items with their coverage, then allowed items that are not enabled */
-            items: components["schemas"]["CoverageItemDto"][];
-        };
-        CreateAddOnDto: {
-            /** @example PRODUCT_COMMISSION */
-            code: string;
-            name: string;
-            description?: string | null;
-            /**
-             * @default PRODUCT
-             * @enum {string}
-             */
-            scope: "PRODUCT" | "CLIENT";
-            /**
-             * Format: uuid
-             * @description Required for CLIENT scope: the client that owns this item. Must exist and not be ARCHIVED.
-             */
-            owner_client_id?: string;
-        };
         CreateBrandDto: {
+            /**
+             * @description Unique per client, ignoring case and outer spaces.
+             * @example Nova Salon
+             */
+            name: string;
             description?: string | null;
-            /** @example https://cdn.example/nova.png */
-            logo_url?: string | null;
+            /**
+             * Format: uuid
+             * @description An ACTIVE business type from the master list.
+             */
+            business_type_id?: string | null;
+            /** @description A custom business type for a brand no master value describes. Never both with business_type_id. */
+            custom_business_type?: string | null;
             /** @example https://nova.example */
             website?: string | null;
-            /** @example #1A2B3C */
+            /** @description A placeholder reference. The logo printed on documents comes from stored files, not from this field. */
+            logo_url?: string | null;
+            /** @example #123456 */
             primary_color?: string | null;
-            /** @example #FFFFFF */
+            /** @example #ABCDEF */
             secondary_color?: string | null;
             /**
-             * @description Unique within the client, stored uppercased.
-             * @example NOVA_BARBER
+             * Format: uuid
+             * @description A business of the same client; every brand belongs to one.
              */
-            code: string;
-            /** @example Nova Barber */
-            name: string;
+            business_id: string;
         };
-        CreateCatalogItemDto: {
-            /**
-             * @description Unique, stored uppercased, immutable.
-             * @example POS
-             */
-            code: string;
-            /** @example Point of sale */
-            name: string;
-            description?: string | null;
-        };
-        CreateClientContactDto: {
-            /** @example Nadia Putri */
-            name: string;
-            /** @example Owner */
-            position?: string | null;
+        CreateBusinessDto: {
+            address?: string | null;
             /** Format: email */
             email?: string | null;
-            /** @example +6281234567890 */
+            /** @description 08…, 62… or +62…; stored as 62… digits. */
             phone?: string | null;
+            /**
+             * @description Trimmed and uppercased; then A-Z, 0-9 and -, at most 20 characters, unique across all clients. Never changes; it is the {ALIAS} token of an invoice number.
+             * @example POSEIDON
+             */
+            alias: string;
+            notes?: string | null;
+        };
+        CreateBusinessTypeDto: {
+            /**
+             * @description Stable code, stored uppercased and unique.
+             * @example FNB
+             */
+            code: string;
+            /** @example Food and Beverage */
+            name: string;
+        };
+        CreateClientContactDto: {
+            /** @example Rina */
+            name: string;
+            /** @example Finance Manager */
+            position?: string | null;
+            /**
+             * Format: email
+             * @description Required when the contact is flagged as a billing contact.
+             */
+            email?: string | null;
+            /** @example +62215550100 */
+            phone?: string | null;
+            /**
+             * Format: uuid
+             * @description Narrow this contact to one brand of the same business. Left out, it serves the whole business.
+             */
+            brand_id?: string | null;
+            /**
+             * @description The single primary contact of the business. Setting it demotes the previous one in the same transaction; the first contact of a business is primary anyway.
+             * @default false
+             */
+            is_primary: boolean;
             /** @default false */
             is_billing: boolean;
             /** @default false */
             is_technical: boolean;
             /**
-             * Format: uuid
-             * @description Scopes the contact to one brand of the same client (for example its billing contact). Omit for a client-level contact.
-             */
-            brand_id?: string | null;
-            /**
-             * @description Makes this contact the primary contact; the previous primary contact loses the flag in the same transaction.
+             * @description Informational only: a PIC never changes money or entitlement.
              * @default false
              */
-            is_primary: boolean;
+            is_pic: boolean;
         };
         CreateClientDto: {
-            /** @example PT Nova Kreasi Indonesia */
-            legal_name?: string | null;
-            /** @example 01.234.567.8-901.000 */
-            tax_identifier?: string | null;
-            /** Format: email */
-            email?: string | null;
-            /** @example +62215550100 */
-            phone?: string | null;
-            /** @example https://nova.example */
-            website?: string | null;
+            /** @example Dicky Darmawan */
+            full_name: string;
+            /**
+             * Format: email
+             * @example owner@poseidon-filter.invalid
+             */
+            email: string;
+            /**
+             * @description 08…, 62… or +62…, spaces or dashes allowed; stored as 62… digits.
+             * @example 085155050951
+             */
+            phone: string;
             address?: string | null;
-            /** @example Indonesia */
-            country?: string | null;
-            /**
-             * @description IANA zone
-             * @example Asia/Jakarta
-             */
-            timezone?: string | null;
-            notes?: string | null;
-            /**
-             * @description Stable client code, stored uppercased and unique. It also becomes the code of the first brand.
-             * @example NOVA
-             */
-            code: string;
-            /**
-             * @description Also the name of the first brand.
-             * @example Nova
-             */
-            display_name: string;
-            /** @description Becomes the primary contact (client-level). */
-            primary_contact: components["schemas"]["PrimaryContactDto"];
-        };
-        CreateClientServiceDto: {
-            /**
-             * Format: uuid
-             * @description An ACTIVE brand of the client; immutable afterwards.
-             */
-            brand_id: string;
-            /**
-             * Format: uuid
-             * @description An ACTIVE product; immutable afterwards.
-             */
-            product_id: string;
-            /** @description ACTIVE features of the product to select; a CLIENT feature only for its owner client. */
-            feature_ids?: string[];
-        };
-        CreateContractAddOnDto: {
-            /**
-             * Format: uuid
-             * @description An open add-on held by the contract service.
-             */
-            client_add_on_id: string;
-            /**
-             * Format: date
-             * @description First billed day, inside an ACTIVE or SCHEDULED term with dates. A calendar date (YYYY-MM-DD) in the business time zone.
-             * @example 2026-12-01
-             */
-            effective_from: string;
-            /**
-             * @description Agreed price per billing cycle of the term, or for the whole term with PER_TERM. Minor units as a string of digits (Rp400.000 is 40000000).
-             * @example 40000000
-             */
-            agreed_amount: string;
-            /**
-             * @default NONE
-             * @enum {string}
-             */
-            adjustment_type: "NONE" | "PROMOTIONAL" | "NEGOTIATED" | "GRANDFATHERED" | "COMPLIMENTARY";
-            adjustment_reason?: string | null;
-        };
-        CreateContractDto: {
-            contract_reference?: string | null;
-            /**
-             * @description Confirm an untouched renewal draft with its prefilled amounts when the term ends.
-             * @default false
-             */
-            auto_renew: boolean;
-            /**
-             * @description Days before a term ends when its renewal draft is created.
-             * @default 30
-             */
-            renewal_notice_days: number;
-            /**
-             * @description Days after a term ends without renewal before the contract becomes EXPIRED.
-             * @default 0
-             */
-            grace_period_days: number;
-            /**
-             * @description False for a complimentary arrangement.
-             * @default true
-             */
-            billable: boolean;
-            /**
-             * Format: uuid
-             * @description An open client service without a contract.
-             */
-            service_id: string;
-        };
-        CreateCreditNoteDto: {
-            /**
-             * @description Amount credited, tax included; at most the invoice balance. Minor units as a string of digits, greater than zero (Rp350.000 is 35000000); IDR must be whole rupiah.
-             * @example 35000000
-             */
-            amount: string;
-            /** @example Koreksi harga paket */
-            description: string;
-            /** @example Discount agreed after issue */
-            reason: string;
-        };
-        CreateDeploymentDto: {
-            /**
-             * @description PROVISION: first install (in PRODUCTION its success sets go_live_at when empty); UPDATE: later releases or manifests.
-             * @enum {string}
-             */
-            action: "PROVISION" | "UPDATE";
-            /** @example Release 1.1.0 for Nova */
-            reason: string;
-            /**
-             * @description Unique per installation; repeating a request with the same key answers the operation it created.
-             * @example nova-prod-2026-11-12-1
-             */
-            idempotency_key: string;
-        };
-        CreateFeatureDto: {
-            /** @example PRODUCT_COMMISSION */
-            code: string;
-            name: string;
-            description?: string | null;
-            /**
-             * @default PRODUCT
-             * @enum {string}
-             */
-            scope: "PRODUCT" | "CLIENT";
-            /**
-             * Format: uuid
-             * @description Required for CLIENT scope: the client that owns this item. Must exist and not be ARCHIVED.
-             */
-            owner_client_id?: string;
-        };
-        CreateHostDto: {
-            /**
-             * @description Unique, stored uppercased; immutable afterwards.
-             * @example JKT-VPS-01
-             */
-            code: string;
-            /** @example Jakarta VPS 01 */
-            name: string;
-            /** @example Biznet Gio */
-            provider?: string | null;
-            /** @example Jakarta */
-            region?: string | null;
-            /**
-             * @description IP or hostname
-             * @example 203.0.113.10
-             */
-            address: string;
-            /** @enum {string} */
-            infrastructure_ownership: "DIGVATION" | "CLIENT";
-        };
-        CreateInstallationDto: {
-            /**
-             * @description Unique, stored uppercased; immutable afterwards.
-             * @example NOVA-PROD
-             */
-            code: string;
-            /** @example Nova production */
-            name: string;
-            /**
-             * @description Immutable afterwards.
-             * @enum {string}
-             */
-            deployment_mode: "SHARED" | "DEDICATED";
-            /**
-             * @description Immutable afterwards.
-             * @enum {string}
-             */
-            environment: "PRODUCTION" | "STAGING" | "DEVELOPMENT";
-            /**
-             * Format: uuid
-             * @description An ACTIVE host; immutable.
-             */
-            host_id: string;
-            /**
-             * Format: uuid
-             * @description Required for DEDICATED (a client that is not ARCHIVED); not allowed for SHARED, which Digvation owns. Immutable.
-             */
-            owner_client_id?: string;
-            /** @default true */
-            managed_by_digvation: boolean;
-            urls?: components["schemas"]["InstallationUrlDto"][];
-            /** @description DEDICATED only: open services of the owner client, from one or several of its brands. */
-            service_ids?: string[];
-            /** @description SHARED only: ACTIVE products hosted directly. */
-            product_ids?: string[];
-            /** @description When every initial service comes from one brand, fields not given here are prefilled from that brand. */
-            branding?: components["schemas"]["BrandingDto"];
+            business: components["schemas"]["RegistrationBusinessDto"];
         };
         CreateInvitationDto: {
             /**
@@ -3910,98 +1461,19 @@ export interface components {
              * @example new.user@example.com
              */
             email: string;
-            /**
-             * @description Roles the invited user receives. Normalized like role slugs; the inviter must be allowed to assign each of them.
-             * @example [
-             *       "ADMIN"
-             *     ]
-             */
-            role_slugs: string[];
         };
-        CreateInvoiceDraftDto: {
-            /** Format: uuid */
-            brand_id: string;
+        CreateLegalEntityDto: {
             /**
-             * @description Defaults to the billing settings currency (IDR).
-             * @example IDR
+             * @description The only name of the entity, printed as bill-to (D35).
+             * @example PT Nova Karya Salon
              */
-            currency?: string;
-        };
-        CreateOneOffChargeDto: {
-            /** @example Pembuatan website */
-            description: string;
-            /**
-             * @description Charge amount. Minor units as a string of digits (Rp400.000 is 40000000).
-             * @example 40000000
-             */
-            amount: string;
-            /**
-             * @description Defaults to the term currency.
-             * @example IDR
-             */
-            currency?: string;
-        };
-        CreatePaymentDto: {
-            /** Format: uuid */
-            client_id: string;
-            /**
-             * Format: date
-             * @description Business date the money arrived (BUSINESS_TIMEZONE); not in the future.
-             */
-            received_at: string;
-            /**
-             * @description Amount received. Minor units as a string of digits, greater than zero (Rp350.000 is 35000000); IDR must be whole rupiah.
-             * @example 35000000
-             */
-            amount: string;
-            /**
-             * @default IDR
-             * @example IDR
-             */
-            currency: string;
-            /** @enum {string} */
-            method: "BANK_TRANSFER" | "CASH" | "OTHER";
-            /** @example BCA 20261112-0001 */
-            reference?: string | null;
-            notes?: string | null;
-            /** @description Allocations made in the same transaction; the rest stays as client credit. */
-            allocations?: components["schemas"]["AllocatePaymentDto"][];
-        };
-        CreateProductDto: {
-            /**
-             * @description Stable machine-readable product code. It is normalized to uppercase and cannot be changed.
-             * @example BUSINESS_SUITE
-             */
-            code: string;
-            /** @example Business Suite */
-            name: string;
-            description?: string;
-            /**
-             * @example RUNTIME_PRODUCT
-             * @enum {string}
-             */
-            kind: "RUNTIME_PRODUCT" | "WEBSITE" | "CUSTOM_SYSTEM" | "OTHER";
-            /**
-             * @description A registered manifest format (GET /catalog/manifest-formats), set together with manifest_schema_version; null for none.
-             * @example business-runtime-entitlements
-             */
-            manifest_format?: string | null;
-            /** @example 1 */
-            manifest_schema_version?: string | null;
-        };
-        CreateReleaseDto: {
-            /**
-             * @description Semantic version 2.0.0
-             * @example 1.10.0
-             */
-            version: string;
-            /**
-             * @description Image digest or build revision; required before RELEASED.
-             * @example sha256:4f1c…
-             */
-            artifact_ref?: string | null;
-            /** Format: date-time */
-            released_at?: string | null;
+            legal_name: string;
+            tax_identifier?: string | null;
+            address?: string | null;
+            /** @example ID */
+            country?: string | null;
+            /** @example Asia/Jakarta */
+            timezone?: string | null;
             notes?: string | null;
         };
         CreateRoleDto: {
@@ -4020,545 +1492,17 @@ export interface components {
              */
             permission_slugs?: string[];
         };
-        CreateTermDto: {
-            /**
-             * Format: date
-             * @description First day of the term. Not allowed with starts_at_go_live. A calendar date (YYYY-MM-DD) in the business time zone.
-             * @example 2026-12-01
-             */
-            starts_on?: string | null;
-            /**
-             * Format: date
-             * @description Last day of the term (inclusive). Give ends_on or a duration, not both. A calendar date (YYYY-MM-DD) in the business time zone.
-             * @example 2026-12-01
-             */
-            ends_on?: string | null;
-            /**
-             * @description The term starts at the go-live of the first PRODUCTION installation hosting the service; its end follows from the duration.
-             * @default false
-             */
-            starts_at_go_live: boolean;
-            /** @example 12 */
-            duration_value?: number | null;
-            /**
-             * @description MONTH: same day N months later, minus one day (clamped at month ends); DAY: N days including the first.
-             * @enum {string|null}
-             */
-            duration_unit?: "MONTH" | "DAY" | null;
-            /**
-             * Format: date
-             * @description Last day of the trial, inside the term. The trial is not billed; a term whose whole period is the trial expires when nothing follows it. A calendar date (YYYY-MM-DD) in the business time zone.
-             * @example 2026-12-01
-             */
-            trial_ends_on?: string | null;
-            /**
-             * @description Due date = invoice issue date + days.
-             * @default 14
-             */
-            payment_terms_days: number;
-            /**
-             * @description Indicative price of the next term. Minor units as a string of digits (Rp400.000 is 40000000).
-             * @example 40000000
-             */
-            planned_renewal_amount?: string | null;
-            /** @enum {string|null} */
-            planned_renewal_cycle?: "MONTHLY" | "QUARTERLY" | "SEMI_ANNUAL" | "ANNUAL" | "PER_TERM" | null;
-            /**
-             * @default NONE
-             * @enum {string}
-             */
-            adjustment_type: "NONE" | "PROMOTIONAL" | "NEGOTIATED" | "GRANDFATHERED" | "COMPLIMENTARY";
-            /** @description Required when a list price exists and the agreed price differs, for any adjustment, and when a renewal draft price changes from its prefilled amount. */
-            adjustment_reason?: string | null;
-            /** @enum {string} */
-            billing_cycle: "MONTHLY" | "QUARTERLY" | "SEMI_ANNUAL" | "ANNUAL" | "PER_TERM";
-            /**
-             * @default IDR
-             * @example IDR
-             */
-            currency: string;
-            /**
-             * @description Agreed price per billing cycle, or for the whole term with PER_TERM. Minor units as a string of digits (Rp400.000 is 40000000).
-             * @example 40000000
-             */
-            agreed_amount: string;
-        };
-        CreditNoteDeliveryDto: {
-            /** Format: uuid */
-            id: string;
-            recipients: string[];
-            /** @enum {string} */
-            status: "SENT" | "FAILED";
-            error_message: string | null;
-            /** Format: uuid */
-            sent_by_id: string | null;
-            /** @example user */
-            source: string;
-            /** Format: date-time */
-            created_at: string;
-        };
-        CreditNoteDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example CN/2026/11/00001 */
-            number: string;
-            invoice: components["schemas"]["CreditNoteInvoiceDto"];
-            /** @example IDR */
-            currency: string;
-            /**
-             * Format: date
-             * @example 2026-12-01
-             */
-            issue_date: string | null;
-            /**
-             * @description Amount credited, tax included. Minor units as a string of digits.
-             * @example 35000000
-             */
-            amount: string;
-            /** @example Koreksi harga paket */
-            description: string;
-            /** @example Discount agreed after issue */
-            reason: string;
-            pdf_sha256: string | null;
-            deliveries: components["schemas"]["CreditNoteDeliveryDto"][];
-            /** Format: date-time */
-            created_at: string;
-        };
-        CreditNoteInvoiceDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example INV/2026/11/00001 */
-            number: string | null;
-            /** Format: uuid */
-            client_id: string;
-            /** Format: uuid */
-            brand_id: string;
-            /** @enum {string} */
-            status: "DRAFT" | "ISSUED" | "PARTIALLY_PAID" | "PAID" | "VOID";
-        };
-        CurrencyAmountDto: {
-            /** @example IDR */
-            currency: string;
-            /**
-             * @description Amount in that currency. Minor units as a string of digits.
-             * @example 35000000
-             */
-            amount: string;
-        };
-        DeploymentDto: {
-            /** Format: uuid */
-            id: string;
-            installation: components["schemas"]["DeploymentInstallationDto"];
-            /** @enum {string} */
-            action: "PROVISION" | "UPDATE";
-            /** @enum {string} */
-            status: "PENDING" | "CLAIMED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED" | "OUTCOME_UNKNOWN";
-            manifest_revision: components["schemas"]["DeploymentManifestDto"] | null;
-            targets: components["schemas"]["DeploymentTargetDto"][];
-            reason: string;
-            idempotency_key: string;
-            /** Format: date-time */
-            claimed_at: string | null;
-            /** Format: date-time */
-            started_at: string | null;
-            /** Format: date-time */
-            finished_at: string | null;
-            /** Format: date-time */
-            last_reported_at: string | null;
-            result_detail: string | null;
-            cancel_reason: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        DeploymentInstallationDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example NOVA-PROD */
-            code: string;
-            /** @enum {string} */
-            environment: "PRODUCTION" | "STAGING" | "DEVELOPMENT";
-            /** @example NOVA-ONPREM-01 */
-            host_code: string;
-        };
-        DeploymentListDto: {
-            items: components["schemas"]["DeploymentDto"][];
-        };
-        DeploymentManifestDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example business-runtime-entitlements */
-            format: string;
-            /** @example 1 */
-            schema_version: string;
-            /** @example 3 */
-            revision: number;
-            /** @description SHA-256 of the manifest content. */
-            sha256: string;
-        };
-        DeploymentMutationResponseDto: {
-            /** @example Deployment created successfully */
-            message: string;
-            /** Format: uuid */
-            deployment_id: string;
-            /** @enum {string} */
-            status: "PENDING" | "CLAIMED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED" | "OUTCOME_UNKNOWN";
-        };
-        DeploymentTargetDto: {
-            /** Format: uuid */
-            product_id: string;
-            /** @example POS_SALON */
-            product_code: string;
-            /** Format: uuid */
-            release_id: string;
-            /** @example 1.1.0 */
-            version: string;
-            /** @example registry.example/pos-salon@sha256:… */
-            artifact_ref: string | null;
-        };
-        EnableItemDto: {
-            /**
-             * Format: uuid
-             * @description A product the installation hosts
-             */
-            product_id: string;
-            /** @enum {string} */
-            entity_type: "BASE_DOMAIN" | "APPLICATION" | "FEATURE" | "CAPABILITY";
-            /**
-             * Format: uuid
-             * @description An ACTIVE catalog item of that product
-             */
-            entity_id: string;
-            /** @description Required to enable an item outside the allowed set (an override, shown as not covered by contract), or to keep a NOT_COVERED item as an override. */
-            override_reason?: string | null;
-        };
-        EnabledItemMutationResponseDto: {
-            /** @example Installation created successfully */
-            message: string;
-            /** Format: uuid */
-            installation_id: string;
-            /** Format: uuid */
-            enabled_item_id: string;
-            /** @enum {string} */
-            coverage: "COVERED" | "OVERRIDE" | "NOT_COVERED" | "NOT_ENABLED";
-        };
-        EndContractAddOnDto: {
-            /**
-             * Format: date
-             * @description Last billed day of the add-on. A calendar date (YYYY-MM-DD) in the business time zone.
-             * @example 2026-12-01
-             */
-            effective_until: string;
-        };
         /**
          * @description Stable code; clients branch on it. Codes are never renamed or reused.
          * @enum {string}
          */
-        ErrorCode: "BAD_REQUEST" | "VALIDATION_ERROR" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "CONFLICT" | "BUSINESS_RULE_VIOLATION" | "RATE_LIMITED" | "INTERNAL_SERVER_ERROR" | "BAD_GATEWAY" | "SERVICE_UNAVAILABLE" | "GATEWAY_TIMEOUT" | "RESOURCE_CONFLICT" | "RELATION_CONFLICT" | "RELATION_CONSTRAINT_VIOLATION" | "RESOURCE_NOT_FOUND" | "TRANSACTION_RETRY_EXHAUSTED" | "DATABASE_VALUE_TOO_LONG" | "DATABASE_NULL_CONSTRAINT" | "DATABASE_REQUIRED_VALUE_MISSING" | "DATABASE_REQUIRED_ARGUMENT_MISSING" | "DATABASE_CONNECTION_TIMEOUT" | "DATABASE_VALIDATION_ERROR" | "DATABASE_ERROR" | "USER_NOT_FOUND" | "USER_INVALID_TRANSITION" | "USER_SELF_DEACTIVATION" | "USER_STATUS_FORBIDDEN" | "PRODUCT_NOT_FOUND" | "PRODUCT_CODE_CONFLICT" | "PRODUCT_INVALID_TRANSITION" | "PRODUCT_FEATURES_NOT_RETIRED" | "PRODUCT_MANIFEST_FORMAT_LOCKED" | "BASE_DOMAIN_NOT_FOUND" | "BASE_DOMAIN_CODE_CONFLICT" | "BASE_DOMAIN_INVALID_TRANSITION" | "APPLICATION_NOT_FOUND" | "APPLICATION_CODE_CONFLICT" | "APPLICATION_INVALID_TRANSITION" | "CAPABILITY_NOT_FOUND" | "CAPABILITY_CODE_CONFLICT" | "CAPABILITY_INVALID_TRANSITION" | "CATALOG_ITEM_NOT_ACTIVE" | "FEATURE_NOT_FOUND" | "FEATURE_CODE_CONFLICT" | "FEATURE_INVALID_TRANSITION" | "PRODUCT_CAPABILITY_NOT_FOUND" | "PRODUCT_CAPABILITY_ALREADY_LINKED" | "PRODUCT_CAPABILITY_RETIRED" | "ADD_ON_NOT_FOUND" | "ADD_ON_CODE_CONFLICT" | "ADD_ON_INVALID_TRANSITION" | "ADD_ON_GRANT_INVALID" | "ADD_ON_GRANT_REQUIRED" | "PRICE_NOT_FOUND" | "RELEASE_NOT_FOUND" | "RELEASE_VERSION_CONFLICT" | "RELEASE_INVALID_TRANSITION" | "RELEASE_NOT_EDITABLE" | "RELEASE_ARTIFACT_REQUIRED" | "RELEASE_TARGETED" | "MANIFEST_FORMAT_UNKNOWN" | "MANIFEST_KEY_INVALID" | "MANIFEST_KEY_CONFLICT" | "MANIFEST_MAPPING_NOT_FOUND" | "MANIFEST_MAPPING_INCOMPLETE" | "SERVICE_NOT_FOUND" | "SERVICE_ALREADY_EXISTS" | "SERVICE_INVALID_TRANSITION" | "SERVICE_CLOSED" | "SERVICE_CLIENT_NOT_ACTIVE" | "SERVICE_BRAND_NOT_ACTIVE" | "SERVICE_PRODUCT_NOT_ACTIVE" | "SERVICE_FEATURE_INVALID" | "SERVICE_ADD_ON_INVALID" | "CLIENT_ADD_ON_NOT_FOUND" | "CLIENT_ADD_ON_ALREADY_HELD" | "CLIENT_ADD_ON_INVALID_TRANSITION" | "CLIENT_HAS_OPEN_SERVICES" | "BRAND_HAS_OPEN_SERVICES" | "PRODUCT_HAS_OPEN_SERVICES" | "PRODUCT_HOSTED" | "FEATURE_IN_USE" | "ADD_ON_IN_USE" | "ROLE_NOT_FOUND" | "ROLE_NOT_ASSIGNABLE" | "ROLE_SLUG_CONFLICT" | "ROLE_SYSTEM_IMMUTABLE" | "ROLE_INACTIVE" | "ROLE_ASSIGNMENT_FORBIDDEN" | "LAST_SUPER_ADMIN" | "PERMISSION_NOT_FOUND" | "PERMISSION_NOT_GRANTABLE" | "USER_IDENTITY_CONFLICT" | "INVITATION_NOT_FOUND" | "INVITATION_ACCESS_FORBIDDEN" | "INVITATION_INVALID" | "INVITATION_ALREADY_ACCEPTED" | "INVITATION_ALREADY_REVOKED" | "INVITATION_EMAIL_REGISTERED" | "INVITATION_EMAIL_PENDING" | "INVITATION_DELIVERY_FAILED" | "AUTH_CSRF_INVALID" | "CLIENT_NOT_FOUND" | "CLIENT_ARCHIVED" | "CLIENT_CODE_CONFLICT" | "CLIENT_INVALID_TRANSITION" | "BRAND_NOT_FOUND" | "BRAND_CODE_CONFLICT" | "BRAND_INVALID_TRANSITION" | "BRAND_LAST_ACTIVE" | "CLIENT_CONTACT_NOT_FOUND" | "CLIENT_CONTACT_BRAND_MISMATCH" | "CLIENT_CONTACT_EMAIL_REQUIRED" | "CLIENT_PRIMARY_CONTACT_REQUIRED" | "SERVICE_HOSTED" | "HOST_NOT_FOUND" | "HOST_CODE_CONFLICT" | "HOST_INVALID_TRANSITION" | "HOST_RETIRED" | "HOST_IN_USE" | "HOST_CREDENTIAL_ALREADY_ACTIVE" | "HOST_CREDENTIAL_NOT_FOUND" | "HOST_CREDENTIAL_SCOPE_MISSING" | "INSTALLATION_NOT_FOUND" | "INSTALLATION_CODE_CONFLICT" | "INSTALLATION_INVALID_TRANSITION" | "INSTALLATION_DECOMMISSIONED" | "INSTALLATION_HOST_NOT_ACTIVE" | "INSTALLATION_OWNER_REQUIRED" | "INSTALLATION_OWNER_NOT_ALLOWED" | "INSTALLATION_MODE_MISMATCH" | "INSTALLATION_SERVICE_INVALID" | "INSTALLATION_SERVICE_ALREADY_HOSTED" | "INSTALLATION_SERVICE_HOSTED_ELSEWHERE" | "INSTALLATION_PRODUCT_NOT_ACTIVE" | "INSTALLATION_PRODUCT_ALREADY_HOSTED" | "INSTALLATION_PRODUCT_NOT_HOSTED" | "INSTALLATION_RELEASE_INVALID" | "INSTALLATION_NOT_READY" | "INSTALLATION_GO_LIVE_INVALID" | "INSTALLATION_ITEM_INVALID" | "INSTALLATION_ITEM_ALREADY_ENABLED" | "INSTALLATION_OVERRIDE_REASON_REQUIRED" | "INSTALLATION_ITEM_NOT_FOUND" | "INSTALLATION_SERVICE_NOT_HOSTED" | "INSTALLATION_LAST_SERVICE" | "INSTALLATION_HOST_UNCHANGED" | "INSTALLATION_GO_LIVE_LOCKED" | "CONTRACT_NOT_FOUND" | "CONTRACT_ALREADY_EXISTS" | "CONTRACT_SERVICE_NOT_OPEN" | "CONTRACT_INVALID_TRANSITION" | "CONTRACT_CLOSED" | "CONTRACT_CANCEL_INVALID" | "CONTRACT_TERM_NOT_FOUND" | "CONTRACT_TERM_NOT_EDITABLE" | "CONTRACT_TERM_INVALID" | "CONTRACT_TERM_OVERLAP" | "CONTRACT_TERM_INVALID_TRANSITION" | "CONTRACT_ADJUSTMENT_REASON_REQUIRED" | "CONTRACT_PRICE_CHANGE_REASON_REQUIRED" | "CONTRACT_ONE_OFF_CHARGE_NOT_FOUND" | "CONTRACT_ADD_ON_NOT_FOUND" | "CONTRACT_ADD_ON_ALREADY_EXISTS" | "CONTRACT_ADD_ON_INVALID" | "MANIFEST_REVISION_NOT_FOUND" | "MANIFEST_REVISION_NOT_DRAFT" | "MANIFEST_FORMAT_NOT_HOSTED" | "MANIFEST_RENDER_CONFLICT" | "MANIFEST_RENDER_INVALID" | "MANIFEST_CONTENT_INVALID" | "MANIFEST_REMOVAL_NOT_CONFIRMED" | "MANIFEST_IMPORT_MISMATCH" | "DEPLOYMENT_NOT_FOUND" | "DEPLOYMENT_ALREADY_OPEN" | "DEPLOYMENT_IDEMPOTENCY_CONFLICT" | "DEPLOYMENT_TARGET_MISSING" | "DEPLOYMENT_MANIFEST_REQUIRED" | "DEPLOYMENT_INVALID_TRANSITION" | "DEPLOYMENT_REPORT_INVALID" | "BILLING_SETTINGS_INVALID" | "BILLING_SETTINGS_REQUIRED" | "INVOICE_NOT_FOUND" | "INVOICE_NOT_DRAFT" | "INVOICE_LINE_NOT_FOUND" | "INVOICE_EMPTY" | "INVOICE_TOTAL_NEGATIVE" | "INVOICE_BILLING_CONTACT_MISSING" | "INVOICE_NOT_EMPTY" | "INVOICE_BRAND_INVALID" | "INVOICE_NOT_SENDABLE" | "INVOICE_SEND_FAILED" | "INVOICE_SOURCE_EXCLUSION_NOT_FOUND" | "INVOICE_NOT_VOIDABLE" | "INVOICE_HAS_ALLOCATIONS" | "INVOICE_HAS_CREDIT_NOTES" | "PAYMENT_NOT_FOUND" | "PAYMENT_NOT_RECORDED" | "PAYMENT_ALLOCATION_NOT_FOUND" | "PAYMENT_ALLOCATION_CLIENT_MISMATCH" | "PAYMENT_ALLOCATION_CURRENCY_MISMATCH" | "PAYMENT_ALLOCATION_INVOICE_NOT_OPEN" | "PAYMENT_ALLOCATION_EXCEEDS_BALANCE" | "PAYMENT_ALLOCATION_EXCEEDS_UNALLOCATED" | "PAYMENT_PROOF_INVALID" | "PAYMENT_PROOF_EXISTS" | "PAYMENT_PROOF_NOT_FOUND" | "CREDIT_NOTE_NOT_FOUND" | "CREDIT_NOTE_INVOICE_NOT_OPEN" | "CREDIT_NOTE_EXCEEDS_BALANCE" | "CREDIT_NOTE_SEND_FAILED" | "CLIENT_HAS_UNSETTLED_INVOICES" | "CLIENT_HAS_CREDIT" | "BRAND_HAS_UNSETTLED_INVOICES";
-        FeatureDto: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            product_id: string;
-            code: string;
-            name: string;
-            description?: string | null;
-            /** @enum {string} */
-            scope: "PRODUCT" | "CLIENT";
-            /** Format: uuid */
-            owner_client_id?: string | null;
-            /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "RETIRED";
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        FeatureListDto: {
-            items: components["schemas"]["FeatureDto"][];
-        };
+        ErrorCode: "BAD_REQUEST" | "VALIDATION_ERROR" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "CONFLICT" | "BUSINESS_RULE_VIOLATION" | "RATE_LIMITED" | "INTERNAL_SERVER_ERROR" | "BAD_GATEWAY" | "SERVICE_UNAVAILABLE" | "GATEWAY_TIMEOUT" | "RESOURCE_CONFLICT" | "RELATION_CONFLICT" | "RELATION_CONSTRAINT_VIOLATION" | "RESOURCE_NOT_FOUND" | "TRANSACTION_RETRY_EXHAUSTED" | "DATABASE_VALUE_TOO_LONG" | "DATABASE_NULL_CONSTRAINT" | "DATABASE_REQUIRED_VALUE_MISSING" | "DATABASE_REQUIRED_ARGUMENT_MISSING" | "DATABASE_CONNECTION_TIMEOUT" | "DATABASE_VALIDATION_ERROR" | "DATABASE_ERROR" | "USER_NOT_FOUND" | "USER_INVALID_TRANSITION" | "USER_SELF_DEACTIVATION" | "USER_STATUS_FORBIDDEN" | "PRODUCT_NOT_FOUND" | "PRODUCT_CODE_CONFLICT" | "PRODUCT_INVALID_TRANSITION" | "PRODUCT_FEATURES_NOT_RETIRED" | "PRODUCT_MANIFEST_FORMAT_LOCKED" | "BASE_DOMAIN_NOT_FOUND" | "BASE_DOMAIN_CODE_CONFLICT" | "BASE_DOMAIN_INVALID_TRANSITION" | "APPLICATION_NOT_FOUND" | "APPLICATION_CODE_CONFLICT" | "APPLICATION_INVALID_TRANSITION" | "CAPABILITY_NOT_FOUND" | "CAPABILITY_CODE_CONFLICT" | "CAPABILITY_INVALID_TRANSITION" | "CATALOG_ITEM_NOT_ACTIVE" | "FEATURE_NOT_FOUND" | "FEATURE_CODE_CONFLICT" | "FEATURE_INVALID_TRANSITION" | "PRODUCT_CAPABILITY_NOT_FOUND" | "PRODUCT_CAPABILITY_ALREADY_LINKED" | "PRODUCT_CAPABILITY_RETIRED" | "ADD_ON_NOT_FOUND" | "ADD_ON_CODE_CONFLICT" | "ADD_ON_INVALID_TRANSITION" | "ADD_ON_GRANT_INVALID" | "ADD_ON_GRANT_REQUIRED" | "PRICE_NOT_FOUND" | "RELEASE_NOT_FOUND" | "RELEASE_VERSION_CONFLICT" | "RELEASE_INVALID_TRANSITION" | "RELEASE_NOT_EDITABLE" | "RELEASE_ARTIFACT_REQUIRED" | "RELEASE_TARGETED" | "MANIFEST_FORMAT_UNKNOWN" | "MANIFEST_KEY_INVALID" | "MANIFEST_KEY_CONFLICT" | "MANIFEST_MAPPING_NOT_FOUND" | "MANIFEST_MAPPING_INCOMPLETE" | "SERVICE_NOT_FOUND" | "SERVICE_ALREADY_EXISTS" | "SERVICE_INVALID_TRANSITION" | "SERVICE_CLOSED" | "SERVICE_CLIENT_NOT_ACTIVE" | "SERVICE_BRAND_NOT_ACTIVE" | "SERVICE_PRODUCT_NOT_ACTIVE" | "SERVICE_FEATURE_INVALID" | "SERVICE_ADD_ON_INVALID" | "CLIENT_ADD_ON_NOT_FOUND" | "CLIENT_ADD_ON_ALREADY_HELD" | "CLIENT_ADD_ON_INVALID_TRANSITION" | "CLIENT_HAS_OPEN_SERVICES" | "BRAND_HAS_OPEN_SERVICES" | "PRODUCT_HAS_OPEN_SERVICES" | "PRODUCT_HOSTED" | "FEATURE_IN_USE" | "ADD_ON_IN_USE" | "ROLE_NOT_FOUND" | "ROLE_NOT_ASSIGNABLE" | "ROLE_SLUG_CONFLICT" | "ROLE_SYSTEM_IMMUTABLE" | "ROLE_INACTIVE" | "ROLE_ASSIGNMENT_FORBIDDEN" | "LAST_SUPER_ADMIN" | "PERMISSION_NOT_FOUND" | "PERMISSION_NOT_GRANTABLE" | "USER_IDENTITY_CONFLICT" | "INVITATION_NOT_FOUND" | "INVITATION_ACCESS_FORBIDDEN" | "INVITATION_INVALID" | "INVITATION_ALREADY_ACCEPTED" | "INVITATION_ALREADY_REVOKED" | "INVITATION_EMAIL_REGISTERED" | "INVITATION_EMAIL_PENDING" | "INVITATION_DELIVERY_FAILED" | "AUTH_CSRF_INVALID" | "CLIENT_NOT_FOUND" | "CLIENT_ARCHIVED" | "CLIENT_INVALID_TRANSITION" | "BRAND_NOT_FOUND" | "BRAND_NAME_CONFLICT" | "BRAND_INVALID_TRANSITION" | "BUSINESS_NOT_FOUND" | "BUSINESS_NOT_EMPTY" | "BUSINESS_ALIAS_CONFLICT" | "CLIENT_CONTACT_NOT_FOUND" | "CLIENT_CONTACT_BRAND_MISMATCH" | "CLIENT_CONTACT_BUSINESS_MISMATCH" | "CLIENT_CONTACT_EMAIL_REQUIRED" | "LEGAL_ENTITY_NOT_FOUND" | "LEGAL_ENTITY_ARCHIVED" | "LEGAL_ENTITY_INVALID_TRANSITION" | "LEGAL_ENTITY_IN_USE" | "BUSINESS_TYPE_NOT_FOUND" | "BUSINESS_TYPE_CODE_CONFLICT" | "BUSINESS_TYPE_INVALID_TRANSITION" | "BUSINESS_TYPE_IN_USE" | "CLIENT_PRIMARY_CONTACT_PROTECTED" | "SERVICE_PIC_INVALID" | "SERVICE_HOSTED" | "HOST_NOT_FOUND" | "HOST_CODE_CONFLICT" | "HOST_INVALID_TRANSITION" | "HOST_RETIRED" | "HOST_IN_USE" | "HOST_CREDENTIAL_ALREADY_ACTIVE" | "HOST_CREDENTIAL_NOT_FOUND" | "HOST_CREDENTIAL_SCOPE_MISSING" | "INSTALLATION_NOT_FOUND" | "INSTALLATION_CODE_CONFLICT" | "INSTALLATION_INVALID_TRANSITION" | "INSTALLATION_DECOMMISSIONED" | "INSTALLATION_HOST_NOT_ACTIVE" | "INSTALLATION_OWNER_REQUIRED" | "INSTALLATION_OWNER_NOT_ALLOWED" | "INSTALLATION_MODE_MISMATCH" | "INSTALLATION_SERVICE_INVALID" | "INSTALLATION_SERVICE_ALREADY_HOSTED" | "INSTALLATION_SERVICE_HOSTED_ELSEWHERE" | "INSTALLATION_PRODUCT_NOT_ACTIVE" | "INSTALLATION_PRODUCT_ALREADY_HOSTED" | "INSTALLATION_PRODUCT_NOT_HOSTED" | "INSTALLATION_RELEASE_INVALID" | "INSTALLATION_NOT_READY" | "INSTALLATION_GO_LIVE_INVALID" | "INSTALLATION_ITEM_INVALID" | "INSTALLATION_ITEM_ALREADY_ENABLED" | "INSTALLATION_OVERRIDE_REASON_REQUIRED" | "INSTALLATION_ITEM_NOT_FOUND" | "INSTALLATION_SERVICE_NOT_HOSTED" | "INSTALLATION_LAST_SERVICE" | "INSTALLATION_HOST_UNCHANGED" | "INSTALLATION_GO_LIVE_LOCKED" | "CONTRACT_NOT_FOUND" | "CONTRACT_ALREADY_EXISTS" | "CONTRACT_SERVICE_NOT_OPEN" | "CONTRACT_INVALID_TRANSITION" | "CONTRACT_CLOSED" | "CONTRACT_CANCEL_INVALID" | "CONTRACT_TERM_NOT_FOUND" | "CONTRACT_TERM_NOT_EDITABLE" | "CONTRACT_TERM_INVALID" | "CONTRACT_TERM_OVERLAP" | "CONTRACT_TERM_INVALID_TRANSITION" | "CONTRACT_ADJUSTMENT_REASON_REQUIRED" | "CONTRACT_PRICE_CHANGE_REASON_REQUIRED" | "CONTRACT_ONE_OFF_CHARGE_NOT_FOUND" | "CONTRACT_ADD_ON_NOT_FOUND" | "CONTRACT_ADD_ON_ALREADY_EXISTS" | "CONTRACT_ADD_ON_INVALID" | "MANIFEST_REVISION_NOT_FOUND" | "MANIFEST_REVISION_NOT_DRAFT" | "MANIFEST_FORMAT_NOT_HOSTED" | "MANIFEST_RENDER_CONFLICT" | "MANIFEST_RENDER_INVALID" | "MANIFEST_CONTENT_INVALID" | "MANIFEST_REMOVAL_NOT_CONFIRMED" | "MANIFEST_IMPORT_MISMATCH" | "DEPLOYMENT_NOT_FOUND" | "DEPLOYMENT_ALREADY_OPEN" | "DEPLOYMENT_IDEMPOTENCY_CONFLICT" | "DEPLOYMENT_TARGET_MISSING" | "DEPLOYMENT_MANIFEST_REQUIRED" | "DEPLOYMENT_INVALID_TRANSITION" | "DEPLOYMENT_REPORT_INVALID" | "BILLING_SETTINGS_INVALID" | "BILLING_SETTINGS_REQUIRED" | "INVOICE_NOT_FOUND" | "INVOICE_NOT_DRAFT" | "INVOICE_LINE_NOT_FOUND" | "INVOICE_EMPTY" | "INVOICE_TOTAL_NEGATIVE" | "INVOICE_BILLING_CONTACT_MISSING" | "INVOICE_NOT_EMPTY" | "INVOICE_BRAND_INVALID" | "INVOICE_NOT_SENDABLE" | "INVOICE_SEND_FAILED" | "INVOICE_SOURCE_EXCLUSION_NOT_FOUND" | "INVOICE_NOT_VOIDABLE" | "INVOICE_HAS_ALLOCATIONS" | "INVOICE_HAS_CREDIT_NOTES" | "PAYMENT_NOT_FOUND" | "PAYMENT_NOT_RECORDED" | "PAYMENT_ALLOCATION_NOT_FOUND" | "PAYMENT_ALLOCATION_CLIENT_MISMATCH" | "PAYMENT_ALLOCATION_CURRENCY_MISMATCH" | "PAYMENT_ALLOCATION_INVOICE_NOT_OPEN" | "PAYMENT_ALLOCATION_EXCEEDS_BALANCE" | "PAYMENT_ALLOCATION_EXCEEDS_UNALLOCATED" | "PAYMENT_PROOF_INVALID" | "PAYMENT_PROOF_EXISTS" | "PAYMENT_PROOF_NOT_FOUND" | "CREDIT_NOTE_NOT_FOUND" | "CREDIT_NOTE_INVOICE_NOT_OPEN" | "CREDIT_NOTE_EXCEEDS_BALANCE" | "CREDIT_NOTE_SEND_FAILED" | "CLIENT_HAS_UNSETTLED_INVOICES" | "CLIENT_HAS_CREDIT" | "BRAND_HAS_UNSETTLED_INVOICES" | "TELEMETRY_COLLECTED_AT_IN_FUTURE" | "TELEMETRY_INVALID" | "PAYLOAD_TOO_LARGE";
         ForgotPasswordDto: {
             /**
              * Format: email
              * @example jane@example.com
              */
             email: string;
-        };
-        HostAgentSelfDto: {
-            /** Format: uuid */
-            host_id: string;
-            /** @example JKT-VPS-01 */
-            host_code: string;
-            /** Format: uuid */
-            credential_id: string;
-            scopes: ("manifest.read" | "deployment.report" | "telemetry.write")[];
-        };
-        HostCredentialDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example dgvh_Q2x9aB1 */
-            token_hint: string;
-            scopes: ("manifest.read" | "deployment.report" | "telemetry.write")[];
-            /** @enum {string} */
-            status: "ACTIVE" | "REVOKED";
-            /** Format: date-time */
-            revoked_at: string | null;
-            /**
-             * Format: date-time
-             * @description Last accepted use on a machine route, to the minute.
-             */
-            last_used_at: string | null;
-            /** Format: date-time */
-            created_at: string;
-        };
-        HostCredentialIssuedDto: {
-            /** @example Host credential issued */
-            message: string;
-            /** Format: uuid */
-            host_id: string;
-            /** Format: uuid */
-            credential_id: string;
-            /** @description The credential token. It is shown only in this response; store it on the host. */
-            token: string;
-            /** @example dgvh_Q2x9aB1 */
-            token_hint: string;
-            scopes: ("manifest.read" | "deployment.report" | "telemetry.write")[];
-        };
-        HostCredentialListDto: {
-            items: components["schemas"]["HostCredentialDto"][];
-        };
-        HostCredentialReasonDto: {
-            /** @example Server replaced */
-            reason: string;
-        };
-        HostDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example JKT-VPS-01 */
-            code: string;
-            name: string;
-            provider: string | null;
-            region: string | null;
-            /** @example 203.0.113.10 */
-            address: string;
-            /** @enum {string} */
-            infrastructure_ownership: "DIGVATION" | "CLIENT";
-            /** @enum {string} */
-            status: "ACTIVE" | "RETIRED";
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        HostFinalReportDto: {
-            /** @enum {string} */
-            status: "SUCCEEDED" | "FAILED";
-            /**
-             * Format: date-time
-             * @description When the deployment finished. Defaults to now; a late report keeps the real time (never in the future).
-             */
-            finished_at?: string;
-            /**
-             * Format: date-time
-             * @description When it started, for a deploy CORE did not see start. Defaults to now; a late report keeps the real time (never in the future).
-             */
-            started_at?: string;
-            /** @description What happened, for example the failing step. No secrets. */
-            detail?: string | null;
-        };
-        HostLifecycleResponseDto: {
-            /** @example Host created successfully */
-            message: string;
-            /** Format: uuid */
-            host_id: string;
-            /** @enum {string} */
-            status: "ACTIVE" | "RETIRED";
-        };
-        HostManifestDto: {
-            /** @example NOVA-PROD */
-            installation_code: string;
-            /** @example business-runtime-entitlements */
-            format: string;
-            /** @example 1 */
-            schema_version: string;
-            /** @example 3 */
-            revision: number;
-            /** @enum {string} */
-            status: "ISSUED" | "SUPERSEDED";
-            /** @description SHA-256 of content (hex); also the ETag. */
-            sha256: string;
-            /** @description The manifest to write on the host, byte for byte. */
-            content: string;
-            /** Format: date-time */
-            issued_at: string | null;
-        };
-        HostMutationResponseDto: {
-            /** @example Host created successfully */
-            message: string;
-            /** Format: uuid */
-            host_id: string;
-        };
-        HostProductDto: {
-            /**
-             * Format: uuid
-             * @description An ACTIVE product
-             */
-            product_id: string;
-        };
-        HostProgressReportDto: {
-            /**
-             * Format: date-time
-             * @description When it happened on the host. Defaults to now; a late report keeps the real time (never in the future).
-             */
-            at?: string;
-        };
-        HostServiceDto: {
-            /**
-             * Format: uuid
-             * @description An open service of the owner
-             */
-            service_id: string;
-        };
-        HostTransitionDto: {
-            /**
-             * @example RETIRED
-             * @enum {string}
-             */
-            target_status: "ACTIVE" | "RETIRED";
-            /** @example Server replaced */
-            reason: string;
-        };
-        HostedProductDto: {
-            product: components["schemas"]["InstallationRefDto"];
-            target_release: components["schemas"]["TargetReleaseDto"] | null;
-        };
-        HostedServiceDto: {
-            /**
-             * Format: uuid
-             * @description The client service id
-             */
-            id: string;
-            brand: components["schemas"]["InstallationRefDto"];
-            product: components["schemas"]["InstallationRefDto"];
-            /** @enum {string} */
-            status: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
-        };
-        ImportManifestDto: {
-            /**
-             * @description Needed only when the installation hosts several formats.
-             * @example business-runtime-entitlements
-             */
-            format?: string;
-            /** @example 1 */
-            schema_version?: string;
-            /** @description The manifest exactly as it runs (YAML). Block mappings of booleans only; it is read through the format schema. */
-            content: string;
-            /** @example entitlements.yml revision f91f3a78, read-only verification 2026-11-12 */
-            source_evidence: string;
-            /** @example Reviewed with the client */
-            reason: string;
-        };
-        InstallationDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example NOVA-PROD */
-            code: string;
-            name: string;
-            /** @enum {string} */
-            deployment_mode: "SHARED" | "DEDICATED";
-            /** @enum {string} */
-            environment: "PRODUCTION" | "STAGING" | "DEVELOPMENT";
-            /** @enum {string} */
-            status: "PROVISIONING" | "ACTIVE" | "SUSPENDED" | "DECOMMISSIONED";
-            host: components["schemas"]["InstallationRefDto"];
-            /** @description Null for SHARED (owned by Digvation) */
-            owner_client: components["schemas"]["OwnerClientRefDto"] | null;
-            managed_by_digvation: boolean;
-            /** Format: date-time */
-            go_live_at: string | null;
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-            urls: components["schemas"]["InstallationUrlResponseDto"][];
-            branding: components["schemas"]["BrandingResponseDto"];
-            services: components["schemas"]["HostedServiceDto"][];
-            products: components["schemas"]["HostedProductDto"][];
-            /** @description The enabled set, each item with its coverage */
-            enabled_items: components["schemas"]["CoverageItemDto"][];
-        };
-        InstallationLifecycleResponseDto: {
-            /** @example Installation created successfully */
-            message: string;
-            /** Format: uuid */
-            installation_id: string;
-            /** @enum {string} */
-            status: "PROVISIONING" | "ACTIVE" | "SUSPENDED" | "DECOMMISSIONED";
-        };
-        InstallationMutationResponseDto: {
-            /** @example Installation created successfully */
-            message: string;
-            /** Format: uuid */
-            installation_id: string;
-        };
-        InstallationRefDto: {
-            /** Format: uuid */
-            id: string;
-            code: string;
-            name: string;
-        };
-        InstallationSummaryDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example NOVA-PROD */
-            code: string;
-            name: string;
-            /** @enum {string} */
-            deployment_mode: "SHARED" | "DEDICATED";
-            /** @enum {string} */
-            environment: "PRODUCTION" | "STAGING" | "DEVELOPMENT";
-            /** @enum {string} */
-            status: "PROVISIONING" | "ACTIVE" | "SUSPENDED" | "DECOMMISSIONED";
-            host: components["schemas"]["InstallationRefDto"];
-            /** @description Null for SHARED (owned by Digvation) */
-            owner_client: components["schemas"]["OwnerClientRefDto"] | null;
-            managed_by_digvation: boolean;
-            /** Format: date-time */
-            go_live_at: string | null;
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        InstallationTransitionDto: {
-            /**
-             * @example ACTIVE
-             * @enum {string}
-             */
-            target_status: "PROVISIONING" | "ACTIVE" | "SUSPENDED" | "DECOMMISSIONED";
-            /** @example Provisioning finished */
-            reason: string;
-        };
-        InstallationUrlDto: {
-            /** @example Backoffice */
-            label: string;
-            /** @example https://backoffice.nova.example */
-            url: string;
-        };
-        InstallationUrlResponseDto: {
-            /** @example Backoffice */
-            label: string;
-            /** @example https://backoffice.nova.example */
-            url: string;
         };
         InvitationAcceptedDto: {
             /** @example Invitation accepted and account created successfully */
@@ -4578,12 +1522,6 @@ export interface components {
             id: string;
             /** Format: email */
             email: string;
-            /**
-             * @example [
-             *       "MEMBER"
-             *     ]
-             */
-            roles: string[];
             invited_by: components["schemas"]["InvitationInviterDto"];
             /** @enum {string} */
             status: "pending" | "accepted" | "revoked" | "expired";
@@ -4616,350 +1554,53 @@ export interface components {
             email: string;
             /** Format: date-time */
             expires_at: string;
-            /**
-             * @example [
-             *       "MEMBER"
-             *     ]
-             */
-            roles: string[];
         };
-        InvoiceAllocationDto: {
+        LegalEntityDto: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
-            payment_id: string;
-            /**
-             * @description Allocated amount. Minor units as a string of digits.
-             * @example 35000000
-             */
-            amount: string;
-            /** Format: date-time */
-            created_at: string;
-        };
-        InvoiceCreditNoteRefDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example CN/2026/11/00001 */
-            number: string;
-            /**
-             * @description Amount credited, tax included. Minor units as a string of digits.
-             * @example 35000000
-             */
-            amount: string;
-            /**
-             * Format: date
-             * @example 2026-12-01
-             */
-            issue_date: string | null;
-        };
-        InvoiceDeliveryDto: {
-            /** Format: uuid */
-            id: string;
-            /**
-             * @example [
-             *       "finance@nova.example"
-             *     ]
-             */
-            recipients: string[];
+            business_id: string;
+            /** @example PT Nova Karya Salon */
+            legal_name: string;
+            tax_identifier?: string | null;
+            address?: string | null;
+            /** @example ID */
+            country?: string | null;
+            /** @example Asia/Jakarta */
+            timezone?: string | null;
+            notes?: string | null;
             /** @enum {string} */
-            status: "SENT" | "FAILED";
-            error_message: string | null;
-            /** Format: uuid */
-            sent_by_id: string | null;
-            /** @example user */
-            source: string;
-            /** Format: date-time */
-            created_at: string;
-        };
-        InvoiceDetailDto: {
-            /** Format: uuid */
-            id: string;
-            /**
-             * @description Assigned at issue.
-             * @example INV/2026/11/00001
-             */
-            number: string | null;
-            /** @description The bill-to client. */
-            client: components["schemas"]["InvoicePartyDto"];
-            brand: components["schemas"]["InvoicePartyDto"];
-            /** @example IDR */
-            currency: string;
-            /** @enum {string} */
-            status: "DRAFT" | "ISSUED" | "PARTIALLY_PAID" | "PAID" | "VOID";
-            /** @description ISSUED or PARTIALLY_PAID past its due date (business date). */
-            overdue: boolean;
-            /**
-             * Format: date
-             * @description Earliest day of its lines’ periods.
-             * @example 2026-12-01
-             */
-            period_start: string | null;
-            /**
-             * Format: date
-             * @description Latest day of its lines’ periods.
-             * @example 2026-12-01
-             */
-            period_end: string | null;
-            /**
-             * Format: date
-             * @example 2026-12-01
-             */
-            issue_date: string | null;
-            /**
-             * Format: date
-             * @example 2026-12-01
-             */
-            due_date: string | null;
-            /**
-             * @description Sum of the lines, before tax. Minor units as a string of digits.
-             * @example 35000000
-             */
-            subtotal: string;
-            /** @example PPN */
-            tax_name: string | null;
-            /**
-             * @description Basis points, snapshotted at issue.
-             * @example 1100
-             */
-            tax_rate_basis_points: number | null;
-            /**
-             * @description Tax on the subtotal, half up. Minor units as a string of digits.
-             * @example 35000000
-             */
-            tax_amount: string;
-            /**
-             * @description subtotal + tax_amount. Minor units as a string of digits.
-             * @example 35000000
-             */
-            total: string;
-            /**
-             * @description Payments allocated to it (credit notes are not payments). Minor units as a string of digits.
-             * @example 35000000
-             */
-            amount_paid: string;
-            /**
-             * @description Sum of its credit notes. Minor units as a string of digits.
-             * @example 35000000
-             */
-            credited_amount: string;
-            /**
-             * @description total - amount_paid - credited_amount; 0 means PAID, 0 once VOID. Minor units as a string of digits.
-             * @example 35000000
-             */
-            balance: string;
-            /** Format: date-time */
-            voided_at: string | null;
-            /** Format: date-time */
-            issued_at: string | null;
-            /** @description SHA-256 of the stored PDF, once rendered. */
-            pdf_sha256: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-            lines: components["schemas"]["InvoiceLineDto"][];
-            /** @description Every send, newest first. */
-            deliveries: components["schemas"]["InvoiceDeliveryDto"][];
-            /** @description Payment allocations in force, oldest first. */
-            allocations: components["schemas"]["InvoiceAllocationDto"][];
-            credit_notes: components["schemas"]["InvoiceCreditNoteRefDto"][];
-            /** @description Issuer, bill_to, brand, billing_contacts, tax and payment_instructions as at issue; null for a DRAFT. */
-            snapshot: {
-                [key: string]: unknown;
-            } | null;
-        };
-        InvoiceDto: {
-            /** Format: uuid */
-            id: string;
-            /**
-             * @description Assigned at issue.
-             * @example INV/2026/11/00001
-             */
-            number: string | null;
-            /** @description The bill-to client. */
-            client: components["schemas"]["InvoicePartyDto"];
-            brand: components["schemas"]["InvoicePartyDto"];
-            /** @example IDR */
-            currency: string;
-            /** @enum {string} */
-            status: "DRAFT" | "ISSUED" | "PARTIALLY_PAID" | "PAID" | "VOID";
-            /** @description ISSUED or PARTIALLY_PAID past its due date (business date). */
-            overdue: boolean;
-            /**
-             * Format: date
-             * @description Earliest day of its lines’ periods.
-             * @example 2026-12-01
-             */
-            period_start: string | null;
-            /**
-             * Format: date
-             * @description Latest day of its lines’ periods.
-             * @example 2026-12-01
-             */
-            period_end: string | null;
-            /**
-             * Format: date
-             * @example 2026-12-01
-             */
-            issue_date: string | null;
-            /**
-             * Format: date
-             * @example 2026-12-01
-             */
-            due_date: string | null;
-            /**
-             * @description Sum of the lines, before tax. Minor units as a string of digits.
-             * @example 35000000
-             */
-            subtotal: string;
-            /** @example PPN */
-            tax_name: string | null;
-            /**
-             * @description Basis points, snapshotted at issue.
-             * @example 1100
-             */
-            tax_rate_basis_points: number | null;
-            /**
-             * @description Tax on the subtotal, half up. Minor units as a string of digits.
-             * @example 35000000
-             */
-            tax_amount: string;
-            /**
-             * @description subtotal + tax_amount. Minor units as a string of digits.
-             * @example 35000000
-             */
-            total: string;
-            /**
-             * @description Payments allocated to it (credit notes are not payments). Minor units as a string of digits.
-             * @example 35000000
-             */
-            amount_paid: string;
-            /**
-             * @description Sum of its credit notes. Minor units as a string of digits.
-             * @example 35000000
-             */
-            credited_amount: string;
-            /**
-             * @description total - amount_paid - credited_amount; 0 means PAID, 0 once VOID. Minor units as a string of digits.
-             * @example 35000000
-             */
-            balance: string;
-            /** Format: date-time */
-            voided_at: string | null;
-            /** Format: date-time */
-            issued_at: string | null;
-            /** @description SHA-256 of the stored PDF, once rendered. */
-            pdf_sha256: string | null;
+            status: "ACTIVE" | "ARCHIVED";
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
             updated_at: string;
         };
-        InvoiceLineDto: {
+        LegalEntityLifecycleResponseDto: {
+            /** @example Legal entity created successfully */
+            message: string;
             /** Format: uuid */
-            id: string;
+            legal_entity_id: string;
             /** @enum {string} */
-            kind: "TERM_CHARGE" | "ADD_ON_CHARGE" | "ADD_ON_PRORATED" | "ONE_OFF_CHARGE" | "AD_HOC";
-            /** @example POS Salon (bulanan) */
-            description: string;
-            /**
-             * @description What a generated line bills; null for ad-hoc items.
-             * @example term:0b8c…:3
-             */
-            source_key: string | null;
-            /** Format: uuid */
-            service_id: string | null;
-            /** Format: uuid */
-            term_id: string | null;
-            /** Format: uuid */
-            one_off_charge_id: string | null;
-            /** Format: uuid */
-            contract_add_on_id: string | null;
-            /**
-             * Format: date
-             * @example 2026-12-01
-             */
-            period_start: string | null;
-            /**
-             * Format: date
-             * @example 2026-12-01
-             */
-            period_end: string | null;
-            /** @example 1 */
-            quantity: number;
-            /**
-             * @description Price per unit before tax. Minor units as a string of digits.
-             * @example 35000000
-             */
-            unit_amount: string;
-            /**
-             * @description quantity x unit_amount. Minor units as a string of digits.
-             * @example 35000000
-             */
-            amount: string;
+            status: "ACTIVE" | "ARCHIVED";
         };
-        InvoicePartyDto: {
+        LegalEntityMutationResponseDto: {
+            /** @example Legal entity created successfully */
+            message: string;
             /** Format: uuid */
-            id: string;
-            /** @example NOVA */
-            code: string;
-            /** @example Nova Group */
-            name: string;
+            legal_entity_id: string;
         };
-        InvoiceReasonDto: {
-            /** @example Billed separately */
+        LegalEntityStatusDto: {
+            /**
+             * @example ARCHIVED
+             * @enum {string}
+             */
+            target_status: "ACTIVE" | "ARCHIVED";
+            /**
+             * @description Required: every state change names an actor, a reason and a time.
+             * @example The entity was dissolved; the brands moved to PT Nova Retail
+             */
             reason: string;
-        };
-        InvoiceSourceExclusionDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example add-on:6d1…:2026-12-01 */
-            source_key: string;
-            /** @example Add-on Membership */
-            description: string;
-            /** Format: uuid */
-            brand_id: string;
-            /** @example Billed in the previous contract */
-            reason: string;
-            /**
-             * Format: date-time
-             * @description Set once the source is billed again; null while excluded.
-             */
-            restored_at: string | null;
-            /** Format: uuid */
-            created_by: string | null;
-            /** Format: date-time */
-            created_at: string;
-        };
-        InvoiceSourceExclusionListDto: {
-            items: components["schemas"]["InvoiceSourceExclusionDto"][];
-        };
-        IssueHostCredentialDto: {
-            /** @example Server replaced */
-            reason: string;
-            /** @description Defaults to every scope. */
-            scopes?: ("manifest.read" | "deployment.report" | "telemetry.write")[];
-        };
-        IssueInvoiceDto: {
-            /** @example Reviewed with finance */
-            reason?: string;
-        };
-        IssueManifestDto: {
-            /** @example Reviewed with the client */
-            reason: string;
-            /**
-             * @description Every key the revision removes compared with the ISSUED one, exactly (MANIFEST_REMOVAL_NOT_CONFIRMED otherwise).
-             * @example [
-             *       "capabilities.CUSTOMER.MEMBERSHIP"
-             *     ]
-             */
-            confirm_removed?: string[];
-        };
-        LinkCapabilityDto: {
-            /** Format: uuid */
-            capability_id: string;
-            /** @enum {string} */
-            inclusion: "INCLUDED" | "COMPATIBLE";
         };
         LoginDto: {
             /**
@@ -4978,301 +1619,25 @@ export interface components {
              */
             remember_me: boolean;
         };
-        ManifestComparisonDto: {
-            /** @description The ISSUED revision compared with; null when none is issued. */
-            compared_with_revision: number | null;
-            /** @enum {string|null} */
-            compared_with_source: "GENERATED" | "IMPORTED" | null;
-            /**
-             * @example [
-             *       "capabilities.TAX"
-             *     ]
-             */
-            added: string[];
-            /**
-             * @description Keys that issuing would turn off; list them in confirm_removed.
-             * @example [
-             *       "capabilities.CUSTOMER.MEMBERSHIP"
-             *     ]
-             */
-            removed: string[];
-            /** @description Enables exactly the keys of the ISSUED revision (bytes may differ). */
-            identical: boolean;
-        };
-        ManifestFormatDto: {
-            /** @example business-runtime-entitlements */
-            code: string;
-            /** @example 1 */
-            schema_version: string;
-            description: string;
-            /** @description Item kinds the format carries; the others need no mapping. */
-            carries: string[];
-            keys: components["schemas"]["ManifestKeyDto"][];
-        };
-        ManifestFormatListDto: {
-            items: components["schemas"]["ManifestFormatDto"][];
-        };
-        ManifestKeyDto: {
-            /** @enum {string} */
-            section: "products" | "capabilities";
-            /** @example CUSTOMER.MEMBERSHIP */
-            key: string;
-            /**
-             * @example [
-             *       "FEATURE",
-             *       "CAPABILITY"
-             *     ]
-             */
-            entity_types: string[];
-            description: string;
-        };
-        ManifestMappingDto: {
-            /** Format: uuid */
-            id: string;
-            /** @enum {string} */
-            entity_type: "BASE_DOMAIN" | "APPLICATION" | "FEATURE" | "CAPABILITY";
-            /** Format: uuid */
-            entity_id: string;
-            /** @example CUSTOMER.MEMBERSHIP */
-            manifest_key: string;
-        };
-        ManifestMappingListDto: {
-            format?: string | null;
-            schema_version?: string | null;
-            items: components["schemas"]["ManifestMappingDto"][];
-            /** @description Items the manifest must carry that have no mapping yet */
-            missing: components["schemas"]["MissingMappingDto"][];
-        };
-        ManifestMutationResponseDto: {
-            /** @example Manifest revision issued successfully */
-            message: string;
-            /** Format: uuid */
-            installation_id: string;
-            /** Format: uuid */
-            revision_id: string;
-            /** @example 2 */
-            revision: number;
-            /** @enum {string} */
-            status: "DRAFT" | "ISSUED" | "SUPERSEDED";
-        };
-        ManifestRefreshResponseDto: {
-            /** @example Manifest drafts are up to date */
-            message: string;
-            /** Format: uuid */
-            installation_id: string;
-            /** @description DRAFT revisions created or changed by this refresh. */
-            revision_ids: string[];
-        };
-        ManifestRevisionDetailDto: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            installation_id: string;
-            /** @example business-runtime-entitlements */
-            format: string;
-            /** @example 1 */
-            schema_version: string;
-            /**
-             * @description Sequential per installation and format.
-             * @example 2
-             */
-            revision: number;
-            /**
-             * @description SHA-256 of content (hex).
-             * @example 9f86d081884c7d65…
-             */
-            sha256: string;
-            /** @enum {string} */
-            source: "GENERATED" | "IMPORTED";
-            source_evidence: string | null;
-            /** @enum {string} */
-            status: "DRAFT" | "ISSUED" | "SUPERSEDED";
-            reason: string | null;
-            /** Format: date-time */
-            issued_at: string | null;
-            /** Format: date-time */
-            superseded_at: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-            /** @description The manifest (YAML). */
-            content: string;
-            comparison: components["schemas"]["ManifestComparisonDto"];
-        };
-        ManifestRevisionDto: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            installation_id: string;
-            /** @example business-runtime-entitlements */
-            format: string;
-            /** @example 1 */
-            schema_version: string;
-            /**
-             * @description Sequential per installation and format.
-             * @example 2
-             */
-            revision: number;
-            /**
-             * @description SHA-256 of content (hex).
-             * @example 9f86d081884c7d65…
-             */
-            sha256: string;
-            /** @enum {string} */
-            source: "GENERATED" | "IMPORTED";
-            source_evidence: string | null;
-            /** @enum {string} */
-            status: "DRAFT" | "ISSUED" | "SUPERSEDED";
-            reason: string | null;
-            /** Format: date-time */
-            issued_at: string | null;
-            /** Format: date-time */
-            superseded_at: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        ManifestRevisionListDto: {
-            items: components["schemas"]["ManifestRevisionDto"][];
-        };
         MessageResponseDto: {
             /** @example Operation completed successfully */
             message: string;
         };
-        MissingMappingDto: {
-            /** @enum {string} */
-            entity_type: "BASE_DOMAIN" | "APPLICATION" | "FEATURE" | "CAPABILITY";
-            /** Format: uuid */
-            entity_id: string;
-            code: string;
-        };
-        MoveInstallationHostDto: {
+        MoveBrandDto: {
             /**
              * Format: uuid
-             * @description An ACTIVE host
+             * @description Move the brand to another business of the same client; the business it leaves stays, also without brands.
              */
-            host_id: string;
-            /** @example Migrated to the new Jakarta VPS */
-            reason: string;
-        };
-        NotificationDeliveryDto: {
-            /** Format: uuid */
-            id: string;
-            /** @enum {string} */
-            event: "CONTRACT_TERM_ENDING" | "TRIAL_ENDING" | "RENEWAL_DRAFT_PENDING" | "INVOICE_DUE" | "INVOICE_OVERDUE" | "INVOICE_DRAFTS_PENDING";
-            /** @example contract_term */
-            subject_type: string;
-            /** Format: uuid */
-            subject_id: string;
+            business_id?: string;
             /**
-             * @description "created", or the days before the date as "<n>d".
-             * @example 14d
+             * Format: uuid
+             * @description Exactly one of business_type_id and custom_business_type stays set (D25).
              */
-            threshold: string;
-            /** @description Recipients of the last attempt. */
-            recipients: string[];
-            email_subject: string;
-            email_body: string;
-            /** @enum {string} */
-            status: "PENDING" | "SENT" | "FAILED" | "CANCELLED";
-            /** @example 1 */
-            attempts: number;
-            last_error: string | null;
-            /** Format: date-time */
-            sent_at: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        NotificationSettingsDto: {
-            /**
-             * @example [
-             *       "ops@digvation.example"
-             *     ]
-             */
-            recipients: string[];
-            /**
-             * @example [
-             *       30,
-             *       14,
-             *       7
-             *     ]
-             */
-            term_ending_days: number[];
-            /**
-             * @example [
-             *       7,
-             *       1
-             *     ]
-             */
-            trial_ending_days: number[];
-            /**
-             * @example [
-             *       14,
-             *       7
-             *     ]
-             */
-            renewal_draft_days: number[];
-            /**
-             * @example [
-             *       3,
-             *       0
-             *     ]
-             */
-            invoice_due_days: number[];
-            /**
-             * @example [
-             *       1,
-             *       7,
-             *       14
-             *     ]
-             */
-            invoice_overdue_days: number[];
-            /**
-             * @description DEFAULT while nothing is saved (the env defaults apply), DATABASE after a PUT.
-             * @enum {string}
-             */
-            source: "DATABASE" | "DEFAULT";
-            /** Format: date-time */
-            updated_at: string | null;
+            business_type_id?: string | null;
+            /** @description Exactly one of business_type_id and custom_business_type stays set (D25). */
+            custom_business_type?: string | null;
         };
         Object: Record<string, never>;
-        OneOffChargeDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example Pembuatan website */
-            description: string;
-            /**
-             * @description Charge amount. Minor units as a string.
-             * @example 40000000
-             */
-            amount: string;
-            /** @example IDR */
-            currency: string;
-            /** Format: date-time */
-            created_at: string;
-        };
-        OneOffChargeMutationResponseDto: {
-            /** @example Contract created successfully */
-            message: string;
-            /** Format: uuid */
-            contract_id: string;
-            /** Format: uuid */
-            term_id: string;
-            /** Format: uuid */
-            charge_id: string;
-        };
-        OwnerClientRefDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example NOVA */
-            code: string;
-            /** @example Nova Group */
-            display_name: string;
-        };
         PaginationDto: {
             /** @example 1 */
             page: number;
@@ -5282,74 +1647,6 @@ export interface components {
             total: number;
             /** @example 10 */
             total_pages: number;
-        };
-        PaymentAllocationDto: {
-            /** Format: uuid */
-            id: string;
-            invoice: components["schemas"]["AllocationInvoiceDto"];
-            /**
-             * @description Allocated amount. Minor units as a string of digits.
-             * @example 35000000
-             */
-            amount: string;
-            /**
-             * Format: date-time
-             * @description Set once released (alone or by the reversal); kept as history.
-             */
-            released_at: string | null;
-            /** Format: date-time */
-            created_at: string;
-        };
-        PaymentClientDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example NOVA */
-            code: string;
-            /** @example Nova Group */
-            name: string;
-        };
-        PaymentDto: {
-            /** Format: uuid */
-            id: string;
-            client: components["schemas"]["PaymentClientDto"];
-            /**
-             * Format: date
-             * @description Business date the money arrived.
-             * @example 2026-12-01
-             */
-            received_at: string | null;
-            /**
-             * @description Amount received. Minor units as a string of digits.
-             * @example 35000000
-             */
-            amount: string;
-            /** @example IDR */
-            currency: string;
-            /** @enum {string} */
-            method: "BANK_TRANSFER" | "CASH" | "OTHER";
-            reference: string | null;
-            notes: string | null;
-            /** @enum {string} */
-            status: "RECORDED" | "REVERSED";
-            /**
-             * @description What is left as client credit; 0 once REVERSED. Minor units as a string of digits.
-             * @example 35000000
-             */
-            unallocated: string;
-            /** @description Whether a proof file is stored (GET /payments/{id}/proof). */
-            has_proof: boolean;
-            /** @example application/pdf */
-            proof_content_type: string | null;
-            proof_sha256: string | null;
-            /** Format: date-time */
-            reversed_at: string | null;
-            allocations: components["schemas"]["PaymentAllocationDto"][];
-            /** Format: date-time */
-            created_at: string;
-        };
-        PaymentReasonDto: {
-            /** @example Allocated to the wrong invoice */
-            reason: string;
         };
         PermissionDto: {
             /** Format: uuid */
@@ -5362,126 +1659,6 @@ export interface components {
         };
         PermissionListDto: {
             items: components["schemas"]["PermissionDto"][];
-        };
-        PriceDto: {
-            /** Format: uuid */
-            id: string;
-            /** @enum {string} */
-            billing_cycle: "MONTHLY" | "QUARTERLY" | "SEMI_ANNUAL" | "ANNUAL" | "PER_TERM";
-            /** @example IDR */
-            currency: string;
-            /**
-             * @description Minor units, as a string (BigInt).
-             * @example 150000000
-             */
-            amount: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        PriceListDto: {
-            items: components["schemas"]["PriceDto"][];
-        };
-        PrimaryContactDto: {
-            /** @example Nadia Putri */
-            name: string;
-            /** @example Owner */
-            position?: string | null;
-            /** Format: email */
-            email?: string | null;
-            /** @example +6281234567890 */
-            phone?: string | null;
-            /** @default false */
-            is_billing: boolean;
-            /** @default false */
-            is_technical: boolean;
-        };
-        ProductCapabilityDto: {
-            /**
-             * Format: uuid
-             * @description The link id
-             */
-            id: string;
-            capability: components["schemas"]["CatalogItemDto"];
-            /** @enum {string} */
-            inclusion: "INCLUDED" | "COMPATIBLE";
-            /** @enum {string} */
-            status: "ACTIVE" | "RETIRED";
-            /** Format: date-time */
-            retired_at?: string | null;
-            /** Format: date-time */
-            created_at: string;
-        };
-        ProductCapabilityListDto: {
-            items: components["schemas"]["ProductCapabilityDto"][];
-        };
-        ProductDetailDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example POS */
-            code: string;
-            /** @example Digvation POS */
-            name: string;
-            description?: string | null;
-            /** @enum {string} */
-            kind: "RUNTIME_PRODUCT" | "WEBSITE" | "CUSTOM_SYSTEM" | "OTHER";
-            manifest_format?: string | null;
-            manifest_schema_version?: string | null;
-            /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "RETIRED";
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-            base_domains: components["schemas"]["CatalogItemDto"][];
-            applications: components["schemas"]["CatalogItemDto"][];
-        };
-        ProductDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example POS */
-            code: string;
-            /** @example Digvation POS */
-            name: string;
-            description?: string | null;
-            /** @enum {string} */
-            kind: "RUNTIME_PRODUCT" | "WEBSITE" | "CUSTOM_SYSTEM" | "OTHER";
-            manifest_format?: string | null;
-            manifest_schema_version?: string | null;
-            /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "RETIRED";
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        ProductLifecycleResponseDto: {
-            /** @example Product created successfully */
-            message: string;
-            /** Format: uuid */
-            product_id: string;
-            /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "RETIRED";
-        };
-        ProductLifecycleTransitionDto: {
-            /**
-             * @example ACTIVE
-             * @enum {string}
-             */
-            target_status: "DRAFT" | "ACTIVE" | "RETIRED";
-            /** @example Product approved for client onboarding */
-            reason: string;
-        };
-        ProductMutationResponseDto: {
-            /** @example Product created successfully */
-            message: string;
-            /** Format: uuid */
-            product_id: string;
         };
         PublicUserDto: {
             /** Format: uuid */
@@ -5498,58 +1675,65 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
+        RecipientsDto: {
+            /**
+             * @example [
+             *       "owner@poseidon-filter.invalid"
+             *     ]
+             */
+            emails: string[];
+            /**
+             * @description CONTACTS for the billing contacts, BUSINESS for the business email, CLIENT for the client email.
+             * @enum {string}
+             */
+            source: "CONTACTS" | "BUSINESS" | "CLIENT";
+        };
         RefreshTokenDto: {
             /** @description Optional non-browser fallback. Browsers should use the HttpOnly refresh cookie instead. Never log this value. */
             refresh_token?: string;
             /** @description Optional body fallback for the CSRF token. Prefer the X-CSRF-Token header with cookie-based refresh. */
             csrf_token?: string;
         };
-        ReleaseDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example 1.10.0 */
-            version: string;
-            artifact_ref?: string | null;
-            /** Format: date-time */
-            released_at?: string | null;
-            notes?: string | null;
-            /** @enum {string} */
-            status: "DRAFT" | "RELEASED" | "WITHDRAWN";
-            /** Format: date-time */
-            status_changed_at: string;
-            /** Format: date-time */
-            created_at: string;
-        };
-        ReleaseListDto: {
-            /** @description Highest semantic version first */
-            items: components["schemas"]["ReleaseDto"][];
-            /** @description The highest RELEASED version */
-            current_version?: string | null;
-        };
-        ReleaseTransitionDto: {
+        RegistrationBrandDto: {
             /**
-             * @example RELEASED
-             * @enum {string}
+             * @description Unique per client, ignoring case and outer spaces.
+             * @example Nova Salon
              */
-            target_status: "DRAFT" | "RELEASED" | "WITHDRAWN";
-            reason: string;
+            name: string;
+            description?: string | null;
+            /**
+             * Format: uuid
+             * @description An ACTIVE business type from the master list.
+             */
+            business_type_id?: string | null;
+            /** @description A custom business type for a brand no master value describes. Never both with business_type_id. */
+            custom_business_type?: string | null;
+            /** @example https://nova.example */
+            website?: string | null;
+            /** @description A placeholder reference. The logo printed on documents comes from stored files, not from this field. */
+            logo_url?: string | null;
+            /** @example #123456 */
+            primary_color?: string | null;
+            /** @example #ABCDEF */
+            secondary_color?: string | null;
         };
-        RemovalReasonDto: {
-            /** @example No longer part of the contract */
-            reason: string;
-        };
-        ReplaceApplicationsDto: {
-            application_ids: string[];
-        };
-        ReplaceBaseDomainsDto: {
-            base_domain_ids: string[];
-        };
-        ReplaceGrantsDto: {
-            feature_ids: string[];
-            capability_ids: string[];
-        };
-        ReplaceServiceFeaturesDto: {
-            feature_ids: string[];
+        RegistrationBusinessDto: {
+            address?: string | null;
+            /** Format: email */
+            email?: string | null;
+            /** @description 08…, 62… or +62…; stored as 62… digits. */
+            phone?: string | null;
+            /**
+             * @description Registers the legal entity of the business, with name and legal_name set to it.
+             * @example PT Digital Innovation
+             */
+            legal?: string | null;
+            /**
+             * @description Trimmed and uppercased; then A-Z, 0-9 and -, at most 20 characters, unique across all clients.
+             * @example DIGVATION
+             */
+            alias: string;
+            brand?: components["schemas"]["RegistrationBrandDto"] | null;
         };
         ResetPasswordDto: {
             /** Format: uuid */
@@ -5561,10 +1745,13 @@ export interface components {
             /** Format: password */
             confirm_password: string;
         };
-        RetireLinkDto: {
+        ResolvedContactDto: {
+            email: string;
             /** @enum {string} */
-            target_status: "RETIRED";
-            reason: string;
+            email_source: "CONTACT" | "BUSINESS" | "CLIENT";
+            phone: string;
+            /** @enum {string} */
+            phone_source: "CONTACT" | "BUSINESS" | "CLIENT";
         };
         RoleDto: {
             /** Format: uuid */
@@ -5611,71 +1798,6 @@ export interface components {
             role_id: string;
             permissions: string[];
         };
-        SelectedFeatureDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example NOVA_SALON */
-            code: string;
-            name: string;
-            /** @enum {string} */
-            scope: "PRODUCT" | "CLIENT";
-            /** @enum {string} */
-            status: "DRAFT" | "ACTIVE" | "RETIRED";
-        };
-        ServiceLifecycleResponseDto: {
-            /** @example Service created successfully */
-            message: string;
-            /** Format: uuid */
-            service_id: string;
-            /** @enum {string} */
-            status: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
-        };
-        ServiceMutationResponseDto: {
-            /** @example Service created successfully */
-            message: string;
-            /** Format: uuid */
-            service_id: string;
-        };
-        ServiceRefDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example NOVA_SALON */
-            code: string;
-            name: string;
-        };
-        ServiceTransitionDto: {
-            /**
-             * @example ACTIVE
-             * @enum {string}
-             */
-            target_status: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
-            /** @example Go-live confirmed by the client */
-            reason: string;
-        };
-        SetGoLiveDto: {
-            /**
-             * Format: date-time
-             * @description Not in the future. Once set it cannot be cleared; a correction may move it earlier or later.
-             */
-            go_live_at: string;
-            /** @example Client confirmed go-live by email */
-            reason: string;
-        };
-        SetPriceDto: {
-            /** @enum {string} */
-            billing_cycle: "MONTHLY" | "QUARTERLY" | "SEMI_ANNUAL" | "ANNUAL" | "PER_TERM";
-            /**
-             * @description ISO 4217 code
-             * @default IDR
-             * @example IDR
-             */
-            currency: string;
-            /**
-             * @description Amount in minor units of the currency, as a string of digits (BigInt).
-             * @example 150000000
-             */
-            amount: string;
-        };
         SetRolePermissionsDto: {
             /**
              * @example [
@@ -5685,13 +1807,6 @@ export interface components {
              */
             permission_slugs: string[];
         };
-        SetTargetReleaseDto: {
-            /**
-             * Format: uuid
-             * @description A RELEASED release of the product; null clears the target.
-             */
-            release_id: string | null;
-        };
         SetUserRolesDto: {
             /**
              * @example [
@@ -5700,271 +1815,57 @@ export interface components {
              */
             role_slugs: string[];
         };
-        TargetReleaseDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example 2.4.0 */
-            version: string;
-        };
-        TaxRateDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example PPN */
-            name: string;
-            /**
-             * @description Basis points (1100 = 11%).
-             * @example 1100
-             */
-            rate_basis_points: number;
-            /**
-             * Format: date
-             * @example 2025-01-01
-             */
-            valid_from: string;
-            /** Format: date */
-            valid_until: string | null;
-        };
-        TaxRateInputDto: {
-            /** @example PPN */
-            name: string;
-            /**
-             * @description Percentage in basis points (1100 = 11%), 0 to 10000.
-             * @example 1100
-             */
-            rate_basis_points: number;
-            /**
-             * @description First day (inclusive).
-             * @example 2025-01-01
-             */
-            valid_from: string;
-            /**
-             * @description Last day (inclusive); empty while the rate applies.
-             * @example null
-             */
-            valid_until?: string | null;
-        };
-        TermLifecycleResponseDto: {
-            /** @example Contract created successfully */
-            message: string;
-            /** Format: uuid */
-            contract_id: string;
-            /** Format: uuid */
-            term_id: string;
-            /** @enum {string} */
-            status: "DRAFT" | "SCHEDULED" | "ACTIVE" | "ENDED" | "CANCELLED";
-        };
-        TermMutationResponseDto: {
-            /** @example Contract created successfully */
-            message: string;
-            /** Format: uuid */
-            contract_id: string;
-            /** Format: uuid */
-            term_id: string;
-        };
-        UpdateBillingSettingsDto: {
-            /** @example PT Digvation Teknologi Indonesia */
-            issuer_legal_name: string;
-            /**
-             * @description NPWP of the issuer.
-             * @example 01.000.000.0-000.000
-             */
-            issuer_tax_identifier?: string | null;
-            /** @example Jl. Contoh 1, Jakarta */
-            issuer_address: string;
-            /** @example billing@digvation.example */
-            issuer_email: string;
-            /** @example +62215550000 */
-            issuer_phone: string;
-            /**
-             * @description How to pay; printed on every invoice PDF.
-             * @example Transfer ke BCA 1234567890 a.n. PT Digvation Teknologi Indonesia
-             */
-            payment_instructions: string;
-            /**
-             * @default IDR
-             * @example IDR
-             */
-            default_currency: string;
-            /**
-             * @description Days before a billing period starts at which its draft is generated (D3), 0 to 90.
-             * @default 7
-             */
-            draft_lead_days: number;
-            /**
-             * @description Tokens: {YYYY}, {MM}, {BRAND} and exactly one {SEQ:n}. The counter restarts per month with {MM}, per year with {YYYY} only.
-             * @default INV/{YYYY}/{MM}/{SEQ:5}
-             */
-            invoice_number_pattern: string;
-            /**
-             * @description Credit note numbers, same tokens.
-             * @default CN/{YYYY}/{MM}/{SEQ:5}
-             */
-            credit_note_number_pattern: string;
-            /** @description Every tax rate; validity periods must not overlap. Empty: invoices carry no tax. */
-            tax_rates: components["schemas"]["TaxRateInputDto"][];
-            /** @example Bank account changed */
-            reason: string;
-        };
         UpdateBrandDto: {
+            /** @example Nova Salon */
+            name?: string;
             description?: string | null;
-            /** @example https://cdn.example/nova.png */
-            logo_url?: string | null;
-            /** @example https://nova.example */
             website?: string | null;
-            /** @example #1A2B3C */
+            logo_url?: string | null;
             primary_color?: string | null;
-            /** @example #FFFFFF */
             secondary_color?: string | null;
-            name?: string;
         };
-        UpdateCatalogItemDto: {
+        UpdateBusinessDto: {
+            address?: string | null;
+            /** Format: email */
+            email?: string | null;
+            /** @description 08…, 62… or +62…; stored as 62… digits. */
+            phone?: string | null;
+            notes?: string | null;
+        };
+        UpdateBusinessTypeDto: {
+            /** @example Food & Beverage */
             name?: string;
-            description?: string | null;
         };
         UpdateClientContactDto: {
+            /** @example Rina */
             name?: string;
             position?: string | null;
             /** Format: email */
             email?: string | null;
             phone?: string | null;
-            /**
-             * Format: uuid
-             * @description A brand of the same client, or null for client-level.
-             */
+            /** Format: uuid */
             brand_id?: string | null;
-            /** @description true makes this contact the primary one (the previous primary loses the flag). The primary contact cannot be set to false; promote another contact instead. */
-            is_primary?: boolean;
-            is_billing?: boolean;
-            is_technical?: boolean;
         };
         UpdateClientDto: {
-            /** @example PT Nova Kreasi Indonesia */
-            legal_name?: string | null;
-            /** @example 01.234.567.8-901.000 */
-            tax_identifier?: string | null;
+            /** @example Nova Karya */
+            full_name?: string;
             /** Format: email */
-            email?: string | null;
-            /** @example +62215550100 */
-            phone?: string | null;
-            /** @example https://nova.example */
-            website?: string | null;
-            address?: string | null;
-            /** @example Indonesia */
-            country?: string | null;
+            email?: string;
             /**
-             * @description IANA zone
-             * @example Asia/Jakarta
+             * @description 08…, 62… or +62…; stored as 62… digits. Cannot be cleared.
+             * @example 0812-0000-0001
              */
+            phone?: string;
+            address?: string | null;
+        };
+        UpdateLegalEntityDto: {
+            /** @example PT Nova Karya Salon */
+            legal_name?: string;
+            tax_identifier?: string | null;
+            address?: string | null;
+            country?: string | null;
             timezone?: string | null;
             notes?: string | null;
-            display_name?: string;
-        };
-        UpdateContractDto: {
-            contract_reference?: string | null;
-            /**
-             * @description Confirm an untouched renewal draft with its prefilled amounts when the term ends.
-             * @default false
-             */
-            auto_renew: boolean;
-            /**
-             * @description Days before a term ends when its renewal draft is created.
-             * @default 30
-             */
-            renewal_notice_days: number;
-            /**
-             * @description Days after a term ends without renewal before the contract becomes EXPIRED.
-             * @default 0
-             */
-            grace_period_days: number;
-            /**
-             * @description False for a complimentary arrangement.
-             * @default true
-             */
-            billable: boolean;
-        };
-        UpdateHostDto: {
-            name?: string;
-            provider?: string | null;
-            region?: string | null;
-            /** @description IP or hostname */
-            address?: string;
-            /** @enum {string} */
-            infrastructure_ownership?: "DIGVATION" | "CLIENT";
-        };
-        UpdateInstallationDto: {
-            name?: string;
-            managed_by_digvation?: boolean;
-            /** @description Replaces the whole list. */
-            urls?: components["schemas"]["InstallationUrlDto"][];
-            branding?: components["schemas"]["BrandingDto"];
-        };
-        UpdateNameDescriptionDto: {
-            name?: string;
-            description?: string | null;
-        };
-        UpdateNotificationSettingsDto: {
-            /**
-             * @description Operator e-mail addresses that receive every reminder (stored lowercased). Clients never receive reminders.
-             * @example [
-             *       "ops@digvation.example"
-             *     ]
-             */
-            recipients: string[];
-            /**
-             * @description Days before a term ends. Whole days from 1 to 365; duplicates are dropped. An empty list turns the reminder off.
-             * @example [
-             *       30,
-             *       14,
-             *       7
-             *     ]
-             */
-            term_ending_days: number[];
-            /**
-             * @description Days before a trial ends. Whole days from 1 to 365; duplicates are dropped. An empty list turns the reminder off.
-             * @example [
-             *       7,
-             *       1
-             *     ]
-             */
-            trial_ending_days: number[];
-            /**
-             * @description Days before the current term ends while its renewal draft waits for confirmation; one reminder is always sent when the draft is created. Whole days from 1 to 365; duplicates are dropped. An empty list turns the reminder off.
-             * @example [
-             *       14,
-             *       7
-             *     ]
-             */
-            renewal_draft_days: number[];
-            /**
-             * @description Days before an invoice is due (0 is the due date). Whole days from 0 to 365; duplicates are dropped; an empty list turns the reminder off. Left out: unchanged.
-             * @example [
-             *       3,
-             *       0
-             *     ]
-             */
-            invoice_due_days?: number[];
-            /**
-             * @description Days after an invoice was due. Whole days from 1 to 365; duplicates are dropped; an empty list turns the reminder off. Left out: unchanged.
-             * @example [
-             *       1,
-             *       7,
-             *       14
-             *     ]
-             */
-            invoice_overdue_days?: number[];
-        };
-        UpdateProductDto: {
-            name?: string;
-            description?: string | null;
-            /** @enum {string} */
-            kind?: "RUNTIME_PRODUCT" | "WEBSITE" | "CUSTOM_SYSTEM" | "OTHER";
-            /**
-             * @description A registered manifest format (GET /catalog/manifest-formats), set together with manifest_schema_version; null for none.
-             * @example business-runtime-entitlements
-             */
-            manifest_format?: string | null;
-            /** @example 1 */
-            manifest_schema_version?: string | null;
         };
         UpdateProfileDto: {
             /** @example Jane Doe */
@@ -5982,88 +1883,11 @@ export interface components {
             message: string;
             user: components["schemas"]["PublicUserDto"];
         };
-        UpdateReleaseDto: {
-            artifact_ref?: string | null;
-            /** Format: date-time */
-            released_at?: string | null;
-            notes?: string | null;
-        };
         UpdateRoleDto: {
             name?: string;
             description?: string | null;
             /** @description Custom roles can be deactivated/reactivated. System roles cannot be deactivated. */
             is_active?: boolean;
-        };
-        UpdateTermDto: {
-            /**
-             * Format: date
-             * @description First day of the term. Not allowed with starts_at_go_live. A calendar date (YYYY-MM-DD) in the business time zone.
-             * @example 2026-12-01
-             */
-            starts_on?: string | null;
-            /**
-             * Format: date
-             * @description Last day of the term (inclusive). Give ends_on or a duration, not both. A calendar date (YYYY-MM-DD) in the business time zone.
-             * @example 2026-12-01
-             */
-            ends_on?: string | null;
-            /**
-             * @description The term starts at the go-live of the first PRODUCTION installation hosting the service; its end follows from the duration.
-             * @default false
-             */
-            starts_at_go_live: boolean;
-            /** @example 12 */
-            duration_value?: number | null;
-            /**
-             * @description MONTH: same day N months later, minus one day (clamped at month ends); DAY: N days including the first.
-             * @enum {string|null}
-             */
-            duration_unit?: "MONTH" | "DAY" | null;
-            /**
-             * Format: date
-             * @description Last day of the trial, inside the term. The trial is not billed; a term whose whole period is the trial expires when nothing follows it. A calendar date (YYYY-MM-DD) in the business time zone.
-             * @example 2026-12-01
-             */
-            trial_ends_on?: string | null;
-            /**
-             * @description Due date = invoice issue date + days.
-             * @default 14
-             */
-            payment_terms_days: number;
-            /**
-             * @description Indicative price of the next term. Minor units as a string of digits (Rp400.000 is 40000000).
-             * @example 40000000
-             */
-            planned_renewal_amount?: string | null;
-            /** @enum {string|null} */
-            planned_renewal_cycle?: "MONTHLY" | "QUARTERLY" | "SEMI_ANNUAL" | "ANNUAL" | "PER_TERM" | null;
-            /**
-             * @default NONE
-             * @enum {string}
-             */
-            adjustment_type: "NONE" | "PROMOTIONAL" | "NEGOTIATED" | "GRANDFATHERED" | "COMPLIMENTARY";
-            /** @description Required when a list price exists and the agreed price differs, for any adjustment, and when a renewal draft price changes from its prefilled amount. */
-            adjustment_reason?: string | null;
-            /** @enum {string} */
-            billing_cycle?: "MONTHLY" | "QUARTERLY" | "SEMI_ANNUAL" | "ANNUAL" | "PER_TERM";
-            /** @example IDR */
-            currency?: string;
-            /**
-             * @description Agreed price per billing cycle, or for the whole term with PER_TERM. Minor units as a string of digits (Rp400.000 is 40000000).
-             * @example 40000000
-             */
-            agreed_amount?: string | null;
-        };
-        UpsertManifestMappingDto: {
-            /** @enum {string} */
-            entity_type: "BASE_DOMAIN" | "APPLICATION" | "FEATURE" | "CAPABILITY";
-            /** Format: uuid */
-            entity_id: string;
-            /**
-             * @description A key of the product's manifest format.
-             * @example CUSTOMER.MEMBERSHIP
-             */
-            manifest_key: string;
         };
         UserRolesDto: {
             /** Format: uuid */
@@ -6537,323 +2361,9 @@ export interface operations {
             };
         };
     };
-    "PaymentController.clientBilling": {
+    "BusinessTypeController.list": {
         parameters: {
             query?: never;
-            header?: never;
-            path: {
-                clientId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ClientBillingDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "BillingSettingsController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["BillingSettingsDto"];
-                    };
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "BillingSettingsController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateBillingSettingsDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["BillingSettingsDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "BillingSettingsController.revisions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["BillingSettingsRevisionListDto"];
-                    };
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.exclusions": {
-        parameters: {
-            query?: {
-                brand_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InvoiceSourceExclusionListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.restore": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                exclusionId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InvoiceReasonDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InvoiceSourceExclusionDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                status?: "DRAFT" | "ACTIVE" | "RETIRED";
-            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -6868,7 +2378,7 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
                         data?: {
-                            items: components["schemas"]["CatalogItemDto"][];
+                            items: components["schemas"]["BusinessTypeDto"][];
                             pagination: components["schemas"]["PaginationDto"];
                         };
                     };
@@ -6903,7 +2413,7 @@ export interface operations {
             };
         };
     };
-    "CatalogItemController.create": {
+    "BusinessTypeController.create": {
         parameters: {
             query?: never;
             header?: never;
@@ -6912,7 +2422,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateCatalogItemDto"];
+                "application/json": components["schemas"]["CreateBusinessTypeDto"];
             };
         };
         responses: {
@@ -6923,7 +2433,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemMutationResponseDto"];
+                        data?: components["schemas"]["BusinessTypeMutationResponseDto"];
                     };
                 };
             };
@@ -6965,838 +2475,7 @@ export interface operations {
             };
         };
     };
-    "CatalogItemController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateCatalogItemDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CatalogLifecycleTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                status?: "DRAFT" | "ACTIVE" | "RETIRED";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["CatalogItemDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCatalogItemDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateCatalogItemDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CatalogLifecycleTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                status?: "DRAFT" | "ACTIVE" | "RETIRED";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["CatalogItemDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCatalogItemDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateCatalogItemDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CatalogItemController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CatalogLifecycleTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogItemLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ManifestFormatController.list": {
+    "BusinessTypeController.listActive": {
         parameters: {
             query?: never;
             header?: never;
@@ -7812,7 +2491,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ManifestFormatListDto"];
+                        data?: components["schemas"]["BusinessTypeDto"];
                     };
                 };
             };
@@ -7827,6 +2506,203 @@ export interface operations {
             };
             /** @description Authenticated but not allowed to perform this operation. */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BusinessTypeController.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                businessTypeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BusinessTypeDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BusinessTypeController.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                businessTypeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateBusinessTypeDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BusinessTypeMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BusinessTypeController.transition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                businessTypeId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BusinessTypeStatusDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BusinessTypeLifecycleResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7843,7 +2719,7 @@ export interface operations {
                 limit?: components["schemas"]["Object"];
                 /** @description Search keyword */
                 search?: string;
-                status?: "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+                status?: "DRAFT" | "ACTIVE" | "SUSPENDED" | "ARCHIVED";
             };
             header?: never;
             path?: never;
@@ -7914,7 +2790,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ClientCreatedResponseDto"];
+                        data?: components["schemas"]["ClientMutationResponseDto"];
                     };
                 };
             };
@@ -8098,7 +2974,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["BrandListDto"];
+                        data?: components["schemas"]["BrandDto"];
                     };
                 };
             };
@@ -8213,6 +3089,67 @@ export interface operations {
             };
         };
     };
+    "BrandController.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                brandId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BrandDetailDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
     "BrandController.update": {
         parameters: {
             query?: never;
@@ -8276,6 +3213,150 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
                 };
             };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BrandController.billTo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                brandId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BrandResolutionDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BrandController.move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                brandId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveBrandDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BrandMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
         };
     };
     "BrandController.transition": {
@@ -8290,7 +3371,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["BrandLifecycleTransitionDto"];
+                "application/json": components["schemas"]["BrandStatusDto"];
             };
         };
         responses: {
@@ -8352,7 +3433,7 @@ export interface operations {
             };
         };
     };
-    "ClientContactController.list": {
+    "BusinessController.list": {
         parameters: {
             query?: never;
             header?: never;
@@ -8370,7 +3451,346 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ClientContactListDto"];
+                        data?: components["schemas"]["BusinessDetailDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BusinessController.create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBusinessDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BusinessMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BusinessController.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                businessId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BusinessDetailDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BusinessController.remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                businessId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BusinessMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BusinessController.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                businessId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateBusinessDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BusinessMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "ClientContactController.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                businessId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientContactDto"];
                     };
                 };
             };
@@ -8418,6 +3838,7 @@ export interface operations {
             header?: never;
             path: {
                 clientId: string;
+                businessId: string;
             };
             cookie?: never;
         };
@@ -8435,6 +3856,76 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
                         data?: components["schemas"]["ClientContactMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "ClientContactController.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientContactDto"];
                     };
                 };
             };
@@ -8609,6 +4100,71 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
                 };
             };
+        };
+    };
+    "ClientContactController.setFlags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClientContactFlagsDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientContactMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
             /** @description Request conflicts with the current resource state. */
             409: {
                 headers: {
@@ -8620,12 +4176,13 @@ export interface operations {
             };
         };
     };
-    "ClientServiceController.list": {
+    "LegalEntityController.get": {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 clientId: string;
+                businessId: string;
             };
             cookie?: never;
         };
@@ -8638,7 +4195,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ClientServiceListDto"];
+                        data?: components["schemas"]["LegalEntityDto"];
                     };
                 };
             };
@@ -8680,18 +4237,19 @@ export interface operations {
             };
         };
     };
-    "ClientServiceController.create": {
+    "LegalEntityController.create": {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 clientId: string;
+                businessId: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateClientServiceDto"];
+                "application/json": components["schemas"]["CreateLegalEntityDto"];
             };
         };
         responses: {
@@ -8702,7 +4260,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ServiceMutationResponseDto"];
+                        data?: components["schemas"]["LegalEntityMutationResponseDto"];
                     };
                 };
             };
@@ -8753,17 +4311,21 @@ export interface operations {
             };
         };
     };
-    "ClientServiceController.get": {
+    "LegalEntityController.update": {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 clientId: string;
-                serviceId: string;
+                businessId: string;
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLegalEntityDto"];
+            };
+        };
         responses: {
             /** @description Request completed successfully. */
             200: {
@@ -8772,7 +4334,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ClientServiceDto"];
+                        data?: components["schemas"]["LegalEntityMutationResponseDto"];
                     };
                 };
             };
@@ -8814,94 +4376,19 @@ export interface operations {
             };
         };
     };
-    "ClientServiceController.addAddOn": {
+    "LegalEntityController.transition": {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 clientId: string;
-                serviceId: string;
+                businessId: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AddClientAddOnDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ClientAddOnMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ClientServiceController.transitionAddOn": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                clientId: string;
-                serviceId: string;
-                clientAddOnId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ServiceTransitionDto"];
+                "application/json": components["schemas"]["LegalEntityStatusDto"];
             };
         };
         responses: {
@@ -8912,155 +4399,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ClientAddOnLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ClientServiceController.replaceFeatures": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                clientId: string;
-                serviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReplaceServiceFeaturesDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ServiceMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ClientServiceController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                clientId: string;
-                serviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ServiceTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ServiceLifecycleResponseDto"];
+                        data?: components["schemas"]["LegalEntityLifecycleResponseDto"];
                     };
                 };
             };
@@ -9134,3913 +4473,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
                         data?: components["schemas"]["ClientLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                status?: "PENDING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "EXPIRED" | "CANCELLED";
-                client_id?: string;
-                brand_id?: string;
-                /** @description Only contracts whose running term ends before this date. */
-                ends_before?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["ContractDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateContractDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ContractMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ContractDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateContractDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ContractMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.addAddOn": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateContractAddOnDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ContractAddOnMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.endAddOn": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-                contractAddOnId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EndContractAddOnDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ContractAddOnMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CancelContractDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ContractLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ContractTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ContractLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.terms": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ContractTermListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.createTerm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateTermDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["TermMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.updateTerm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-                termId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateTermDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["TermMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.confirmTerm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-                termId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConfirmTermDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["TermLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.addCharge": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-                termId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateOneOffChargeDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["OneOffChargeMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ContractController.removeCharge": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                contractId: string;
-                termId: string;
-                chargeId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["OneOffChargeMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CreditNoteController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                invoice_id?: string;
-                client_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["CreditNoteDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CreditNoteController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                creditNoteId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CreditNoteDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CreditNoteController.pdf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                creditNoteId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The PDF. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": string;
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CreditNoteController.send": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                creditNoteId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CreditNoteDeliveryDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description A required dependency is temporarily unavailable. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "DeploymentController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                installation_id?: string;
-                status?: "PENDING" | "CLAIMED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED" | "OUTCOME_UNKNOWN";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["DeploymentDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "DeploymentController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deploymentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["DeploymentDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "DeploymentController.cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deploymentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CancelDeploymentDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["DeploymentMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostDeploymentController.open": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["DeploymentListDto"];
-                    };
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Rate limit exceeded. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostDeploymentController.claim": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deploymentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["HostProgressReportDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["DeploymentDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Rate limit exceeded. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostDeploymentController.result": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deploymentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["HostFinalReportDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["DeploymentDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Rate limit exceeded. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostDeploymentController.running": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                deploymentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["HostProgressReportDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["DeploymentDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Rate limit exceeded. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostManifestController.current": {
-        parameters: {
-            query?: {
-                /** @description Needed only when the installation hosts several formats. */
-                format?: string;
-                schema_version?: string;
-            };
-            header?: never;
-            path: {
-                installationCode: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostManifestDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Rate limit exceeded. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostManifestController.byRevision": {
-        parameters: {
-            query?: {
-                /** @description Needed only when the installation hosts several formats. */
-                format?: string;
-                schema_version?: string;
-            };
-            header?: never;
-            path: {
-                installationCode: string;
-                revision: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostManifestDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Rate limit exceeded. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostAgentController.self": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostAgentSelfDto"];
-                    };
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Rate limit exceeded. */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                status?: "ACTIVE" | "RETIRED";
-                infrastructure_ownership?: "DIGVATION" | "CLIENT";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["HostDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateHostDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                hostId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                hostId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateHostDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostController.listCredentials": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                hostId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostCredentialListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostController.issueCredential": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                hostId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["IssueHostCredentialDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostCredentialIssuedDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostController.revokeCredential": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                hostId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["HostCredentialReasonDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostController.rotateCredential": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                hostId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["HostCredentialReasonDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostCredentialIssuedDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "HostController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                hostId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["HostTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["HostLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                host_id?: string;
-                owner_client_id?: string;
-                deployment_mode?: "SHARED" | "DEDICATED";
-                environment?: "PRODUCTION" | "STAGING" | "DEVELOPMENT";
-                status?: "PROVISIONING" | "ACTIVE" | "SUSPENDED" | "DECOMMISSIONED";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["InstallationSummaryDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateInstallationDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateInstallationDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.coverage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CoverageReportDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "DeploymentController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateDeploymentDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["DeploymentMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.enableItem": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EnableItemDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["EnabledItemMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.removeItem": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-                itemId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RemovalReasonDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.setGoLive": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetGoLiveDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.moveHost": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MoveInstallationHostDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ManifestController.list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ManifestRevisionListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ManifestController.import": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ImportManifestDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ManifestMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ManifestController.refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ManifestRefreshResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ManifestController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-                revisionId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ManifestRevisionDetailDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ManifestController.issue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-                revisionId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["IssueManifestDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ManifestMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.addProduct": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["HostProductDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.setTargetRelease": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetTargetReleaseDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.addService": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["HostServiceDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.removeService": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-                serviceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RemovalReasonDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InstallationController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                installationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InstallationTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InstallationLifecycleResponseDto"];
                     };
                 };
             };
@@ -13446,1460 +4878,6 @@ export interface operations {
             };
         };
     };
-    "InvoiceController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                client_id?: string;
-                brand_id?: string;
-                status?: "DRAFT" | "ISSUED" | "PARTIALLY_PAID" | "PAID" | "VOID";
-                currency?: string;
-                /** @description Issued on or after this date. */
-                issue_date_from?: string;
-                /** @description Issued on or before this date. */
-                issue_date_to?: string;
-                /** @description Period starting on or after this date. */
-                period_from?: string;
-                /** @description Period starting on or before this date. */
-                period_to?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["InvoiceDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.createDraft": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateInvoiceDraftDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InvoiceDetailDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                invoiceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InvoiceDetailDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.deleteDraft": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                invoiceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "CreditNoteController.issue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                invoiceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCreditNoteDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CreditNoteDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.issue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                invoiceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["IssueInvoiceDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InvoiceDetailDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.addLine": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                invoiceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AddInvoiceLineDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InvoiceDetailDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.removeLine": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                invoiceId: string;
-                lineId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InvoiceReasonDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InvoiceDetailDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.pdf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                invoiceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The PDF. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": string;
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.send": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                invoiceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InvoiceDeliveryDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description A required dependency is temporarily unavailable. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "InvoiceController.voidInvoice": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                invoiceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InvoiceReasonDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["InvoiceDetailDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "NotificationController.deliveries": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                status?: "PENDING" | "SENT" | "FAILED" | "CANCELLED";
-                event?: "CONTRACT_TERM_ENDING" | "TRIAL_ENDING" | "RENEWAL_DRAFT_PENDING" | "INVOICE_DUE" | "INVOICE_OVERDUE" | "INVOICE_DRAFTS_PENDING";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["NotificationDeliveryDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "NotificationController.settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["NotificationSettingsDto"];
-                    };
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "NotificationController.replace": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateNotificationSettingsDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["NotificationSettingsDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PaymentController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                client_id?: string;
-                status?: "RECORDED" | "REVERSED";
-                currency?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["PaymentDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PaymentController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePaymentDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["PaymentDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PaymentController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                paymentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["PaymentDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PaymentController.allocate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                paymentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AllocatePaymentDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["PaymentDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PaymentController.release": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                paymentId: string;
-                allocationId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PaymentReasonDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["PaymentDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PaymentController.proof": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                paymentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The proof file. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                    "image/jpeg": components["schemas"]["ApiErrorEnvelopeDto"];
-                    "image/png": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                    "image/jpeg": components["schemas"]["ApiErrorEnvelopeDto"];
-                    "image/png": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                    "image/jpeg": components["schemas"]["ApiErrorEnvelopeDto"];
-                    "image/png": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/pdf": components["schemas"]["ApiErrorEnvelopeDto"];
-                    "image/jpeg": components["schemas"]["ApiErrorEnvelopeDto"];
-                    "image/png": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PaymentController.attachProof": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                paymentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    file: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["PaymentDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request failed. */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PaymentController.reverse": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                paymentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PaymentReasonDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["PaymentDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
     "PermissionController.list": {
         parameters: {
             query?: never;
@@ -14931,2221 +4909,6 @@ export interface operations {
             };
             /** @description Authenticated but not allowed to perform this operation. */
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ProductController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                status?: "DRAFT" | "ACTIVE" | "RETIRED";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["ProductDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ProductController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateProductDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ProductMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ProductController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ProductDetailDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ProductController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateProductDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ProductMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "AddOnController.list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["AddOnListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "AddOnController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateAddOnDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "AddOnController.get": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                addOnId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["AddOnDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "AddOnController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                addOnId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateNameDescriptionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "AddOnController.replaceGrants": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                addOnId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReplaceGrantsDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "AddOnController.listPrices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                addOnId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["PriceListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "AddOnController.setPrice": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                addOnId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetPriceDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "AddOnController.removePrice": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                addOnId: string;
-                priceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "AddOnController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                addOnId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CatalogLifecycleTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ProductController.replaceApplications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReplaceApplicationsDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ProductMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ProductController.replaceBaseDomains": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReplaceBaseDomainsDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ProductMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ProductCapabilityController.list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ProductCapabilityListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ProductCapabilityController.link": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LinkCapabilityDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ProductCapabilityController.retire": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                linkId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RetireLinkDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "FeatureController.list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["FeatureListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "FeatureController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateFeatureDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "FeatureController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                featureId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateNameDescriptionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "FeatureController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                featureId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CatalogLifecycleTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ManifestMappingController.list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ManifestMappingListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ManifestMappingController.upsert": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpsertManifestMappingDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ManifestMappingController.remove": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                mappingId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PriceController.list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["PriceListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PriceController.set": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetPriceDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "PriceController.remove": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                priceId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ReleaseController.list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ReleaseListDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ReleaseController.create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateReleaseDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ReleaseController.update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                releaseId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateReleaseDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogMutationResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ReleaseController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-                releaseId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReleaseTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["CatalogLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ProductController.transition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                productId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProductLifecycleTransitionDto"];
-            };
-        };
-        responses: {
-            /** @description Request completed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: components["schemas"]["ProductLifecycleResponseDto"];
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Requested resource was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Request conflicts with the current resource state. */
-            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -17556,67 +5319,6 @@ export interface operations {
             };
             /** @description Requested resource was not found. */
             404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-        };
-    };
-    "ServiceCatalogController.list": {
-        parameters: {
-            query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
-                /** @description Search keyword */
-                search?: string;
-                client_id?: string;
-                brand_id?: string;
-                product_id?: string;
-                status?: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Page retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
-                        data?: {
-                            items: components["schemas"]["ClientServiceDto"][];
-                            pagination: components["schemas"]["PaginationDto"];
-                        };
-                    };
-                };
-            };
-            /** @description Invalid request or validation failure. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authentication failed or the session is invalid. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
-                };
-            };
-            /** @description Authenticated but not allowed to perform this operation. */
-            403: {
                 headers: {
                     [name: string]: unknown;
                 };

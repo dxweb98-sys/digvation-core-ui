@@ -1,4 +1,4 @@
-import { DBadge, DDataTable, DEmptyState, type TableAction, type TableColumn } from '@digvation/ui';
+import { DBadge, DDataTable, type TableAction, type TableColumn } from '@digvation/ui';
 import { useState } from 'react';
 import { useApiMutation } from '../../../shared/api/use-api-mutation';
 import { formatInstant } from '../../../shared/format/date';
@@ -13,39 +13,32 @@ import { usePermissions } from '../../auth/use-permissions';
 import { accessApi, type User } from '../access-api';
 import { accessKeys, useRoles, useUsers } from '../access-queries';
 
-const COLUMNS: TableColumn<User>[] = [
-  {
-    key: 'fullname',
+const columns = (roleName: (slug: string) => string): TableColumn<User>[] => [
+  { key: 'fullname',
     label: 'User',
-    render: (user) => <Identity primary={user.fullname} secondary={user.email} />,
-  },
+    render: (user) => <Identity primary={user.fullname} secondary={user.email} /> },
   { key: 'username', label: 'Username' },
-  {
-    key: 'roles',
-    label: 'Roles',
+  { key: 'roles',
+    label: 'Role',
     render: (user) =>
       user.roles.length ? (
         <span className="app-page-actions">
           {user.roles.map((role) => (
             <DBadge key={role} variant="outline">
-              {role}
+              {roleName(role)}
             </DBadge>
           ))}
         </span>
       ) : (
-        'No roles'
-      ),
-  },
-  {
-    key: 'is_active',
+        'Tidak ada role'
+      ) },
+  { key: 'is_active',
     label: 'Status',
-    render: (user) => <StatusBadge status={user.is_active ? 'ACTIVE' : 'INACTIVE'} />,
-  },
-  { key: 'created_at', label: 'Created', render: (user) => formatInstant(user.created_at) },
+    render: (user) => <StatusBadge status={user.is_active ? 'ACTIVE' : 'INACTIVE'} /> },
+  { key: 'created_at', label: 'Dibuat', render: (user) => formatInstant(user.created_at) },
 ];
 
-export function UsersPage() {
-  const list = useListState();
+export function UsersPage() { const list = useListState();
   const users = useUsers(list.query);
   const { can } = usePermissions();
   const { user: me } = useAuth();
@@ -57,29 +50,25 @@ export function UsersPage() {
   const setRoles = useApiMutation(
     (input: { userId: string; roles: string[] }) =>
       accessApi.setUserRoles(input.userId, { role_slugs: input.roles }),
-    { success: 'Roles saved', invalidate: [accessKeys.all], toastErrors: false },
+    { success: 'Role disimpan', invalidate: [accessKeys.all], toastErrors: false },
   );
   const setStatus = useApiMutation(
     (input: { user: User; reason: string }) =>
       accessApi.setUserStatus(input.user.id, { is_active: !input.user.is_active, reason: input.reason }),
-    {
-      success: (_, input) => (input.user.is_active ? 'User deactivated' : 'User reactivated'),
+    { success: (_, input) => (input.user.is_active ? 'User dinonaktifkan' : 'User diaktifkan kembali'),
       invalidate: [accessKeys.all],
-      toastErrors: false,
-    },
+      toastErrors: false },
   );
 
   const actions: TableAction<User>[] = [
-    ...(canManageRoles ? [{ label: 'Edit roles', onClick: setEditing }] : []),
+    ...(canManageRoles ? [{ label: 'Edit role', onClick: setEditing }] : []),
     ...(can(PERMISSIONS.USERS_LIFECYCLE_MANAGE)
       ? [
-          {
-            label: 'Deactivate',
+          { label: 'Nonaktifkan',
             variant: 'danger' as const,
             show: (user: User) => user.is_active && user.id !== me?.id,
-            onClick: setStatusTarget,
-          },
-          { label: 'Reactivate', show: (user: User) => !user.is_active, onClick: setStatusTarget },
+            onClick: setStatusTarget },
+          { label: 'Aktifkan kembali', show: (user: User) => !user.is_active, onClick: setStatusTarget },
         ]
       : []),
   ];
@@ -88,47 +77,50 @@ export function UsersPage() {
     .filter((role) => role.is_active)
     .map((role) => ({ value: role.slug, label: role.name, description: role.description ?? undefined }));
 
+  // The user payload carries role slugs; the operator sees the role name.
+  const roleName = new Map((roles.data ?? []).map((role) => [role.slug, role.name]));
+  const userColumns = columns((slug) => roleName.get(slug) ?? slug);
+
   return (
     <Page>
-      <PageHeader title="Users" description="Operator accounts and the roles that decide what they can do." />
-      <QueryState query={users} label="users">
+      <PageHeader title="User" description="Akun operator beserta role yang menentukan apa yang bisa mereka lakukan." />
+      <QueryState query={users} label="user">
         {(page) => (
           <DDataTable
-            columns={COLUMNS}
+            columns={userColumns}
             data={page.items}
             rowKey="id"
             searchable
-            searchPlaceholder="Search name, email, or username"
+            searchPlaceholder="Cari nama, email, atau username"
             {...list.tableProps}
             pagination={{ page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }}
             actions={actions.length ? actions : undefined}
-            emptyMessage={<DEmptyState title="No users found" description="Try another search, or invite someone." />}
+            emptyMessage="User tidak ditemukan. Coba kata lain, atau undang user."
           />
         )}
       </QueryState>
 
       <FormDialog
         open={editing !== null}
-        title={`Roles for ${editing?.fullname ?? ''}`}
-        description="The user gets every permission of the roles you choose. Their open sessions pick the change up on the next request."
-        fields={[{ name: 'role_slugs', label: 'Roles', kind: 'checklist', options: roleOptions }]}
+        title={`Role untuk ${editing?.fullname ?? ''}`}
+        description="User mendapat seluruh permission dari role yang dipilih. Sesi yang sedang terbuka akan memakai perubahan ini pada permintaan berikutnya."
+        fields={[{ name: 'role_slugs', label: 'Role', kind: 'checklist', options: roleOptions }]}
         initialValues={{ role_slugs: editing?.roles ?? [] }}
-        submitLabel="Save roles"
+        submitLabel="Simpan role"
         onSubmit={(values) => setRoles.mutateAsync({ userId: editing!.id, roles: read.list(values, 'role_slugs') })}
         onClose={() => setEditing(null)}
       />
 
       <ConfirmDialog
         open={statusTarget !== null}
-        title={statusTarget?.is_active ? 'Deactivate user' : 'Reactivate user'}
-        message={
-          statusTarget?.is_active
-            ? `${statusTarget.fullname} is signed out everywhere at once and cannot sign in until reactivated.`
-            : `${statusTarget?.fullname ?? ''} can sign in again with their existing roles.`
+        title={statusTarget?.is_active ? 'Nonaktifkan user' : 'Aktifkan kembali user'}
+        message={ statusTarget?.is_active
+            ? `${statusTarget.fullname} akan keluar dari semua sesi sekaligus dan tidak bisa masuk lagi sampai diaktifkan kembali.`
+            : `${statusTarget?.fullname ?? ''} bisa masuk kembali dengan role yang sudah dimilikinya.`
         }
-        confirmLabel={statusTarget?.is_active ? 'Deactivate' : 'Reactivate'}
+        confirmLabel={statusTarget?.is_active ? 'Nonaktifkan' : 'Aktifkan kembali'}
         tone={statusTarget?.is_active ? 'danger' : 'primary'}
-        reason={{ label: 'Reason' }}
+        reason={{ label: 'Alasan' }}
         onConfirm={(values) => setStatus.mutateAsync({ user: statusTarget!, reason: read.text(values, 'reason') })}
         onClose={() => setStatusTarget(null)}
       />

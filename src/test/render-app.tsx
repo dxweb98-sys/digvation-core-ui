@@ -1,4 +1,4 @@
-import { DLocalizationProvider, DToastProvider, enMessages } from '@digvation/ui';
+import { DLocalizationProvider, DToastProvider } from '@digvation/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
@@ -22,7 +22,7 @@ export function renderApp(ui: ReactElement, { path = '/', route = '/' }: { path?
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <DLocalizationProvider locale="en-US" messages={enMessages}>
+      <DLocalizationProvider locale="id-ID">
         <DToastProvider>
           <AuthContext.Provider
             value={{

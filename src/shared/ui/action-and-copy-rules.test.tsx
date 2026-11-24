@@ -70,16 +70,16 @@ describe('empty-value rule', () => {
     expect(isEmptyValue(false)).toBe(false);
   });
 
-  it('shows "Not set" when a label sits beside it', () => {
+  it('shows "Belum diisi" when a label sits beside it', () => {
     render(<DetailList><DetailItem label="Region">{null}</DetailItem></DetailList>);
 
-    expect(screen.getByText('Region').nextElementSibling).toHaveTextContent('Not set');
+    expect(screen.getByText('Region').nextElementSibling).toHaveTextContent('Belum diisi');
   });
 
   it('names the field when no label sits beside it', () => {
     render(<NotSet field="Legal name" />);
 
-    expect(screen.getByText('Legal name not set')).toHaveClass('not-set');
+    expect(screen.getByText('Legal name belum diisi')).toHaveClass('not-set');
   });
 
   it('passes real values through', () => {
@@ -91,10 +91,12 @@ describe('labels', () => {
   it.each([
     ['WHITE_LABEL', 'White label'],
     ['PROVISIONING', 'Provisioning'],
-    ['CO_TERM_PRORATED', 'Prorated to term end'],
-    ['IN_PROGRESS', 'In progress'],
+    ['CO_TERM_PRORATED', 'Prorata sampai akhir periode'],
+    ['IN_PROGRESS', 'Berjalan'],
     ['REVERSE_PROXY', 'Reverse proxy'],
     ['DIGVATION', 'Digvation'],
+    ['ACTIVE', 'Aktif'],
+    ['ARCHIVED', 'Diarsipkan'],
   ])('maps %s', (value, label) => {
     expect(labelFor(value)).toBe(label);
   });
@@ -109,9 +111,9 @@ describe('labels', () => {
   });
 
   it('names the action that moves into a status', () => {
-    expect(transitionLabel('SUSPENDED')).toBe('Suspend');
-    expect(transitionLabel('DRAFT')).toBe('Return to draft');
-    expect(transitionLabel('ARCHIVED')).toBe('Archive');
+    expect(transitionLabel('SUSPENDED')).toBe('Tangguhkan');
+    expect(transitionLabel('DRAFT')).toBe('Kembalikan ke draf');
+    expect(transitionLabel('ARCHIVED')).toBe('Arsipkan');
   });
 });
 
@@ -125,7 +127,7 @@ describe('form fields', () => {
     );
 
     expect(screen.getByLabelText(/Legal name/)).toBeInTheDocument();
-    expect(screen.getAllByText('Optional')).toHaveLength(1);
+    expect(screen.getAllByText('Opsional')).toHaveLength(1);
     expect(screen.getByLabelText('Display name')).toBeInTheDocument();
   });
 

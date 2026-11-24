@@ -5,7 +5,7 @@ import { errorReference, fieldErrors, friendlyErrorMessage } from './error-messa
 describe('friendly error messages', () => {
   it('maps a stable code to its Indonesian message, never CORE’s English text', () => {
     const error = new ApiError('Client has open services', 409, 'CLIENT_HAS_OPEN_SERVICES');
-    expect(friendlyErrorMessage(error)).toMatch(/Klien belum bisa diarsipkan/);
+    expect(friendlyErrorMessage(error)).toMatch(/Client belum bisa diarsipkan/);
     expect(friendlyErrorMessage(error)).not.toContain('open services');
   });
 

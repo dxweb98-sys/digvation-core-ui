@@ -1,0 +1,7 @@
+[
+  { "folder": "clients", "paths": ["/clients"] },
+  { "folder": "services", "paths": ["/services"] },
+  { "folder": "contracts", "paths": ["/contracts"] },
+  { "folder": "billing", "paths": ["/invoices", "/payments", "/credit-notes", "/billing-settings"] },
+  { "folder": "catalog", "paths": ["/products", "/catalog"] }
+]

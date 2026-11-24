@@ -14,7 +14,7 @@ import { forwardRef, useId, type ReactNode } from "react";
 import "./form-fields.css";
 
 function OptionalTag() {
-  return <span className="app-field-optional">Optional</span>;
+  return <span className="app-field-optional">Opsional</span>;
 }
 
 /**

@@ -6,7 +6,7 @@ import { transitionLabel } from '../labels/labels';
 
 const DESTRUCTIVE = new Set(['RETIRED', 'WITHDRAWN', 'ARCHIVED', 'CANCELLED', 'ENDED']);
 
-const RELEASE_LABELS: Record<string, string> = { RELEASED: 'Release', WITHDRAWN: 'Withdraw', ACTIVE: 'Activate' };
+const RELEASE_LABELS: Record<string, string> = { RELEASED: 'Rilis', WITHDRAWN: 'Tarik', ACTIVE: 'Aktifkan' };
 
 export function targetLabel(target: string) {
   return RELEASE_LABELS[target] ?? transitionLabel(target);
@@ -44,7 +44,7 @@ export function useTransitions<T extends { status: string }>({
       message={
         pending
           ? (describe?.(pending.row, pending.target) ??
-            `${name(pending.row)} moves to ${transitionLabel(pending.target).toLowerCase()}.`)
+            `${name(pending.row)} berpindah ke ${transitionLabel(pending.target).toLowerCase()}.`)
           : ''
       }
       confirmLabel={pending ? targetLabel(pending.target) : ''}

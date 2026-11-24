@@ -24,8 +24,8 @@ export function LoginPage() {
   }, [from, navigate, status]);
 
   const { field, allowSubmit } = useFieldErrors<'identifier' | 'password'>('login-form', () => ({
-    ...(identifier.trim() ? {} : { identifier: 'Enter your email or username.' }),
-    ...(password ? {} : { password: 'Enter your password.' }),
+    ...(identifier.trim() ? {} : { identifier: 'Isi email atau username Anda.' }),
+    ...(password ? {} : { password: 'Isi kata sandi Anda.' }),
   }));
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -51,13 +51,13 @@ export function LoginPage() {
         </div>
         <div>
           <p className="auth-eyebrow">Digvation Control Center</p>
-          <h1 id="login-title">Sign in</h1>
-          <p className="auth-copy">Use your Digvation operator account.</p>
+          <h1 id="login-title">Masuk</h1>
+          <p className="auth-copy">Gunakan akun operator Digvation Anda.</p>
         </div>
         <form className="auth-form" id="login-form" noValidate onSubmit={submit}>
           <AppInput
             {...field('identifier')}
-            label="Email or username"
+            label="Email atau username"
             placeholder="operator@digvation.id"
             value={identifier}
             autoComplete="username"
@@ -65,8 +65,8 @@ export function LoginPage() {
           />
           <AppInput
             {...field('password')}
-            label="Password"
-            placeholder="Your password"
+            label="Kata sandi"
+            placeholder="Kata sandi Anda"
             type="password"
             value={password}
             autoComplete="current-password"
@@ -77,7 +77,7 @@ export function LoginPage() {
               checked={rememberMe}
               onChange={(event) => setRememberMe(event.target.checked)}
             />
-            <span>Keep me signed in</span>
+            <span>Biarkan saya tetap masuk</span>
           </label>
           {error ? (
             <p className="auth-error" role="alert">
@@ -85,11 +85,11 @@ export function LoginPage() {
             </p>
           ) : null}
           <AppAction type="submit" loading={loading}>
-            Sign in
+            Masuk
           </AppAction>
         </form>
         <Link className="auth-link" to="/password-reset">
-          Forgot your password?
+          Lupa kata sandi?
         </Link>
       </section>
     </main>
