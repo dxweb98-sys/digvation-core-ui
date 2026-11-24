@@ -435,6 +435,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/client-groups/{groupId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a client group with its brands
+         * @description A client group holds the brands of one client and carries no billing meaning: it is never a party, never changes the bill-to, and a brand always bills under its own legal entity or its group default. Each brand shows the legal entity it names, if any.
+         */
+        get: operations["ClientGroupController.get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a client group that has no brands
+         * @description A client group holds the brands of one client and carries no billing meaning: it is never a party, never changes the bill-to, and a brand always bills under its own legal entity or its group default. A group with brands is not deleted: move its brands to another group first, which removes the group it leaves when it becomes empty.
+         */
+        delete: operations["ClientGroupController.remove"];
+        options?: never;
+        head?: never;
+        /**
+         * Rename a client group
+         * @description A client group holds the brands of one client and carries no billing meaning: it is never a party, never changes the bill-to, and a brand always bills under its own legal entity or its group default. Only the name, notes and default legal entity change; a group has no code and no status.
+         */
+        patch: operations["ClientGroupController.update"];
+        trace?: never;
+    };
     "/clients": {
         parameters: {
             query?: never;
@@ -450,7 +478,7 @@ export interface paths {
         put?: never;
         /**
          * Register a client
-         * @description Creates the client, its first brand (same code and name) and its primary contact in one transaction.
+         * @description Creates the client, its first legal entity, its first group, its first brand (same code and name) and its primary contact in one transaction.
          */
         post: operations["ClientController.create"];
         delete?: never;
@@ -466,7 +494,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a client with its brands and contacts */
+        /** Get a client with its groups each holding their brands, its brands that belong to no group, its legal entities and its contacts */
         get: operations["ClientController.get"];
         put?: never;
         post?: never;
@@ -505,7 +533,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Get a brand with its group, bill-to, services and add-ons
+         * @description The brand read from itself down: the group that organizes it, where its invoices are addressed, the contacts that apply to it, its services with their contract, every add-on it holds and the installations hosting its services.
+         */
+        get: operations["BrandController.get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -513,6 +545,30 @@ export interface paths {
         head?: never;
         /** Update brand details (the code is immutable) */
         patch: operations["BrandController.update"];
+        trace?: never;
+    };
+    "/clients/{clientId}/brands/{brandId}/group": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Move the brand to another client group
+         * @description A client group holds the brands of one client and carries no billing meaning: it is never a party, never changes the bill-to, and a brand always bills under its own legal entity or its group default. A brand belongs to exactly one group, so the group it leaves is deleted when it becomes empty.
+         */
+        put: operations["BrandController.moveGroup"];
+        /**
+         * Start a new client group for the brand
+         * @description A client group holds the brands of one client and carries no billing meaning: it is never a party, never changes the bill-to, and a brand always bills under its own legal entity or its group default. This is the only way to create a group: the brand moves into the new group, and the group it leaves is deleted when it becomes empty.
+         */
+        post: operations["BrandController.startGroup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/clients/{clientId}/brands/{brandId}/status": {
@@ -563,7 +619,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Get a contact with the group or brand it is scoped to, and its roles */
+        get: operations["ClientContactController.get"];
         put?: never;
         post?: never;
         /** Delete a contact (not the primary contact) */
@@ -575,6 +632,120 @@ export interface paths {
          * @description is_primary true makes it the primary contact and demotes the previous one; the primary contact cannot be set to false.
          */
         patch: operations["ClientContactController.update"];
+        trace?: never;
+    };
+    "/clients/{clientId}/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the groups of a client
+         * @description A client group holds the brands of one client and carries no billing meaning: it is never a party, never changes the bill-to, and a brand always bills under its own legal entity or its group default. A group organizes the brands of one client.
+         */
+        get: operations["ClientGroupController.list"];
+        put?: never;
+        /**
+         * Create a client group for the client
+         * @description A client group holds the brands of one client and carries no billing meaning: it is never a party, never changes the bill-to, and a brand always bills under its own legal entity or its group default. The group always belongs to the client in the path and is created without brands; brands join it by their own action.
+         */
+        post: operations["ClientGroupController.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clients/{clientId}/groups/{groupId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a group of a client with its brands
+         * @description A client group holds the brands of one client and carries no billing meaning: it is never a party, never changes the bill-to, and a brand always bills under its own legal entity or its group default. The group must belong to the client in the path.
+         */
+        get: operations["ClientGroupController.getInClient"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a group of a client that has no brands
+         * @description A client group holds the brands of one client and carries no billing meaning: it is never a party, never changes the bill-to, and a brand always bills under its own legal entity or its group default. A group with brands is not deleted: move its brands to another group first, which removes the group it leaves when it becomes empty.
+         */
+        delete: operations["ClientGroupController.removeInClient"];
+        options?: never;
+        head?: never;
+        /**
+         * Rename a group of a client
+         * @description A client group holds the brands of one client and carries no billing meaning: it is never a party, never changes the bill-to, and a brand always bills under its own legal entity or its group default. Only the name, notes and default legal entity change; a group has no code and no status.
+         */
+        patch: operations["ClientGroupController.updateInClient"];
+        trace?: never;
+    };
+    "/clients/{clientId}/legal-entities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the legal entities of a client
+         * @description A legal entity is an optional badan hukum a brand or a group can name as bill-to. Payments, allocations and credit always belong to the client.
+         */
+        get: operations["LegalEntityController.list"];
+        put?: never;
+        /**
+         * Add a legal entity to a client
+         * @description A brand may then bill under it, and a group may use it as its default.
+         */
+        post: operations["LegalEntityController.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clients/{clientId}/legal-entities/{legalEntityId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a legal entity */
+        get: operations["LegalEntityController.get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update the details of a legal entity */
+        patch: operations["LegalEntityController.update"];
+        trace?: never;
+    };
+    "/clients/{clientId}/legal-entities/{legalEntityId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Archive or reactivate a legal entity
+         * @description Archiving is refused while a brand of the entity has an open service or an unsettled invoice, or it holds credit. The reason and actor are recorded.
+         */
+        patch: operations["LegalEntityController.transition"];
         trace?: never;
     };
     "/clients/{clientId}/services": {
@@ -665,6 +836,26 @@ export interface paths {
          * @description ACTIVE features of the service product; a CLIENT feature only for its owner client. Refused on a CANCELLED or DECOMMISSIONED service.
          */
         put: operations["ClientServiceController.replaceFeatures"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clients/{clientId}/services/{serviceId}/pic": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Name the contact in charge of the service, or clear it
+         * @description The contact must belong to the service’s client. It is informational: the PIC never changes billing, credit, entitlement or a transition. With no contact the PIC resolves to the brand, then the group, then the client.
+         */
+        put: operations["ClientServiceController.setPic"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1200,6 +1391,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/host-agent/v1/telemetry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report one telemetry batch (schema_version 1)
+         * @description Host metrics are kept even when installation items are refused; an installation that is unknown or on another host is refused per item. The same collected_at again answers DUPLICATE and changes nothing. collected_at more than 5 minutes ahead is refused (400); older than 48 hours is discarded (DISCARDED_TOO_OLD). Body at most 256 KB (413).
+         */
+        post: operations["HostTelemetryController.ingest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/hosts": {
         parameters: {
             query?: never;
@@ -1294,6 +1505,23 @@ export interface paths {
          * @description Revokes the active credential and issues a new one with the same scopes, in one transaction. The new token is returned once.
          */
         post: operations["HostController.rotateCredential"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/hosts/{hostId}/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Host metrics per 15 minutes over 24 hours or 7 days */
+        get: operations["MonitoringController.metrics"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1622,6 +1850,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/installations/{installationId}/runtime": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Runtime of an installation as its host reports it
+         * @description Components with their last state and health, drift against the last SUCCEEDED deployment, and when CORE last heard from the host (stale after MONITORING_HOST_STALE_MINUTES).
+         */
+        get: operations["MonitoringController.runtime"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/installations/{installationId}/services": {
         parameters: {
             query?: never;
@@ -1943,6 +2191,26 @@ export interface paths {
          * @description Only an ISSUED invoice without payment allocations or credit notes (INVOICE_HAS_ALLOCATIONS, INVOICE_HAS_CREDIT_NOTES, INVOICE_NOT_VOIDABLE). The number stays used, the stored PDF is unchanged, and the lines are released: the next draft run bills their periods still in the window; earlier periods are billed with ad-hoc lines.
          */
         post: operations["InvoiceController.voidInvoice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/monitoring/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Monitoring events, newest first
+         * @description Filters: installation_id, host_id, kind, and an occurred_at range (from inclusive, to exclusive).
+         */
+        get: operations["MonitoringController.events"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2990,11 +3258,81 @@ export interface components {
         BillingSettingsRevisionListDto: {
             items: components["schemas"]["BillingSettingsRevisionDto"][];
         };
-        BrandDto: {
+        BrandAddOnDto: {
+            /**
+             * Format: uuid
+             * @description The held add-on id
+             */
+            client_add_on_id: string;
+            /** Format: uuid */
+            add_on_id: string;
+            /** @example PRO */
+            code: string;
+            name: string;
+            /** @enum {string} */
+            status: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
+            /**
+             * Format: uuid
+             * @description The service that holds it
+             */
+            service_id: string;
+            product: components["schemas"]["BrandCatalogRefDto"];
+            /** @description The contract add-on that prices it; empty until the contract carries one. */
+            contract_add_on?: components["schemas"]["BrandContractAddOnDto"] | null;
+        };
+        BrandBillToDto: {
+            /**
+             * @description BRAND and GROUP name a legal entity; CLIENT means the client’s own legal details are the bill-to.
+             * @enum {string}
+             */
+            source: "BRAND" | "GROUP" | "CLIENT";
+            /** @description The legal entity the invoice is addressed to. Empty when the source is CLIENT. */
+            legal_entity?: components["schemas"]["LegalEntityDto"] | null;
+        };
+        BrandCatalogRefDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example DIGPOS */
+            code: string;
+            /** @example DigPOS */
+            name: string;
+        };
+        BrandContractAddOnDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example IDR */
+            currency: string;
+            /**
+             * @description Per billing cycle of the term, in minor units as a string.
+             * @example 50000000
+             */
+            agreed_amount: string;
+            /**
+             * Format: date
+             * @example 2026-12-01
+             */
+            effective_from: string;
+            /**
+             * Format: date
+             * @example 2026-12-31
+             */
+            effective_until?: string | null;
+        };
+        BrandDetailDto: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             client_id: string;
+            /**
+             * Format: uuid
+             * @description The group that organizes the brand; empty when the brand belongs to no group.
+             */
+            group_id?: string | null;
+            /**
+             * Format: uuid
+             * @description The brand's own legal entity; empty when it bills under its group's default.
+             */
+            legal_entity_id?: Record<string, never> | null;
             /** @example NOVA_BARBER */
             code: string;
             name: string;
@@ -3012,6 +3350,85 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             updated_at: string;
+            /** @description The brand's own billing contacts, or its group's, or the client-level ones when neither has any. */
+            billing_contacts: components["schemas"]["ClientContactDto"][];
+            /** @enum {string} */
+            billing_contact_source: "BRAND" | "GROUP" | "CLIENT" | "NONE";
+            /** @description The people in charge: the brand PICs, or the group PICs, or the client PICs. */
+            pic_contacts: components["schemas"]["ClientContactDto"][];
+            /** @enum {string} */
+            pic_source: "BRAND" | "GROUP" | "CLIENT" | "NONE";
+            /** @description The group that organizes the brand; empty when it has none. */
+            group?: components["schemas"]["BrandGroupRefDto"] | null;
+            /** @description Where an invoice of this brand is addressed: its own legal entity, else its group’s default, else the client’s own details. */
+            bill_to: components["schemas"]["BrandBillToDto"];
+            /** @description The services of the brand, newest first, each with its contract when it has one. */
+            services: components["schemas"]["BrandServiceDto"][];
+            /** @description Every add-on the brand holds through its services, with the contract add-on that prices it when there is one. */
+            add_ons: components["schemas"]["BrandAddOnDto"][];
+            /** @description The installations hosting at least one service of the brand. */
+            installations: components["schemas"]["BrandInstallationDto"][];
+        };
+        BrandDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            client_id: string;
+            /**
+             * Format: uuid
+             * @description The group that organizes the brand; empty when the brand belongs to no group.
+             */
+            group_id?: string | null;
+            /**
+             * Format: uuid
+             * @description The brand's own legal entity; empty when it bills under its group's default.
+             */
+            legal_entity_id?: Record<string, never> | null;
+            /** @example NOVA_BARBER */
+            code: string;
+            name: string;
+            description?: string | null;
+            logo_url?: string | null;
+            website?: string | null;
+            /** @example #1A2B3C */
+            primary_color?: string | null;
+            secondary_color?: string | null;
+            /** @enum {string} */
+            status: "ACTIVE" | "ARCHIVED";
+            /** Format: date-time */
+            status_changed_at: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        BrandGroupMembershipResponseDto: {
+            /** @example Client group updated successfully */
+            message: string;
+            /** Format: uuid */
+            client_group_id: string;
+            /** Format: uuid */
+            brand_id: string;
+        };
+        BrandGroupRefDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Digvation */
+            name: string;
+        };
+        BrandInstallationDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example NOVA-PROD */
+            code: string;
+            /** @example Nova production */
+            name: string;
+            /** @enum {string} */
+            deployment_mode: "SHARED" | "DEDICATED";
+            /** @enum {string} */
+            environment: "PRODUCTION" | "STAGING" | "DEVELOPMENT";
+            /** @enum {string} */
+            status: "PROVISIONING" | "ACTIVE" | "SUSPENDED" | "DECOMMISSIONED";
         };
         BrandLifecycleResponseDto: {
             /** @example Brand created successfully */
@@ -3039,11 +3456,36 @@ export interface components {
             /** Format: uuid */
             brand_id: string;
         };
+        BrandServiceContractDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "PENDING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "EXPIRED" | "CANCELLED";
+        };
+        BrandServiceDto: {
+            /** Format: uuid */
+            id: string;
+            product: components["schemas"]["BrandCatalogRefDto"];
+            /** @enum {string} */
+            status: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
+            /** @description The one contract of the service; empty until it is opened, and it follows the service lifecycle. */
+            contract?: components["schemas"]["BrandServiceContractDto"] | null;
+        };
         BrandWithBillingDto: {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
             client_id: string;
+            /**
+             * Format: uuid
+             * @description The group that organizes the brand; empty when the brand belongs to no group.
+             */
+            group_id?: string | null;
+            /**
+             * Format: uuid
+             * @description The brand's own legal entity; empty when it bills under its group's default.
+             */
+            legal_entity_id?: Record<string, never> | null;
             /** @example NOVA_BARBER */
             code: string;
             name: string;
@@ -3061,10 +3503,14 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             updated_at: string;
-            /** @description The brand's own billing contacts, or the client-level ones when it has none. */
+            /** @description The brand's own billing contacts, or its group's, or the client-level ones when neither has any. */
             billing_contacts: components["schemas"]["ClientContactDto"][];
             /** @enum {string} */
-            billing_contact_source: "BRAND" | "CLIENT" | "NONE";
+            billing_contact_source: "BRAND" | "GROUP" | "CLIENT" | "NONE";
+            /** @description The people in charge: the brand PICs, or the group PICs, or the client PICs. */
+            pic_contacts: components["schemas"]["ClientContactDto"][];
+            /** @enum {string} */
+            pic_source: "BRAND" | "GROUP" | "CLIENT" | "NONE";
         };
         BrandingDto: {
             /** @enum {string} */
@@ -3237,6 +3683,8 @@ export interface components {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
+            group_id?: string | null;
+            /** Format: uuid */
             brand_id?: string | null;
             name: string;
             position?: string | null;
@@ -3246,6 +3694,7 @@ export interface components {
             is_primary: boolean;
             is_billing: boolean;
             is_technical: boolean;
+            is_pic: boolean;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -3265,6 +3714,16 @@ export interface components {
             message: string;
             /** Format: uuid */
             client_id: string;
+            /**
+             * Format: uuid
+             * @description Set when the registration gave a legal_entity.
+             */
+            legal_entity_id?: Record<string, never> | null;
+            /**
+             * Format: uuid
+             * @description Set when the registration gave a group_name or a legal entity.
+             */
+            group_id?: Record<string, never> | null;
             /** Format: uuid */
             brand_id: string;
             /** Format: uuid */
@@ -3286,6 +3745,7 @@ export interface components {
             code: string;
             /** @example Nova */
             display_name: string;
+            /** @description The client’s own legal name. It is the bill-to of an invoice unless the brand resolves a legal entity. */
             legal_name?: string | null;
             tax_identifier?: string | null;
             email?: string | null;
@@ -3303,8 +3763,14 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             updated_at: string;
+            /** @description The groups of the client, each with its own brands. A group may hold no brand yet. */
+            groups: components["schemas"]["ClientGroupWithBrandsDto"][];
+            /** @description The brands that belong to no group. A grouped brand is listed inside its group, never here. */
             brands: components["schemas"]["BrandDto"][];
+            legal_entities: components["schemas"]["LegalEntityDto"][];
             contacts: components["schemas"]["ClientContactDto"][];
+            /** @description Counts of the client rows and of its open services and active contracts, so a reader knows the size without loading every service. */
+            summary: components["schemas"]["ClientSummaryDto"];
             /** @description Client credit: what RECORDED payments have left unallocated, per currency (currencies with credit only). */
             credit: components["schemas"]["ClientCreditDto"][];
         };
@@ -3315,6 +3781,7 @@ export interface components {
             code: string;
             /** @example Nova */
             display_name: string;
+            /** @description The client’s own legal name. It is the bill-to of an invoice unless the brand resolves a legal entity. */
             legal_name?: string | null;
             tax_identifier?: string | null;
             email?: string | null;
@@ -3332,6 +3799,96 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             updated_at: string;
+        };
+        ClientGroupBrandDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example DIGPOS */
+            code: string;
+            /** @example DigPOS */
+            name: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "ARCHIVED";
+            /**
+             * Format: uuid
+             * @description The brand's own legal entity; empty when it bills under the group default.
+             */
+            legal_entity_id?: Record<string, never> | null;
+        };
+        ClientGroupCreatedResponseDto: {
+            /** @example Client group updated successfully */
+            message: string;
+            /** Format: uuid */
+            client_group_id: string;
+            /** Format: uuid */
+            client_id: string;
+        };
+        ClientGroupDetailDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            client_id: string;
+            /** @example Digvation */
+            name: string;
+            notes?: string | null;
+            /** Format: uuid */
+            default_legal_entity_id?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** @description The brands of the group, ordered by name. */
+            brands: components["schemas"]["ClientGroupBrandDto"][];
+        };
+        ClientGroupDetailsDto: {
+            /**
+             * @description Name of the group. A new group defaults to the name of the brand that starts it. It is a label that can be renamed, not a code.
+             * @example Digvation
+             */
+            name?: string;
+            /** @description Free-form note about the group. It has no billing or entitlement meaning. */
+            notes?: string | null;
+            /**
+             * Format: uuid
+             * @description Default legal entity of the group's brands. A brand that names its own legal entity ignores it.
+             */
+            default_legal_entity_id?: Record<string, never> | null;
+        };
+        ClientGroupDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            client_id: string;
+            /** @example Digvation */
+            name: string;
+            notes?: string | null;
+            /** Format: uuid */
+            default_legal_entity_id?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        ClientGroupListDto: {
+            /** @description The groups that organize the brands of one client. */
+            items: components["schemas"]["ClientGroupDto"][];
+        };
+        ClientGroupMutationResponseDto: {
+            /** @example Client group updated successfully */
+            message: string;
+            /** Format: uuid */
+            client_group_id: string;
+        };
+        ClientGroupWithBrandsDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Digvation */
+            name: string;
+            notes?: string | null;
+            /** Format: uuid */
+            default_legal_entity_id?: string | null;
+            /** @description The brands of the group, ordered by name. A brand belongs to at most one group, and a group may hold none. */
+            brands: components["schemas"]["BrandDto"][];
         };
         ClientLifecycleResponseDto: {
             /** @example Client created successfully */
@@ -3365,8 +3922,14 @@ export interface components {
             product: components["schemas"]["ServiceRefDto"];
             /** @enum {string} */
             status: "PROVISIONING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | "DECOMMISSIONED";
+            /** @description The contract of the service: a service holds at most one. Empty until one is opened. */
+            contract?: components["schemas"]["ServiceContractRefDto"] | null;
             features: components["schemas"]["SelectedFeatureDto"][];
             add_ons: components["schemas"]["ClientAddOnDto"][];
+            /** @description The contacts in charge: the service PIC contact when it has one, else the brand PIC contacts, else the group, else the client. */
+            pic_contacts: components["schemas"]["ClientContactDto"][];
+            /** @enum {string} */
+            pic_source: "SERVICE" | "BRAND" | "GROUP" | "CLIENT" | "NONE";
             /** Format: date-time */
             status_changed_at: string;
             /** Format: date-time */
@@ -3376,6 +3939,74 @@ export interface components {
         };
         ClientServiceListDto: {
             items: components["schemas"]["ClientServiceDto"][];
+        };
+        ClientSummaryDto: {
+            /**
+             * @description How many groups the client has.
+             * @example 2
+             */
+            groups: number;
+            /**
+             * @description How many brands the client has, grouped or not.
+             * @example 4
+             */
+            brands: number;
+            /** @example 2 */
+            legal_entities: number;
+            /** @example 6 */
+            contacts: number;
+            /**
+             * @description Services that are PROVISIONING, TRIAL, ACTIVE or SUSPENDED (open services).
+             * @example 3
+             */
+            services_open: number;
+            /**
+             * @description Contracts that are ACTIVE.
+             * @example 2
+             */
+            contracts_active: number;
+            /**
+             * @description Installations owned by the client.
+             * @example 1
+             */
+            installations: number;
+        };
+        ComponentDto: {
+            /** @example pos-runtime */
+            name: string;
+            /** @enum {string} */
+            kind: "RUNTIME" | "BACKOFFICE" | "OPERATIONAL" | "OTHER";
+            running: boolean;
+            /** @example 0 */
+            restart_count: number;
+            /** @description The last exit was an OOM kill. */
+            oom_killed: boolean;
+            /** @example registry.digvation.dev/pos-salon@sha256:1100 */
+            image_digest?: Record<string, never> | null;
+            /** @example f91f3a78 */
+            build_revision?: Record<string, never> | null;
+            health: components["schemas"]["HealthCheckDto"][];
+        };
+        ComponentStateDto: {
+            /** @example pos-runtime */
+            name: string;
+            /** @enum {string} */
+            kind: "RUNTIME" | "BACKOFFICE" | "OPERATIONAL" | "OTHER";
+            /** @description False once the host stopped reporting it. */
+            present: boolean;
+            running: boolean;
+            /** @example 1 */
+            restart_count: number;
+            oom_killed: boolean;
+            image_digest: string | null;
+            build_revision: string | null;
+            /** @enum {string} */
+            health_status: "HEALTHY" | "UNHEALTHY" | "UNKNOWN";
+            health: components["schemas"]["HealthCheckStateDto"][];
+            /** Format: date-time */
+            first_seen_at: string;
+            /** Format: date-time */
+            last_seen_at: string;
         };
         ConfirmTermDto: {
             /**
@@ -3671,6 +4302,21 @@ export interface components {
             code: string;
             /** @example Nova Barber */
             name: string;
+            /**
+             * Format: uuid
+             * @description The group the brand joins. Omit it to start a new group named after the brand. A group holds the brands of one client and carries no billing meaning.
+             */
+            group_id?: string;
+            /**
+             * @description Name of the new group when group_id is not given. Defaults to the brand name.
+             * @example Digvation
+             */
+            group_name?: string;
+            /**
+             * Format: uuid
+             * @description The brand's own legal entity, bill-to of its invoices. When empty it bills under its group's default. It can be set once the badan hukum is registered.
+             */
+            legal_entity_id?: Record<string, never> | null;
         };
         CreateCatalogItemDto: {
             /**
@@ -3696,10 +4342,20 @@ export interface components {
             /** @default false */
             is_technical: boolean;
             /**
+             * @description Person in charge. A service with no PIC of its own uses the PICs of its brand, then of its group, then of the client.
+             * @default false
+             */
+            is_pic: boolean;
+            /**
              * Format: uuid
              * @description Scopes the contact to one brand of the same client (for example its billing contact). Omit for a client-level contact.
              */
             brand_id?: string | null;
+            /**
+             * Format: uuid
+             * @description Scopes the contact to one group of the same client, so it applies to every brand of that group. Cannot be combined with brand_id.
+             */
+            group_id?: string | null;
             /**
              * @description Makes this contact the primary contact; the previous primary contact loses the flag in the same transaction.
              * @default false
@@ -3707,7 +4363,10 @@ export interface components {
             is_primary: boolean;
         };
         CreateClientDto: {
-            /** @example PT Nova Kreasi Indonesia */
+            /**
+             * @description The client's own legal name. It is the bill-to of an invoice unless the brand resolves a legal entity of its own.
+             * @example PT Nova Kreasi Indonesia
+             */
             legal_name?: string | null;
             /** @example 01.234.567.8-901.000 */
             tax_identifier?: string | null;
@@ -3732,12 +4391,33 @@ export interface components {
              */
             code: string;
             /**
-             * @description Also the name of the first brand.
+             * @description Also the name of the first brand and of the first group.
              * @example Nova
              */
             display_name: string;
+            /** @description The badan hukum of the first brand. It contracts and is the bill-to of its invoices; a brand added later may name another one. */
+            legal_entity?: components["schemas"]["RegistrationLegalEntityDto"];
+            /**
+             * @description Name of the group the first brand starts. Defaults to the display name. A group holds the brands of one client and carries no billing meaning.
+             * @example Digvation
+             */
+            group_name?: string;
             /** @description Becomes the primary contact (client-level). */
             primary_contact: components["schemas"]["PrimaryContactDto"];
+        };
+        CreateClientGroupDto: {
+            /**
+             * @description Name of the group. It is a label that can be renamed, not a code.
+             * @example Digvation
+             */
+            name: string;
+            /** @description Free-form note about the group. It has no billing or entitlement meaning. */
+            notes?: string | null;
+            /**
+             * Format: uuid
+             * @description Default legal entity of the group's brands. A brand that names its own legal entity ignores it.
+             */
+            default_legal_entity_id?: Record<string, never> | null;
         };
         CreateClientServiceDto: {
             /**
@@ -3750,6 +4430,11 @@ export interface components {
              * @description An ACTIVE product; immutable afterwards.
              */
             product_id: string;
+            /**
+             * Format: uuid
+             * @description The contact in charge of this service, a contact of the same client. When left out, the PIC resolves to the brand, then the group, then the client (specification 3.3).
+             */
+            pic_contact_id?: Record<string, never> | null;
             /** @description ACTIVE features of the product to select; a CLIENT feature only for its owner client. */
             feature_ids?: string[];
         };
@@ -3927,6 +4612,30 @@ export interface components {
              */
             currency?: string;
         };
+        CreateLegalEntityDto: {
+            /** @example PT Nova Kreasi Indonesia */
+            legal_name?: string | null;
+            /** @example 01.234.567.8-901.000 */
+            tax_identifier?: string | null;
+            /** Format: email */
+            email?: string | null;
+            /** @example +62215550100 */
+            phone?: string | null;
+            address?: string | null;
+            /** @example Indonesia */
+            country?: string | null;
+            /**
+             * @description IANA zone
+             * @example Asia/Jakarta
+             */
+            timezone?: string | null;
+            notes?: string | null;
+            /**
+             * @description Short name of the legal entity, shown in lists.
+             * @example PT Nova Kreasi
+             */
+            name: string;
+        };
         CreateOneOffChargeDto: {
             /** @example Pembuatan website */
             description: string;
@@ -3964,6 +4673,18 @@ export interface components {
             /** @example BCA 20261112-0001 */
             reference?: string | null;
             notes?: string | null;
+            /**
+             * Format: uuid
+             * @description Optional: a contact of the payment client who paid. Informational only; it never changes who is billed.
+             */
+            paid_by_contact_id?: Record<string, never>;
+            /**
+             * Format: uuid
+             * @description Optional: a brand of the payment client that handled the payment. Informational only.
+             */
+            paid_by_brand_id?: Record<string, never>;
+            /** @description Optional: a free label for a payer that is not a contact (for example an investor). Cannot be combined with paid_by_contact_id. */
+            paid_by_label?: string | null;
             /** @description Allocations made in the same transaction; the rest stays as client credit. */
             allocations?: components["schemas"]["AllocatePaymentDto"][];
         };
@@ -4172,6 +4893,24 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
+        DeploymentEventDto: {
+            /**
+             * @description Id of the entry in history/ on the host; makes the event idempotent.
+             * @example 2026-11-14T10-05-00Z-update
+             */
+            id: string;
+            /** @example UPDATE */
+            action: string;
+            /** @example 1.1.0 */
+            version: string;
+            /**
+             * Format: date-time
+             * @description When the deployment finished on the host.
+             */
+            finished_at: string;
+            /** @enum {string} */
+            outcome: "SUCCEEDED" | "FAILED";
+        };
         DeploymentInstallationDto: {
             /** Format: uuid */
             id: string;
@@ -4217,6 +4956,14 @@ export interface components {
             /** @example registry.example/pos-salon@sha256:… */
             artifact_ref: string | null;
         };
+        DiskDto: {
+            /** @example / */
+            mount: string;
+            /** @example 42000000000 */
+            used_bytes: number;
+            /** @example 100000000000 */
+            total_bytes: number;
+        };
         EnableItemDto: {
             /**
              * Format: uuid
@@ -4255,7 +5002,7 @@ export interface components {
          * @description Stable code; clients branch on it. Codes are never renamed or reused.
          * @enum {string}
          */
-        ErrorCode: "BAD_REQUEST" | "VALIDATION_ERROR" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "CONFLICT" | "BUSINESS_RULE_VIOLATION" | "RATE_LIMITED" | "INTERNAL_SERVER_ERROR" | "BAD_GATEWAY" | "SERVICE_UNAVAILABLE" | "GATEWAY_TIMEOUT" | "RESOURCE_CONFLICT" | "RELATION_CONFLICT" | "RELATION_CONSTRAINT_VIOLATION" | "RESOURCE_NOT_FOUND" | "TRANSACTION_RETRY_EXHAUSTED" | "DATABASE_VALUE_TOO_LONG" | "DATABASE_NULL_CONSTRAINT" | "DATABASE_REQUIRED_VALUE_MISSING" | "DATABASE_REQUIRED_ARGUMENT_MISSING" | "DATABASE_CONNECTION_TIMEOUT" | "DATABASE_VALIDATION_ERROR" | "DATABASE_ERROR" | "USER_NOT_FOUND" | "USER_INVALID_TRANSITION" | "USER_SELF_DEACTIVATION" | "USER_STATUS_FORBIDDEN" | "PRODUCT_NOT_FOUND" | "PRODUCT_CODE_CONFLICT" | "PRODUCT_INVALID_TRANSITION" | "PRODUCT_FEATURES_NOT_RETIRED" | "PRODUCT_MANIFEST_FORMAT_LOCKED" | "BASE_DOMAIN_NOT_FOUND" | "BASE_DOMAIN_CODE_CONFLICT" | "BASE_DOMAIN_INVALID_TRANSITION" | "APPLICATION_NOT_FOUND" | "APPLICATION_CODE_CONFLICT" | "APPLICATION_INVALID_TRANSITION" | "CAPABILITY_NOT_FOUND" | "CAPABILITY_CODE_CONFLICT" | "CAPABILITY_INVALID_TRANSITION" | "CATALOG_ITEM_NOT_ACTIVE" | "FEATURE_NOT_FOUND" | "FEATURE_CODE_CONFLICT" | "FEATURE_INVALID_TRANSITION" | "PRODUCT_CAPABILITY_NOT_FOUND" | "PRODUCT_CAPABILITY_ALREADY_LINKED" | "PRODUCT_CAPABILITY_RETIRED" | "ADD_ON_NOT_FOUND" | "ADD_ON_CODE_CONFLICT" | "ADD_ON_INVALID_TRANSITION" | "ADD_ON_GRANT_INVALID" | "ADD_ON_GRANT_REQUIRED" | "PRICE_NOT_FOUND" | "RELEASE_NOT_FOUND" | "RELEASE_VERSION_CONFLICT" | "RELEASE_INVALID_TRANSITION" | "RELEASE_NOT_EDITABLE" | "RELEASE_ARTIFACT_REQUIRED" | "RELEASE_TARGETED" | "MANIFEST_FORMAT_UNKNOWN" | "MANIFEST_KEY_INVALID" | "MANIFEST_KEY_CONFLICT" | "MANIFEST_MAPPING_NOT_FOUND" | "MANIFEST_MAPPING_INCOMPLETE" | "SERVICE_NOT_FOUND" | "SERVICE_ALREADY_EXISTS" | "SERVICE_INVALID_TRANSITION" | "SERVICE_CLOSED" | "SERVICE_CLIENT_NOT_ACTIVE" | "SERVICE_BRAND_NOT_ACTIVE" | "SERVICE_PRODUCT_NOT_ACTIVE" | "SERVICE_FEATURE_INVALID" | "SERVICE_ADD_ON_INVALID" | "CLIENT_ADD_ON_NOT_FOUND" | "CLIENT_ADD_ON_ALREADY_HELD" | "CLIENT_ADD_ON_INVALID_TRANSITION" | "CLIENT_HAS_OPEN_SERVICES" | "BRAND_HAS_OPEN_SERVICES" | "PRODUCT_HAS_OPEN_SERVICES" | "PRODUCT_HOSTED" | "FEATURE_IN_USE" | "ADD_ON_IN_USE" | "ROLE_NOT_FOUND" | "ROLE_NOT_ASSIGNABLE" | "ROLE_SLUG_CONFLICT" | "ROLE_SYSTEM_IMMUTABLE" | "ROLE_INACTIVE" | "ROLE_ASSIGNMENT_FORBIDDEN" | "LAST_SUPER_ADMIN" | "PERMISSION_NOT_FOUND" | "PERMISSION_NOT_GRANTABLE" | "USER_IDENTITY_CONFLICT" | "INVITATION_NOT_FOUND" | "INVITATION_ACCESS_FORBIDDEN" | "INVITATION_INVALID" | "INVITATION_ALREADY_ACCEPTED" | "INVITATION_ALREADY_REVOKED" | "INVITATION_EMAIL_REGISTERED" | "INVITATION_EMAIL_PENDING" | "INVITATION_DELIVERY_FAILED" | "AUTH_CSRF_INVALID" | "CLIENT_NOT_FOUND" | "CLIENT_ARCHIVED" | "CLIENT_CODE_CONFLICT" | "CLIENT_INVALID_TRANSITION" | "BRAND_NOT_FOUND" | "BRAND_CODE_CONFLICT" | "BRAND_INVALID_TRANSITION" | "BRAND_LAST_ACTIVE" | "CLIENT_CONTACT_NOT_FOUND" | "CLIENT_CONTACT_BRAND_MISMATCH" | "CLIENT_CONTACT_EMAIL_REQUIRED" | "CLIENT_PRIMARY_CONTACT_REQUIRED" | "SERVICE_HOSTED" | "HOST_NOT_FOUND" | "HOST_CODE_CONFLICT" | "HOST_INVALID_TRANSITION" | "HOST_RETIRED" | "HOST_IN_USE" | "HOST_CREDENTIAL_ALREADY_ACTIVE" | "HOST_CREDENTIAL_NOT_FOUND" | "HOST_CREDENTIAL_SCOPE_MISSING" | "INSTALLATION_NOT_FOUND" | "INSTALLATION_CODE_CONFLICT" | "INSTALLATION_INVALID_TRANSITION" | "INSTALLATION_DECOMMISSIONED" | "INSTALLATION_HOST_NOT_ACTIVE" | "INSTALLATION_OWNER_REQUIRED" | "INSTALLATION_OWNER_NOT_ALLOWED" | "INSTALLATION_MODE_MISMATCH" | "INSTALLATION_SERVICE_INVALID" | "INSTALLATION_SERVICE_ALREADY_HOSTED" | "INSTALLATION_SERVICE_HOSTED_ELSEWHERE" | "INSTALLATION_PRODUCT_NOT_ACTIVE" | "INSTALLATION_PRODUCT_ALREADY_HOSTED" | "INSTALLATION_PRODUCT_NOT_HOSTED" | "INSTALLATION_RELEASE_INVALID" | "INSTALLATION_NOT_READY" | "INSTALLATION_GO_LIVE_INVALID" | "INSTALLATION_ITEM_INVALID" | "INSTALLATION_ITEM_ALREADY_ENABLED" | "INSTALLATION_OVERRIDE_REASON_REQUIRED" | "INSTALLATION_ITEM_NOT_FOUND" | "INSTALLATION_SERVICE_NOT_HOSTED" | "INSTALLATION_LAST_SERVICE" | "INSTALLATION_HOST_UNCHANGED" | "INSTALLATION_GO_LIVE_LOCKED" | "CONTRACT_NOT_FOUND" | "CONTRACT_ALREADY_EXISTS" | "CONTRACT_SERVICE_NOT_OPEN" | "CONTRACT_INVALID_TRANSITION" | "CONTRACT_CLOSED" | "CONTRACT_CANCEL_INVALID" | "CONTRACT_TERM_NOT_FOUND" | "CONTRACT_TERM_NOT_EDITABLE" | "CONTRACT_TERM_INVALID" | "CONTRACT_TERM_OVERLAP" | "CONTRACT_TERM_INVALID_TRANSITION" | "CONTRACT_ADJUSTMENT_REASON_REQUIRED" | "CONTRACT_PRICE_CHANGE_REASON_REQUIRED" | "CONTRACT_ONE_OFF_CHARGE_NOT_FOUND" | "CONTRACT_ADD_ON_NOT_FOUND" | "CONTRACT_ADD_ON_ALREADY_EXISTS" | "CONTRACT_ADD_ON_INVALID" | "MANIFEST_REVISION_NOT_FOUND" | "MANIFEST_REVISION_NOT_DRAFT" | "MANIFEST_FORMAT_NOT_HOSTED" | "MANIFEST_RENDER_CONFLICT" | "MANIFEST_RENDER_INVALID" | "MANIFEST_CONTENT_INVALID" | "MANIFEST_REMOVAL_NOT_CONFIRMED" | "MANIFEST_IMPORT_MISMATCH" | "DEPLOYMENT_NOT_FOUND" | "DEPLOYMENT_ALREADY_OPEN" | "DEPLOYMENT_IDEMPOTENCY_CONFLICT" | "DEPLOYMENT_TARGET_MISSING" | "DEPLOYMENT_MANIFEST_REQUIRED" | "DEPLOYMENT_INVALID_TRANSITION" | "DEPLOYMENT_REPORT_INVALID" | "BILLING_SETTINGS_INVALID" | "BILLING_SETTINGS_REQUIRED" | "INVOICE_NOT_FOUND" | "INVOICE_NOT_DRAFT" | "INVOICE_LINE_NOT_FOUND" | "INVOICE_EMPTY" | "INVOICE_TOTAL_NEGATIVE" | "INVOICE_BILLING_CONTACT_MISSING" | "INVOICE_NOT_EMPTY" | "INVOICE_BRAND_INVALID" | "INVOICE_NOT_SENDABLE" | "INVOICE_SEND_FAILED" | "INVOICE_SOURCE_EXCLUSION_NOT_FOUND" | "INVOICE_NOT_VOIDABLE" | "INVOICE_HAS_ALLOCATIONS" | "INVOICE_HAS_CREDIT_NOTES" | "PAYMENT_NOT_FOUND" | "PAYMENT_NOT_RECORDED" | "PAYMENT_ALLOCATION_NOT_FOUND" | "PAYMENT_ALLOCATION_CLIENT_MISMATCH" | "PAYMENT_ALLOCATION_CURRENCY_MISMATCH" | "PAYMENT_ALLOCATION_INVOICE_NOT_OPEN" | "PAYMENT_ALLOCATION_EXCEEDS_BALANCE" | "PAYMENT_ALLOCATION_EXCEEDS_UNALLOCATED" | "PAYMENT_PROOF_INVALID" | "PAYMENT_PROOF_EXISTS" | "PAYMENT_PROOF_NOT_FOUND" | "CREDIT_NOTE_NOT_FOUND" | "CREDIT_NOTE_INVOICE_NOT_OPEN" | "CREDIT_NOTE_EXCEEDS_BALANCE" | "CREDIT_NOTE_SEND_FAILED" | "CLIENT_HAS_UNSETTLED_INVOICES" | "CLIENT_HAS_CREDIT" | "BRAND_HAS_UNSETTLED_INVOICES";
+        ErrorCode: "BAD_REQUEST" | "VALIDATION_ERROR" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" | "CONFLICT" | "BUSINESS_RULE_VIOLATION" | "RATE_LIMITED" | "INTERNAL_SERVER_ERROR" | "BAD_GATEWAY" | "SERVICE_UNAVAILABLE" | "GATEWAY_TIMEOUT" | "RESOURCE_CONFLICT" | "RELATION_CONFLICT" | "RELATION_CONSTRAINT_VIOLATION" | "RESOURCE_NOT_FOUND" | "TRANSACTION_RETRY_EXHAUSTED" | "DATABASE_VALUE_TOO_LONG" | "DATABASE_NULL_CONSTRAINT" | "DATABASE_REQUIRED_VALUE_MISSING" | "DATABASE_REQUIRED_ARGUMENT_MISSING" | "DATABASE_CONNECTION_TIMEOUT" | "DATABASE_VALIDATION_ERROR" | "DATABASE_ERROR" | "USER_NOT_FOUND" | "USER_INVALID_TRANSITION" | "USER_SELF_DEACTIVATION" | "USER_STATUS_FORBIDDEN" | "PRODUCT_NOT_FOUND" | "PRODUCT_CODE_CONFLICT" | "PRODUCT_INVALID_TRANSITION" | "PRODUCT_FEATURES_NOT_RETIRED" | "PRODUCT_MANIFEST_FORMAT_LOCKED" | "BASE_DOMAIN_NOT_FOUND" | "BASE_DOMAIN_CODE_CONFLICT" | "BASE_DOMAIN_INVALID_TRANSITION" | "APPLICATION_NOT_FOUND" | "APPLICATION_CODE_CONFLICT" | "APPLICATION_INVALID_TRANSITION" | "CAPABILITY_NOT_FOUND" | "CAPABILITY_CODE_CONFLICT" | "CAPABILITY_INVALID_TRANSITION" | "CATALOG_ITEM_NOT_ACTIVE" | "FEATURE_NOT_FOUND" | "FEATURE_CODE_CONFLICT" | "FEATURE_INVALID_TRANSITION" | "PRODUCT_CAPABILITY_NOT_FOUND" | "PRODUCT_CAPABILITY_ALREADY_LINKED" | "PRODUCT_CAPABILITY_RETIRED" | "ADD_ON_NOT_FOUND" | "ADD_ON_CODE_CONFLICT" | "ADD_ON_INVALID_TRANSITION" | "ADD_ON_GRANT_INVALID" | "ADD_ON_GRANT_REQUIRED" | "PRICE_NOT_FOUND" | "RELEASE_NOT_FOUND" | "RELEASE_VERSION_CONFLICT" | "RELEASE_INVALID_TRANSITION" | "RELEASE_NOT_EDITABLE" | "RELEASE_ARTIFACT_REQUIRED" | "RELEASE_TARGETED" | "MANIFEST_FORMAT_UNKNOWN" | "MANIFEST_KEY_INVALID" | "MANIFEST_KEY_CONFLICT" | "MANIFEST_MAPPING_NOT_FOUND" | "MANIFEST_MAPPING_INCOMPLETE" | "SERVICE_NOT_FOUND" | "SERVICE_ALREADY_EXISTS" | "SERVICE_INVALID_TRANSITION" | "SERVICE_CLOSED" | "SERVICE_CLIENT_NOT_ACTIVE" | "SERVICE_BRAND_NOT_ACTIVE" | "SERVICE_PRODUCT_NOT_ACTIVE" | "SERVICE_FEATURE_INVALID" | "SERVICE_ADD_ON_INVALID" | "CLIENT_ADD_ON_NOT_FOUND" | "CLIENT_ADD_ON_ALREADY_HELD" | "CLIENT_ADD_ON_INVALID_TRANSITION" | "CLIENT_HAS_OPEN_SERVICES" | "BRAND_HAS_OPEN_SERVICES" | "PRODUCT_HAS_OPEN_SERVICES" | "PRODUCT_HOSTED" | "FEATURE_IN_USE" | "ADD_ON_IN_USE" | "ROLE_NOT_FOUND" | "ROLE_NOT_ASSIGNABLE" | "ROLE_SLUG_CONFLICT" | "ROLE_SYSTEM_IMMUTABLE" | "ROLE_INACTIVE" | "ROLE_ASSIGNMENT_FORBIDDEN" | "LAST_SUPER_ADMIN" | "PERMISSION_NOT_FOUND" | "PERMISSION_NOT_GRANTABLE" | "USER_IDENTITY_CONFLICT" | "INVITATION_NOT_FOUND" | "INVITATION_ACCESS_FORBIDDEN" | "INVITATION_INVALID" | "INVITATION_ALREADY_ACCEPTED" | "INVITATION_ALREADY_REVOKED" | "INVITATION_EMAIL_REGISTERED" | "INVITATION_EMAIL_PENDING" | "INVITATION_DELIVERY_FAILED" | "AUTH_CSRF_INVALID" | "CLIENT_NOT_FOUND" | "CLIENT_ARCHIVED" | "CLIENT_CODE_CONFLICT" | "CLIENT_INVALID_TRANSITION" | "BRAND_NOT_FOUND" | "BRAND_CODE_CONFLICT" | "BRAND_NAME_CONFLICT" | "BRAND_INVALID_TRANSITION" | "BRAND_LAST_ACTIVE" | "CLIENT_GROUP_NOT_FOUND" | "CLIENT_GROUP_NOT_EMPTY" | "CLIENT_GROUP_NAME_CONFLICT" | "CLIENT_CONTACT_NOT_FOUND" | "CLIENT_CONTACT_BRAND_MISMATCH" | "CLIENT_CONTACT_GROUP_MISMATCH" | "CLIENT_CONTACT_EMAIL_REQUIRED" | "CLIENT_PRIMARY_CONTACT_REQUIRED" | "LEGAL_ENTITY_NOT_FOUND" | "LEGAL_ENTITY_ARCHIVED" | "LEGAL_ENTITY_INVALID_TRANSITION" | "LEGAL_ENTITY_IN_USE" | "SERVICE_PIC_INVALID" | "SERVICE_HOSTED" | "HOST_NOT_FOUND" | "HOST_CODE_CONFLICT" | "HOST_INVALID_TRANSITION" | "HOST_RETIRED" | "HOST_IN_USE" | "HOST_CREDENTIAL_ALREADY_ACTIVE" | "HOST_CREDENTIAL_NOT_FOUND" | "HOST_CREDENTIAL_SCOPE_MISSING" | "INSTALLATION_NOT_FOUND" | "INSTALLATION_CODE_CONFLICT" | "INSTALLATION_INVALID_TRANSITION" | "INSTALLATION_DECOMMISSIONED" | "INSTALLATION_HOST_NOT_ACTIVE" | "INSTALLATION_OWNER_REQUIRED" | "INSTALLATION_OWNER_NOT_ALLOWED" | "INSTALLATION_MODE_MISMATCH" | "INSTALLATION_SERVICE_INVALID" | "INSTALLATION_SERVICE_ALREADY_HOSTED" | "INSTALLATION_SERVICE_HOSTED_ELSEWHERE" | "INSTALLATION_PRODUCT_NOT_ACTIVE" | "INSTALLATION_PRODUCT_ALREADY_HOSTED" | "INSTALLATION_PRODUCT_NOT_HOSTED" | "INSTALLATION_RELEASE_INVALID" | "INSTALLATION_NOT_READY" | "INSTALLATION_GO_LIVE_INVALID" | "INSTALLATION_ITEM_INVALID" | "INSTALLATION_ITEM_ALREADY_ENABLED" | "INSTALLATION_OVERRIDE_REASON_REQUIRED" | "INSTALLATION_ITEM_NOT_FOUND" | "INSTALLATION_SERVICE_NOT_HOSTED" | "INSTALLATION_LAST_SERVICE" | "INSTALLATION_HOST_UNCHANGED" | "INSTALLATION_GO_LIVE_LOCKED" | "CONTRACT_NOT_FOUND" | "CONTRACT_ALREADY_EXISTS" | "CONTRACT_SERVICE_NOT_OPEN" | "CONTRACT_INVALID_TRANSITION" | "CONTRACT_CLOSED" | "CONTRACT_CANCEL_INVALID" | "CONTRACT_TERM_NOT_FOUND" | "CONTRACT_TERM_NOT_EDITABLE" | "CONTRACT_TERM_INVALID" | "CONTRACT_TERM_OVERLAP" | "CONTRACT_TERM_INVALID_TRANSITION" | "CONTRACT_ADJUSTMENT_REASON_REQUIRED" | "CONTRACT_PRICE_CHANGE_REASON_REQUIRED" | "CONTRACT_ONE_OFF_CHARGE_NOT_FOUND" | "CONTRACT_ADD_ON_NOT_FOUND" | "CONTRACT_ADD_ON_ALREADY_EXISTS" | "CONTRACT_ADD_ON_INVALID" | "MANIFEST_REVISION_NOT_FOUND" | "MANIFEST_REVISION_NOT_DRAFT" | "MANIFEST_FORMAT_NOT_HOSTED" | "MANIFEST_RENDER_CONFLICT" | "MANIFEST_RENDER_INVALID" | "MANIFEST_CONTENT_INVALID" | "MANIFEST_REMOVAL_NOT_CONFIRMED" | "MANIFEST_IMPORT_MISMATCH" | "DEPLOYMENT_NOT_FOUND" | "DEPLOYMENT_ALREADY_OPEN" | "DEPLOYMENT_IDEMPOTENCY_CONFLICT" | "DEPLOYMENT_TARGET_MISSING" | "DEPLOYMENT_MANIFEST_REQUIRED" | "DEPLOYMENT_INVALID_TRANSITION" | "DEPLOYMENT_REPORT_INVALID" | "BILLING_SETTINGS_INVALID" | "BILLING_SETTINGS_REQUIRED" | "INVOICE_NOT_FOUND" | "INVOICE_NOT_DRAFT" | "INVOICE_LINE_NOT_FOUND" | "INVOICE_EMPTY" | "INVOICE_TOTAL_NEGATIVE" | "INVOICE_BILLING_CONTACT_MISSING" | "INVOICE_NOT_EMPTY" | "INVOICE_BRAND_INVALID" | "INVOICE_NOT_SENDABLE" | "INVOICE_SEND_FAILED" | "INVOICE_SOURCE_EXCLUSION_NOT_FOUND" | "INVOICE_NOT_VOIDABLE" | "INVOICE_HAS_ALLOCATIONS" | "INVOICE_HAS_CREDIT_NOTES" | "PAYMENT_NOT_FOUND" | "PAYMENT_NOT_RECORDED" | "PAYMENT_ALLOCATION_NOT_FOUND" | "PAYMENT_ALLOCATION_CLIENT_MISMATCH" | "PAYMENT_ALLOCATION_CURRENCY_MISMATCH" | "PAYMENT_ALLOCATION_INVOICE_NOT_OPEN" | "PAYMENT_ALLOCATION_EXCEEDS_BALANCE" | "PAYMENT_ALLOCATION_EXCEEDS_UNALLOCATED" | "PAYMENT_PROOF_INVALID" | "PAYMENT_PROOF_EXISTS" | "PAYMENT_PROOF_NOT_FOUND" | "CREDIT_NOTE_NOT_FOUND" | "CREDIT_NOTE_INVOICE_NOT_OPEN" | "CREDIT_NOTE_EXCEEDS_BALANCE" | "CREDIT_NOTE_SEND_FAILED" | "CLIENT_HAS_UNSETTLED_INVOICES" | "CLIENT_HAS_CREDIT" | "BRAND_HAS_UNSETTLED_INVOICES" | "TELEMETRY_COLLECTED_AT_IN_FUTURE" | "TELEMETRY_INVALID" | "PAYLOAD_TOO_LARGE";
         FeatureDto: {
             /** Format: uuid */
             id: string;
@@ -4286,6 +5033,25 @@ export interface components {
              * @example jane@example.com
              */
             email: string;
+        };
+        HealthCheckDto: {
+            /** @enum {string} */
+            endpoint: "live" | "ready" | "healthz";
+            /**
+             * @description 0 when the endpoint did not answer.
+             * @example 200
+             */
+            status_code: number;
+            /** @example 12 */
+            latency_ms: number;
+        };
+        HealthCheckStateDto: {
+            /** @enum {string} */
+            endpoint: "live" | "ready" | "healthz";
+            /** @example 200 */
+            status_code: number;
+            /** @example 12 */
+            latency_ms: number;
         };
         HostAgentSelfDto: {
             /** Format: uuid */
@@ -4396,6 +5162,60 @@ export interface components {
             content: string;
             /** Format: date-time */
             issued_at: string | null;
+        };
+        HostMetricPointDto: {
+            /** Format: date-time */
+            bucket_start: string;
+            /** @example 15 */
+            samples: number;
+            /** @example 21.4 */
+            cpu_percent_avg: number;
+            /** @example 63 */
+            cpu_percent_max: number;
+            /** @example 3200000000 */
+            memory_used_bytes_avg: number;
+            /** @example 3400000000 */
+            memory_used_bytes_max: number;
+            /** @example 8000000000 */
+            memory_total_bytes: number;
+            /** @example 0.4 */
+            load_1_avg: number;
+            /** @example 1.2 */
+            load_1_max: number;
+            /** @example 41.5 */
+            disk_used_percent_avg: number | null;
+            /** @example 42 */
+            disk_used_percent_max: number | null;
+        };
+        HostMetricSeriesDto: {
+            /** Format: uuid */
+            host_id: string;
+            /** @enum {string} */
+            range: "24h" | "7d";
+            /** Format: date-time */
+            from: string;
+            /** Format: date-time */
+            to: string;
+            /** Format: date-time */
+            last_seen_at: string | null;
+            stale: boolean;
+            /** @description 15-minute buckets, oldest first. */
+            points: components["schemas"]["HostMetricPointDto"][];
+        };
+        HostMetricsDto: {
+            /** @example 23.5 */
+            cpu_percent: number;
+            /** @example 3200000000 */
+            memory_used_bytes: number;
+            /** @example 8000000000 */
+            memory_total_bytes: number;
+            /** @example 0.42 */
+            load_1: number;
+            /** @example 0.38 */
+            load_5: number;
+            /** @example 0.31 */
+            load_15: number;
+            disks: components["schemas"]["DiskDto"][];
         };
         HostMutationResponseDto: {
             /** @example Host created successfully */
@@ -4514,6 +5334,19 @@ export interface components {
             code: string;
             name: string;
         };
+        InstallationRuntimeDto: {
+            /** Format: uuid */
+            installation_id: string;
+            /** @example NOVA-PROD */
+            installation_code: string;
+            host: components["schemas"]["RuntimeHostDto"];
+            /** Format: date-time */
+            reported_at: string | null;
+            /** Format: date-time */
+            backup_last_success_at: string | null;
+            drift: components["schemas"]["RuntimeDriftDto"];
+            components: components["schemas"]["ComponentStateDto"][];
+        };
         InstallationSummaryDto: {
             /** Format: uuid */
             id: string;
@@ -4538,6 +5371,21 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             updated_at: string;
+        };
+        InstallationTelemetryDto: {
+            /** @example NOVA-PROD */
+            installation_code: string;
+            /** @example 1.1.0 */
+            release_lock_version?: Record<string, never> | null;
+            /** @description SHA-256 (lowercase hex) of the manifest on the host. */
+            manifest_sha256?: Record<string, never> | null;
+            /**
+             * Format: date-time
+             * @description Last successful backup on the host.
+             */
+            backup_last_success_at?: string;
+            components: components["schemas"]["ComponentDto"][];
+            deployment_events: components["schemas"]["DeploymentEventDto"][];
         };
         InstallationTransitionDto: {
             /**
@@ -4955,6 +5803,58 @@ export interface components {
              */
             confirm_removed?: string[];
         };
+        LegalEntityDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            client_id: string;
+            /** @example PT Nova Kreasi */
+            name: string;
+            legal_name?: string | null;
+            tax_identifier?: string | null;
+            /** Format: email */
+            email?: string | null;
+            phone?: string | null;
+            address?: string | null;
+            country?: string | null;
+            timezone?: string | null;
+            notes?: string | null;
+            /** @enum {string} */
+            status: "ACTIVE" | "ARCHIVED";
+            /** Format: date-time */
+            status_changed_at: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        LegalEntityLifecycleResponseDto: {
+            /** @example Legal entity created successfully */
+            message: string;
+            /** Format: uuid */
+            legal_entity_id: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "ARCHIVED";
+        };
+        LegalEntityLifecycleTransitionDto: {
+            /**
+             * @example ARCHIVED
+             * @enum {string}
+             */
+            target_status: "ACTIVE" | "ARCHIVED";
+            /** @example Company dissolved */
+            reason: string;
+        };
+        LegalEntityListDto: {
+            /** @description The optional badan hukum of the client. Money never belongs to one: payments, allocations and credit stay with the client. */
+            items: components["schemas"]["LegalEntityDto"][];
+        };
+        LegalEntityMutationResponseDto: {
+            /** @example Legal entity created successfully */
+            message: string;
+            /** Format: uuid */
+            legal_entity_id: string;
+        };
         LinkCapabilityDto: {
             /** Format: uuid */
             capability_id: string;
@@ -5148,6 +6048,37 @@ export interface components {
             entity_id: string;
             code: string;
         };
+        MonitoringEventDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            kind: "COMPONENT_APPEARED" | "COMPONENT_DISAPPEARED" | "COMPONENT_RESTARTED" | "COMPONENT_OOM_KILLED" | "HEALTH_CHANGED" | "DEPLOYMENT_REPORTED" | "DRIFT_CHANGED";
+            /** Format: uuid */
+            host_id: string;
+            /** Format: uuid */
+            installation_id: string | null;
+            /** @example pos-runtime */
+            component: string | null;
+            /** Format: date-time */
+            occurred_at: string;
+            previous_value: string | null;
+            next_value: string | null;
+            detail: {
+                [key: string]: unknown;
+            };
+            external_id: string | null;
+            /** @example host:NOVA-ONPREM-01 */
+            source: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        MoveBrandGroupDto: {
+            /**
+             * Format: uuid
+             * @description The group the brand joins. A brand belongs to exactly one group of its client, so this moves it out of its previous one; the previous group is deleted when it becomes empty.
+             */
+            group_id: string;
+        };
         MoveInstallationHostDto: {
             /**
              * Format: uuid
@@ -5329,6 +6260,15 @@ export interface components {
             method: "BANK_TRANSFER" | "CASH" | "OTHER";
             reference: string | null;
             notes: string | null;
+            /** @description Who paid, when recorded as a contact of the client; informational only and never part of the amounts. */
+            paid_by_contact: components["schemas"]["PaymentPayerContactDto"] | null;
+            /** @description The brand that handled the payment, when recorded. */
+            paid_by_brand: components["schemas"]["PaymentPayerBrandDto"] | null;
+            /**
+             * @description A payer that is not a contact of the client; never combined with paid_by_contact.
+             * @example Investor
+             */
+            paid_by_label: string | null;
             /** @enum {string} */
             status: "RECORDED" | "REVERSED";
             /**
@@ -5346,6 +6286,20 @@ export interface components {
             allocations: components["schemas"]["PaymentAllocationDto"][];
             /** Format: date-time */
             created_at: string;
+        };
+        PaymentPayerBrandDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example SALON */
+            code: string;
+            /** @example Nova Salon */
+            name: string;
+        };
+        PaymentPayerContactDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Budi Santoso */
+            name: string;
         };
         PaymentReasonDto: {
             /** @example Allocated to the wrong invoice */
@@ -5396,6 +6350,11 @@ export interface components {
             is_billing: boolean;
             /** @default false */
             is_technical: boolean;
+            /**
+             * @description Person in charge. A service with no PIC of its own uses the PICs of its brand, then of its group, then of the client.
+             * @default false
+             */
+            is_pic: boolean;
         };
         ProductCapabilityDto: {
             /**
@@ -5504,6 +6463,26 @@ export interface components {
             /** @description Optional body fallback for the CSRF token. Prefer the X-CSRF-Token header with cookie-based refresh. */
             csrf_token?: string;
         };
+        RegistrationLegalEntityDto: {
+            /**
+             * @description Short name of the legal entity; defaults to the display name.
+             * @example PT Nova Kreasi
+             */
+            name?: Record<string, never>;
+            /** @example PT Nova Kreasi Indonesia */
+            legal_name?: string | null;
+            /** @example 01.234.567.8-901.000 */
+            tax_identifier?: string | null;
+            address?: string | null;
+            /** @example Indonesia */
+            country?: string | null;
+            /**
+             * @description IANA zone
+             * @example Asia/Jakarta
+             */
+            timezone?: string | null;
+            notes?: string | null;
+        };
         ReleaseDto: {
             /** Format: uuid */
             id: string;
@@ -5611,6 +6590,25 @@ export interface components {
             role_id: string;
             permissions: string[];
         };
+        RuntimeDriftDto: {
+            /** @enum {string} */
+            status: "IN_SYNC" | "RELEASE_DRIFT" | "MANIFEST_DRIFT" | "BOTH" | "UNKNOWN";
+            /** Format: date-time */
+            checked_at: string | null;
+            /** @example 1.1.0 */
+            reported_release_lock_version: string | null;
+            reported_manifest_sha256: string | null;
+        };
+        RuntimeHostDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example NOVA-ONPREM-01 */
+            code: string;
+            /** Format: date-time */
+            last_seen_at: string | null;
+            /** @description No accepted batch for MONITORING_HOST_STALE_MINUTES (default 5); computed when read. */
+            stale: boolean;
+        };
         SelectedFeatureDto: {
             /** Format: uuid */
             id: string;
@@ -5621,6 +6619,12 @@ export interface components {
             scope: "PRODUCT" | "CLIENT";
             /** @enum {string} */
             status: "DRAFT" | "ACTIVE" | "RETIRED";
+        };
+        ServiceContractRefDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            status: "PENDING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "EXPIRED" | "CANCELLED";
         };
         ServiceLifecycleResponseDto: {
             /** @example Service created successfully */
@@ -5685,6 +6689,13 @@ export interface components {
              */
             permission_slugs: string[];
         };
+        SetServicePicDto: {
+            /**
+             * Format: uuid
+             * @description A contact of the service’s client, or null to leave the PIC to the brand, group or client.
+             */
+            pic_contact_id?: Record<string, never> | null;
+        };
         SetTargetReleaseDto: {
             /**
              * Format: uuid
@@ -5742,6 +6753,48 @@ export interface components {
              * @example null
              */
             valid_until?: string | null;
+        };
+        TelemetryBatchDto: {
+            /**
+             * @example 1
+             * @enum {number}
+             */
+            schema_version: 1;
+            /**
+             * Format: date-time
+             * @description When the agent collected the batch (UTC). More than 5 minutes ahead is refused; older than 48 hours is discarded.
+             */
+            collected_at: string;
+            host: components["schemas"]["HostMetricsDto"];
+            installations: components["schemas"]["InstallationTelemetryDto"][];
+        };
+        TelemetryIngestResultDto: {
+            /**
+             * @description ACCEPTED: stored. DUPLICATE: a batch with this collected_at was already accepted; nothing changed. DISCARDED_TOO_OLD: older than 48 hours; nothing stored.
+             * @enum {string}
+             */
+            outcome: "ACCEPTED" | "DUPLICATE" | "DISCARDED_TOO_OLD";
+            /** Format: date-time */
+            collected_at: string;
+            installations: components["schemas"]["TelemetryItemResultDto"][];
+            /**
+             * @description Monitoring events recorded from this batch.
+             * @example 2
+             */
+            events_recorded: number;
+        };
+        TelemetryItemResultDto: {
+            /** @example NOVA-PROD */
+            installation_code: string;
+            /** @enum {string} */
+            result: "ACCEPTED" | "REJECTED";
+            /**
+             * @description INSTALLATION_NOT_ON_HOST: unknown or on another host (not told apart); DUPLICATE_IN_BATCH: the code came twice.
+             * @enum {string}
+             */
+            reason?: "INSTALLATION_NOT_ON_HOST" | "DUPLICATE_IN_BATCH";
+            /** @enum {string} */
+            drift_status?: "IN_SYNC" | "RELEASE_DRIFT" | "MANIFEST_DRIFT" | "BOTH" | "UNKNOWN";
         };
         TermLifecycleResponseDto: {
             /** @example Contract created successfully */
@@ -5816,6 +6869,11 @@ export interface components {
             /** @example #FFFFFF */
             secondary_color?: string | null;
             name?: string;
+            /**
+             * Format: uuid
+             * @description Set the brand's own legal entity (bill-to). Pass null to fall back to the group default.
+             */
+            legal_entity_id?: Record<string, never> | null;
         };
         UpdateCatalogItemDto: {
             name?: string;
@@ -5832,13 +6890,22 @@ export interface components {
              * @description A brand of the same client, or null for client-level.
              */
             brand_id?: string | null;
+            /**
+             * Format: uuid
+             * @description A group of the same client, or null. Cannot be combined with brand_id.
+             */
+            group_id?: string | null;
             /** @description true makes this contact the primary one (the previous primary loses the flag). The primary contact cannot be set to false; promote another contact instead. */
             is_primary?: boolean;
             is_billing?: boolean;
             is_technical?: boolean;
+            is_pic?: boolean;
         };
         UpdateClientDto: {
-            /** @example PT Nova Kreasi Indonesia */
+            /**
+             * @description The client's own legal name. It is the bill-to of an invoice unless the brand resolves a legal entity of its own.
+             * @example PT Nova Kreasi Indonesia
+             */
             legal_name?: string | null;
             /** @example 01.234.567.8-901.000 */
             tax_identifier?: string | null;
@@ -5897,6 +6964,26 @@ export interface components {
             /** @description Replaces the whole list. */
             urls?: components["schemas"]["InstallationUrlDto"][];
             branding?: components["schemas"]["BrandingDto"];
+        };
+        UpdateLegalEntityDto: {
+            /** @example PT Nova Kreasi Indonesia */
+            legal_name?: string | null;
+            /** @example 01.234.567.8-901.000 */
+            tax_identifier?: string | null;
+            /** Format: email */
+            email?: string | null;
+            /** @example +62215550100 */
+            phone?: string | null;
+            address?: string | null;
+            /** @example Indonesia */
+            country?: string | null;
+            /**
+             * @description IANA zone
+             * @example Asia/Jakarta
+             */
+            timezone?: string | null;
+            notes?: string | null;
+            name?: string;
         };
         UpdateNameDescriptionDto: {
             name?: string;
@@ -7836,6 +8923,199 @@ export interface operations {
             };
         };
     };
+    "ClientGroupController.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientGroupDetailDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "ClientGroupController.remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientGroupMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "ClientGroupController.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClientGroupDetailsDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientGroupMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
     "ClientController.list": {
         parameters: {
             query?: {
@@ -8213,6 +9493,67 @@ export interface operations {
             };
         };
     };
+    "BrandController.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                brandId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BrandDetailDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
     "BrandController.update": {
         parameters: {
             query?: never;
@@ -8269,6 +9610,154 @@ export interface operations {
             };
             /** @description Requested resource was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BrandController.moveGroup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                brandId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveBrandGroupDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BrandGroupMembershipResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "BrandController.startGroup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                brandId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClientGroupDetailsDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["BrandGroupMembershipResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8476,6 +9965,67 @@ export interface operations {
             };
         };
     };
+    "ClientContactController.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                contactId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientContactDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
     "ClientContactController.remove": {
         parameters: {
             query?: never;
@@ -8570,6 +10120,677 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
                         data?: components["schemas"]["ClientContactMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "ClientGroupController.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientGroupListDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "ClientGroupController.create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateClientGroupDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientGroupCreatedResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "ClientGroupController.getInClient": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientGroupDetailDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "ClientGroupController.removeInClient": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientGroupMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "ClientGroupController.updateInClient": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                groupId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClientGroupDetailsDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ClientGroupMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "LegalEntityController.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["LegalEntityListDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "LegalEntityController.create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLegalEntityDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["LegalEntityMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "LegalEntityController.get": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                legalEntityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["LegalEntityDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "LegalEntityController.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                legalEntityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLegalEntityDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["LegalEntityMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "LegalEntityController.transition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                legalEntityId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LegalEntityLifecycleTransitionDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["LegalEntityLifecycleResponseDto"];
                     };
                 };
             };
@@ -9037,6 +11258,80 @@ export interface operations {
             };
         };
     };
+    "ClientServiceController.setPic": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clientId: string;
+                serviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetServicePicDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["ServiceMutationResponseDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request conflicts with the current resource state. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
     "ClientServiceController.transition": {
         parameters: {
             query?: never;
@@ -9194,6 +11489,7 @@ export interface operations {
                 status?: "PENDING" | "TRIAL" | "ACTIVE" | "SUSPENDED" | "EXPIRED" | "CANCELLED";
                 client_id?: string;
                 brand_id?: string;
+                service_id?: string;
                 /** @description Only contracts whose running term ends before this date. */
                 ends_before?: string;
             };
@@ -11098,6 +13394,77 @@ export interface operations {
             };
         };
     };
+    "HostTelemetryController.ingest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelemetryBatchDto"];
+            };
+        };
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["TelemetryIngestResultDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Request failed. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Rate limit exceeded. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
     "HostController.list": {
         parameters: {
             query?: {
@@ -11622,6 +13989,68 @@ export interface operations {
             };
         };
     };
+    "MonitoringController.metrics": {
+        parameters: {
+            query?: {
+                range?: "24h" | "7d";
+            };
+            header?: never;
+            path: {
+                hostId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["HostMetricSeriesDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
     "HostController.transition": {
         parameters: {
             query?: never;
@@ -11704,6 +14133,10 @@ export interface operations {
                 search?: string;
                 host_id?: string;
                 owner_client_id?: string;
+                /** @description Installations hosting at least one service of this brand. */
+                brand_id?: string;
+                /** @description Installations hosting this client service. */
+                service_id?: string;
                 deployment_mode?: "SHARED" | "DEDICATED";
                 environment?: "PRODUCTION" | "STAGING" | "DEVELOPMENT";
                 status?: "PROVISIONING" | "ACTIVE" | "SUSPENDED" | "DECOMMISSIONED";
@@ -12862,6 +15295,66 @@ export interface operations {
             };
             /** @description Request conflicts with the current resource state. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
+    "MonitoringController.runtime": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                installationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request completed successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: components["schemas"]["InstallationRuntimeDto"];
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Requested resource was not found. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -14197,6 +16690,70 @@ export interface operations {
             };
         };
     };
+    "MonitoringController.events": {
+        parameters: {
+            query?: {
+                page?: components["schemas"]["Object"];
+                limit?: components["schemas"]["Object"];
+                /** @description Search keyword */
+                search?: string;
+                installation_id?: string;
+                host_id?: string;
+                kind?: "COMPONENT_APPEARED" | "COMPONENT_DISAPPEARED" | "COMPONENT_RESTARTED" | "COMPONENT_OOM_KILLED" | "HEALTH_CHANGED" | "DEPLOYMENT_REPORTED" | "DRIFT_CHANGED";
+                /** @description occurred_at from (inclusive). */
+                from?: string;
+                /** @description occurred_at before (exclusive). */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page retrieved successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiSuccessEnvelopeDto"] & {
+                        data?: {
+                            items: components["schemas"]["MonitoringEventDto"][];
+                            pagination: components["schemas"]["PaginationDto"];
+                        };
+                    };
+                };
+            };
+            /** @description Invalid request or validation failure. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authentication failed or the session is invalid. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+            /** @description Authenticated but not allowed to perform this operation. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorEnvelopeDto"];
+                };
+            };
+        };
+    };
     "NotificationController.deliveries": {
         parameters: {
             query?: {
@@ -14359,6 +16916,8 @@ export interface operations {
                 client_id?: string;
                 status?: "RECORDED" | "REVERSED";
                 currency?: string;
+                /** @description Only payments whose payer brand is this brand. */
+                paid_by_brand_id?: string;
             };
             header?: never;
             path?: never;

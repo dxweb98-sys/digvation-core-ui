@@ -8,10 +8,10 @@ export function NotFoundPage() {
   return (
     <section className="not-found-page" aria-labelledby="not-found-title">
       <DEmptyState
-        title={<span id="not-found-title">Page not found</span>}
-        description="This page does not exist."
+        title={<span id="not-found-title">Halaman tidak ditemukan</span>}
+        description="Halaman ini tidak ada."
         action={
-          <AppAction tone="secondary" onClick={() => navigate('/')}>Back to start</AppAction>
+          <AppAction tone="secondary" onClick={() => navigate('/')}>Kembali ke awal</AppAction>
         }
       />
     </section>

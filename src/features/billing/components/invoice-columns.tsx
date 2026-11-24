@@ -16,7 +16,7 @@ export function InvoiceStatus({ invoice }: { invoice: Pick<Invoice, 'status' | '
   return (
     <span className="app-page-actions">
       <StatusBadge status={invoice.status} />
-      {invoice.overdue ? <DBadge variant="danger">Overdue</DBadge> : null}
+      {invoice.overdue ? <DBadge variant="danger">Terlambat</DBadge> : null}
     </span>
   );
 }
@@ -27,19 +27,19 @@ export const INVOICE_COLUMNS: TableColumn<Invoice>[] = [
     label: 'Invoice',
     render: (invoice) => (
       <RecordButton>
-        <Identity primary={invoice.number ?? 'Draft'} secondary={`${invoice.client.name} · ${invoice.brand.name}`} />
+        <Identity primary={invoice.number ?? 'Draf'} secondary={`${invoice.client.name} · ${invoice.brand.name}`} />
       </RecordButton>
     ),
   },
   { key: 'status', label: 'Status', render: (invoice) => <InvoiceStatus invoice={invoice} /> },
   {
     key: 'period_start',
-    label: 'Period',
+    label: 'Periode',
     render: (invoice) =>
       invoice.period_start ? `${formatBusinessDate(invoice.period_start)} – ${formatBusinessDate(invoice.period_end)}` : '—',
   },
-  { key: 'issue_date', label: 'Issued', render: (invoice) => formatBusinessDate(invoice.issue_date) },
-  { key: 'due_date', label: 'Due', render: (invoice) => formatBusinessDate(invoice.due_date) },
+  { key: 'issue_date', label: 'Terbit', render: (invoice) => formatBusinessDate(invoice.issue_date) },
+  { key: 'due_date', label: 'Jatuh tempo', render: (invoice) => formatBusinessDate(invoice.due_date) },
   {
     key: 'total',
     label: 'Total',
@@ -48,7 +48,7 @@ export const INVOICE_COLUMNS: TableColumn<Invoice>[] = [
   },
   {
     key: 'balance',
-    label: 'Balance',
+    label: 'Sisa',
     align: 'right',
     render: (invoice) => <span className="app-amount">{formatMoney(invoice.balance, invoice.currency)}</span>,
   },

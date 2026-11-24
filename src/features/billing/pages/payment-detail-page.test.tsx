@@ -48,18 +48,18 @@ describe('payment page', () => {
     });
     renderApp(<PaymentDetailPage />, { path: '/payments/:paymentId', route: '/payments/pay-1' });
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Allocate' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Alokasikan' }));
     const dialog = await screen.findByRole('dialog');
-    fireEvent.click(within(dialog).getByText('Select an option').closest('button')!);
+    fireEvent.click(within(dialog).getByText('Pilih salah satu').closest('button')!);
     fireEvent.click((await screen.findAllByText(/INV\/2026\/11\/00001/)).at(-1)!);
-    const amount = within(dialog).getByRole('textbox', { name: /amount/i });
+    const amount = within(dialog).getByRole('textbox', { name: /jumlah/i });
 
     fireEvent.change(amount, { target: { value: '450.000' } });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Allocate' }));
-    expect(await within(dialog).findByText('More than the invoice balance.')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Alokasikan' }));
+    expect(await within(dialog).findByText('Melebihi sisa invoice.')).toBeInTheDocument();
 
     fireEvent.change(amount, { target: { value: '444.000' } });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Allocate' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Alokasikan' }));
     await waitFor(() => expect(calls.some((call) => call.method === 'POST')).toBe(true));
     expect(calls.find((call) => call.method === 'POST')?.body).toEqual({ invoice_id: 'inv-1', amount: '44400000' });
   });

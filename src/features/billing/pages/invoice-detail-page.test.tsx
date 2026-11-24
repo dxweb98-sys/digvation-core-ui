@@ -65,11 +65,11 @@ describe('invoice page', () => {
     renderApp(<InvoiceDetailPage />, route);
 
     expect(await screen.findByRole('heading', { name: 'INV/2026/11/00001' })).toBeInTheDocument();
-    expect(screen.getByText('Overdue')).toBeInTheDocument();
+    expect(screen.getByText('Terlambat')).toBeInTheDocument();
     expect(screen.getAllByText('Rp 444.000').length).toBeGreaterThan(0);
     expect(screen.getByText('PPN 11%')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Void' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Unduh PDF' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Batalkan' })).not.toBeInTheDocument();
   });
 
   it('downloads the PDF through the API client with the bearer session', async () => {
@@ -83,7 +83,7 @@ describe('invoice page', () => {
     });
     renderApp(<InvoiceDetailPage />, route);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Download PDF' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Unduh PDF' }));
     await waitFor(() => expect(createObjectURL).toHaveBeenCalled());
     expect(calls.some((call) => call.url.endsWith('/invoices/inv-1/pdf'))).toBe(true);
     expect(click).toHaveBeenCalled();
@@ -98,12 +98,12 @@ describe('invoice page', () => {
     });
     renderApp(<InvoiceDetailPage />, route);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Void' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Batalkan' }));
     const dialog = await screen.findByRole('dialog');
     fireEvent.change(within(dialog).getByRole('textbox'), { target: { value: 'Wrong client' } });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Void' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Batalkan' }));
 
-    expect(await within(dialog).findByText('Lepas dulu alokasi pembayaran dari invoice ini.')).toBeInTheDocument();
+    expect(await within(dialog).findByText('Lepas dulu alokasi payment dari invoice ini.')).toBeInTheDocument();
     expect(calls.find((call) => call.url.endsWith('/void'))?.body).toEqual({ reason: 'Wrong client' });
   });
 });

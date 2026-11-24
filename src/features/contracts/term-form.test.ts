@@ -38,7 +38,7 @@ describe('term form', () => {
 
   it('asks for a reason when the agreed price differs from the list price', () => {
     const { fields, values: form } = values({ starts_on: '2026-12-01', agreed_amount: '350000' });
-    expect(validateForm(fields, form).adjustment_reason).toBe('The price differs from the list price; give a reason.');
+    expect(validateForm(fields, form).adjustment_reason).toBe('Harga berbeda dari harga list; berikan alasan.');
     const listed = { ...form, agreed_amount: '400000' };
     expect(validateForm(fields, listed)).toEqual({});
   });
@@ -52,8 +52,8 @@ describe('term form', () => {
       adjustment_type: 'PROMOTIONAL',
     });
     expect(validateForm(fields, form)).toEqual({
-      ends_on: 'The last day must be on or after the first day.',
-      adjustment_reason: 'Give a reason for the adjustment.',
+      ends_on: 'Hari terakhir tidak boleh sebelum hari pertama.',
+      adjustment_reason: 'Berikan alasan penyesuaian.',
     });
   });
 

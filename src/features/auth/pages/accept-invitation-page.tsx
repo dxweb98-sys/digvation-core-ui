@@ -71,23 +71,23 @@ export function AcceptInvitationPage() {
       </DAlert>
     );
   } else if (verification.isPending) {
-    body = <p className="auth-copy" role="status">Checking your invitation…</p>;
+    body = <p className="auth-copy" role="status">Memeriksa undangan Anda…</p>;
   } else if (done) {
-    body = <DAlert variant="success">Your account is ready. Sign in to continue.</DAlert>;
+    body = <DAlert variant="success">Akun Anda sudah siap. Masuk untuk melanjutkan.</DAlert>;
   } else {
     body = (
       <form className="auth-form" id="accept-form" noValidate onSubmit={submit}>
         <p className="auth-copy">
           Invitation for <strong>{verification.data.email}</strong>, valid until {formatInstant(verification.data.expires_at)}.
         </p>
-        <AppInput {...field('fullname')} label="Full name" autoComplete="name" value={fullname} onChange={setFullname} />
+        <AppInput {...field('fullname')} label="Nama lengkap" autoComplete="name" value={fullname} onChange={setFullname} />
         <AppInput {...field('username')} label="Username" autoComplete="username" value={username} onChange={setUsername} />
-        <AppInput label="Phone" optional autoComplete="tel" placeholder="+6281234567890" value={phone} onChange={setPhone} />
-        <AppInput {...field('password')} label="Password" type="password" autoComplete="new-password" hint="At least 12 characters." value={password} onChange={setPassword} />
-        <AppInput {...field('confirm')} label="Confirm password" type="password" autoComplete="new-password" value={confirm} onChange={setConfirm} />
+        <AppInput label="Nomor telepon" optional autoComplete="tel" placeholder="+6281234567890" value={phone} onChange={setPhone} />
+        <AppInput {...field('password')} label="Kata sandi" type="password" autoComplete="new-password" hint="Minimal 12 karakter." value={password} onChange={setPassword} />
+        <AppInput {...field('confirm')} label="Konfirmasi kata sandi" type="password" autoComplete="new-password" value={confirm} onChange={setConfirm} />
         {error ? <p className="auth-error" role="alert">{error}</p> : null}
         <AppAction type="submit" loading={loading}>
-          Create account
+          Buat akun
         </AppAction>
       </form>
     );
@@ -98,11 +98,11 @@ export function AcceptInvitationPage() {
       <section className="auth-card" aria-labelledby="accept-title">
         <div>
           <p className="auth-eyebrow">Digvation Control Center</p>
-          <h1 id="accept-title">Accept invitation</h1>
+          <h1 id="accept-title">Terima undangan</h1>
         </div>
         {body}
         <Link className="auth-link" to="/login">
-          Go to sign in
+          Ke halaman masuk
         </Link>
       </section>
     </main>

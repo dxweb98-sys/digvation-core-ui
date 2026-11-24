@@ -8,7 +8,7 @@ import type { Term } from './contracts-api';
 const CYCLE_OPTIONS = BILLING_CYCLES.map((cycle) => ({ value: cycle, label: labelFor(cycle) }));
 const ADJUSTMENTS = ['NONE', 'PROMOTIONAL', 'NEGOTIATED', 'GRANDFATHERED', 'COMPLIMENTARY'].map((value) => ({
   value,
-  label: value === 'NONE' ? 'No adjustment (list price)' : labelFor(value),
+  label: value === 'NONE' ? 'Tanpa penyesuaian (harga list)' : labelFor(value),
 }));
 
 /** The catalog list price for the chosen billing cycle, as CORE will snapshot it. */
@@ -25,43 +25,43 @@ export function termFields(prices: readonly Price[], cycle: string, renewal?: Te
   return [
     {
       name: 'start_mode',
-      label: 'Starts',
+      label: 'Mulai',
       kind: 'select',
       required: true,
       half: true,
       options: [
-        { value: 'DATE', label: 'On a date' },
-        { value: 'GO_LIVE', label: 'At go-live of the production installation' },
+        { value: 'DATE', label: 'Pada tanggal tertentu' },
+        { value: 'GO_LIVE', label: 'Saat go-live installation production' },
       ],
     },
-    { name: 'starts_on', label: 'First day', kind: 'date', required: true, half: true, visible: (values) => values.start_mode === 'DATE' },
+    { name: 'starts_on', label: 'Hari pertama', kind: 'date', required: true, half: true, visible: (values) => values.start_mode === 'DATE' },
     {
       name: 'end_mode',
-      label: 'Ends',
+      label: 'Berakhir',
       kind: 'select',
       required: true,
       half: true,
       options: [
-        { value: 'DURATION', label: 'After a duration' },
-        { value: 'DATE', label: 'On a date' },
+        { value: 'DURATION', label: 'Setelah jangka waktu' },
+        { value: 'DATE', label: 'Pada tanggal tertentu' },
       ],
       visible: (values) => values.start_mode === 'DATE',
     },
     {
       name: 'ends_on',
-      label: 'Last day',
+      label: 'Hari terakhir',
       kind: 'date',
       required: true,
       half: true,
       visible: (values) => values.start_mode === 'DATE' && values.end_mode === 'DATE',
       validate: (value, values) =>
         typeof value === 'string' && typeof values.starts_on === 'string' && value && values.starts_on && value < values.starts_on
-          ? 'The last day must be on or after the first day.'
+          ? 'Hari terakhir tidak boleh sebelum hari pertama.'
           : undefined,
     },
     {
       name: 'duration_value',
-      label: 'Duration',
+      label: 'Jangka waktu',
       kind: 'integer',
       required: true,
       half: true,
@@ -71,52 +71,52 @@ export function termFields(prices: readonly Price[], cycle: string, renewal?: Te
     },
     {
       name: 'duration_unit',
-      label: 'Unit',
+      label: 'Satuan',
       kind: 'select',
       required: true,
       half: true,
       options: [
-        { value: 'MONTH', label: 'Months' },
-        { value: 'DAY', label: 'Days' },
+        { value: 'MONTH', label: 'Bulan' },
+        { value: 'DAY', label: 'Hari' },
       ],
       visible: (values) => values.start_mode === 'GO_LIVE' || values.end_mode === 'DURATION',
     },
-    { name: 'billing_cycle', label: 'Billing cycle', kind: 'select', required: true, half: true, options: CYCLE_OPTIONS },
+    { name: 'billing_cycle', label: 'Siklus penagihan', kind: 'select', required: true, half: true, options: CYCLE_OPTIONS },
     {
       name: 'agreed_amount',
-      label: cycle === 'PER_TERM' ? 'Agreed price for the term (Rp)' : 'Agreed price per cycle (Rp)',
+      label: cycle === 'PER_TERM' ? 'Harga disepakati untuk term (Rp)' : 'Harga disepakati per siklus (Rp)',
       kind: 'rupiah',
       required: true,
       half: true,
       hint: listPrice
-        ? `List price: ${formatMoney(listPrice.amount, 'IDR')}.`
-        : 'No list price for this cycle; the agreed price stands alone.',
+        ? `Harga list: ${formatMoney(listPrice.amount, 'IDR')}.`
+        : 'Tidak ada harga list untuk siklus ini; harga yang disepakati berlaku sendiri.',
     },
-    { name: 'adjustment_type', label: 'Price adjustment', kind: 'select', required: true, half: true, options: ADJUSTMENTS },
+    { name: 'adjustment_type', label: 'Penyesuaian harga', kind: 'select', required: true, half: true, options: ADJUSTMENTS },
     {
       name: 'adjustment_reason',
-      label: 'Adjustment reason',
+      label: 'Alasan penyesuaian',
       kind: 'textarea',
       maxLength: 500,
       hint: renewal
-        ? 'Required when the price differs from the list price or from the renewal prefill.'
-        : 'Required when the price differs from the list price, or for any adjustment.',
+        ? 'Wajib diisi jika harga berbeda dari harga list atau dari isian otomatis perpanjangan.'
+        : 'Wajib diisi jika harga berbeda dari harga list, atau untuk penyesuaian apa pun.',
       validate: (value, values) => {
         const text = typeof value === 'string' ? value.trim() : '';
         if (text) return undefined;
-        if (values.adjustment_type !== 'NONE') return 'Give a reason for the adjustment.';
+        if (values.adjustment_type !== 'NONE') return 'Berikan alasan penyesuaian.';
         const amount = read.rupiah(values, 'agreed_amount');
         const list = listPriceFor(prices, String(values.billing_cycle));
         if (list && amount !== undefined && rupiahToMinor(amount) !== list.amount) {
-          return 'The price differs from the list price; give a reason.';
+          return 'Harga berbeda dari harga list; berikan alasan.';
         }
         return undefined;
       },
     },
-    { name: 'trial_ends_on', label: 'Trial ends on', kind: 'date', half: true, hint: 'The trial is not billed.' },
-    { name: 'payment_terms_days', label: 'Payment terms (days)', kind: 'integer', required: true, half: true, min: 0, max: 365 },
-    { name: 'planned_renewal_amount', label: 'Planned renewal price (Rp)', kind: 'rupiah', half: true, hint: 'Indicative; used to prefill the renewal.' },
-    { name: 'planned_renewal_cycle', label: 'Planned renewal cycle', kind: 'select', half: true, options: CYCLE_OPTIONS },
+    { name: 'trial_ends_on', label: 'Trial berakhir pada', kind: 'date', half: true, hint: 'Trial tidak ditagih.' },
+    { name: 'payment_terms_days', label: 'Tempo pembayaran (hari)', kind: 'integer', required: true, half: true, min: 0, max: 365 },
+    { name: 'planned_renewal_amount', label: 'Rencana harga perpanjangan (Rp)', kind: 'rupiah', half: true, hint: 'Perkiraan saja; dipakai untuk mengisi otomatis perpanjangan.' },
+    { name: 'planned_renewal_cycle', label: 'Rencana siklus perpanjangan', kind: 'select', half: true, options: CYCLE_OPTIONS },
   ];
 }
 

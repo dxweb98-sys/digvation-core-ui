@@ -22,7 +22,7 @@ export function ServiceContractSection({ service }: { service: Service }) {
     (values: Parameters<typeof contractSettingsBody>[0]) =>
       contractsApi.create({ service_id: service.id, ...contractSettingsBody(values) }),
     {
-      success: 'Contract created',
+      success: 'Contract dibuat',
       invalidate: [contractKeys.all],
       toastErrors: false,
       onSuccess: (result) => navigate(`/contracts/${result.contract_id}`),
@@ -36,14 +36,14 @@ export function ServiceContractSection({ service }: { service: Service }) {
         {(found) =>
           found ? (
             <p className="form-dialog-message">
-              <Link to={`/contracts/${found.id}`}>Open the contract</Link> <StatusBadge status={found.status} />
+              <Link to={`/contracts/${found.id}`}>Buka contract</Link> <StatusBadge status={found.status} />
             </p>
           ) : (
             <div className="app-page-actions">
-              <p className="form-dialog-message">This service has no contract yet, so nothing is billed.</p>
+              <p className="form-dialog-message">Service ini belum punya contract, jadi tidak ada tagihan.</p>
               {can(PERMISSIONS.CONTRACTS_MANAGE) && isOpenService(service.status) ? (
                 <AppAction tone="secondary" size="sm" onClick={() => setCreating(true)}>
-                  Create contract
+                  Buat contract
                 </AppAction>
               ) : null}
             </div>
@@ -52,11 +52,11 @@ export function ServiceContractSection({ service }: { service: Service }) {
       </QueryState>
       <FormDialog
         open={creating}
-        title="Create contract"
-        description="Add terms with the agreed price on the contract page."
+        title="Buat contract"
+        description="Tambahkan term dengan harga yang disepakati di halaman contract."
         fields={CONTRACT_SETTINGS_FIELDS}
         initialValues={contractSettingsValues()}
-        submitLabel="Create contract"
+        submitLabel="Buat contract"
         onSubmit={(values) => create.mutateAsync(values)}
         onClose={() => setCreating(false)}
       />

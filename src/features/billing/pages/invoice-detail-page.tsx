@@ -1,4 +1,4 @@
-import { DAlert, DDataTable, DEmptyState, useToast, type TableColumn } from '@digvation/ui';
+import { DAlert, DDataTable, useToast, type TableColumn } from '@digvation/ui';
 import { Download, Plus, Send } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
@@ -11,7 +11,7 @@ import { ConfirmDialog, FormDialog } from '../../../shared/forms/form-dialog';
 import { read } from '../../../shared/forms/form-spec';
 import { labelFor } from '../../../shared/labels/labels';
 import { AppAction } from '../../../shared/ui/app-action';
-import { Code, Identity, Page, PageHeader, QueryState, Section } from '../../../shared/ui/page';
+import { Code, Identity, Page, PageBreadcrumb, PageHeader, QueryState, Section, StatStrip } from '../../../shared/ui/page';
 import { StatusBadge } from '../../../shared/ui/status-badge';
 import { PERMISSIONS } from '../../auth/permissions';
 import { usePermissions } from '../../auth/use-permissions';
@@ -20,48 +20,38 @@ import { billingKeys, useInvoice } from '../billing-queries';
 import { InvoiceStatus } from '../components/invoice-columns';
 
 const LINE_COLUMNS: TableColumn<InvoiceLine>[] = [
-  {
-    key: 'description',
+  { key: 'description',
     label: 'Item',
     render: (line) => (
       <Identity
         primary={line.description}
-        secondary={
-          line.period_start
+        secondary={ line.period_start
             ? `${labelFor(line.kind)} · ${formatBusinessDate(line.period_start)} – ${formatBusinessDate(line.period_end)}`
             : labelFor(line.kind)
         }
       />
-    ),
-  },
+    ) },
   { key: 'quantity', label: 'Qty', align: 'right' },
-  { key: 'unit_amount', label: 'Unit price', align: 'right', render: (line) => <span className="app-amount">{formatMoney(line.unit_amount)}</span> },
-  { key: 'amount', label: 'Amount', align: 'right', render: (line) => <span className="app-amount">{formatMoney(line.amount)}</span> },
+  { key: 'unit_amount', label: 'Harga satuan', align: 'right', render: (line) => <span className="app-amount">{formatMoney(line.unit_amount)}</span> },
+  { key: 'amount', label: 'Jumlah', align: 'right', render: (line) => <span className="app-amount">{formatMoney(line.amount)}</span> },
 ];
 
-function Totals({ invoice }: { invoice: InvoiceDetail }) {
-  const items = [
+function Totals({ invoice }: { invoice: InvoiceDetail }) { const items = [
     ['Subtotal', invoice.subtotal],
-    [invoice.tax_name ? `${invoice.tax_name} ${(invoice.tax_rate_basis_points ?? 0) / 100}%` : 'Tax', invoice.tax_amount],
+    [invoice.tax_name ? `${invoice.tax_name} ${(invoice.tax_rate_basis_points ?? 0) / 100}%` : 'Pajak', invoice.tax_amount],
     ['Total', invoice.total],
-    ['Paid', invoice.amount_paid],
-    ['Credited', invoice.credited_amount],
-    ['Balance', invoice.balance],
+    ['Dibayar', invoice.amount_paid],
+    ['Dikredit', invoice.credited_amount],
+    ['Sisa', invoice.balance],
   ] as const;
   return (
-    <div className="app-summary">
-      {items.map(([label, amount]) => (
-        <div className="app-summary-item" key={label}>
-          <span>{label}</span>
-          <strong>{formatMoney(amount, invoice.currency)}</strong>
-        </div>
-      ))}
-    </div>
+    <StatStrip
+      items={items.map(([label, amount]) => ({ label, value: formatMoney(amount, invoice.currency) }))}
+    />
   );
 }
 
-function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
-  const navigate = useNavigate();
+function InvoiceView({ invoice }: { invoice: InvoiceDetail }) { const navigate = useNavigate();
   const { showToast } = useToast();
   const { can } = usePermissions();
   const canManage = can(PERMISSIONS.BILLING_MANAGE);
@@ -77,57 +67,41 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
 
   const addLine = useApiMutation(
     (values: Parameters<typeof read.text>[0]) =>
-      billingApi.addLine(invoice.id, {
-        description: read.text(values, 'description'),
+      billingApi.addLine(invoice.id, { description: read.text(values, 'description'),
         quantity: read.integer(values, 'quantity') ?? 1,
         unit_amount: rupiahToMinor(read.rupiah(values, 'unit_amount') ?? 0),
         period_start: read.omit(values, 'period_start'),
-        period_end: read.omit(values, 'period_end'),
-      }),
-    { success: 'Item added', invalidate, toastErrors: false },
+        period_end: read.omit(values, 'period_end') }),
+    { success: 'Item ditambahkan', invalidate, toastErrors: false },
   );
   const removeLine = useApiMutation(
     (input: { lineId: string; reason: string }) => billingApi.removeLine(invoice.id, input.lineId, input.reason),
-    { success: 'Line removed', invalidate, toastErrors: false },
+    { success: 'Item dihapus', invalidate, toastErrors: false },
   );
-  const issue = useApiMutation((reason: string | undefined) => billingApi.issue(invoice.id, reason), {
-    success: (issued) => `Invoice ${issued.number ?? ''} issued`,
+  const issue = useApiMutation((reason: string | undefined) => billingApi.issue(invoice.id, reason), { success: (issued) => `Invoice ${issued.number ?? ''} diterbitkan`,
+    invalidate,
+    toastErrors: false });
+  const send = useApiMutation(() => billingApi.send(invoice.id), { success: (delivery) => `Dikirim ke ${delivery.recipients.join(', ')}`,
+    invalidate });
+  const voidInvoice = useApiMutation((reason: string) => billingApi.void(invoice.id, reason), { success: 'Invoice dibatalkan',
+    invalidate,
+    toastErrors: false });
+  const remove = useApiMutation(() => billingApi.deleteDraft(invoice.id), { success: 'Draf dihapus',
     invalidate,
     toastErrors: false,
-  });
-  const send = useApiMutation(() => billingApi.send(invoice.id), {
-    success: (delivery) => `Sent to ${delivery.recipients.join(', ')}`,
-    invalidate,
-  });
-  const voidInvoice = useApiMutation((reason: string) => billingApi.void(invoice.id, reason), {
-    success: 'Invoice voided',
-    invalidate,
-    toastErrors: false,
-  });
-  const remove = useApiMutation(() => billingApi.deleteDraft(invoice.id), {
-    success: 'Draft deleted',
-    invalidate,
-    toastErrors: false,
-    onSuccess: () => navigate('/invoices'),
-  });
+    onSuccess: () => navigate('/invoices') });
   const credit = useApiMutation(
     (values: Parameters<typeof read.text>[0]) =>
-      billingApi.createCreditNote(invoice.id, {
-        amount: rupiahToMinor(read.rupiah(values, 'amount') ?? 0),
+      billingApi.createCreditNote(invoice.id, { amount: rupiahToMinor(read.rupiah(values, 'amount') ?? 0),
         description: read.text(values, 'description'),
-        reason: read.text(values, 'reason'),
-      }),
-    { success: (note) => `Credit note ${note.number} issued`, invalidate, toastErrors: false },
+        reason: read.text(values, 'reason') }),
+    { success: (note) => `Credit note ${note.number} diterbitkan`, invalidate, toastErrors: false },
   );
 
-  async function downloadPdf() {
-    setDownloading(true);
-    try {
-      saveFile(await billingApi.invoicePdf(invoice.id), documentFileName(invoice.number, invoice.id));
-    } catch (error) {
-      showToast({ title: friendlyErrorMessage(error), description: errorReference(error), variant: 'danger' });
-    } finally {
-      setDownloading(false);
+  async function downloadPdf() { setDownloading(true);
+    try { saveFile(await billingApi.invoicePdf(invoice.id), documentFileName(invoice.number, invoice.id));
+    } catch (error) { showToast({ title: friendlyErrorMessage(error), description: errorReference(error), variant: 'danger' });
+    } finally { setDownloading(false);
     }
   }
 
@@ -136,23 +110,19 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
 
   return (
     <Page>
-      <Link className="app-back-link" to="/invoices">
-        ← Invoices
-      </Link>
+      <PageBreadcrumb trail={[{ label: 'Invoice', to: '/invoices' }, { label: invoice.number ?? 'Draf invoice' }]} />
       <PageHeader
-        title={invoice.number ?? 'Draft invoice'}
-        meta={
-          <>
+        title={invoice.number ?? 'Draf invoice'}
+        meta={ <>
             <Link to={`/clients/${invoice.client.id}?tab=billing`}>{invoice.client.name}</Link>
             <Code>{invoice.brand.code}</Code>
             <InvoiceStatus invoice={invoice} />
           </>
         }
-        actions={
-          <>
+        actions={ <>
             {!draft && invoice.status !== 'VOID' ? (
               <AppAction icon={Download} tone="secondary" loading={downloading} onClick={() => void downloadPdf()}>
-                Download PDF
+                Unduh PDF
               </AppAction>
             ) : null}
             {canManage && open ? (
@@ -161,10 +131,10 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
                   Credit note
                 </AppAction>
                 <AppAction tone="danger-subtle" onClick={() => setVoiding(true)}>
-                  Void
+                  Batalkan
                 </AppAction>
                 <AppAction icon={Send} loading={send.isPending} onClick={() => send.mutate()}>
-                  Send
+                  Kirim
                 </AppAction>
               </>
             ) : null}
@@ -172,31 +142,30 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
               <>
                 {invoice.lines.length === 0 ? (
                   <AppAction tone="danger-subtle" onClick={() => setDeleting(true)}>
-                    Delete draft
+                    Hapus draf
                   </AppAction>
                 ) : null}
                 <AppAction onClick={() => setIssuing(true)} disabled={invoice.lines.length === 0}>
-                  Issue
+                  Terbitkan
                 </AppAction>
               </>
             ) : null}
           </>
         }
       />
-      {invoice.status === 'VOID' ? <DAlert variant="danger">Voided on {formatInstant(invoice.voided_at)}.</DAlert> : null}
-      <Section title="Summary">
+      {invoice.status === 'VOID' ? <DAlert variant="danger">Dibatalkan pada {formatInstant(invoice.voided_at)}.</DAlert> : null}
+      <Section title="Ringkasan">
         <Totals invoice={invoice} />
         <p className="form-dialog-message">
-          {invoice.issue_date ? `Issued ${formatBusinessDate(invoice.issue_date)}, due ${formatBusinessDate(invoice.due_date)}.` : 'Not issued yet.'}
-          {contacts?.length ? ` Billing contacts: ${contacts.map((contact) => contact.email).filter(Boolean).join(', ')}.` : ''}
+          {invoice.issue_date ? `Diterbitkan ${formatBusinessDate(invoice.issue_date)}, jatuh tempo ${formatBusinessDate(invoice.due_date)}.` : 'Belum diterbitkan.'}
+          {contacts?.length ? ` Kontak penagihan: ${contacts.map((contact) => contact.email).filter(Boolean).join(', ')}.` : ''}
         </p>
       </Section>
       <Section
-        title="Lines"
-        actions={
-          canManage && draft ? (
+        title="Item"
+        actions={ canManage && draft ? (
             <AppAction icon={Plus} tone="secondary" size="sm" onClick={() => setAddingLine(true)}>
-              Add item
+              Tambah item
             </AppAction>
           ) : null
         }
@@ -205,17 +174,17 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
           columns={LINE_COLUMNS}
           data={invoice.lines}
           rowKey="id"
-          actions={canManage && draft ? [{ label: 'Remove', variant: 'danger', onClick: setRemoving }] : undefined}
-          emptyMessage={<DEmptyState title="No lines" description="Add an item to bill." />}
+          actions={canManage && draft ? [{ label: 'Hapus', variant: 'danger', onClick: setRemoving }] : undefined}
+          emptyMessage="Belum ada item. Tambahkan item untuk ditagih."
         />
       </Section>
       {invoice.allocations.length > 0 ? (
-        <Section title="Payments allocated">
+        <Section title="Payment dialokasikan">
           <DDataTable
             columns={[
-              { key: 'payment_id', label: 'Payment', render: (item) => <Link to={`/payments/${item.payment_id}`}>Open payment</Link> },
-              { key: 'amount', label: 'Amount', align: 'right', render: (item) => formatMoney(item.amount, invoice.currency) },
-              { key: 'created_at', label: 'Allocated', render: (item) => formatInstant(item.created_at) },
+              { key: 'payment_id', label: 'Payment', render: (item) => <Link to={`/payments/${item.payment_id}`}>Buka payment</Link> },
+              { key: 'amount', label: 'Jumlah', align: 'right', render: (item) => formatMoney(item.amount, invoice.currency) },
+              { key: 'created_at', label: 'Dialokasikan', render: (item) => formatInstant(item.created_at) },
             ]}
             data={invoice.allocations}
             rowKey="id"
@@ -223,12 +192,12 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
         </Section>
       ) : null}
       {invoice.credit_notes.length > 0 ? (
-        <Section title="Credit notes">
+        <Section title="Credit note">
           <DDataTable
             columns={[
-              { key: 'number', label: 'Number', render: (note) => <Code>{note.number}</Code> },
-              { key: 'amount', label: 'Amount', align: 'right', render: (note) => formatMoney(note.amount, invoice.currency) },
-              { key: 'issue_date', label: 'Issued', render: (note) => formatBusinessDate(note.issue_date) },
+              { key: 'number', label: 'Nomor', render: (note) => <Code>{note.number}</Code> },
+              { key: 'amount', label: 'Jumlah', align: 'right', render: (note) => formatMoney(note.amount, invoice.currency) },
+              { key: 'issue_date', label: 'Terbit', render: (note) => formatBusinessDate(note.issue_date) },
             ]}
             data={invoice.credit_notes}
             rowKey="id"
@@ -236,13 +205,13 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
         </Section>
       ) : null}
       {invoice.deliveries.length > 0 ? (
-        <Section title="Send history">
+        <Section title="Riwayat pengiriman">
           <DDataTable
             columns={[
-              { key: 'created_at', label: 'When', render: (item) => formatInstant(item.created_at) },
-              { key: 'status', label: 'Result', render: (item) => <StatusBadge status={item.status} /> },
-              { key: 'recipients', label: 'To', render: (item) => item.recipients.join(', ') },
-              { key: 'error_message', label: 'Error', render: (item) => item.error_message ?? '—' },
+              { key: 'created_at', label: 'Waktu', render: (item) => formatInstant(item.created_at) },
+              { key: 'status', label: 'Hasil', render: (item) => <StatusBadge status={item.status} /> },
+              { key: 'recipients', label: 'Kepada', render: (item) => item.recipients.join(', ') },
+              { key: 'error_message', label: 'Kesalahan', render: (item) => item.error_message ?? '—' },
             ]}
             data={invoice.deliveries}
             rowKey="id"
@@ -252,77 +221,74 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
 
       <FormDialog
         open={addingLine}
-        title="Add item"
-        description="A negative unit price is a discount."
+        title="Tambah item"
+        description="Harga satuan negatif berlaku sebagai diskon."
         fields={[
-          { name: 'description', label: 'Description', required: true, maxLength: 300, placeholder: 'Pelatihan staf (2 sesi)' },
-          { name: 'quantity', label: 'Quantity', kind: 'integer', required: true, half: true, min: 1, max: 100000 },
-          { name: 'unit_amount', label: 'Unit price (Rp)', kind: 'rupiah', required: true, half: true, allowNegative: true },
-          { name: 'period_start', label: 'Period from', kind: 'date', half: true },
-          {
-            name: 'period_end',
-            label: 'Period to',
+          { name: 'description', label: 'Deskripsi', required: true, maxLength: 300, placeholder: 'Pelatihan staf (2 sesi)' },
+          { name: 'quantity', label: 'Jumlah', kind: 'integer', required: true, half: true, min: 1, max: 100000 },
+          { name: 'unit_amount', label: 'Harga satuan (Rp)', kind: 'rupiah', required: true, half: true, allowNegative: true },
+          { name: 'period_start', label: 'Periode mulai', kind: 'date', half: true },
+          { name: 'period_end',
+            label: 'Periode sampai',
             kind: 'date',
             half: true,
             validate: (value, values) =>
-              Boolean(value) !== Boolean(values.period_start) ? 'Give both period dates, or neither.' : undefined,
-          },
+              Boolean(value) !== Boolean(values.period_start) ? 'Isi kedua tanggal periode, atau keduanya kosong.' : undefined },
         ]}
         initialValues={{ quantity: '1' }}
-        submitLabel="Add item"
+        submitLabel="Tambah item"
         onSubmit={(values) => addLine.mutateAsync(values)}
         onClose={() => setAddingLine(false)}
       />
       <ConfirmDialog
         open={removing !== null}
-        title="Remove line"
-        message={
-          removing?.source_key
-            ? `${removing.description} is excluded from billing until restored. CORE keeps the exclusion with your reason.`
-            : `${removing?.description ?? ''} is removed from the draft.`
+        title="Hapus item"
+        message={ removing?.source_key
+            ? `${removing.description} dikecualikan dari billing sampai dipulihkan. CORE menyimpan pengecualian beserta alasannya.`
+            : `${removing?.description ?? ''} dihapus dari draf.`
         }
-        confirmLabel="Remove"
+        confirmLabel="Hapus"
         reason={{}}
         onConfirm={(values) => removeLine.mutateAsync({ lineId: removing!.id, reason: read.text(values, 'reason') })}
         onClose={() => setRemoving(null)}
       />
       <ConfirmDialog
         open={issuing}
-        title="Issue invoice"
-        message={`CORE assigns the number, applies tax and freezes the invoice at ${formatMoney(invoice.subtotal, invoice.currency)} before tax. An issued invoice cannot be edited; it can only be credited or voided.`}
-        confirmLabel="Issue"
+        title="Terbitkan invoice"
+        message={`CORE memberi nomor, menerapkan pajak, dan mengunci invoice di ${formatMoney(invoice.subtotal, invoice.currency)} sebelum pajak. Invoice yang sudah terbit tidak dapat diubah; hanya dapat dikredit atau dibatalkan.`}
+        confirmLabel="Terbitkan"
         tone="primary"
-        reason={{ label: 'Note', required: false }}
+        reason={{ label: 'Catatan', required: false }}
         onConfirm={(values) => issue.mutateAsync(read.omit(values, 'reason'))}
         onClose={() => setIssuing(false)}
       />
       <ConfirmDialog
         open={voiding}
-        title="Void invoice"
-        message="A voided invoice no longer counts. CORE refuses while payments are allocated to it or credit notes exist."
-        confirmLabel="Void"
+        title="Batalkan invoice"
+        message="Invoice yang dibatalkan tidak lagi dihitung. CORE menolak selama masih ada payment yang dialokasikan atau credit note pada invoice ini."
+        confirmLabel="Batalkan"
         reason={{}}
         onConfirm={(values) => voidInvoice.mutateAsync(read.text(values, 'reason'))}
         onClose={() => setVoiding(false)}
       />
       <ConfirmDialog
         open={deleting}
-        title="Delete draft"
-        message="The empty draft is deleted."
-        confirmLabel="Delete"
+        title="Hapus draf"
+        message="Draf kosong akan dihapus."
+        confirmLabel="Hapus"
         onConfirm={() => remove.mutateAsync(undefined)}
         onClose={() => setDeleting(false)}
       />
       <FormDialog
         open={crediting}
-        title="Issue credit note"
-        description={`Reduces what the client owes. At most the balance, ${formatMoney(invoice.balance, invoice.currency)}, tax included.`}
+        title="Terbitkan credit note"
+        description={`Mengurangi tagihan client. Maksimal sebesar sisa, ${formatMoney(invoice.balance, invoice.currency)}, termasuk pajak.`}
         fields={[
-          { name: 'amount', label: 'Amount credited (Rp)', kind: 'rupiah', required: true, min: 1 },
-          { name: 'description', label: 'Description', required: true, maxLength: 500, placeholder: 'Koreksi harga paket' },
-          { name: 'reason', label: 'Reason', kind: 'textarea', required: true, maxLength: 500 },
+          { name: 'amount', label: 'Jumlah kredit (Rp)', kind: 'rupiah', required: true, min: 1 },
+          { name: 'description', label: 'Deskripsi', required: true, maxLength: 500, placeholder: 'Koreksi harga paket' },
+          { name: 'reason', label: 'Alasan', kind: 'textarea', required: true, maxLength: 500 },
         ]}
-        submitLabel="Issue credit note"
+        submitLabel="Terbitkan credit note"
         onSubmit={(values) => credit.mutateAsync(values)}
         onClose={() => setCrediting(false)}
       />
@@ -330,8 +296,7 @@ function InvoiceView({ invoice }: { invoice: InvoiceDetail }) {
   );
 }
 
-export function InvoiceDetailPage() {
-  const { invoiceId = '' } = useParams();
+export function InvoiceDetailPage() { const { invoiceId = '' } = useParams();
   const invoice = useInvoice(invoiceId);
   return <QueryState query={invoice} label="invoice">{(data) => <InvoiceView invoice={data} />}</QueryState>;
 }

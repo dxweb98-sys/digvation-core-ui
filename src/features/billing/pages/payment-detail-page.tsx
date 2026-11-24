@@ -1,4 +1,4 @@
-import { DAlert, DDataTable, DEmptyState, useToast, type TableColumn } from '@digvation/ui';
+import { DAlert, DDataTable, useToast, type TableColumn } from '@digvation/ui';
 import { Download, Plus, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
@@ -11,8 +11,7 @@ import { ConfirmDialog, FormDialog } from '../../../shared/forms/form-dialog';
 import { read } from '../../../shared/forms/form-spec';
 import { labelFor } from '../../../shared/labels/labels';
 import { AppAction } from '../../../shared/ui/app-action';
-import { DetailItem, DetailList } from '../../../shared/ui/app-dialog';
-import { Code, Page, PageHeader, QueryState, Section } from '../../../shared/ui/page';
+import { Code, FieldGrid, Page, PageBreadcrumb, PageHeader, QueryState, Section, StatStrip } from '../../../shared/ui/page';
 import { StatusBadge } from '../../../shared/ui/status-badge';
 import { PERMISSIONS } from '../../auth/permissions';
 import { usePermissions } from '../../auth/use-permissions';
@@ -23,8 +22,7 @@ import { proofProblem } from '../payment-rules';
 const proofExtension = (contentType: string | null) =>
   contentType === 'application/pdf' ? 'pdf' : contentType === 'image/png' ? 'png' : 'jpg';
 
-function PaymentView({ payment }: { payment: Payment }) {
-  const { showToast } = useToast();
+function PaymentView({ payment }: { payment: Payment }) { const { showToast } = useToast();
   const { can } = usePermissions();
   const canManage = can(PERMISSIONS.PAYMENTS_MANAGE);
   const recorded = payment.status === 'RECORDED';
@@ -37,106 +35,88 @@ function PaymentView({ payment }: { payment: Payment }) {
 
   const allocate = useApiMutation(
     (input: { invoice_id: string; amount: string }) => billingApi.allocate(payment.id, input),
-    { success: 'Payment allocated', invalidate, toastErrors: false },
+    { success: 'Payment dialokasikan', invalidate, toastErrors: false },
   );
   const release = useApiMutation(
     (input: { allocationId: string; reason: string }) => billingApi.release(payment.id, input.allocationId, input.reason),
-    { success: 'Allocation released', invalidate, toastErrors: false },
+    { success: 'Alokasi dilepas', invalidate, toastErrors: false },
   );
-  const reverse = useApiMutation((reason: string) => billingApi.reverse(payment.id, reason), {
-    success: 'Payment reversed',
+  const reverse = useApiMutation((reason: string) => billingApi.reverse(payment.id, reason), { success: 'Payment dibalik',
     invalidate,
-    toastErrors: false,
-  });
-  const upload = useApiMutation((file: File) => billingApi.uploadProof(payment.id, file), {
-    success: 'Proof attached',
+    toastErrors: false });
+  const upload = useApiMutation((file: File) => billingApi.uploadProof(payment.id, file), { success: 'Bukti transfer dilampirkan',
     invalidate,
-    toastErrors: false,
-  });
+    toastErrors: false });
 
-  async function downloadProof() {
-    try {
-      saveFile(await billingApi.proof(payment.id), `payment-proof-${payment.id.slice(0, 8)}.${proofExtension(payment.proof_content_type)}`);
-    } catch (error) {
-      showToast({ title: friendlyErrorMessage(error), description: errorReference(error), variant: 'danger' });
+  async function downloadProof() { try { saveFile(await billingApi.proof(payment.id), `payment-proof-${payment.id.slice(0, 8)}.${proofExtension(payment.proof_content_type)}`);
+    } catch (error) { showToast({ title: friendlyErrorMessage(error), description: errorReference(error), variant: 'danger' });
     }
   }
 
   const openInvoices = (invoices.data?.items ?? []).filter((invoice) => isOpenInvoice(invoice.status));
   const columns: TableColumn<PaymentAllocation>[] = [
-    {
-      key: 'invoice',
+    { key: 'invoice',
       label: 'Invoice',
-      render: (item) => <Link to={`/invoices/${item.invoice.id}`}>{item.invoice.number ?? 'Invoice'}</Link>,
-    },
-    { key: 'amount', label: 'Amount', align: 'right', render: (item) => <span className="app-amount">{formatMoney(item.amount, payment.currency)}</span> },
-    { key: 'created_at', label: 'Allocated', render: (item) => formatInstant(item.created_at) },
-    { key: 'released_at', label: 'Released', render: (item) => (item.released_at ? formatInstant(item.released_at) : '—') },
+      render: (item) => <Link to={`/invoices/${item.invoice.id}`}>{item.invoice.number ?? 'Invoice'}</Link> },
+    { key: 'amount', label: 'Jumlah', align: 'right', render: (item) => <span className="app-amount">{formatMoney(item.amount, payment.currency)}</span> },
+    { key: 'created_at', label: 'Dialokasikan', render: (item) => formatInstant(item.created_at) },
+    { key: 'released_at', label: 'Dilepas', render: (item) => (item.released_at ? formatInstant(item.released_at) : '—') },
   ];
 
   return (
     <Page>
-      <Link className="app-back-link" to="/payments">
-        ← Payments
-      </Link>
+      <PageBreadcrumb trail={[{ label: 'Payments', to: '/payments' }, { label: formatMoney(payment.amount, payment.currency) }]} />
       <PageHeader
-        title={`${formatMoney(payment.amount, payment.currency)} from ${payment.client.name}`}
-        meta={
-          <>
+        title={`${formatMoney(payment.amount, payment.currency)} dari ${payment.client.name}`}
+        meta={ <>
             <Code>{payment.client.code}</Code>
             <StatusBadge status={payment.status} />
           </>
         }
-        actions={
-          <>
+        actions={ <>
             {payment.has_proof ? (
               <AppAction icon={Download} tone="secondary" onClick={() => void downloadProof()}>
-                Download proof
+                Unduh bukti
               </AppAction>
             ) : null}
             {canManage && recorded && !payment.has_proof ? (
               <AppAction icon={Upload} tone="secondary" onClick={() => setUploading(true)}>
-                Attach proof
+                Lampirkan bukti
               </AppAction>
             ) : null}
             {canManage && recorded ? (
               <AppAction tone="danger-subtle" onClick={() => setReversing(true)}>
-                Reverse
+                Balikkan
               </AppAction>
             ) : null}
           </>
         }
       />
       {payment.status === 'REVERSED' ? (
-        <DAlert variant="danger">Reversed on {formatInstant(payment.reversed_at)}. Its allocations were released.</DAlert>
+        <DAlert variant="danger">Dibalik pada {formatInstant(payment.reversed_at)}. Semua alokasinya telah dilepas.</DAlert>
       ) : null}
       <Section title="Payment">
-        <div className="app-summary">
-          <div className="app-summary-item">
-            <span>Received</span>
-            <strong>{formatMoney(payment.amount, payment.currency)}</strong>
-          </div>
-          <div className="app-summary-item">
-            <span>Unallocated (client credit)</span>
-            <strong>{formatMoney(payment.unallocated, payment.currency)}</strong>
-          </div>
-        </div>
-        <DetailList>
-          <DetailItem label="Received on">{formatBusinessDate(payment.received_at)}</DetailItem>
-          <DetailItem label="Method">{labelFor(payment.method)}</DetailItem>
-          <DetailItem label="Reference">{payment.reference}</DetailItem>
-          <DetailItem label="Proof">{payment.has_proof ? 'Attached' : undefined}</DetailItem>
-          <DetailItem label="Notes" wide>
-            {payment.notes}
-          </DetailItem>
-        </DetailList>
+        <StatStrip
+          items={[
+            { label: 'Diterima', value: formatMoney(payment.amount, payment.currency) },
+            { label: 'Kredit belum dipakai', value: formatMoney(payment.unallocated, payment.currency) },
+          ]}
+        />
+        <FieldGrid
+          items={[
+            { label: 'Diterima pada', value: formatBusinessDate(payment.received_at) },
+            { label: 'Metode', value: labelFor(payment.method) },
+            { label: 'Referensi', value: payment.reference },
+            { label: 'Bukti transfer', value: payment.has_proof ? 'Terlampir' : undefined },
+            { label: 'Catatan', value: payment.notes },
+          ]}
+        />
       </Section>
       <Section
-        title="Allocations"
-        actions={
-          canManage && recorded && payment.unallocated !== '0' ? (
+        title="Alokasi"
+        actions={ canManage && recorded && payment.unallocated !== '0' ? (
             <AppAction icon={Plus} tone="secondary" size="sm" onClick={() => setAllocating(true)}>
-              Allocate
+              Alokasikan
             </AppAction>
           ) : null
         }
@@ -145,89 +125,77 @@ function PaymentView({ payment }: { payment: Payment }) {
           columns={columns}
           data={payment.allocations}
           rowKey="id"
-          actions={
-            canManage && recorded
-              ? [{ label: 'Release', variant: 'danger', show: (item: PaymentAllocation) => !item.released_at, onClick: setReleasing }]
+          actions={ canManage && recorded
+              ? [{ label: 'Lepas', variant: 'danger', show: (item: PaymentAllocation) => !item.released_at, onClick: setReleasing }]
               : undefined
           }
-          emptyMessage={<DEmptyState title="Not allocated" description="Allocate the payment to the invoices it pays." />}
+          emptyMessage="Belum ada alokasi. Alokasikan payment ke invoice yang dibayarnya."
         />
       </Section>
 
       <FormDialog
         open={allocating}
-        title="Allocate payment"
-        description={`${formatMoney(payment.unallocated, payment.currency)} is left to allocate.`}
+        title="Alokasikan payment"
+        description={`${formatMoney(payment.unallocated, payment.currency)} masih dapat dialokasikan.`}
         fields={[
-          {
-            name: 'invoice_id',
+          { name: 'invoice_id',
             label: 'Invoice',
             kind: 'select',
             required: true,
-            options: openInvoices.map((invoice) => ({
-              value: invoice.id,
-              label: `${invoice.number} · ${invoice.brand.name} · balance ${formatMoney(invoice.balance, invoice.currency)}`,
-            })),
-            hint: openInvoices.length === 0 ? 'The client has no issued invoice waiting for payment.' : undefined,
-          },
-          {
-            name: 'amount',
-            label: 'Amount (Rp)',
+            options: openInvoices.map((invoice) => ({ value: invoice.id,
+              label: `${invoice.number} · ${invoice.brand.name} · sisa ${formatMoney(invoice.balance, invoice.currency)}` })),
+            hint: openInvoices.length === 0 ? 'Client ini tidak punya invoice terbit yang menunggu payment.' : undefined },
+          { name: 'amount',
+            label: 'Jumlah (Rp)',
             kind: 'rupiah',
             required: true,
             min: 1,
-            validate: (value, values) => {
-              const amount = read.rupiah(values, 'amount');
+            validate: (value, values) => { const amount = read.rupiah(values, 'amount');
               if (amount === undefined || !value) return undefined;
-              if (amount > minorToRupiah(payment.unallocated)) return 'More than what is left of the payment.';
+              if (amount > minorToRupiah(payment.unallocated)) return 'Melebihi sisa payment.';
               const invoice = openInvoices.find((item) => item.id === values.invoice_id);
-              if (invoice && amount > minorToRupiah(invoice.balance)) return 'More than the invoice balance.';
+              if (invoice && amount > minorToRupiah(invoice.balance)) return 'Melebihi sisa invoice.';
               return undefined;
-            },
-          },
+            } },
         ]}
-        submitLabel="Allocate"
+        submitLabel="Alokasikan"
         onSubmit={(values) =>
-          allocate.mutateAsync({
-            invoice_id: read.text(values, 'invoice_id'),
-            amount: rupiahToMinor(read.rupiah(values, 'amount') ?? 0),
-          })
+          allocate.mutateAsync({ invoice_id: read.text(values, 'invoice_id'),
+            amount: rupiahToMinor(read.rupiah(values, 'amount') ?? 0) })
         }
         onClose={() => setAllocating(false)}
       />
       <ConfirmDialog
         open={releasing !== null}
-        title="Release allocation"
-        message={`${formatMoney(releasing?.amount, payment.currency)} goes back to client credit and ${releasing?.invoice.number ?? 'the invoice'} owes it again.`}
-        confirmLabel="Release"
+        title="Lepas alokasi"
+        message={`${formatMoney(releasing?.amount, payment.currency)} kembali menjadi kredit client, dan ${releasing?.invoice.number ?? 'invoice'} menagihnya lagi.`}
+        confirmLabel="Lepas"
         reason={{}}
         onConfirm={(values) => release.mutateAsync({ allocationId: releasing!.id, reason: read.text(values, 'reason') })}
         onClose={() => setReleasing(null)}
       />
       <ConfirmDialog
         open={reversing}
-        title="Reverse payment"
-        message="Use this for a payment recorded by mistake. Every allocation is released and the payment no longer counts. This cannot be undone."
-        confirmLabel="Reverse"
+        title="Balikkan payment"
+        message="Gunakan untuk payment yang salah dicatat. Semua alokasi akan dilepas dan payment tidak lagi dihitung. Tindakan ini tidak dapat dibatalkan."
+        confirmLabel="Balikkan"
         reason={{}}
         onConfirm={(values) => reverse.mutateAsync(read.text(values, 'reason'))}
         onClose={() => setReversing(false)}
       />
       <FormDialog
         open={uploading}
-        title="Attach proof"
-        description="A PDF, JPG or PNG of at most 5 MB. A proof can be attached once."
+        title="Lampirkan bukti transfer"
+        description="Berkas PDF, JPG, atau PNG maksimal 5 MB. Bukti hanya dapat dilampirkan sekali."
         fields={[
-          {
-            name: 'file',
-            label: 'Proof file',
+          { name: 'file',
+            label: 'Berkas bukti',
             kind: 'file',
             required: true,
             accept: 'application/pdf,image/jpeg,image/png',
-            validate: (value) => proofProblem(value instanceof File ? value : null),
-          },
+            validate: (value) => proofProblem(value instanceof File ? value : null) },
         ]}
-        submitLabel="Attach proof"
+        submitLabel="Lampirkan bukti"
         onSubmit={(values) => upload.mutateAsync(read.file(values, 'file')!)}
         onClose={() => setUploading(false)}
       />
@@ -235,8 +203,7 @@ function PaymentView({ payment }: { payment: Payment }) {
   );
 }
 
-export function PaymentDetailPage() {
-  const { paymentId = '' } = useParams();
+export function PaymentDetailPage() { const { paymentId = '' } = useParams();
   const payment = usePayment(paymentId);
   return <QueryState query={payment} label="payment">{(data) => <PaymentView payment={data} />}</QueryState>;
 }

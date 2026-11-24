@@ -51,15 +51,15 @@ describe('users page', () => {
     renderApp(<UsersPage />);
 
     await openRowActions(0);
-    fireEvent.click(await screen.findByText('Deactivate'));
+    fireEvent.click(await screen.findByText('Nonaktifkan'));
 
     const dialog = await screen.findByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Deactivate' }));
-    expect(await within(dialog).findByText('This field is required.')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Nonaktifkan' }));
+    expect(await within(dialog).findByText('Isi kolom ini.')).toBeInTheDocument();
     expect(calls.some((call) => call.method === 'PATCH')).toBe(false);
 
     fireEvent.change(within(dialog).getByRole('textbox'), { target: { value: 'Left the company' } });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Deactivate' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Nonaktifkan' }));
 
     expect(await within(dialog).findByText(/minimal satu Super Admin/)).toBeInTheDocument();
     const write = calls.find((call) => call.method === 'PATCH');

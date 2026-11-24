@@ -14,6 +14,7 @@ import { CatalogItemsPage } from '../../features/catalog/pages/catalog-items-pag
 import { ProductDetailPage } from '../../features/catalog/pages/product-detail-page';
 import { ProductListPage } from '../../features/catalog/pages/product-list-page';
 import { ClientDetailPage } from '../../features/clients/pages/client-detail-page';
+import { BrandDetailPage } from '../../features/clients/pages/brand-detail-page';
 import { ClientListPage } from '../../features/clients/pages/client-list-page';
 import { ServiceDetailPage } from '../../features/services/pages/service-detail-page';
 import { ServiceListPage } from '../../features/services/pages/service-list-page';
@@ -45,6 +46,7 @@ export const applicationRoutes: RouteObject[] = [
       { path: 'profile', element: <ProfilePage /> },
       { path: 'clients', element: <ClientListPage /> },
       { path: 'clients/:clientId', element: <ClientDetailPage /> },
+      { path: 'clients/:clientId/brands/:brandId', element: <BrandDetailPage /> },
       { path: 'clients/:clientId/services/:serviceId', element: <ServiceDetailPage /> },
       { path: 'services', element: <ServiceListPage /> },
       { path: 'contracts', element: <ContractListPage /> },

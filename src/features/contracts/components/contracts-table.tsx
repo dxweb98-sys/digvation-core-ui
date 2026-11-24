@@ -32,7 +32,7 @@ export const CONTRACT_COLUMNS: TableColumn<Contract>[] = [
   { key: 'status', label: 'Status', render: (contract) => <StatusBadge status={contract.status} /> },
   {
     key: 'terms',
-    label: 'Current term',
+    label: 'Term berjalan',
     render: (contract) => {
       const term = currentTerm(contract);
       return term ? `${formatBusinessDate(term.starts_on)} – ${formatBusinessDate(term.ends_on)}` : '—';
@@ -40,7 +40,7 @@ export const CONTRACT_COLUMNS: TableColumn<Contract>[] = [
   },
   {
     key: 'agreed',
-    label: 'Agreed',
+    label: 'Disepakati',
     align: 'right',
     render: (contract) => {
       const term = currentTerm(contract);
@@ -53,5 +53,5 @@ export const CONTRACT_COLUMNS: TableColumn<Contract>[] = [
       );
     },
   },
-  { key: 'contract_reference', label: 'Reference', render: (contract) => contract.contract_reference ?? '—' },
+  { key: 'contract_reference', label: 'Referensi', render: (contract) => contract.contract_reference ?? '—' },
 ];

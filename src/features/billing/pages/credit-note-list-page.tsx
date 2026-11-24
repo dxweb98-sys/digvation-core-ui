@@ -1,4 +1,4 @@
-import { DDataTable, DEmptyState, useToast, type TableColumn } from '@digvation/ui';
+import { DDataTable, useToast, type TableColumn } from '@digvation/ui';
 import { Link } from 'react-router';
 import { errorReference, friendlyErrorMessage } from '../../../shared/api/error-messages';
 import { documentFileName, saveFile } from '../../../shared/api/save-file';
@@ -14,42 +14,32 @@ import { billingKeys, useCreditNotes } from '../billing-queries';
 
 const COLUMNS: TableColumn<CreditNote>[] = [
   { key: 'number', label: 'Credit note', render: (note) => <Identity primary={<Code>{note.number}</Code>} secondary={note.description} /> },
-  {
-    key: 'invoice',
+  { key: 'invoice',
     label: 'Invoice',
-    render: (note) => <Link to={`/invoices/${note.invoice.id}`}>{note.invoice.number ?? 'Invoice'}</Link>,
-  },
-  { key: 'issue_date', label: 'Issued', render: (note) => formatBusinessDate(note.issue_date) },
-  { key: 'amount', label: 'Amount', align: 'right', render: (note) => <span className="app-amount">{formatMoney(note.amount, note.currency)}</span> },
-  { key: 'reason', label: 'Reason' },
-  {
-    key: 'deliveries',
-    label: 'Sent',
-    render: (note) => (note.deliveries.some((delivery) => delivery.status === 'SENT') ? 'Yes' : 'No'),
-  },
+    render: (note) => <Link to={`/invoices/${note.invoice.id}`}>{note.invoice.number ?? 'Invoice'}</Link> },
+  { key: 'issue_date', label: 'Terbit', render: (note) => formatBusinessDate(note.issue_date) },
+  { key: 'amount', label: 'Jumlah', align: 'right', render: (note) => <span className="app-amount">{formatMoney(note.amount, note.currency)}</span> },
+  { key: 'reason', label: 'Alasan' },
+  { key: 'deliveries',
+    label: 'Terkirim',
+    render: (note) => (note.deliveries.some((delivery) => delivery.status === 'SENT') ? 'Ya' : 'Tidak') },
 ];
 
-export function CreditNoteListPage() {
-  const list = useListState();
+export function CreditNoteListPage() { const list = useListState();
   const notes = useCreditNotes(list.query);
   const { can } = usePermissions();
   const { showToast } = useToast();
-  const send = useApiMutation((note: CreditNote) => billingApi.sendCreditNote(note.id), {
-    success: 'Credit note sent',
-    invalidate: [billingKeys.all],
-  });
+  const send = useApiMutation((note: CreditNote) => billingApi.sendCreditNote(note.id), { success: 'Credit note terkirim',
+    invalidate: [billingKeys.all] });
 
-  async function download(note: CreditNote) {
-    try {
-      saveFile(await billingApi.creditNotePdf(note.id), documentFileName(note.number, note.id));
-    } catch (error) {
-      showToast({ title: friendlyErrorMessage(error), description: errorReference(error), variant: 'danger' });
+  async function download(note: CreditNote) { try { saveFile(await billingApi.creditNotePdf(note.id), documentFileName(note.number, note.id));
+    } catch (error) { showToast({ title: friendlyErrorMessage(error), description: errorReference(error), variant: 'danger' });
     }
   }
 
   return (
     <Page>
-      <PageHeader title="Credit notes" description="Reductions of issued invoices. Issue a credit note from its invoice." />
+      <PageHeader title="Credit note" description="Pengurang invoice yang sudah terbit. Terbitkan credit note dari invoice-nya." />
       <QueryState query={notes} label="credit notes">
         {(page) => (
           <DDataTable
@@ -57,14 +47,14 @@ export function CreditNoteListPage() {
             data={page.items}
             rowKey="id"
             searchable
-            searchPlaceholder="Search number or invoice"
+            searchPlaceholder="Cari nomor atau invoice"
             {...list.tableProps}
             pagination={{ page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }}
             actions={[
-              { label: 'Download PDF', onClick: (note) => void download(note) },
-              ...(can(PERMISSIONS.BILLING_MANAGE) ? [{ label: 'Send', onClick: (note: CreditNote) => send.mutate(note) }] : []),
+              { label: 'Unduh PDF', onClick: (note) => void download(note) },
+              ...(can(PERMISSIONS.BILLING_MANAGE) ? [{ label: 'Kirim', onClick: (note: CreditNote) => send.mutate(note) }] : []),
             ]}
-            emptyMessage={<DEmptyState title="No credit notes" description="Credit notes appear here once issued." />}
+            emptyMessage="Belum ada credit note. Credit note muncul di sini setelah diterbitkan."
           />
         )}
       </QueryState>

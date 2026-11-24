@@ -11,9 +11,9 @@ describe('catalog lifecycle (core-v2 catalog.lifecycle.ts)', () => {
   });
 
   it('names each move as an action', () => {
-    expect(targetLabel('RELEASED')).toBe('Release');
-    expect(targetLabel('WITHDRAWN')).toBe('Withdraw');
-    expect(targetLabel('RETIRED')).toBe('Retire');
-    expect(targetLabel('DRAFT')).toBe('Return to draft');
+    expect(targetLabel('RELEASED')).toBe('Rilis');
+    expect(targetLabel('WITHDRAWN')).toBe('Tarik');
+    expect(targetLabel('RETIRED')).toBe('Pensiunkan');
+    expect(targetLabel('DRAFT')).toBe('Kembalikan ke draf');
   });
 });

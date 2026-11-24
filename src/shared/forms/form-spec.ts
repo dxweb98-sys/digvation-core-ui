@@ -66,50 +66,50 @@ export function validateForm(fields: readonly FieldSpec[], values: FormValues) {
     const value = values[field.name];
     const kind = field.kind ?? 'text';
     if (field.required && kind !== 'toggle' && isEmpty(value)) {
-      errors[field.name] = kind === 'select' || kind === 'checklist' ? 'Choose an option.' : 'This field is required.';
+      errors[field.name] = kind === 'select' || kind === 'checklist' ? 'Pilih salah satu.' : 'Isi kolom ini.';
       continue;
     }
     if (!isEmpty(value) && typeof value === 'string') {
       const text = value.trim();
       if (field.maxLength && text.length > field.maxLength) {
-        errors[field.name] = `Use at most ${field.maxLength} characters.`;
+        errors[field.name] = `Maksimal ${field.maxLength} karakter.`;
         continue;
       }
       if (kind === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)) {
-        errors[field.name] = 'Enter a valid email address.';
+        errors[field.name] = 'Format email tidak valid.';
         continue;
       }
       if (kind === 'date' && !isCalendarDate(text)) {
-        errors[field.name] = 'Use a date in the format YYYY-MM-DD.';
+        errors[field.name] = 'Gunakan format tanggal YYYY-MM-DD.';
         continue;
       }
       if (kind === 'integer') {
         const number = Number(text);
         if (!/^-?\d+$/.test(text) || !Number.isSafeInteger(number)) {
-          errors[field.name] = 'Enter a whole number.';
+          errors[field.name] = 'Isi dengan angka bulat.';
           continue;
         }
         if (field.min !== undefined && number < field.min) {
-          errors[field.name] = `Enter ${field.min} or more.`;
+          errors[field.name] = `Minimal ${field.min}.`;
           continue;
         }
         if (field.max !== undefined && number > field.max) {
-          errors[field.name] = `Enter ${field.max} or less.`;
+          errors[field.name] = `Maksimal ${field.max}.`;
           continue;
         }
       }
       if (kind === 'rupiah') {
         const rupiah = parseRupiahInput(text);
         if (rupiah === undefined) {
-          errors[field.name] = 'Enter a whole rupiah amount.';
+          errors[field.name] = 'Isi dengan jumlah rupiah utuh.';
           continue;
         }
         if (rupiah < 0 && !field.allowNegative) {
-          errors[field.name] = 'Enter an amount of 0 or more.';
+          errors[field.name] = 'Isi jumlah 0 atau lebih.';
           continue;
         }
         if (field.min !== undefined && rupiah < field.min) {
-          errors[field.name] = `Enter at least Rp ${field.min.toLocaleString('id-ID')}.`;
+          errors[field.name] = `Minimal Rp ${field.min.toLocaleString('id-ID')}.`;
           continue;
         }
       }

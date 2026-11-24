@@ -5,22 +5,22 @@ import type { BillingSettings, TaxRate } from './billing-api';
 const PATTERN_RULE = (value: unknown) => {
   if (typeof value !== 'string' || !value.trim()) return undefined;
   const sequences = value.match(/\{SEQ:\d+\}/g) ?? [];
-  if (sequences.length !== 1) return 'Use exactly one {SEQ:n} token.';
+  if (sequences.length !== 1) return 'Gunakan tepat satu token {SEQ:n}.';
   const unknown = value.replace(/\{(YYYY|MM|BRAND|SEQ:\d+)\}/g, '').match(/\{[^}]*\}/);
-  return unknown ? `Unknown token ${unknown[0]}. Use {YYYY}, {MM}, {BRAND} and {SEQ:n}.` : undefined;
+  return unknown ? `Token ${unknown[0]} tidak dikenal. Gunakan {YYYY}, {MM}, {BRAND}, dan {SEQ:n}.` : undefined;
 };
 
 export const SETTINGS_FIELDS: FieldSpec[] = [
-  { name: 'issuer_legal_name', label: 'Issuer legal name', required: true, placeholder: 'PT Digvation Teknologi Indonesia' },
-  { name: 'issuer_tax_identifier', label: 'Issuer NPWP', half: true },
-  { name: 'issuer_email', label: 'Issuer email', kind: 'email', required: true, half: true },
-  { name: 'issuer_phone', label: 'Issuer phone', required: true, half: true },
-  { name: 'draft_lead_days', label: 'Draft lead time (days)', kind: 'integer', required: true, half: true, min: 0, max: 90, hint: 'Drafts are generated this many days before a billing period starts.' },
-  { name: 'issuer_address', label: 'Issuer address', kind: 'textarea', required: true },
-  { name: 'payment_instructions', label: 'Payment instructions', kind: 'textarea', required: true, hint: 'Printed on every invoice PDF.' },
-  { name: 'invoice_number_pattern', label: 'Invoice number pattern', required: true, half: true, validate: PATTERN_RULE },
-  { name: 'credit_note_number_pattern', label: 'Credit note number pattern', required: true, half: true, validate: PATTERN_RULE },
-  { name: 'reason', label: 'Reason for the change', kind: 'textarea', required: true, maxLength: 500, hint: 'Kept with the saved revision.' },
+  { name: 'issuer_legal_name', label: 'Nama legal penerbit', required: true, placeholder: 'PT Digvation Teknologi Indonesia' },
+  { name: 'issuer_tax_identifier', label: 'NPWP penerbit', half: true },
+  { name: 'issuer_email', label: 'Email penerbit', kind: 'email', required: true, half: true },
+  { name: 'issuer_phone', label: 'Telepon penerbit', required: true, half: true },
+  { name: 'draft_lead_days', label: 'Batas awal draf (hari)', kind: 'integer', required: true, half: true, min: 0, max: 90, hint: 'Draf dibuat sekian hari sebelum periode billing dimulai.' },
+  { name: 'issuer_address', label: 'Alamat penerbit', kind: 'textarea', required: true },
+  { name: 'payment_instructions', label: 'Instruksi pembayaran', kind: 'textarea', required: true, hint: 'Tercetak di setiap PDF invoice.' },
+  { name: 'invoice_number_pattern', label: 'Pola nomor invoice', required: true, half: true, validate: PATTERN_RULE },
+  { name: 'credit_note_number_pattern', label: 'Pola nomor credit note', required: true, half: true, validate: PATTERN_RULE },
+  { name: 'reason', label: 'Alasan perubahan', kind: 'textarea', required: true, maxLength: 500, hint: 'Disimpan bersama revisi.' },
 ];
 
 export function settingsValues(settings: BillingSettings): FormValues {

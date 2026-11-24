@@ -22,8 +22,9 @@
 
 .app-page-heading h1 {
   margin: 0;
-  font-size: clamp(1.4rem, 2.2vw, 1.8rem);
-  letter-spacing: -0.02em;
+  font-size: clamp(1.25rem, 1.4vw, 1.5rem);
+  font-weight: 650;
+  letter-spacing: -0.015em;
   overflow-wrap: anywhere;
 }
 
@@ -89,6 +90,7 @@
 
 .app-identity strong {
   font-size: var(--cc-text-sm);
+  font-weight: 500;
 }
 
 .app-identity span {
@@ -105,39 +107,112 @@
   white-space: nowrap;
 }
 
-.app-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--cc-space-3);
+.app-nowrap {
+  white-space: nowrap;
 }
 
-.app-summary-item {
-  display: grid;
-  gap: var(--cc-space-1);
-  padding: var(--cc-space-3) var(--cc-space-4);
-  background: var(--cc-surface);
-  border: 1px solid var(--cc-line);
-  border-radius: var(--cc-radius-md);
+/* Same surface as a data table: depth comes from tone, not from a border. */
+.app-card {
+  border-color: transparent;
 }
 
-.app-summary-item span {
+.app-quiet-link {
+  font-size: var(--cc-text-sm);
+  color: var(--cc-text-muted);
+  text-decoration: none;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.app-quiet-link:hover,
+.app-quiet-link:focus-visible {
+  color: var(--cc-text);
+}
+
+/* A tab panel keeps clear of the tab bar above it, with a real separator. */
+.app-tab-panel {
+  display: grid;
+  gap: var(--cc-space-5);
+  padding-top: var(--cc-space-4);
+}
+
+.app-tab-panel-body {
+  display: grid;
+  gap: var(--cc-space-5);
+  min-width: 0;
+}
+
+/* Facts of one record: three dense columns, only filled values are rendered. */
+.app-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cc-space-3) var(--cc-space-5);
+  margin: 0;
+}
+
+.app-field {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.app-field dt {
   font-size: var(--cc-text-xs);
   color: var(--cc-text-muted);
 }
 
-.app-summary-item strong {
+.app-field dd {
+  margin: 0;
   font-size: var(--cc-text-md);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.app-field-grid-empty {
+  margin: 0;
+  font-size: var(--cc-text-sm);
+  color: var(--cc-text-muted);
+}
+
+/* Counts and totals as one quiet line instead of a card per number. */
+.app-stat-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2) var(--cc-space-4);
+  align-items: center;
+  margin: 0;
+}
+
+.app-stat-divider {
+  display: flex;
+  align-self: stretch;
+}
+
+.app-stat {
+  display: flex;
+  align-items: baseline;
+  gap: var(--cc-space-2);
+}
+
+.app-stat dt {
+  font-size: var(--cc-text-xs);
+  color: var(--cc-text-muted);
+}
+
+.app-stat dd {
+  margin: 0;
+  font-size: var(--cc-text-md);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
-.app-back-link {
-  font-size: var(--cc-text-sm);
-  color: var(--cc-text-muted);
-  text-decoration: none;
+@media (max-width: 1100px) {
+  .app-field-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.app-back-link:hover,
-.app-back-link:focus-visible {
-  color: var(--cc-text);
-  text-decoration: underline;
+@media (max-width: 640px) {
+  .app-field-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

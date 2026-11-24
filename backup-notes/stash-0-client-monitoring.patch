@@ -1,0 +1,60 @@
+diff --git a/src/app/router/application-routes.tsx b/src/app/router/application-routes.tsx
+index d5aa11a..91f742d 100644
+--- a/src/app/router/application-routes.tsx
++++ b/src/app/router/application-routes.tsx
+@@ -11,11 +11,13 @@ import { InfrastructureListPage } from '../../features/infrastructure/pages/infr
+ import { IncidentsPage } from '../../features/operations/pages/incidents-page';
+ import { DeploymentsPage } from '../../features/operations/pages/deployments-page';
+ import { PlatformHealthPage } from '../../features/runtime/pages/platform-health-page';
++import { ClientMonitoringPage } from '../../features/client-monitoring/pages/client-monitoring-page';
+ import { NotFoundPage } from './not-found-page';
+ import { PlaceholderPage } from './placeholder-page';
+ import { RouteErrorState } from './route-error-state';
+ 
+ export const applicationRoutes: RouteObject[] = [
++  { path: '/client-monitoring', element: <ClientMonitoringPage /> },
+   {
+     path: '/',
+     element: <ApplicationShell />,
+diff --git a/src/features/client-monitoring/data/client-monitoring-data-source.ts b/src/features/client-monitoring/data/client-monitoring-data-source.ts
+new file mode 100644
+index 0000000..f876fd2
+--- /dev/null
++++ b/src/features/client-monitoring/data/client-monitoring-data-source.ts
+@@ -0,0 +1 @@
++import type{ClientMonitoringProjection}from'../types/client-monitoring';export interface ClientMonitoringDataSource{getMonitoring():Promise<ClientMonitoringProjection>}
+diff --git a/src/features/client-monitoring/data/mock-client-monitoring-data-source.ts b/src/features/client-monitoring/data/mock-client-monitoring-data-source.ts
+new file mode 100644
+index 0000000..a1d84b3
+--- /dev/null
++++ b/src/features/client-monitoring/data/mock-client-monitoring-data-source.ts
+@@ -0,0 +1 @@
++import type{ClientMonitoringDataSource}from'./client-monitoring-data-source';import type{ClientMonitoringProjection}from'../types/client-monitoring';const CONTEXT={clientId:'client-nova',displayName:'Nova Salon',permittedInstallationIds:['installation-nova-pos-production','installation-nova-workshop-staging']};const DATA:ClientMonitoringProjection={context:CONTEXT,systems:[{id:'installation-nova-pos-production',productName:'Digvation POS',installationName:'Nova POS Production',environment:'PRODUCTION',applicationUrl:'https://pos.novasalon.digvation.id',health:'HEALTHY',serviceSummary:'All client-visible services healthy',lastObservedAt:'2026-09-07T01:20:00Z',maintenance:false,version:'v0.3.2'},{id:'installation-nova-workshop-staging',productName:'Digvation Workshop',installationName:'Nova Workshop Staging',environment:'STAGING',health:'DEGRADED',serviceSummary:'One background service is degraded',lastObservedAt:'2026-09-07T01:18:00Z',maintenance:true,version:'v0.3.2'}],incidents:[{id:'client-incident-nova-worker',title:'Background processing is delayed',summary:'Some background processing may take longer than usual. Digvation is investigating.',severity:'HIGH',status:'ACKNOWLEDGED',systemId:'installation-nova-workshop-staging',detectedAt:'2026-09-07T01:18:00Z'}]};export function createMockClientMonitoringDataSource():ClientMonitoringDataSource{return{async getMonitoring(){return JSON.parse(JSON.stringify(DATA))}}}
+diff --git a/src/features/client-monitoring/hooks/use-client-monitoring.ts b/src/features/client-monitoring/hooks/use-client-monitoring.ts
+new file mode 100644
+index 0000000..5e6746e
+--- /dev/null
++++ b/src/features/client-monitoring/hooks/use-client-monitoring.ts
+@@ -0,0 +1 @@
++import{useQuery}from'@tanstack/react-query';import{createMockClientMonitoringDataSource}from'../data/mock-client-monitoring-data-source';const source=createMockClientMonitoringDataSource();export const useClientMonitoring=()=>useQuery({queryKey:['client-monitoring','client-nova'],queryFn:()=>source.getMonitoring()});
+diff --git a/src/features/client-monitoring/monitoring.css b/src/features/client-monitoring/monitoring.css
+new file mode 100644
+index 0000000..79d288e
+--- /dev/null
++++ b/src/features/client-monitoring/monitoring.css
+@@ -0,0 +1 @@
++.cm-page{display:grid;gap:26px;width:100%;padding:32px;max-width:1200px;margin:auto}.cm-page h1,.cm-page h2{margin:0}.cm-page header p,.cm-page header span{color:var(--color-text-muted)}.cm-page section{display:grid;gap:12px}.cm-state{display:grid;min-height:100vh;place-items:center}
+diff --git a/src/features/client-monitoring/pages/client-monitoring-page.tsx b/src/features/client-monitoring/pages/client-monitoring-page.tsx
+new file mode 100644
+index 0000000..155054f
+--- /dev/null
++++ b/src/features/client-monitoring/pages/client-monitoring-page.tsx
+@@ -0,0 +1 @@
++import{DBadge,DConnectionError,DDataTable,DEmptyState,DLoadingIndicator,type TableColumn}from'@digvation/ui';import{useClientMonitoring}from'../hooks/use-client-monitoring';import type{ClientIncident,ClientSystem}from'../types/client-monitoring';import'../monitoring.css';const V:any={HEALTHY:'success',DEGRADED:'warning',UNHEALTHY:'danger',UNKNOWN:'default',OPEN:'danger',ACKNOWLEDGED:'warning',RESOLVED:'success'};const S:TableColumn<ClientSystem>[]=[{key:'productName',label:'System'},{key:'installationName',label:'Installation'},{key:'environment',label:'Environment'},{key:'health',label:'Health',render:x=><DBadge variant={V[x.health]} dot>{x.health}</DBadge>},{key:'serviceSummary',label:'Service status'},{key:'lastObservedAt',label:'Last observed',render:x=>x.lastObservedAt?new Date(x.lastObservedAt).toLocaleString():'Not observed'}];const I:TableColumn<ClientIncident>[]=[{key:'title',label:'Incident'},{key:'severity',label:'Severity',render:x=><DBadge variant={V[x.severity]??'warning'}>{x.severity}</DBadge>},{key:'status',label:'Status',render:x=><DBadge variant={V[x.status]}>{x.status}</DBadge>},{key:'detectedAt',label:'Detected',render:x=>new Date(x.detectedAt).toLocaleString()}];export function ClientMonitoringPage(){const q=useClientMonitoring();if(q.isPending)return <div className="cm-state"><DLoadingIndicator label="Loading your systems"/></div>;if(q.isError)return <DConnectionError title="Monitoring unavailable" message="Your monitoring status could not be loaded." detail={q.error.message} onRetry={()=>void q.refetch()}/>;const d=q.data;const attention=d.systems.filter(x=>x.health!=='HEALTHY');return <div className="cm-page"><header><p>Client monitoring</p><h1>{d.context.displayName} systems</h1><span>Client-safe status view · read-only</span></header><section><h2>Overall status</h2>{attention.length?<p>{attention.length} system{attention.length>1?'s':''} currently require attention.</p>:<DEmptyState title="All systems healthy" description="No current client-visible incidents."/>}</section><section><h2>Systems</h2><DDataTable columns={S} data={d.systems} rowKey="id"/></section><section><h2>Current incidents</h2>{d.incidents.length?<DDataTable columns={I} data={d.incidents} rowKey="id"/>:<DEmptyState title="No current incidents" description="There are no client-visible incidents affecting your systems."/>}</section></div>}
+diff --git a/src/features/client-monitoring/types/client-monitoring.ts b/src/features/client-monitoring/types/client-monitoring.ts
+new file mode 100644
+index 0000000..440deef
+--- /dev/null
++++ b/src/features/client-monitoring/types/client-monitoring.ts
+@@ -0,0 +1 @@
++export type ClientHealth='HEALTHY'|'DEGRADED'|'UNHEALTHY'|'UNKNOWN';export interface ClientSystem{id:string;productName:string;installationName:string;environment:string;applicationUrl?:string;health:ClientHealth;serviceSummary:string;lastObservedAt?:string;maintenance:boolean;version?:string}export interface ClientIncident{id:string;title:string;summary:string;severity:'LOW'|'MEDIUM'|'HIGH'|'CRITICAL';status:'OPEN'|'ACKNOWLEDGED'|'RESOLVED';systemId:string;detectedAt:string;resolvedAt?:string}export interface ClientMonitoringContext{clientId:string;displayName:string;permittedInstallationIds:string[]}export interface ClientMonitoringProjection{context:ClientMonitoringContext;systems:ClientSystem[];incidents:ClientIncident[]}

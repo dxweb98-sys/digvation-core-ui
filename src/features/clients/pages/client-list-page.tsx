@@ -1,9 +1,8 @@
-import { DDataTable, DEmptyState, DStatusFilter, type TableColumn } from '@digvation/ui';
+import { DDataTable, DStatusFilter, type TableColumn } from '@digvation/ui';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useApiMutation } from '../../../shared/api/use-api-mutation';
-import { formatInstant } from '../../../shared/format/date';
 import { FormDialog } from '../../../shared/forms/form-dialog';
 import { AppAction } from '../../../shared/ui/app-action';
 import { Code, Identity, Page, PageHeader, QueryState } from '../../../shared/ui/page';
@@ -17,49 +16,41 @@ import { clientsApi, type Client } from '../clients-api';
 import { clientKeys, useClients } from '../clients-queries';
 
 const STATUS_OPTIONS = [
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'SUSPENDED', label: 'Suspended' },
-  { value: 'ARCHIVED', label: 'Archived' },
+  { value: 'ACTIVE', label: 'Aktif' },
+  { value: 'SUSPENDED', label: 'Ditangguhkan' },
+  { value: 'ARCHIVED', label: 'Diarsipkan' },
 ];
 
 const COLUMNS: TableColumn<Client>[] = [
-  {
-    key: 'display_name',
+  { key: 'display_name',
     label: 'Client',
     render: (client) => (
       <RecordButton>
         <Identity primary={client.display_name} secondary={client.legal_name} />
       </RecordButton>
-    ),
-  },
-  { key: 'code', label: 'Code', render: (client) => <Code>{client.code}</Code> },
-  { key: 'status', label: 'Status', render: (client) => <StatusBadge status={client.status} /> },
-  { key: 'email', label: 'Email', render: (client) => client.email ?? '—' },
-  { key: 'updated_at', label: 'Updated', render: (client) => formatInstant(client.updated_at) },
+    ) },
+  { key: 'code', label: 'Code', width: '240px', render: (client) => <Code>{client.code}</Code> },
+  { key: 'status', label: 'Status', width: '200px', render: (client) => <StatusBadge status={client.status} /> },
 ];
 
-export function ClientListPage() {
-  const navigate = useNavigate();
+export function ClientListPage() { const navigate = useNavigate();
   const list = useListState();
   const clients = useClients(list.query);
   const { can } = usePermissions();
   const [creating, setCreating] = useState(false);
-  const create = useApiMutation(clientsApi.create, {
-    success: 'Client added',
+  const create = useApiMutation(clientsApi.create, { success: 'Client ditambahkan',
     invalidate: [clientKeys.all],
     toastErrors: false,
-    onSuccess: (result) => navigate(`/clients/${result.client_id}`),
-  });
+    onSuccess: (result) => navigate(`/clients/${result.client_id}`) });
 
   return (
     <Page>
       <PageHeader
         title="Clients"
-        description="Organizations Digvation serves. Each client has one or more brands."
-        actions={
-          can(PERMISSIONS.CLIENTS_MANAGE) ? (
+        description="Organisasi yang Digvation layani. Setiap client punya satu atau lebih brand."
+        actions={ can(PERMISSIONS.CLIENTS_MANAGE) ? (
             <AppAction icon={Plus} onClick={() => setCreating(true)}>
-              Add client
+              Tambah client
             </AppAction>
           ) : null
         }
@@ -71,12 +62,11 @@ export function ClientListPage() {
             data={page.items}
             rowKey="id"
             searchable
-            searchPlaceholder="Search code, display name, or legal name"
+            searchPlaceholder="Cari code, nama, atau nama legal"
             {...list.tableProps}
-            filters={
-              <DStatusFilter
+            filters={ <DStatusFilter
                 label="Status"
-                allLabel="All statuses"
+                allLabel="Semua status"
                 options={STATUS_OPTIONS}
                 value={String(list.state.filters.status ?? 'ALL')}
                 onChange={(status) => list.setFilter('status', status)}
@@ -84,17 +74,17 @@ export function ClientListPage() {
             }
             pagination={{ page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }}
             onRowClick={(client) => navigate(`/clients/${client.id}`)}
-            emptyMessage={<DEmptyState title="No clients found" description="Try another search, or add a client." />}
+            emptyMessage="Client tidak ditemukan. Coba kata lain, atau tambahkan client."
           />
         )}
       </QueryState>
       <FormDialog
         open={creating}
         kind="wide"
-        title="Add client"
-        description="The client starts active, with a first brand and a primary contact."
+        title="Tambah client"
+        description="Client langsung aktif, dengan satu brand pertama dan satu kontak utama."
         fields={CLIENT_CREATE_FIELDS}
-        submitLabel="Add client"
+        submitLabel="Tambah client"
         onSubmit={(values) => create.mutateAsync(createClientBody(values))}
         onClose={() => setCreating(false)}
       />

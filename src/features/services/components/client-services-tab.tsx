@@ -1,4 +1,4 @@
-import { DDataTable, DEmptyState } from '@digvation/ui';
+import { DDataTable } from '@digvation/ui';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -11,8 +11,7 @@ import { useClientServices } from '../services-queries';
 import { ProvisionServiceDialog } from './provision-service-dialog';
 import { SERVICE_COLUMNS } from './services-table';
 
-export function ClientServicesTab({ client }: { client: ClientDetail }) {
-  const navigate = useNavigate();
+export function ClientServicesTab({ client }: { client: ClientDetail }) { const navigate = useNavigate();
   const services = useClientServices(client.id);
   const { can } = usePermissions();
   const [provisioning, setProvisioning] = useState(false);
@@ -20,30 +19,29 @@ export function ClientServicesTab({ client }: { client: ClientDetail }) {
     can(PERMISSIONS.SERVICES_MANAGE) && can(PERMISSIONS.CATALOG_READ) && client.status === 'ACTIVE';
 
   return (
-    <Section
-      title="Services"
-      actions={
-        canProvision ? (
-          <AppAction icon={Plus} tone="secondary" size="sm" onClick={() => setProvisioning(true)}>
-            Provision service
-          </AppAction>
-        ) : null
-      }
-    >
-      <QueryState query={services} label="services">
-        {(items) => (
-          <DDataTable
-            columns={SERVICE_COLUMNS}
-            data={items}
-            rowKey="id"
-            onRowClick={(service) => navigate(`/clients/${client.id}/services/${service.id}`)}
-            emptyMessage={
-              <DEmptyState title="No services" description="Provision a product for one of the client's brands." />
-            }
-          />
-        )}
-      </QueryState>
+    <>
+      <Section
+        title="Service client"
+        actions={ canProvision ? (
+            <AppAction icon={Plus} tone="secondary" size="sm" onClick={() => setProvisioning(true)}>
+              Provision service
+            </AppAction>
+          ) : null
+        }
+      >
+        <QueryState query={services} label="services">
+          {(items) => (
+            <DDataTable
+              columns={SERVICE_COLUMNS}
+              data={items}
+              rowKey="id"
+              onRowClick={(service) => navigate(`/clients/${client.id}/services/${service.id}`)}
+              emptyMessage="Belum ada service. Provision sebuah product untuk salah satu brand client ini."
+            />
+          )}
+        </QueryState>
+      </Section>
       <ProvisionServiceDialog client={client} open={provisioning} onClose={() => setProvisioning(false)} />
-    </Section>
+    </>
   );
 }

@@ -3,34 +3,34 @@ import { read, type FieldSpec, type FormValues } from '../../shared/forms/form-s
 import type { Contract } from './contracts-api';
 
 export const CONTRACT_SETTINGS_FIELDS: FieldSpec[] = [
-  { name: 'contract_reference', label: 'Contract reference', maxLength: 100, placeholder: 'SPK/2026/014' },
+  { name: 'contract_reference', label: 'Referensi contract', maxLength: 100, placeholder: 'SPK/2026/014' },
   {
     name: 'renewal_notice_days',
-    label: 'Renewal notice (days)',
+    label: 'Pemberitahuan perpanjangan (hari)',
     kind: 'integer',
     required: true,
     half: true,
     min: 0,
     max: 365,
-    hint: 'CORE drafts the renewal this many days before a term ends.',
+    hint: 'CORE membuat draf perpanjangan sejumlah hari ini sebelum term berakhir.',
   },
   {
     name: 'grace_period_days',
-    label: 'Grace period (days)',
+    label: 'Masa tenggang (hari)',
     kind: 'integer',
     required: true,
     half: true,
     min: 0,
     max: 365,
-    hint: 'Days after a term ends without renewal before the contract expires.',
+    hint: 'Batas hari setelah term berakhir tanpa perpanjangan sampai contract kedaluwarsa.',
   },
   {
     name: 'auto_renew',
-    label: 'Renew automatically',
+    label: 'Perpanjang otomatis',
     kind: 'toggle',
-    hint: 'An untouched renewal draft is confirmed with its prefilled price when the term ends.',
+    hint: 'Draf perpanjangan yang tidak diubah dikonfirmasi dengan harga isian otomatisnya saat term berakhir.',
   },
-  { name: 'billable', label: 'Billable', kind: 'toggle', hint: 'Off for a complimentary arrangement: no invoices.' },
+  { name: 'billable', label: 'Ditagih', kind: 'toggle', hint: 'Nonaktifkan untuk kesepakatan gratis: tidak ada invoice.' },
 ];
 
 export function contractSettingsValues(contract?: Contract): FormValues {

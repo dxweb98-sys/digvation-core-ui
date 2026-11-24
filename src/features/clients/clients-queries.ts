@@ -7,6 +7,7 @@ export const clientKeys = {
   list: (query?: Query) => ['clients', 'list', query ?? {}] as const,
   detail: (clientId: string) => ['clients', 'detail', clientId] as const,
   brands: (clientId: string) => ['clients', 'brands', clientId] as const,
+  brand: (clientId: string, brandId: string) => ['clients', 'brand', clientId, brandId] as const,
 };
 
 export function useClients(query: Query, enabled = true) {
@@ -20,6 +21,15 @@ export function useClients(query: Query, enabled = true) {
 
 export function useClient(clientId: string) {
   return useQuery({ queryKey: clientKeys.detail(clientId), queryFn: () => clientsApi.detail(clientId) });
+}
+
+/** One brand with its group, bill-to, services, add-ons and installations. */
+export function useBrandDetail(clientId: string, brandId: string) {
+  return useQuery({
+    queryKey: clientKeys.brand(clientId, brandId),
+    queryFn: () => clientsApi.brandDetail(clientId, brandId),
+    enabled: Boolean(clientId && brandId),
+  });
 }
 
 /** Brands with the billing contacts invoices will use. */

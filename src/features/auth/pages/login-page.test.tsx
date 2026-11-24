@@ -16,7 +16,7 @@ function renderLogin() {
     </MemoryRouter>,
   );
   return {
-    identifier: screen.getByRole('textbox', { name: /email or username/i }),
+    identifier: screen.getByRole('textbox', { name: /email atau username/i }),
     form: document.getElementById('login-form') as HTMLFormElement,
   };
 }
@@ -31,8 +31,8 @@ describe('login form errors', () => {
 
     await waitFor(() => expect(identifier).toHaveAttribute('aria-invalid', 'true'));
     const describedBy = identifier.getAttribute('aria-describedby') as string;
-    expect(document.getElementById(describedBy)).toHaveTextContent('Enter your email or username.');
-    expect(screen.getByText('Enter your password.')).toBeInTheDocument();
+    expect(document.getElementById(describedBy)).toHaveTextContent('Isi email atau username Anda.');
+    expect(screen.getByText('Isi kata sandi Anda.')).toBeInTheDocument();
     await waitFor(() => expect(identifier).toHaveFocus());
     expect(login).not.toHaveBeenCalled();
   });

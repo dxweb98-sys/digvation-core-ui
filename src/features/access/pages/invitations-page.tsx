@@ -1,4 +1,4 @@
-import { DBadge, DDataTable, DEmptyState, DStatusFilter, type TableColumn } from '@digvation/ui';
+import { DBadge, DDataTable, DStatusFilter, type TableColumn } from '@digvation/ui';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useApiMutation } from '../../../shared/api/use-api-mutation';
@@ -15,23 +15,20 @@ import { accessApi, type Invitation } from '../access-api';
 import { accessKeys, useInvitations, useRoles } from '../access-queries';
 
 const STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'accepted', label: 'Accepted' },
-  { value: 'revoked', label: 'Revoked' },
-  { value: 'expired', label: 'Expired' },
+  { value: 'pending', label: 'Menunggu' },
+  { value: 'accepted', label: 'Diterima' },
+  { value: 'revoked', label: 'Dicabut' },
+  { value: 'expired', label: 'Kedaluwarsa' },
 ];
 
 const COLUMNS: TableColumn<Invitation>[] = [
-  {
-    key: 'email',
+  { key: 'email',
     label: 'Email',
     render: (invitation) => (
-      <Identity primary={invitation.email} secondary={`Invited by ${invitation.invited_by.fullname}`} />
-    ),
-  },
-  {
-    key: 'roles',
-    label: 'Roles',
+      <Identity primary={invitation.email} secondary={`Diundang oleh ${invitation.invited_by.fullname}`} />
+    ) },
+  { key: 'roles',
+    label: 'Role',
     render: (invitation) => (
       <span className="app-page-actions">
         {invitation.roles.map((role) => (
@@ -40,15 +37,13 @@ const COLUMNS: TableColumn<Invitation>[] = [
           </DBadge>
         ))}
       </span>
-    ),
-  },
+    ) },
   { key: 'status', label: 'Status', render: (invitation) => <StatusBadge status={invitation.status.toUpperCase()} /> },
-  { key: 'expires_at', label: 'Expires', render: (invitation) => formatInstant(invitation.expires_at) },
-  { key: 'created_at', label: 'Sent', render: (invitation) => formatInstant(invitation.created_at) },
+  { key: 'expires_at', label: 'Kedaluwarsa', render: (invitation) => formatInstant(invitation.expires_at) },
+  { key: 'created_at', label: 'Dikirim', render: (invitation) => formatInstant(invitation.created_at) },
 ];
 
-export function InvitationsPage() {
-  const list = useListState();
+export function InvitationsPage() { const list = useListState();
   const invitations = useInvitations(list.query);
   const { can } = usePermissions();
   const canInvite = can(PERMISSIONS.USERS_INVITE);
@@ -56,97 +51,84 @@ export function InvitationsPage() {
   const [inviting, setInviting] = useState(false);
   const [revoking, setRevoking] = useState<Invitation | null>(null);
 
-  const invite = useApiMutation(accessApi.invite, {
-    success: 'Invitation sent',
+  const invite = useApiMutation(accessApi.invite, { success: 'Undangan terkirim',
     invalidate: [accessKeys.all],
-    toastErrors: false,
-  });
-  const revoke = useApiMutation((invitation: Invitation) => accessApi.revokeInvitation(invitation.id), {
-    success: 'Invitation revoked',
+    toastErrors: false });
+  const revoke = useApiMutation((invitation: Invitation) => accessApi.revokeInvitation(invitation.id), { success: 'Undangan dicabut',
     invalidate: [accessKeys.all],
-    toastErrors: false,
-  });
+    toastErrors: false });
 
   return (
     <Page>
       <PageHeader
-        title="Invitations"
-        description="New operators join by invitation. The link in the email is valid until it expires."
-        actions={
-          canInvite ? (
+        title="Undangan"
+        description="Operator baru bergabung lewat undangan. Tautan dalam email berlaku sampai masa kedaluwarsanya."
+        actions={ canInvite ? (
             <AppAction icon={Plus} onClick={() => setInviting(true)}>
-              Invite user
+              Undang user
             </AppAction>
           ) : null
         }
       />
-      <QueryState query={invitations} label="invitations">
+      <QueryState query={invitations} label="undangan">
         {(page) => (
           <DDataTable
             columns={COLUMNS}
             data={page.items}
             rowKey="id"
             searchable
-            searchPlaceholder="Search email"
+            searchPlaceholder="Cari email"
             {...list.tableProps}
-            filters={
-              <DStatusFilter
+            filters={ <DStatusFilter
                 label="Status"
-                allLabel="All statuses"
+                allLabel="Semua status"
                 options={STATUS_OPTIONS}
                 value={String(list.state.filters.status ?? 'ALL')}
                 onChange={(status) => list.setFilter('status', status)}
               />
             }
             pagination={{ page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }}
-            actions={
-              canInvite
+            actions={ canInvite
                 ? [
-                    {
-                      label: 'Revoke',
+                    { label: 'Cabut',
                       variant: 'danger',
                       show: (invitation) => invitation.status === 'pending',
-                      onClick: setRevoking,
-                    },
+                      onClick: setRevoking },
                   ]
                 : undefined
             }
-            emptyMessage={<DEmptyState title="No invitations" description="Invite a user to give them access." />}
+            emptyMessage="Belum ada undangan. Undang user untuk memberikan mereka akses."
           />
         )}
       </QueryState>
 
       <FormDialog
         open={inviting}
-        title="Invite user"
-        description="CORE emails a sign-up link. The account gets the roles you choose here."
+        title="Undang user"
+        description="CORE mengirim tautan pendaftaran lewat email. Akun baru akan mendapat role yang dipilih di sini."
         fields={[
           { name: 'email', label: 'Email', kind: 'email', required: true, placeholder: 'name@digvation.id' },
-          {
-            name: 'role_slugs',
-            label: 'Roles',
+          { name: 'role_slugs',
+            label: 'Role',
             kind: 'checklist',
             required: true,
             options: (roles.data ?? [])
               .filter((role) => role.is_active)
-              .map((role) => ({ value: role.slug, label: role.name, description: role.description ?? undefined })),
-          },
+              .map((role) => ({ value: role.slug, label: role.name, description: role.description ?? undefined })) },
         ]}
-        submitLabel="Send invitation"
+        submitLabel="Kirim undangan"
         onSubmit={(values) =>
-          invite.mutateAsync({
-            email: read.text(values, 'email').toLowerCase(),
-            role_slugs: read.list(values, 'role_slugs'),
-          })
+          invite.mutateAsync({ email: read.text(values, 'email').toLowerCase(),
+            role_slugs: read.list(values, 'role_slugs') })
         }
         onClose={() => setInviting(false)}
       />
 
       <ConfirmDialog
         open={revoking !== null}
-        title="Revoke invitation"
-        message={`The link sent to ${revoking?.email ?? ''} stops working at once.`}
-        confirmLabel="Revoke"
+        title="Cabut undangan"
+        message={`Tautan yang dikirim ke ${revoking?.email ?? ''} langsung tidak berlaku.`}
+        confirmLabel="Cabut"
         onConfirm={() => revoke.mutateAsync(revoking!)}
         onClose={() => setRevoking(null)}
       />

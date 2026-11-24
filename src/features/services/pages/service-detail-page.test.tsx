@@ -47,23 +47,23 @@ describe('service page', () => {
     serve(['services.read', 'catalog.read']);
     renderApp(<ServiceDetailPage />, route);
 
-    expect(await screen.findByRole('heading', { name: 'Digvation POS for Nova' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Digvation POS untuk Nova' })).toBeInTheDocument();
     expect(screen.getByText('Commission')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Change features' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Batalkan' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ubah feature' })).not.toBeInTheDocument();
   });
 
   it('cancels with a reason', async () => {
     const { calls } = serve(['services.read', 'services.manage', 'catalog.read']);
     renderApp(<ServiceDetailPage />, route);
 
-    expect(await screen.findByRole('button', { name: 'Suspend' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(await screen.findByRole('button', { name: 'Tangguhkan' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Batalkan' }));
     const dialog = await screen.findByRole('dialog');
     fireEvent.change(within(dialog).getByRole('textbox'), { target: { value: 'Client stopped' } });
-    fireEvent.click(within(dialog).getAllByRole('button', { name: 'Cancel' }).at(-1)!);
+    fireEvent.click(within(dialog).getAllByRole('button', { name: 'Batalkan' }).at(-1)!);
 
-    await screen.findByText('Service status changed');
+    await screen.findByText('Status service diubah');
     expect(calls.find((call) => call.method === 'PATCH')?.body).toEqual({
       target_status: 'CANCELLED',
       reason: 'Client stopped',

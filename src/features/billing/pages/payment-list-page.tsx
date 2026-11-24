@@ -1,4 +1,4 @@
-import { DDataTable, DEmptyState, DStatusFilter, type TableColumn } from '@digvation/ui';
+import { DDataTable, DStatusFilter, type TableColumn } from '@digvation/ui';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -21,68 +21,58 @@ import { billingKeys, usePayments } from '../billing-queries';
 import { PAYMENT_METHODS } from '../payment-rules';
 
 const COLUMNS: TableColumn<Payment>[] = [
-  {
-    key: 'client',
+  { key: 'client',
     label: 'Client',
     render: (payment) => (
       <RecordButton>
         <Identity primary={payment.client.name} secondary={payment.reference ?? labelFor(payment.method)} />
       </RecordButton>
-    ),
-  },
-  { key: 'received_at', label: 'Received', render: (payment) => formatBusinessDate(payment.received_at) },
+    ) },
+  { key: 'received_at', label: 'Diterima', render: (payment) => formatBusinessDate(payment.received_at) },
   { key: 'status', label: 'Status', render: (payment) => <StatusBadge status={payment.status} /> },
-  { key: 'amount', label: 'Amount', align: 'right', render: (payment) => <span className="app-amount">{formatMoney(payment.amount, payment.currency)}</span> },
-  {
-    key: 'unallocated',
-    label: 'Unallocated',
+  { key: 'amount', label: 'Jumlah', align: 'right', render: (payment) => <span className="app-amount">{formatMoney(payment.amount, payment.currency)}</span> },
+  { key: 'unallocated',
+    label: 'Belum dipakai',
     align: 'right',
-    render: (payment) => <span className="app-amount">{formatMoney(payment.unallocated, payment.currency)}</span>,
-  },
-  { key: 'has_proof', label: 'Proof', render: (payment) => (payment.has_proof ? 'Attached' : 'Missing') },
+    render: (payment) => <span className="app-amount">{formatMoney(payment.unallocated, payment.currency)}</span> },
+  { key: 'has_proof', label: 'Bukti transfer', render: (payment) => (payment.has_proof ? 'Terlampir' : 'Belum ada') },
 ];
 
-export function PaymentListPage() {
-  const navigate = useNavigate();
+export function PaymentListPage() { const navigate = useNavigate();
   const list = useListState();
   const payments = usePayments(list.query);
   const { can } = usePermissions();
   const canRecord = can(PERMISSIONS.PAYMENTS_MANAGE) && can(PERMISSIONS.CLIENTS_READ);
   const clients = useClientOptions(canRecord);
   const [recording, setRecording] = useState(false);
-  const record = useApiMutation(billingApi.recordPayment, {
-    success: 'Payment recorded',
+  const record = useApiMutation(billingApi.recordPayment, { success: 'Payment dicatat',
     invalidate: [billingKeys.all],
     toastErrors: false,
-    onSuccess: (payment) => navigate(`/payments/${payment.id}`),
-  });
+    onSuccess: (payment) => navigate(`/payments/${payment.id}`) });
 
   const fields: FieldSpec[] = [
     { name: 'client_id', label: 'Client', kind: 'select', required: true, options: clients.data ?? [] },
-    {
-      name: 'received_at',
-      label: 'Received on',
+    { name: 'received_at',
+      label: 'Diterima pada',
       kind: 'date',
       required: true,
       half: true,
       validate: (value) =>
-        typeof value === 'string' && value > todayBusinessDate() ? 'The date cannot be in the future.' : undefined,
-    },
-    { name: 'amount', label: 'Amount (Rp)', kind: 'rupiah', required: true, half: true, min: 1 },
-    { name: 'method', label: 'Method', kind: 'select', required: true, half: true, options: PAYMENT_METHODS },
-    { name: 'reference', label: 'Reference', maxLength: 200, half: true, placeholder: 'BCA 20261112-0001' },
-    { name: 'notes', label: 'Notes', kind: 'textarea', maxLength: 1000 },
+        typeof value === 'string' && value > todayBusinessDate() ? 'Tanggal tidak boleh di masa depan.' : undefined },
+    { name: 'amount', label: 'Jumlah (Rp)', kind: 'rupiah', required: true, half: true, min: 1 },
+    { name: 'method', label: 'Metode', kind: 'select', required: true, half: true, options: PAYMENT_METHODS },
+    { name: 'reference', label: 'Referensi', maxLength: 200, half: true, placeholder: 'BCA 20261112-0001' },
+    { name: 'notes', label: 'Catatan', kind: 'textarea', maxLength: 1000 },
   ];
 
   return (
     <Page>
       <PageHeader
-        title="Payments"
-        description="Money received from clients. What is not allocated to an invoice stays as client credit."
-        actions={
-          canRecord ? (
+        title="Payment"
+        description="Dana yang diterima dari client. Yang tidak dialokasikan ke invoice tetap menjadi kredit client."
+        actions={ canRecord ? (
             <AppAction icon={Plus} onClick={() => setRecording(true)}>
-              Record payment
+              Catat payment
             </AppAction>
           ) : null
         }
@@ -94,15 +84,14 @@ export function PaymentListPage() {
             data={page.items}
             rowKey="id"
             searchable
-            searchPlaceholder="Search client or reference"
+            searchPlaceholder="Cari client atau referensi"
             {...list.tableProps}
-            filters={
-              <DStatusFilter
+            filters={ <DStatusFilter
                 label="Status"
-                allLabel="All statuses"
+                allLabel="Semua status"
                 options={[
-                  { value: 'RECORDED', label: 'Recorded' },
-                  { value: 'REVERSED', label: 'Reversed' },
+                  { value: 'RECORDED', label: 'Tercatat' },
+                  { value: 'REVERSED', label: 'Dibalikkan' },
                 ]}
                 value={String(list.state.filters.status ?? 'ALL')}
                 onChange={(status) => list.setFilter('status', status)}
@@ -110,27 +99,25 @@ export function PaymentListPage() {
             }
             pagination={{ page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }}
             onRowClick={(payment) => navigate(`/payments/${payment.id}`)}
-            emptyMessage={<DEmptyState title="No payments found" description="Record a payment when money arrives." />}
+            emptyMessage="Payment tidak ditemukan. Coba kata lain, atau catat payment saat dana masuk."
           />
         )}
       </QueryState>
       <FormDialog
         open={recording}
-        title="Record payment"
-        description="Allocate it to invoices and attach the proof on the next page."
+        title="Catat payment"
+        description="Alokasikan ke invoice dan lampirkan bukti transfer di halaman berikutnya."
         fields={fields}
         initialValues={{ method: 'BANK_TRANSFER', received_at: todayBusinessDate() }}
-        submitLabel="Record payment"
+        submitLabel="Catat payment"
         onSubmit={(values) =>
-          record.mutateAsync({
-            client_id: read.text(values, 'client_id'),
+          record.mutateAsync({ client_id: read.text(values, 'client_id'),
             received_at: read.text(values, 'received_at'),
             amount: rupiahToMinor(read.rupiah(values, 'amount') ?? 0),
             currency: 'IDR',
             method: read.text(values, 'method') as Payment['method'],
             reference: read.optional(values, 'reference'),
-            notes: read.optional(values, 'notes'),
-          })
+            notes: read.optional(values, 'notes') })
         }
         onClose={() => setRecording(false)}
       />

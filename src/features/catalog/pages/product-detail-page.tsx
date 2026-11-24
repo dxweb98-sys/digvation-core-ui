@@ -1,6 +1,6 @@
 import { DBadge, DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation/ui';
 import { useState, type ReactNode } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { useParams, useSearchParams } from 'react-router';
 import { useApiMutation } from '../../../shared/api/use-api-mutation';
 import { formatInstant } from '../../../shared/format/date';
 import { ConfirmDialog, FormDialog } from '../../../shared/forms/form-dialog';
@@ -8,7 +8,7 @@ import { read } from '../../../shared/forms/form-spec';
 import { labelFor } from '../../../shared/labels/labels';
 import { AppAction } from '../../../shared/ui/app-action';
 import { DetailItem, DetailList } from '../../../shared/ui/app-dialog';
-import { Code, Page, PageHeader, QueryState, Section } from '../../../shared/ui/page';
+import { Code, Page, PageBreadcrumb, PageHeader, QueryState, Section, TabPanel } from '../../../shared/ui/page';
 import { StatusBadge } from '../../../shared/ui/status-badge';
 import { PERMISSIONS } from '../../auth/permissions';
 import { usePermissions } from '../../auth/use-permissions';
@@ -25,13 +25,13 @@ import { targetLabel } from '../../../shared/forms/use-transitions';
 import { PRODUCT_FIELDS } from '../product-fields';
 
 const TRANSITION_MESSAGES: Record<CatalogStatus, string> = {
-  ACTIVE: 'An active product can be chosen for new client services.',
-  RETIRED: 'A retired product cannot get new services. CORE refuses while services are still open or it is installed somewhere.',
-  DRAFT: 'The product goes back to draft and cannot be sold.',
+  ACTIVE: 'Product aktif bisa dipilih untuk service client baru.',
+  RETIRED: 'Product yang dipensiunkan tidak bisa mendapat service baru. CORE menolak selama masih ada service yang terbuka atau product masih terpasang.',
+  DRAFT: 'Product kembali menjadi draf dan tidak bisa dijual.',
 };
 
 function ItemBadges({ items }: { items: readonly CatalogItem[] }) {
-  if (items.length === 0) return <span className="not-set">None</span>;
+  if (items.length === 0) return <span className="not-set">Tidak ada</span>;
   return (
     <span className="app-page-actions">
       {items.map((item) => (
@@ -55,7 +55,7 @@ function OverviewTab({ product }: { product: ProductDetail }) {
       input.kind === 'applications'
         ? catalogApi.setApplications(product.id, input.ids)
         : catalogApi.setBaseDomains(product.id, input.ids),
-    { success: 'Composition saved', invalidate, toastErrors: false },
+    { success: 'Komposisi disimpan', invalidate, toastErrors: false },
   );
 
   const current = editing === 'applications' ? product.applications : product.base_domains;
@@ -68,11 +68,11 @@ function OverviewTab({ product }: { product: ProductDetail }) {
 
   return (
     <div className="app-page">
-      <Section title="Details">
+      <Section title="Detail">
         <DetailList>
-          <DetailItem label="Kind">{labelFor(product.kind)}</DetailItem>
-          <DetailItem label="Status since">{formatInstant(product.status_changed_at)}</DetailItem>
-          <DetailItem label="Description" wide>
+          <DetailItem label="Jenis">{labelFor(product.kind)}</DetailItem>
+          <DetailItem label="Status sejak">{formatInstant(product.status_changed_at)}</DetailItem>
+          <DetailItem label="Deskripsi" wide>
             {product.description}
           </DetailItem>
         </DetailList>
@@ -82,7 +82,7 @@ function OverviewTab({ product }: { product: ProductDetail }) {
         actions={
           canManage ? (
             <AppAction tone="secondary" size="sm" onClick={() => setEditing('applications')}>
-              Change
+              Ubah
             </AppAction>
           ) : null
         }
@@ -94,7 +94,7 @@ function OverviewTab({ product }: { product: ProductDetail }) {
         actions={
           canManage ? (
             <AppAction tone="secondary" size="sm" onClick={() => setEditing('base-domains')}>
-              Change
+              Ubah
             </AppAction>
           ) : null
         }
@@ -103,18 +103,18 @@ function OverviewTab({ product }: { product: ProductDetail }) {
       </Section>
       <FormDialog
         open={editing !== null}
-        title={editing === 'applications' ? 'Applications of the product' : 'Base domains of the product'}
+        title={editing === 'applications' ? 'Applications untuk product ini' : 'Base domains untuk product ini'}
         fields={[
           {
             name: 'ids',
             label: editing === 'applications' ? 'Applications' : 'Base domains',
             kind: 'checklist',
             options,
-            hint: 'Only active items can be added.',
+            hint: 'Hanya yang berstatus Aktif bisa ditambahkan.',
           },
         ]}
         initialValues={{ ids: current.map((item) => item.id) }}
-        submitLabel="Save"
+        submitLabel="Simpan"
         onSubmit={(values) => save.mutateAsync({ kind: editing!, ids: read.list(values, 'ids') })}
         onClose={() => setEditing(null)}
       />
@@ -123,11 +123,11 @@ function OverviewTab({ product }: { product: ProductDetail }) {
 }
 
 const TABS: { value: string; label: string; render: (product: ProductDetail) => ReactNode }[] = [
-  { value: 'overview', label: 'Overview', render: (product) => <OverviewTab product={product} /> },
+  { value: 'overview', label: 'Ringkasan', render: (product) => <OverviewTab product={product} /> },
   { value: 'features', label: 'Features', render: (product) => <FeaturesSection product={product} /> },
   { value: 'capabilities', label: 'Capabilities', render: (product) => <CapabilitiesSection product={product} /> },
   { value: 'add-ons', label: 'Add-ons', render: (product) => <AddOnsSection product={product} /> },
-  { value: 'prices', label: 'Prices', render: (product) => <PricesSection product={product} /> },
+  { value: 'prices', label: 'Harga', render: (product) => <PricesSection product={product} /> },
   { value: 'releases', label: 'Releases', render: (product) => <ReleasesSection product={product} /> },
 ];
 
@@ -144,20 +144,18 @@ function ProductView({ product }: { product: ProductDetail }) {
         description: read.optional(values, 'description'),
         kind: read.text(values, 'kind') as ProductDetail['kind'],
       }),
-    { success: 'Product saved', invalidate, toastErrors: false },
+    { success: 'Product disimpan', invalidate, toastErrors: false },
   );
   const transition = useApiMutation(
     (input: { target: CatalogStatus; reason: string }) =>
       catalogApi.transitionProduct(product.id, { target_status: input.target, reason: input.reason }),
-    { success: 'Product status changed', invalidate, toastErrors: false },
+    { success: 'Status product diubah', invalidate, toastErrors: false },
   );
   const active = TABS.some((tab) => tab.value === params.get('tab')) ? params.get('tab')! : 'overview';
 
   return (
     <Page>
-      <Link className="app-back-link" to="/products">
-        ← Products
-      </Link>
+      <PageBreadcrumb trail={[{ label: 'Products', to: '/products' }, { label: product.name }]} />
       <PageHeader
         title={product.name}
         meta={
@@ -193,17 +191,17 @@ function ProductView({ product }: { product: ProductDetail }) {
         </DTabsList>
         {TABS.map((tab) => (
           <DTabsContent key={tab.value} value={tab.value}>
-            {active === tab.value ? tab.render(product) : null}
+            <TabPanel>{tab.render(product)}</TabPanel>
           </DTabsContent>
         ))}
       </DTabs>
       <FormDialog
         open={editing}
         title="Edit product"
-        description="The product code cannot be changed."
+        description="Code product tidak bisa diubah."
         fields={PRODUCT_FIELDS}
         initialValues={{ kind: product.kind, name: product.name, description: product.description ?? '' }}
-        submitLabel="Save product"
+        submitLabel="Simpan product"
         onSubmit={(values) => update.mutateAsync(values)}
         onClose={() => setEditing(false)}
       />

@@ -1,4 +1,4 @@
-import { DDataTable, DEmptyState, type TableColumn } from '@digvation/ui';
+import { DDataTable, type TableColumn } from '@digvation/ui';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useApiMutation } from '../../../shared/api/use-api-mutation';
@@ -16,49 +16,38 @@ import { contractKeys } from '../contracts-queries';
 
 const COLUMNS: TableColumn<ContractAddOn>[] = [
   { key: 'add_on', label: 'Add-on', render: (item) => <Identity primary={item.add_on.name} secondary={item.add_on.code} /> },
-  {
-    key: 'effective_from',
-    label: 'Billed',
+  { key: 'effective_from',
+    label: 'Ditagih',
     render: (item) =>
-      `${formatBusinessDate(item.effective_from)} – ${item.effective_until ? formatBusinessDate(item.effective_until) : 'with the service'}`,
-  },
-  {
-    key: 'agreed_amount',
-    label: 'Agreed per cycle',
+      `${formatBusinessDate(item.effective_from)} – ${item.effective_until ? formatBusinessDate(item.effective_until) : 'bersama service'}` },
+  { key: 'agreed_amount',
+    label: 'Disepakati per siklus',
     align: 'right',
     render: (item) => (
       <Identity
         primary={<span className="app-amount">{formatMoney(item.agreed_amount, item.currency)}</span>}
         secondary={item.adjustment_type !== 'NONE' ? labelFor(item.adjustment_type) : undefined}
       />
-    ),
-  },
-  {
-    key: 'initial_prorated_amount',
-    label: 'First charge (prorated)',
+    ) },
+  { key: 'initial_prorated_amount',
+    label: 'Tagihan pertama (prorata)',
     align: 'right',
-    render: (item) => <span className="app-amount">{formatMoney(item.initial_prorated_amount, item.currency)}</span>,
-  },
+    render: (item) => <span className="app-amount">{formatMoney(item.initial_prorated_amount, item.currency)}</span> },
 ];
 
-const ADJUSTMENTS = ['NONE', 'PROMOTIONAL', 'NEGOTIATED', 'GRANDFATHERED', 'COMPLIMENTARY'].map((value) => ({
-  value,
-  label: value === 'NONE' ? 'No adjustment' : labelFor(value),
-}));
+const ADJUSTMENTS = ['NONE', 'PROMOTIONAL', 'NEGOTIATED', 'GRANDFATHERED', 'COMPLIMENTARY'].map((value) => ({ value,
+  label: value === 'NONE' ? 'Tanpa penyesuaian' : labelFor(value) }));
 
-export function ContractAddOnsSection({ contract, canManage }: { contract: Contract; canManage: boolean }) {
-  const service = useService(contract.service.client.id, contract.service.id);
+export function ContractAddOnsSection({ contract, canManage }: { contract: Contract; canManage: boolean }) { const service = useService(contract.service.client.id, contract.service.id);
   const [adding, setAdding] = useState(false);
   const [ending, setEnding] = useState<ContractAddOn | null>(null);
   const invalidate = [contractKeys.all];
-  const add = useApiMutation((body: Parameters<typeof contractsApi.addAddOn>[1]) => contractsApi.addAddOn(contract.id, body), {
-    success: 'Add-on billed under the contract',
+  const add = useApiMutation((body: Parameters<typeof contractsApi.addAddOn>[1]) => contractsApi.addAddOn(contract.id, body), { success: 'Add-on ditagih di bawah contract',
     invalidate,
-    toastErrors: false,
-  });
+    toastErrors: false });
   const end = useApiMutation(
     (input: { id: string; until: string }) => contractsApi.endAddOn(contract.id, input.id, input.until),
-    { success: 'Last billed day set', invalidate, toastErrors: false },
+    { success: 'Hari terakhir penagihan disimpan', invalidate, toastErrors: false },
   );
 
   const billed = new Set(contract.add_ons.filter((item) => !item.effective_until).map((item) => item.client_add_on_id));
@@ -69,11 +58,10 @@ export function ContractAddOnsSection({ contract, canManage }: { contract: Contr
 
   return (
     <Section
-      title="Add-ons billed"
-      actions={
-        canManage && !closed ? (
+      title="Add-on yang ditagih"
+      actions={ canManage && !closed ? (
           <AppAction icon={Plus} tone="secondary" size="sm" onClick={() => setAdding(true)}>
-            Bill add-on
+            Tagih add-on
           </AppAction>
         ) : null
       }
@@ -82,60 +70,51 @@ export function ContractAddOnsSection({ contract, canManage }: { contract: Contr
         columns={COLUMNS}
         data={contract.add_ons}
         rowKey="id"
-        actions={
-          canManage
-            ? [{ label: 'Set last billed day', show: (item: ContractAddOn) => !item.effective_until, onClick: setEnding }]
+        actions={ canManage
+            ? [{ label: 'Atur hari terakhir tagih', show: (item: ContractAddOn) => !item.effective_until, onClick: setEnding }]
             : undefined
         }
-        emptyMessage={
-          <DEmptyState title="No add-ons billed" description="Add-ons held by the service are billed here, prorated to the term." />
-        }
+        emptyMessage="Belum ada add-on yang ditagih. Add-on yang dipegang service ditagih di sini, diprorata terhadap term."
       />
       <FormDialog
         open={adding}
-        title="Bill add-on"
-        description="The first charge is prorated from the first billed day to the end of that billing period."
+        title="Tagih add-on"
+        description="Tagihan pertama diprorata dari hari pertama penagihan sampai akhir periode tagihan tersebut."
         fields={[
-          {
-            name: 'client_add_on_id',
-            label: 'Add-on held by the service',
+          { name: 'client_add_on_id',
+            label: 'Add-on yang dipegang service',
             kind: 'select',
             required: true,
             options,
-            hint: options.length === 0 ? 'Add the add-on to the service first.' : undefined,
-          },
-          { name: 'effective_from', label: 'First billed day', kind: 'date', required: true, half: true, hint: 'Inside an active or scheduled term.' },
-          { name: 'agreed_amount', label: 'Agreed per cycle (Rp)', kind: 'rupiah', required: true, half: true },
-          { name: 'adjustment_type', label: 'Price adjustment', kind: 'select', required: true, half: true, options: ADJUSTMENTS },
-          {
-            name: 'adjustment_reason',
-            label: 'Adjustment reason',
+            hint: options.length === 0 ? 'Tambahkan add-on ke service terlebih dahulu.' : undefined },
+          { name: 'effective_from', label: 'Hari pertama tagih', kind: 'date', required: true, half: true, hint: 'Harus di dalam term aktif atau terjadwal.' },
+          { name: 'agreed_amount', label: 'Disepakati per siklus (Rp)', kind: 'rupiah', required: true, half: true },
+          { name: 'adjustment_type', label: 'Penyesuaian harga', kind: 'select', required: true, half: true, options: ADJUSTMENTS },
+          { name: 'adjustment_reason',
+            label: 'Alasan penyesuaian',
             kind: 'textarea',
             maxLength: 500,
             validate: (value, values) =>
               values.adjustment_type !== 'NONE' && !(typeof value === 'string' && value.trim())
-                ? 'Give a reason for the adjustment.'
-                : undefined,
-          },
+                ? 'Berikan alasan penyesuaian.'
+                : undefined },
         ]}
         initialValues={{ adjustment_type: 'NONE' }}
-        submitLabel="Bill add-on"
+        submitLabel="Tagih add-on"
         onSubmit={(values) =>
-          add.mutateAsync({
-            client_add_on_id: read.text(values, 'client_add_on_id'),
+          add.mutateAsync({ client_add_on_id: read.text(values, 'client_add_on_id'),
             effective_from: read.text(values, 'effective_from'),
             agreed_amount: rupiahToMinor(read.rupiah(values, 'agreed_amount') ?? 0),
             adjustment_type: read.text(values, 'adjustment_type') as AdjustmentType,
-            adjustment_reason: read.optional(values, 'adjustment_reason'),
-          })
+            adjustment_reason: read.optional(values, 'adjustment_reason') })
         }
         onClose={() => setAdding(false)}
       />
       <FormDialog
         open={ending !== null}
-        title={`Stop billing ${ending?.add_on.name ?? ''}`}
-        fields={[{ name: 'effective_until', label: 'Last billed day', kind: 'date', required: true }]}
-        submitLabel="Set last day"
+        title={`Hentikan penagihan ${ending?.add_on.name ?? ''}`}
+        fields={[{ name: 'effective_until', label: 'Hari terakhir tagih', kind: 'date', required: true }]}
+        submitLabel="Simpan hari terakhir"
         onSubmit={(values) => end.mutateAsync({ id: ending!.id, until: read.text(values, 'effective_until') })}
         onClose={() => setEnding(null)}
       />

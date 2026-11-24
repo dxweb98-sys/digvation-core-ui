@@ -4,22 +4,22 @@ import type { FieldSpec, FieldValue, FormValues } from '../../shared/forms/form-
 export const PASSWORD_FIELDS: FieldSpec[] = [
   {
     name: 'new_password',
-    label: 'New password',
+    label: 'Kata sandi baru',
     kind: 'password',
     required: true,
     maxLength: 128,
-    hint: 'At least 12 characters.',
+    hint: 'Minimal 12 karakter.',
     validate: (value) =>
-      typeof value === 'string' && value.length > 0 && value.length < 12 ? 'Use at least 12 characters.' : undefined,
+      typeof value === 'string' && value.length > 0 && value.length < 12 ? 'Gunakan minimal 12 karakter.' : undefined,
   },
   {
     name: 'confirm_password',
-    label: 'Confirm new password',
+    label: 'Konfirmasi kata sandi baru',
     kind: 'password',
     required: true,
     maxLength: 128,
     validate: (value: FieldValue, values: FormValues) =>
-      value !== values.new_password ? 'The passwords do not match.' : undefined,
+      value !== values.new_password ? 'Kata sandi tidak cocok.' : undefined,
   },
 ];
 
@@ -28,5 +28,5 @@ export function USERNAME_RULE(value: FieldValue) {
   if (typeof value !== 'string' || !value.trim()) return undefined;
   return /^[a-z0-9._-]{3,50}$/.test(value.trim().toLowerCase())
     ? undefined
-    : 'Use 3 to 50 letters, digits, ".", "_" or "-".';
+    : 'Gunakan 3 sampai 50 huruf, angka, ".", "_" atau "-".';
 }

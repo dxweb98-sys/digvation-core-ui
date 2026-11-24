@@ -14,7 +14,7 @@ function pageTitleFor(pathname: string) {
     .filter((item) => pathname === item.to || pathname.startsWith(`${item.to}/`))
     .sort((a, b) => b.to.length - a.to.length)[0];
   if (match) return match.label;
-  if (pathname === '/profile') return 'My profile';
+  if (pathname === '/profile') return 'Profil saya';
   return 'Control Center';
 }
 
@@ -30,7 +30,7 @@ function OperatorProfile() {
         <span>{user.email}</span>
       </Link>
       <AppAction icon={LogOut} tone="tertiary" size="sm" onClick={() => void logout()}>
-        Sign out
+        Keluar
       </AppAction>
     </div>
   );
@@ -77,7 +77,6 @@ export function ApplicationShell() {
             </AppAction>
             <div>
               <p className="header-eyebrow">Control Center</p>
-              <p className="header-title">{pageTitle}</p>
             </div>
           </div>
           <div className="header-status">

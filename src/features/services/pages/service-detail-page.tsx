@@ -1,14 +1,14 @@
-import { DDataTable, DEmptyState, type TableColumn } from '@digvation/ui';
+import { DDataTable, type TableColumn } from '@digvation/ui';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import { useApiMutation } from '../../../shared/api/use-api-mutation';
 import { formatInstant } from '../../../shared/format/date';
 import { ConfirmDialog, FormDialog } from '../../../shared/forms/form-dialog';
 import { read } from '../../../shared/forms/form-spec';
 import { targetLabel, useTransitions } from '../../../shared/forms/use-transitions';
 import { AppAction } from '../../../shared/ui/app-action';
-import { Code, Identity, Page, PageHeader, QueryState, Section } from '../../../shared/ui/page';
+import { Code, Identity, Page, PageBreadcrumb, PageHeader, QueryState, Section } from '../../../shared/ui/page';
 import { StatusBadge } from '../../../shared/ui/status-badge';
 import { PERMISSIONS } from '../../auth/permissions';
 import { usePermissions } from '../../auth/use-permissions';
@@ -18,22 +18,19 @@ import { clientKeys } from '../../clients/clients-queries';
 import { SERVICE_TRANSITIONS, isOpenService, servicesApi, type HeldAddOn, type Service, type ServiceStatus } from '../services-api';
 import { serviceKeys, useService } from '../services-queries';
 
-const STATUS_MESSAGES: Partial<Record<ServiceStatus, string>> = {
-  TRIAL: 'The client can use the service on trial.',
-  ACTIVE: 'The service is live and billable under its contract.',
-  SUSPENDED: 'The service is paused. It can be reactivated.',
-  CANCELLED: 'A cancelled service cannot be reopened. Its features and add-ons can no longer change.',
-  DECOMMISSIONED: 'The service is taken down for good. CORE refuses while it is still hosted on an installation.',
-};
+const STATUS_MESSAGES: Partial<Record<ServiceStatus, string>> = { TRIAL: 'Client dapat memakai service ini dalam masa trial.',
+  ACTIVE: 'Service berjalan dan ditagih sesuai contract-nya.',
+  SUSPENDED: 'Service ditangguhkan. Dapat diaktifkan kembali.',
+  CANCELLED: 'Service yang dibatalkan tidak dapat dibuka kembali. Feature dan add-on-nya tidak bisa diubah lagi.',
+  DECOMMISSIONED: 'Service dihentikan permanen. CORE menolak selama service masih berada pada sebuah installation.' };
 
 const ADD_ON_COLUMNS: TableColumn<HeldAddOn>[] = [
   { key: 'name', label: 'Add-on', render: (addOn) => <Identity primary={addOn.name} secondary={addOn.code} /> },
   { key: 'status', label: 'Status', render: (addOn) => <StatusBadge status={addOn.status} /> },
-  { key: 'status_changed_at', label: 'Since', render: (addOn) => formatInstant(addOn.status_changed_at) },
+  { key: 'status_changed_at', label: 'Sejak', render: (addOn) => formatInstant(addOn.status_changed_at) },
 ];
 
-function ServiceView({ service }: { service: Service }) {
-  const { can } = usePermissions();
+function ServiceView({ service }: { service: Service }) { const { can } = usePermissions();
   const canManage = can(PERMISSIONS.SERVICES_MANAGE);
   const canReadCatalog = can(PERMISSIONS.CATALOG_READ);
   const open = isOpenService(service.status);
@@ -46,35 +43,27 @@ function ServiceView({ service }: { service: Service }) {
 
   const saveFeatures = useApiMutation(
     (ids: string[]) => servicesApi.setFeatures(service.client_id, service.id, ids),
-    { success: 'Features saved', invalidate, toastErrors: false },
+    { success: 'Feature tersimpan', invalidate, toastErrors: false },
   );
-  const addAddOn = useApiMutation((addOnId: string) => servicesApi.addAddOn(service.client_id, service.id, addOnId), {
-    success: 'Add-on added',
+  const addAddOn = useApiMutation((addOnId: string) => servicesApi.addAddOn(service.client_id, service.id, addOnId), { success: 'Add-on ditambahkan',
     invalidate,
-    toastErrors: false,
-  });
+    toastErrors: false });
   const transition = useApiMutation(
     (input: { target: ServiceStatus; reason: string }) =>
       servicesApi.transition(service.client_id, service.id, { target_status: input.target, reason: input.reason }),
-    { success: 'Service status changed', invalidate, toastErrors: false },
+    { success: 'Status service diubah', invalidate, toastErrors: false },
   );
-  const addOnTransition = useApiMutation((run: () => Promise<unknown>) => run(), {
-    success: 'Add-on status changed',
+  const addOnTransition = useApiMutation((run: () => Promise<unknown>) => run(), { success: 'Status add-on diubah',
     invalidate,
-    toastErrors: false,
-  });
-  const addOnTransitions = useTransitions<HeldAddOn>({
-    transitions: SERVICE_TRANSITIONS,
+    toastErrors: false });
+  const addOnTransitions = useTransitions<HeldAddOn>({ transitions: SERVICE_TRANSITIONS,
     name: (addOn) => addOn.name,
     describe: (_, next) => STATUS_MESSAGES[next as ServiceStatus] ?? '',
     apply: (addOn, next, reason) =>
       addOnTransition.mutateAsync(() =>
-        servicesApi.transitionAddOn(service.client_id, service.id, addOn.id, {
-          target_status: next as ServiceStatus,
-          reason,
-        }),
-      ),
-  });
+        servicesApi.transitionAddOn(service.client_id, service.id, addOn.id, { target_status: next as ServiceStatus,
+          reason }),
+      ) });
 
   const held = new Set(service.add_ons.filter((addOn) => isOpenService(addOn.status)).map((addOn) => addOn.add_on_id));
   const addOnOptions = (addOns.data ?? [])
@@ -95,20 +84,21 @@ function ServiceView({ service }: { service: Service }) {
 
   return (
     <Page>
-      <Link className="app-back-link" to={`/clients/${service.client_id}?tab=services`}>
-        ← Client
-      </Link>
+      <PageBreadcrumb
+        trail={[
+          { label: 'Client', to: `/clients/${service.client_id}?tab=services` },
+          { label: `${service.product.name} untuk ${service.brand.name}` },
+        ]}
+      />
       <PageHeader
-        title={`${service.product.name} for ${service.brand.name}`}
-        meta={
-          <>
+        title={`${service.product.name} untuk ${service.brand.name}`}
+        meta={ <>
             <Code>{service.product.code}</Code>
             <Code>{service.brand.code}</Code>
             <StatusBadge status={service.status} />
           </>
         }
-        actions={
-          canManage
+        actions={ canManage
             ? SERVICE_TRANSITIONS[service.status].map((status) => (
                 <AppAction
                   key={status}
@@ -124,16 +114,15 @@ function ServiceView({ service }: { service: Service }) {
       <ServiceContractSection service={service} />
       <Section
         title="Features"
-        actions={
-          canManage && canReadCatalog && open ? (
+        actions={ canManage && canReadCatalog && open ? (
             <AppAction tone="secondary" size="sm" onClick={() => setEditingFeatures(true)}>
-              Change features
+              Ubah feature
             </AppAction>
           ) : null
         }
       >
         {service.features.length === 0 ? (
-          <p className="form-dialog-message">No features selected.</p>
+          <p className="form-dialog-message">Belum ada feature yang dipilih.</p>
         ) : (
           <span className="app-page-actions">
             {service.features.map((feature) => (
@@ -146,10 +135,9 @@ function ServiceView({ service }: { service: Service }) {
       </Section>
       <Section
         title="Add-ons"
-        actions={
-          canManage && canReadCatalog && open ? (
+        actions={ canManage && canReadCatalog && open ? (
             <AppAction icon={Plus} tone="secondary" size="sm" onClick={() => setAddingAddOn(true)}>
-              Add add-on
+              Tambah add-on
             </AppAction>
           ) : null
         }
@@ -159,35 +147,33 @@ function ServiceView({ service }: { service: Service }) {
           data={service.add_ons}
           rowKey="id"
           actions={canManage ? addOnTransitions.actions : undefined}
-          emptyMessage={<DEmptyState title="No add-ons" description="Add-ons sell extra features or capabilities on this service." />}
+          emptyMessage="Belum ada add-on. Add-on menjual feature atau capability tambahan pada service ini."
         />
       </Section>
 
       <FormDialog
         open={editingFeatures}
-        title="Features of the service"
-        description="Only active features of the product can be added. A retired feature stays until you remove it."
+        title="Feature service"
+        description="Hanya feature aktif dari product yang dapat ditambahkan. Feature yang dipensiunkan tetap ada sampai Anda hapus."
         fields={[{ name: 'feature_ids', label: 'Features', kind: 'checklist', options: featureOptions }]}
         initialValues={{ feature_ids: service.features.map((feature) => feature.id) }}
-        submitLabel="Save features"
+        submitLabel="Simpan feature"
         onSubmit={(values) => saveFeatures.mutateAsync(read.list(values, 'feature_ids'))}
         onClose={() => setEditingFeatures(false)}
       />
       <FormDialog
         open={addingAddOn}
-        title="Add add-on"
-        description="The add-on starts in provisioning, like a new service."
+        title="Tambah add-on"
+        description="Add-on mulai dari provisioning, seperti service baru."
         fields={[
-          {
-            name: 'add_on_id',
+          { name: 'add_on_id',
             label: 'Add-on',
             kind: 'select',
             required: true,
             options: addOnOptions,
-            hint: addOnOptions.length === 0 ? 'No active add-on of this product is left to add.' : undefined,
-          },
+            hint: addOnOptions.length === 0 ? 'Tidak ada add-on aktif dari product ini yang bisa ditambahkan.' : undefined },
         ]}
-        submitLabel="Add add-on"
+        submitLabel="Tambah add-on"
         onSubmit={(values) => addAddOn.mutateAsync(read.text(values, 'add_on_id'))}
         onClose={() => setAddingAddOn(false)}
       />
@@ -206,8 +192,7 @@ function ServiceView({ service }: { service: Service }) {
   );
 }
 
-export function ServiceDetailPage() {
-  const { clientId = '', serviceId = '' } = useParams();
+export function ServiceDetailPage() { const { clientId = '', serviceId = '' } = useParams();
   const service = useService(clientId, serviceId);
   return <QueryState query={service} label="service">{(data) => <ServiceView service={data} />}</QueryState>;
 }

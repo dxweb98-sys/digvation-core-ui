@@ -45,17 +45,17 @@ describe('renewal draft', () => {
     const { calls } = mockFetch(() => envelope({ message: 'ok', contract_id: 'contract-1', term_id: 'term-2', status: 'SCHEDULED' }));
     renderApp(<TermsSection contract={contract} prices={[]} canManage />);
 
-    expect(screen.getAllByText('Renewal draft').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Draf perpanjangan').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Rp 450.000').length).toBeGreaterThan(0);
     await openRowActions(0);
-    fireEvent.click(await screen.findByText('Confirm'));
+    fireEvent.click(await screen.findByText('Konfirmasi'));
 
     const dialog = await screen.findByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm term' }));
-    expect(await within(dialog).findByText('This field is required.')).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Konfirmasi term' }));
+    expect(await within(dialog).findByText('Isi kolom ini.')).toBeInTheDocument();
 
     fireEvent.change(within(dialog).getByRole('textbox'), { target: { value: 'Hosting costs went up' } });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm term' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Konfirmasi term' }));
 
     await waitFor(() => expect(calls).toHaveLength(1));
     expect(calls[0].url).toContain('/contracts/contract-1/terms/term-2/confirm');

@@ -4,7 +4,7 @@ import { useApiMutation } from '../../../shared/api/use-api-mutation';
 import { FormDialog } from '../../../shared/forms/form-dialog';
 import { read, type FieldSpec } from '../../../shared/forms/form-spec';
 import { useActiveProductOptions, useFeatures } from '../../catalog/catalog-queries';
-import type { ClientDetail } from '../../clients/clients-api';
+import { clientBrands, type ClientDetail } from '../../clients/clients-api';
 import { clientKeys } from '../../clients/clients-queries';
 import { servicesApi } from '../services-api';
 import { serviceKeys } from '../services-queries';
@@ -26,7 +26,7 @@ export function ProvisionServiceDialog({
   const create = useApiMutation(
     (body: Parameters<typeof servicesApi.create>[1]) => servicesApi.create(client.id, body),
     {
-      success: 'Service provisioned',
+      success: 'Service diprovision',
       invalidate: [serviceKeys.all, clientKeys.detail(client.id)],
       toastErrors: false,
       onSuccess: (result) => navigate(`/clients/${client.id}/services/${result.service_id}`),
@@ -41,10 +41,10 @@ export function ProvisionServiceDialog({
         kind: 'select',
         required: true,
         half: true,
-        options: client.brands
+        options: clientBrands(client)
           .filter((brand) => brand.status === 'ACTIVE')
           .map((brand) => ({ value: brand.id, label: `${brand.name} (${brand.code})` })),
-        hint: 'The brand cannot be changed later.',
+        hint: 'Brand tidak dapat diubah nanti.',
       },
       {
         name: 'product_id',
@@ -53,7 +53,7 @@ export function ProvisionServiceDialog({
         required: true,
         half: true,
         options: products.data ?? [],
-        hint: 'Only active products. It cannot be changed later.',
+        hint: 'Hanya product aktif. Tidak dapat diubah nanti.',
       },
       {
         name: 'feature_ids',
@@ -68,9 +68,9 @@ export function ProvisionServiceDialog({
           .map((feature) => ({
             value: feature.id,
             label: feature.name,
-            description: feature.scope === 'CLIENT' ? `${feature.code} · custom for this client` : feature.code,
+            description: feature.scope === 'CLIENT' ? `${feature.code} · kustom untuk client ini` : feature.code,
           })),
-        hint: features.isFetching ? 'Loading features…' : undefined,
+        hint: features.isFetching ? 'Memuat feature…' : undefined,
       },
     ],
     [client, products.data, features.data, features.isFetching],
@@ -80,7 +80,7 @@ export function ProvisionServiceDialog({
     <FormDialog
       open={open}
       title="Provision service"
-      description="The service starts in provisioning. Add-ons and status changes are made on the service page."
+      description="Service mulai dari provisioning. Perubahan add-on dan status dilakukan di halaman service."
       fields={fields}
       submitLabel="Provision service"
       onValuesChange={(values) => setProductId(read.text(values, 'product_id'))}

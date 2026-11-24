@@ -7,7 +7,7 @@ import { ConfirmDialog, FormDialog } from '../../../shared/forms/form-dialog';
 import { read } from '../../../shared/forms/form-spec';
 import { AppAction } from '../../../shared/ui/app-action';
 import { DetailItem, DetailList } from '../../../shared/ui/app-dialog';
-import { Code, Page, PageHeader, QueryState, Section } from '../../../shared/ui/page';
+import { Code, Page, PageBreadcrumb, PageHeader, QueryState, Section } from '../../../shared/ui/page';
 import { StatusBadge } from '../../../shared/ui/status-badge';
 import { PERMISSIONS } from '../../auth/permissions';
 import { usePermissions } from '../../auth/use-permissions';
@@ -30,16 +30,16 @@ function ContractView({ contract }: { contract: Contract }) {
 
   const update = useApiMutation(
     (values: Parameters<typeof contractSettingsBody>[0]) => contractsApi.update(contract.id, contractSettingsBody(values)),
-    { success: 'Contract saved', invalidate, toastErrors: false },
+    { success: 'Contract tersimpan', invalidate, toastErrors: false },
   );
   const transition = useApiMutation(
     (input: { target: 'SUSPENDED' | 'ACTIVE'; reason: string }) =>
       contractsApi.transition(contract.id, { target_status: input.target, reason: input.reason }),
-    { success: (_, input) => (input.target === 'SUSPENDED' ? 'Contract suspended' : 'Contract resumed'), invalidate, toastErrors: false },
+    { success: (_, input) => (input.target === 'SUSPENDED' ? 'Contract ditangguhkan' : 'Contract diaktifkan kembali'), invalidate, toastErrors: false },
   );
   const cancel = useApiMutation(
     (input: { reason: string; effective_on: string }) => contractsApi.cancel(contract.id, input),
-    { success: 'Contract cancellation recorded', invalidate, toastErrors: false },
+    { success: 'Pembatalan contract tercatat', invalidate, toastErrors: false },
   );
 
   const service = contract.service;
@@ -47,17 +47,20 @@ function ContractView({ contract }: { contract: Contract }) {
 
   return (
     <Page>
-      <Link className="app-back-link" to="/contracts">
-        ← Contracts
-      </Link>
+      <PageBreadcrumb
+        trail={[
+          { label: 'Contracts', to: '/contracts' },
+          { label: `${service.product.name} untuk ${service.brand.name}` },
+        ]}
+      />
       <PageHeader
-        title={`${service.product.name} for ${service.brand.name}`}
+        title={`${service.product.name} untuk ${service.brand.name}`}
         meta={
           <>
             <Link to={`/clients/${service.client.id}?tab=contracts`}>{service.client.display_name}</Link>
             <Code>{service.client.code}</Code>
             <StatusBadge status={contract.status} />
-            {contract.contract_reference ? <span>Ref {contract.contract_reference}</span> : null}
+            {contract.contract_reference ? <span>Referensi {contract.contract_reference}</span> : null}
           </>
         }
         actions={
@@ -65,40 +68,40 @@ function ContractView({ contract }: { contract: Contract }) {
             <>
               {contract.status === 'TRIAL' || contract.status === 'ACTIVE' ? (
                 <AppAction tone="secondary" onClick={() => setPausing('SUSPENDED')}>
-                  Suspend
+                  Tangguhkan
                 </AppAction>
               ) : null}
               {contract.status === 'SUSPENDED' ? (
                 <AppAction tone="secondary" onClick={() => setPausing('ACTIVE')}>
-                  Resume
+                  Aktifkan kembali
                 </AppAction>
               ) : null}
               {CANCELLABLE.includes(contract.status) && !contract.cancel_effective_on ? (
                 <AppAction tone="danger-subtle" onClick={() => setCancelling(true)}>
-                  Cancel contract
+                  Batalkan contract
                 </AppAction>
               ) : null}
-              <AppAction onClick={() => setEditing(true)}>Edit settings</AppAction>
+              <AppAction onClick={() => setEditing(true)}>Ubah pengaturan</AppAction>
             </>
           ) : null
         }
       />
       {contract.cancel_effective_on ? (
         <DAlert variant="warning">
-          Cancelled: the last day is {formatBusinessDate(contract.cancel_effective_on)}.
-          {contract.cancel_reason ? ` Reason: ${contract.cancel_reason}` : ''}
+          Dibatalkan: hari terakhir adalah {formatBusinessDate(contract.cancel_effective_on)}.
+          {contract.cancel_reason ? ` Alasan: ${contract.cancel_reason}` : ''}
         </DAlert>
       ) : null}
-      <Section title="Settings">
+      <Section title="Pengaturan">
         <DetailList>
-          <DetailItem label="Billable">{contract.billable ? 'Yes' : 'No (complimentary)'}</DetailItem>
-          <DetailItem label="Renews automatically">{contract.auto_renew ? 'Yes' : 'No'}</DetailItem>
-          <DetailItem label="Renewal notice">{`${contract.renewal_notice_days} days`}</DetailItem>
-          <DetailItem label="Grace period">{`${contract.grace_period_days} days`}</DetailItem>
-          <DetailItem label="Running term">
+          <DetailItem label="Ditagih">{contract.billable ? 'Ya' : 'Tidak (gratis)'}</DetailItem>
+          <DetailItem label="Perpanjangan otomatis">{contract.auto_renew ? 'Ya' : 'Tidak'}</DetailItem>
+          <DetailItem label="Pemberitahuan perpanjangan">{`${contract.renewal_notice_days} hari`}</DetailItem>
+          <DetailItem label="Masa tenggang">{`${contract.grace_period_days} hari`}</DetailItem>
+          <DetailItem label="Term berjalan">
             {running ? `${formatBusinessDate(running.starts_on)} – ${formatBusinessDate(running.ends_on)}` : undefined}
           </DetailItem>
-          <DetailItem label="Status since">{formatInstant(contract.status_changed_at)}</DetailItem>
+          <DetailItem label="Status sejak">{formatInstant(contract.status_changed_at)}</DetailItem>
         </DetailList>
       </Section>
       <TermsSection contract={contract} prices={prices.data ?? []} canManage={canManage} />
@@ -106,22 +109,22 @@ function ContractView({ contract }: { contract: Contract }) {
 
       <FormDialog
         open={editing}
-        title="Contract settings"
+        title="Pengaturan contract"
         fields={CONTRACT_SETTINGS_FIELDS}
         initialValues={contractSettingsValues(contract)}
-        submitLabel="Save settings"
+        submitLabel="Simpan pengaturan"
         onSubmit={(values) => update.mutateAsync(values)}
         onClose={() => setEditing(false)}
       />
       <ConfirmDialog
         open={pausing !== null}
-        title={pausing === 'SUSPENDED' ? 'Suspend contract' : 'Resume contract'}
+        title={pausing === 'SUSPENDED' ? 'Tangguhkan contract' : 'Aktifkan kembali contract'}
         message={
           pausing === 'SUSPENDED'
-            ? 'The contract and its service are paused. Nothing is billed for the paused time.'
-            : 'The contract and its service continue.'
+            ? 'Contract dan service-nya ditangguhkan. Tidak ada tagihan selama masa penangguhan.'
+            : 'Contract dan service-nya berjalan kembali.'
         }
-        confirmLabel={pausing === 'SUSPENDED' ? 'Suspend' : 'Resume'}
+        confirmLabel={pausing === 'SUSPENDED' ? 'Tangguhkan' : 'Aktifkan kembali'}
         tone={pausing === 'SUSPENDED' ? 'danger' : 'primary'}
         reason={{}}
         onConfirm={(values) => transition.mutateAsync({ target: pausing!, reason: read.text(values, 'reason') })}
@@ -129,10 +132,10 @@ function ContractView({ contract }: { contract: Contract }) {
       />
       <ConfirmDialog
         open={cancelling}
-        title="Cancel contract"
-        message="Draft and scheduled terms are cancelled at once. The running term continues until the last day you choose; then the contract becomes cancelled."
-        confirmLabel="Cancel contract"
-        extraFields={[{ name: 'effective_on', label: 'Last day of the running term', kind: 'date', required: true }]}
+        title="Batalkan contract"
+        message="Term berstatus draf dan term terjadwal langsung dibatalkan. Term yang berjalan tetap berlaku sampai hari terakhir yang Anda pilih; setelah itu contract menjadi dibatalkan."
+        confirmLabel="Batalkan contract"
+        extraFields={[{ name: 'effective_on', label: 'Hari terakhir term berjalan', kind: 'date', required: true }]}
         reason={{}}
         onConfirm={(values) =>
           cancel.mutateAsync({ reason: read.text(values, 'reason'), effective_on: read.text(values, 'effective_on') })

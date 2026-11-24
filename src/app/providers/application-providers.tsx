@@ -1,4 +1,4 @@
-import { DLocalizationProvider, DThemeProvider, DToastProvider, enMessages } from '@digvation/ui';
+import { DLocalizationProvider, DThemeProvider, DToastProvider } from '@digvation/ui';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { PropsWithChildren } from 'react';
 import { useState } from 'react';
@@ -10,7 +10,7 @@ export function ApplicationProviders({ children }: PropsWithChildren) {
 
   return (
     <DThemeProvider mode="dark" radius="default">
-      <DLocalizationProvider locale="en-US" messages={enMessages}>
+      <DLocalizationProvider locale="id-ID">
         <DToastProvider>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>{children}</AuthProvider>

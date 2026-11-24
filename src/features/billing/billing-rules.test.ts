@@ -33,8 +33,8 @@ describe('billing settings rules', () => {
       credit_note_number_pattern: 'CN/{YEAR}/{SEQ:5}',
     };
     expect(validateForm(SETTINGS_FIELDS, values)).toEqual({
-      invoice_number_pattern: 'Use exactly one {SEQ:n} token.',
-      credit_note_number_pattern: 'Unknown token {YEAR}. Use {YYYY}, {MM}, {BRAND} and {SEQ:n}.',
+      invoice_number_pattern: 'Gunakan tepat satu token {SEQ:n}.',
+      credit_note_number_pattern: 'Token {YEAR} tidak dikenal. Gunakan {YYYY}, {MM}, {BRAND}, dan {SEQ:n}.',
     });
     expect(
       validateForm(SETTINGS_FIELDS, { ...values, invoice_number_pattern: 'INV/{BRAND}/{SEQ:4}', credit_note_number_pattern: 'CN/{YYYY}/{SEQ:5}' }),
@@ -42,10 +42,10 @@ describe('billing settings rules', () => {
   });
 
   it('catches the obvious proof file problems before upload', () => {
-    expect(proofProblem(null)).toBe('Choose a file.');
-    expect(proofProblem(new File(['x'], 'proof.txt', { type: 'text/plain' }))).toBe('Use a PDF, JPG or PNG file.');
+    expect(proofProblem(null)).toBe('Pilih berkas terlebih dahulu.');
+    expect(proofProblem(new File(['x'], 'proof.txt', { type: 'text/plain' }))).toBe('Gunakan berkas PDF, JPG, atau PNG.');
     const big = new File([new Uint8Array(PROOF_MAX_BYTES + 1)], 'proof.pdf', { type: 'application/pdf' });
-    expect(proofProblem(big)).toBe('The file is larger than 5 MB.');
+    expect(proofProblem(big)).toBe('Ukuran berkas melebihi 5 MB.');
     expect(proofProblem(new File(['%PDF'], 'proof.pdf', { type: 'application/pdf' }))).toBeUndefined();
   });
 });

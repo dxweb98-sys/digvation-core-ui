@@ -24,14 +24,14 @@ export function CoreApiStatus() {
     retry: false,
   });
 
-  if (reachability.isPending) return <DBadge variant="secondary">Checking</DBadge>;
+  if (reachability.isPending) return <DBadge variant="secondary">Memeriksa</DBadge>;
   return reachability.data ? (
     <DBadge variant="success" dot>
-      Reachable
+      Terhubung
     </DBadge>
   ) : (
     <DBadge variant="danger" dot>
-      Unreachable
+      Tidak terhubung
     </DBadge>
   );
 }

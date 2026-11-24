@@ -14,7 +14,7 @@ export function NewDraftDialog({ open, clientId, onClose }: { open: boolean; cli
   const [chosen, setChosen] = useState(clientId ?? '');
   const brands = useBrands(clientId ?? chosen, open);
   const create = useApiMutation(billingApi.createDraft, {
-    success: 'Draft invoice opened',
+    success: 'Draf invoice dibuka',
     invalidate: [billingKeys.all],
     toastErrors: false,
     onSuccess: (draft) => navigate(`/invoices/${draft.id}`),
@@ -27,13 +27,13 @@ export function NewDraftDialog({ open, clientId, onClose }: { open: boolean; cli
         : [{ name: 'client_id', label: 'Client', kind: 'select' as const, required: true, options: clients.data ?? [] }]),
       {
         name: 'brand_id',
-        label: 'Brand billed',
+        label: 'Brand ditagih',
         kind: 'select',
         required: true,
         options: (brands.data ?? [])
           .filter((brand) => brand.status === 'ACTIVE')
           .map((brand) => ({ value: brand.id, label: `${brand.name} (${brand.code})` })),
-        hint: 'The invoice goes to the billing contacts of this brand.',
+        hint: 'Invoice dikirim ke kontak penagihan brand ini.',
       },
     ],
     [clientId, clients.data, brands.data],
@@ -42,10 +42,10 @@ export function NewDraftDialog({ open, clientId, onClose }: { open: boolean; cli
   return (
     <FormDialog
       open={open}
-      title="New draft invoice"
-      description="Use this for one-off items. Subscription and contract charges are drafted automatically."
+      title="Draf invoice baru"
+      description="Gunakan untuk tagihan sekali jalan. Biaya langganan dan contract dibuat sebagai draf otomatis."
       fields={fields}
-      submitLabel="Open draft"
+      submitLabel="Buka draf"
       onValuesChange={(values) => {
         if (!clientId) setChosen(read.text(values, 'client_id'));
       }}

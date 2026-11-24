@@ -1,4 +1,4 @@
-import { DDataTable, DEmptyState, DStatusFilter } from '@digvation/ui';
+import { DDataTable, DStatusFilter } from '@digvation/ui';
 import { useNavigate } from 'react-router';
 import { AppDateInput } from '../../../shared/ui/form-fields';
 import { Page, PageHeader, QueryState } from '../../../shared/ui/page';
@@ -6,8 +6,7 @@ import { useListState } from '../../../shared/ui/use-list-state';
 import { CONTRACT_COLUMNS, CONTRACT_STATUS_OPTIONS } from '../components/contracts-table';
 import { useContracts } from '../contracts-queries';
 
-export function ContractListPage() {
-  const navigate = useNavigate();
+export function ContractListPage() { const navigate = useNavigate();
   const list = useListState();
   const contracts = useContracts(list.query);
 
@@ -15,7 +14,7 @@ export function ContractListPage() {
     <Page>
       <PageHeader
         title="Contracts"
-        description="The commercial agreement of each client service: terms, agreed prices and renewals. Create a contract from the service page."
+        description="Perjanjian komersial tiap service client: term, harga yang disepakati, dan perpanjangan. Buat contract dari halaman service."
       />
       <QueryState query={contracts} label="contracts">
         {(page) => (
@@ -24,19 +23,18 @@ export function ContractListPage() {
             data={page.items}
             rowKey="id"
             searchable
-            searchPlaceholder="Search client, brand, product, or reference"
+            searchPlaceholder="Cari client, brand, product, atau referensi"
             {...list.tableProps}
-            filters={
-              <div className="app-page-actions">
+            filters={ <div className="app-page-actions">
                 <DStatusFilter
                   label="Status"
-                  allLabel="All statuses"
+                  allLabel="Semua status"
                   options={CONTRACT_STATUS_OPTIONS}
                   value={String(list.state.filters.status ?? 'ALL')}
                   onChange={(status) => list.setFilter('status', status)}
                 />
                 <AppDateInput
-                  label="Ends before"
+                  label="Berakhir sebelum"
                   optional
                   clearable
                   value={String(list.state.filters.ends_before ?? '')}
@@ -47,7 +45,7 @@ export function ContractListPage() {
             }
             pagination={{ page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }}
             onRowClick={(contract) => navigate(`/contracts/${contract.id}`)}
-            emptyMessage={<DEmptyState title="No contracts found" description="Try another search or filter." />}
+            emptyMessage="Contract tidak ditemukan. Coba kata lain atau filter lain."
           />
         )}
       </QueryState>

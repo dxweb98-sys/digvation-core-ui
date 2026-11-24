@@ -1,17 +1,18 @@
 import { DBadge, type TableColumn } from '@digvation/ui';
 import { formatInstant } from '../../../shared/format/date';
+import { labelFor } from '../../../shared/labels/labels';
 import { Code, Identity } from '../../../shared/ui/page';
 import { RecordButton } from '../../../shared/ui/record-button';
 import { StatusBadge } from '../../../shared/ui/status-badge';
 import type { Service } from '../services-api';
 
 export const SERVICE_STATUS_OPTIONS = [
-  { value: 'PROVISIONING', label: 'Provisioning' },
-  { value: 'TRIAL', label: 'Trial' },
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'SUSPENDED', label: 'Suspended' },
-  { value: 'CANCELLED', label: 'Cancelled' },
-  { value: 'DECOMMISSIONED', label: 'Decommissioned' },
+  { value: 'PROVISIONING', label: labelFor('PROVISIONING') },
+  { value: 'TRIAL', label: labelFor('TRIAL') },
+  { value: 'ACTIVE', label: labelFor('ACTIVE') },
+  { value: 'SUSPENDED', label: labelFor('SUSPENDED') },
+  { value: 'CANCELLED', label: labelFor('CANCELLED') },
+  { value: 'DECOMMISSIONED', label: labelFor('DECOMMISSIONED') },
 ];
 
 export const SERVICE_COLUMNS: TableColumn<Service>[] = [
@@ -56,5 +57,5 @@ export const SERVICE_COLUMNS: TableColumn<Service>[] = [
         </span>
       ),
   },
-  { key: 'updated_at', label: 'Updated', render: (service) => formatInstant(service.updated_at) },
+  { key: 'updated_at', label: 'Diperbarui', render: (service) => formatInstant(service.updated_at) },
 ];

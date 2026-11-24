@@ -1,7 +1,7 @@
 export const PAYMENT_METHODS = [
-  { value: 'BANK_TRANSFER', label: 'Bank transfer' },
-  { value: 'CASH', label: 'Cash' },
-  { value: 'OTHER', label: 'Other' },
+  { value: 'BANK_TRANSFER', label: 'Transfer bank' },
+  { value: 'CASH', label: 'Tunai' },
+  { value: 'OTHER', label: 'Lainnya' },
 ];
 
 export const PROOF_MAX_BYTES = 5 * 1024 * 1024;
@@ -9,8 +9,8 @@ const PROOF_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
 
 /** CORE checks the content itself; this only catches the obvious mistakes before upload. */
 export function proofProblem(file: File | null) {
-  if (!file) return 'Choose a file.';
-  if (file.size > PROOF_MAX_BYTES) return 'The file is larger than 5 MB.';
-  if (file.type && !PROOF_TYPES.includes(file.type)) return 'Use a PDF, JPG or PNG file.';
+  if (!file) return 'Pilih berkas terlebih dahulu.';
+  if (file.size > PROOF_MAX_BYTES) return 'Ukuran berkas melebihi 5 MB.';
+  if (file.type && !PROOF_TYPES.includes(file.type)) return 'Gunakan berkas PDF, JPG, atau PNG.';
   return undefined;
 }

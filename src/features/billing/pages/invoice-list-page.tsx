@@ -1,4 +1,4 @@
-import { DDataTable, DEmptyState, DStatusFilter } from '@digvation/ui';
+import { DDataTable, DStatusFilter } from '@digvation/ui';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -11,8 +11,7 @@ import { useInvoices } from '../billing-queries';
 import { INVOICE_COLUMNS, INVOICE_STATUS_OPTIONS } from '../components/invoice-columns';
 import { NewDraftDialog } from '../components/new-draft-dialog';
 
-export function InvoiceListPage() {
-  const navigate = useNavigate();
+export function InvoiceListPage() { const navigate = useNavigate();
   const list = useListState();
   const invoices = useInvoices(list.query);
   const { can } = usePermissions();
@@ -21,12 +20,11 @@ export function InvoiceListPage() {
   return (
     <Page>
       <PageHeader
-        title="Invoices"
-        description="Drafts are generated before each billing period. Review, issue and send them here."
-        actions={
-          can(PERMISSIONS.BILLING_MANAGE) && can(PERMISSIONS.CLIENTS_READ) ? (
+        title="Invoice"
+        description="Draf dibuat sebelum setiap periode billing. Tinjau, terbitkan, dan kirim invoice di sini."
+        actions={ can(PERMISSIONS.BILLING_MANAGE) && can(PERMISSIONS.CLIENTS_READ) ? (
             <AppAction icon={Plus} tone="secondary" onClick={() => setCreating(true)}>
-              New draft
+              Draf baru
             </AppAction>
           ) : null
         }
@@ -38,12 +36,11 @@ export function InvoiceListPage() {
             data={page.items}
             rowKey="id"
             searchable
-            searchPlaceholder="Search number, client, or brand"
+            searchPlaceholder="Cari nomor, client, atau brand"
             {...list.tableProps}
-            filters={
-              <DStatusFilter
+            filters={ <DStatusFilter
                 label="Status"
-                allLabel="All statuses"
+                allLabel="Semua status"
                 options={INVOICE_STATUS_OPTIONS}
                 value={String(list.state.filters.status ?? 'ALL')}
                 onChange={(status) => list.setFilter('status', status)}
@@ -51,7 +48,7 @@ export function InvoiceListPage() {
             }
             pagination={{ page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }}
             onRowClick={(invoice) => navigate(`/invoices/${invoice.id}`)}
-            emptyMessage={<DEmptyState title="No invoices found" description="Try another search or status." />}
+            emptyMessage="Invoice tidak ditemukan. Coba kata lain atau status lain."
           />
         )}
       </QueryState>

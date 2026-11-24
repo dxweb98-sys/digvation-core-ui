@@ -10,8 +10,8 @@ export function RouteErrorState() {
   return (
     <main className="application-error-page">
       <DConnectionError
-        title="This view could not load"
-        message="The requested Control Center view is unavailable."
+        title="Tampilan ini tidak bisa dimuat"
+        message="Tampilan Control Center yang diminta tidak tersedia."
         detail={detail}
         onRetry={() => window.location.reload()}
       />

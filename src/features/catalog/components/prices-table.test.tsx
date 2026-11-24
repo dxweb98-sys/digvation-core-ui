@@ -17,7 +17,7 @@ describe('list prices', () => {
   it('shows minor units as whole rupiah', () => {
     renderApp(<PricesTable prices={[price]} canManage={false} onSet={vi.fn()} onDelete={vi.fn()} />);
     expect(screen.getAllByText('Rp 1.500.000').length).toBeGreaterThan(0);
-    expect(screen.queryByRole('button', { name: 'Set price' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Atur harga' })).not.toBeInTheDocument();
   });
 
   it('prefills the change form in rupiah and sends minor units back', async () => {
@@ -25,13 +25,13 @@ describe('list prices', () => {
     renderApp(<PricesTable prices={[price]} canManage onSet={onSet} onDelete={vi.fn()} />);
 
     await openRowActions(0);
-    fireEvent.click(await screen.findByText('Change'));
+    fireEvent.click(await screen.findByText('Ubah'));
     const dialog = await screen.findByRole('dialog');
-    const amount = within(dialog).getByRole('textbox', { name: /list price/i });
+    const amount = within(dialog).getByRole('textbox', { name: /harga list/i });
     expect(amount).toHaveValue('1.500.000');
 
     fireEvent.change(amount, { target: { value: '2.000.000' } });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Save price' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Simpan harga' }));
 
     await waitFor(() =>
       expect(onSet).toHaveBeenCalledWith({ billing_cycle: 'MONTHLY', currency: 'IDR', amount: '200000000' }),
