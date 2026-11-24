@@ -7,6 +7,7 @@ import { UsersPage } from '../../features/access/pages/users-page';
 import { RequireAuthentication } from '../../features/auth/components/require-authentication';
 import { AcceptInvitationPage } from '../../features/auth/pages/accept-invitation-page';
 import { LoginPage } from '../../features/auth/pages/login-page';
+import { PasswordResetCodePage } from '../../features/auth/pages/password-reset-code-page';
 import { PasswordResetPage } from '../../features/auth/pages/password-reset-page';
 import { ApplicationShell } from '../shell/application-shell';
 import { HomePage } from './home-page';
@@ -20,6 +21,7 @@ import { RouteErrorState } from './route-error-state';
 export const applicationRoutes: RouteObject[] = [
   { path: '/login', element: <LoginPage /> },
   { path: '/password-reset', element: <PasswordResetPage /> },
+  { path: '/password-reset/code', element: <PasswordResetCodePage /> },
   { path: '/invitations/accept', element: <AcceptInvitationPage /> },
   {
     path: '/',

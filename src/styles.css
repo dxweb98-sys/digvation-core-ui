@@ -3,56 +3,51 @@
  * Overrides the public @digvation/ui variables for this app only, then adds
  * the tokens it owns. Component and feature CSS reads tokens, never raw values.
  */
-:root[data-ds-mode='dark'] {
-  color-scheme: dark;
+:root[data-ds-mode] {
+  /*
+   * Colors come from DThemeProvider (THEME_TOKENS in src/shared/theme/appearance.ts).
+   * The --cc-* names stay as aliases so screens not yet redesigned follow the theme.
+   */
+  --app-sidebar: #111111;
+  --app-font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
 
-  /* Surfaces, darkest first. Depth comes from tone rather than borders. */
-  --cc-rail: #090e10;
-  --cc-canvas: #0e1517;
-  --cc-surface: #151e21;
-  --cc-raised: #1c272b;
-  --cc-overlay: #243135;
+  --cc-rail: var(--app-sidebar);
+  --cc-canvas: var(--color-background);
+  --cc-surface: var(--color-surface);
+  --cc-raised: var(--color-surface-muted);
+  --cc-overlay: var(--color-secondary-hover);
+  --cc-line: var(--color-border);
+  --cc-line-control: var(--color-text-muted);
+  --cc-text: var(--color-text);
+  --cc-text-muted: var(--color-text-muted);
+  --cc-text-subtle: var(--color-text-muted);
+  --cc-accent: var(--color-brand);
+  --cc-accent-hover: var(--color-brand-hover);
+  --cc-accent-active: var(--color-brand-hover);
+  --cc-on-accent: var(--color-brand-foreground);
+  --cc-status-success: var(--color-success);
+  --cc-status-warning: var(--color-warning);
+  --cc-status-danger: var(--color-danger);
+  --cc-status-danger-solid: var(--color-danger);
+  --cc-status-info: var(--color-info);
+  --cc-shadow-raised: var(--shadow-sm);
+  --cc-shadow-overlay: var(--shadow-lg);
+  --cc-font-sans: var(--font-sans);
+  --cc-font-mono: var(--app-font-mono);
+  --cc-radius-sm: 4px;
+  --cc-radius-md: var(--radius-control);
+  --cc-radius-lg: var(--radius-card);
 
-  /* Lines */
-  --cc-line: #2a383c;
-  --cc-line-control: #6a7f85;
-
-  /* Text */
-  --cc-text: #e8eff0;
-  --cc-text-muted: #a7b6ba;
-  --cc-text-subtle: #8fa0a5;
-
-  /* The single accent: primary action, focus, active navigation, selection. */
-  --cc-accent: #3ccfe0;
-  --cc-accent-hover: #66dae8;
-  --cc-accent-active: #8ce4ee;
-  --cc-on-accent: #03171a;
-
-  /* Chart series identity. Validated for color vision deficiency on --cc-surface. */
+  /* Chart series identity. Validated for color vision deficiency. */
   --cc-series-1: #8b6ef2;
   --cc-series-2: #d85f9f;
   --cc-series-3: #7f9c34;
 
-  /* Status set. Separate from the accent, and always paired with text. */
-  --cc-status-success: #56d98f;
-  --cc-status-warning: #f4bc52;
-  --cc-status-danger: #ff8a80;
-  --cc-status-danger-solid: #d42f37;
-  --cc-status-info: #a6bdff;
-
-  /* Elevation */
-  --cc-shadow-raised: 0 1px 2px rgb(0 0 0 / 35%);
-  --cc-shadow-overlay: 0 18px 48px rgb(0 0 0 / 55%);
-
-  /* Typography, system stacks only. */
-  --cc-font-sans: 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-  --cc-font-mono: ui-monospace, 'Cascadia Mono', 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
   --cc-text-xs: 0.72rem;
   --cc-text-sm: 0.8rem;
   --cc-text-md: 0.875rem;
   --cc-text-xl: 1.6rem;
 
-  /* Spacing */
   --cc-space-1: 4px;
   --cc-space-2: 8px;
   --cc-space-3: 12px;
@@ -60,51 +55,22 @@
   --cc-space-5: 24px;
   --cc-space-6: 32px;
 
-  /* Radius */
-  --cc-radius-sm: 4px;
-  --cc-radius-md: 8px;
-  --cc-radius-lg: 12px;
-
-  /* Motion */
   --motion-fast: 120ms;
   --motion-base: 180ms;
   --motion-slow: 260ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
   --motion-stagger: 40ms;
-
-  /* Public @digvation/ui variables mapped onto the tokens above. */
-  --font-sans: var(--cc-font-sans);
-  --color-background: var(--cc-canvas);
-  --color-surface: var(--cc-surface);
-  --color-surface-muted: var(--cc-raised);
-  --color-text: var(--cc-text);
-  --color-text-muted: var(--cc-text-muted);
-  --color-border: var(--cc-line);
-  --color-brand: var(--cc-accent);
-  --color-brand-hover: var(--cc-accent-hover);
-  --color-brand-active: var(--cc-accent-active);
-  --color-brand-foreground: var(--cc-on-accent);
-  --color-secondary: var(--cc-raised);
-  --color-secondary-hover: var(--cc-overlay);
-  --color-secondary-active: var(--cc-line);
-  --color-secondary-foreground: var(--cc-text);
-  --color-focus: var(--cc-accent);
-  --color-info: var(--cc-status-info);
-  --color-success: var(--cc-status-success);
-  --color-warning: var(--cc-status-warning);
-  --color-danger: var(--cc-status-danger);
-  --color-tooltip: var(--cc-rail);
-  --radius-control: var(--cc-radius-md);
-  --radius-card: var(--cc-radius-lg);
-  --radius-panel: var(--cc-radius-lg);
-  --shadow-sm: var(--cc-shadow-raised);
-  --shadow-md: var(--cc-shadow-overlay);
-  --shadow-lg: var(--cc-shadow-overlay);
-  --shadow-panel: var(--cc-shadow-overlay);
   --default-transition-duration: var(--motion-fast);
   --default-transition-timing-function: var(--ease-standard);
   --ease-out: var(--ease-standard);
+  --color-tooltip: var(--app-sidebar);
+  color-scheme: dark;
+}
+
+:root[data-ds-mode='light'] {
+  --app-sidebar: #f3f1ed;
+  color-scheme: light;
 }
 
 :root {
@@ -667,4 +633,9 @@ samp {
 /* The DS checkbox border is nearly invisible on raised surfaces. */
 :root[data-ds-mode] [data-ds-component='checkbox'] > input:not(:checked) + span {
   border-color: var(--cc-text-subtle);
+}
+
+/* Temporary until the design system draws the checkbox box at 4px (00-foundation.md, addition 2). */
+:root[data-ds-mode] [data-ds-component='checkbox'] > span {
+  border-radius: 4px;
 }
