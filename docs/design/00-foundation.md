@@ -1,4 +1,4 @@
-# 00 · Fondasi UI CORE — APPROVED (24 Nov 2026)
+# 00 · Fondasi UI CORE — APPROVED (24 Nov 2026, kontras diperbaiki 24 Nov 2026)
 
 Sumber visual: kanvas "Digvation CORE — desain UI" (board 00 · Fondasi). Berlaku untuk semua layar core-ui. Logo juga tersedia sebagai file `digvation-mark.svg` di folder ini.
 
@@ -25,11 +25,15 @@ tema=netral; aksen=mono; font=inter; kepadatan=normal; radius=8; sidebar=kontras
 | secondary | #1a1a1a | #f1eee9 |
 | secondaryHover | #232323 | #e9e5de |
 | focus | #ededed | #1c1917 |
-| success | #45a557 | #2f7d45 |
-| warning | #f5a524 | #a8650b |
-| danger | #e5484d | #c0392b |
+| success | #45a557 | #256b38 |
+| warning | #f5a524 | #8f5506 |
+| danger | #ff6166 | #b02e24 |
 | info | #52a8ff | #1d6fa5 |
 | sidebar (milik app) | #111111 | #f3f1ed |
+| danger-foreground (milik app, teks tombol bahaya) | #0a0a0a | #ffffff |
+
+## Kontras
+Semua warna status lolos WCAG AA 4.5:1 sebagai teks di atas surface dan di dalam pill (latar 12%). Di mode gelap, teks putih di atas merah tidak bisa lolos bersamaan dengan teks merah di atas latar gelap. Karena itu tombol bahaya memakai `--app-danger-foreground`: teks gelap (#0a0a0a) di mode gelap dan putih di mode terang hangat. Sampai design system punya token warna teks tombol bahaya, core-ui memasang override kecil yang diberi komentar pada DButton varian danger.
 
 ## Bentuk dan huruf
 - Font: Inter (400/500/600/700); kode dan nomor dokumen: JetBrains Mono.
@@ -44,7 +48,9 @@ tema=netral; aksen=mono; font=inter; kepadatan=normal; radius=8; sidebar=kontras
 ## Tambahan design system yang dibutuhkan
 1. DDataTable: opsi judul kolom kapital.
 2. DCheckbox: radius tetap 4px (sekarang memakai radius control 8px sehingga tampil bulat).
-3. Komponen baru (saat layar yang memakainya di-approve): stat strip, activity feed.
+3. DButton danger: token warna teks sendiri (pengganti putih tetap).
+4. DInput kata sandi: tombol mata bisa dijangkau keyboard, label "Tampilkan kata sandi".
+5. Komponen baru (saat layar yang memakainya di-approve): stat strip, activity feed.
 
 ## Logo
 `digvation-mark.svg` (fill = currentColor, viewBox 0 0 1000 990):
