@@ -16,6 +16,7 @@ This folder holds the product owner's approved designs. Each screen is built to 
 |---|---|---|
 | `00-foundation.md` | Theme tokens, type, radii, components, logo | 2026-11-24 |
 | `01-login.html` | Sign in, forgot password, set a new password (all states, ID/EN copy) | 2026-11-24 |
+| `02-users.html` | App shell (sidebar, top bar, account menu) and the users list with deactivate/reactivate | 2026-11-24 |
 | `digvation-mark.svg` | Digvation logo mark (`fill="currentColor"`) | 2026-11-24 |
 
 Open the `.html` files in a browser. Each one starts with the behaviour and copy, followed by every state as rendered.
