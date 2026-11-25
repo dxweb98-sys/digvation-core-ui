@@ -14,12 +14,13 @@ This folder holds the product owner's approved designs. Each screen is built to 
 
 | File | Screen | Approved |
 |---|---|---|
-| `00-foundation.md` | Theme tokens, type, radii, components, logo (status contrast raised and warm light tokens strengthened 2026-11-24) | 2026-11-24 |
+| `00-foundation.md` | Theme tokens, type, radii, components, logo (status contrast raised and warm light tokens strengthened 2026-11-24; date-time format and table filters 2026-11-25) | 2026-11-24 |
 | `01-login.html` | Sign in, forgot password, set a new password (all states, ID/EN copy) | 2026-11-24 |
 | `02-users.html` | App shell (sidebar, top bar, account menu) and the users list with deactivate/reactivate | 2026-11-24 |
 | `03-change-roles.html` | Change roles dialog (multi-select, locks, server errors) and the warm light token change | 2026-11-24 |
-| `04-roles.html` | Roles page, permission editor, create/edit role, deactivate/reactivate (status filter re-rendered in the `DStatusFilter` style 2026-11-25) | 2026-11-25 |
-| `05-invitations.html` | Invitations page, invite dialog, revoke, give roles to an accepted invitation, accept invitation (public), account without a role | 2026-11-25 |
+| `04-roles.html` | Roles page, permission editor, create/edit role, deactivate/reactivate (status filter moved to the DDataTable filter section 2026-11-25) | 2026-11-25 |
+| `05-invitations.html` | Invitations page, invite dialog, revoke, give roles to an accepted invitation, accept invitation (public), account without a role (status filter moved to the DDataTable filter section 2026-11-25) | 2026-11-25 |
+| `06-profile.html` | My profile as a dialog from the account menu: profile tab, password tab | 2026-11-25 |
 | `digvation-mark.svg` | Digvation logo mark (`fill="currentColor"`) | 2026-11-24 |
 
 Open the `.html` files in a browser. Each one starts with the behaviour and copy, followed by every state as rendered.

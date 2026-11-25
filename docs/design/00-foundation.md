@@ -1,4 +1,4 @@
-# 00 · Fondasi UI CORE — APPROVED (24 Nov 2026; kontras status dan token terang hangat diperbarui 24 Nov 2026)
+# 00 · Fondasi UI CORE — APPROVED (24 Nov 2026; kontras status dan token terang hangat diperbarui 24 Nov 2026; format tanggal-jam dan filter tabel 25 Nov 2026)
 
 Sumber visual: kanvas "Digvation CORE — desain UI" (board 00 · Fondasi). Berlaku untuk semua layar core-ui. Logo juga tersedia sebagai file `digvation-mark.svg` di folder ini.
 
@@ -47,8 +47,14 @@ Semua warna status lolos WCAG AA 4.5:1 sebagai teks di atas surface dan di dalam
 - Status: DBadge pil. Judul kolom tabel: kapital 11px, letter-spacing 0.05em (butuh opsi baru di DDataTable).
 - Kepadatan normal: sel tabel padding 12px 16px.
 
+## Tabel
+- Semua daftar memakai DDataTable. Filter memakai **bagian filter bawaan DDataTable** (prop `filters`): tombol filter di sebelah pencarian membuka baris berisi `DSelectFilter` (label di dalam tombol, mis. "Status: Menunggu"). Tidak memakai DStatusFilter atau tombol pilihan berjejer di toolbar (keputusan PO 25 Nov 2026).
+- Selama ada filter aktif, teks di kanan toolbar (`headerActions`) menyebutnya: "{n} undangan · Status: Menunggu". Dengan begitu filter tetap terlihat walau barisnya ditutup.
+- Jumlah per pilihan hanya ditampilkan bila datanya sudah ada di browser (daftar tanpa halaman, mis. Role).
+
 ## Mode dan bahasa
 - Tampilan: Gelap, Terang hangat, Ikuti sistem. Bahasa: Indonesia, English. Tanggal dan uang mengikuti locale (id-ID: "24 Nov 2026", "Rp 5.000.000"; en-US: "Nov 24, 2026", "IDR 5,000,000").
+- Tanggal-jam (keputusan PO 25 Nov 2026): jam 24 jam dengan titik dua, diikuti singkatan zona waktu perangkat. id-ID "26 Nov 2026 10:10 WIB", en-US "Nov 26, 2026 10:10 WIB". Zona: WIB (Asia/Jakarta, Asia/Pontianak), WITA (Asia/Makassar), WIT (Asia/Jayapura); di luar Indonesia singkatan dari `Intl` (mis. "GMT+8"). Berlaku di semua layar; board lama yang menampilkan "10.10" atau koma kalah oleh aturan ini.
 - Sebelum login: toggle di kanan atas halaman login. Setelah login: menu akun di kiri bawah (Profil saya, Bahasa, Tampilan, Keluar).
 
 ## Tambahan design system yang dibutuhkan
@@ -57,6 +63,7 @@ Semua warna status lolos WCAG AA 4.5:1 sebagai teks di atas surface dan di dalam
 3. DButton danger: token warna teks sendiri (pengganti putih tetap).
 4. DInput kata sandi: tombol mata bisa dijangkau keyboard, label "Tampilkan kata sandi".
 5. Komponen baru (saat layar yang memakainya di-approve): stat strip, activity feed.
+6. DDataTable: tanda jumlah filter aktif di tombol filter, dan opsi agar baris filter bisa dibuka dari luar (mis. tetap terbuka selama ada filter aktif).
 
 ## Logo
 `digvation-mark.svg` (fill = currentColor, viewBox 0 0 1000 990):
