@@ -1,4 +1,4 @@
-# 00 · Fondasi UI CORE — APPROVED (24 Nov 2026, kontras diperbaiki 24 Nov 2026)
+# 00 · Fondasi UI CORE — APPROVED (24 Nov 2026; kontras status dan token terang hangat diperbarui 24 Nov 2026)
 
 Sumber visual: kanvas "Digvation CORE — desain UI" (board 00 · Fondasi). Berlaku untuk semua layar core-ui. Logo juga tersedia sebagai file `digvation-mark.svg` di folder ini.
 
@@ -13,24 +13,29 @@ tema=netral; aksen=mono; font=inter; kepadatan=normal; radius=8; sidebar=kontras
 ## Token warna
 | Token | Gelap (default) | Terang hangat |
 |---|---|---|
-| background | #0a0a0a | #faf9f7 |
+| background | #0a0a0a | #f3f1ec |
 | surface | #111111 | #ffffff |
-| surfaceMuted | #1a1a1a | #f1eee9 |
-| border | #262626 | #e5e0d8 |
+| surfaceMuted | #1a1a1a | #eeeae3 |
+| border | #262626 | #d9d2c7 |
 | text | #ededed | #1c1917 |
-| textMuted | #a1a1a1 | #6f6862 |
+| textMuted | #a1a1a1 | #625b55 |
 | brand | #ededed | #1c1917 |
 | brandHover | #ffffff | #000000 |
 | brandForeground | #0a0a0a | #faf9f7 |
-| secondary | #1a1a1a | #f1eee9 |
-| secondaryHover | #232323 | #e9e5de |
+| secondary | #1a1a1a | #eeeae3 |
+| secondaryHover | #232323 | #e6e1d9 |
 | focus | #ededed | #1c1917 |
 | success | #45a557 | #256b38 |
 | warning | #f5a524 | #8f5506 |
 | danger | #ff6166 | #b02e24 |
 | info | #52a8ff | #1d6fa5 |
-| sidebar (milik app) | #111111 | #f3f1ed |
+| sidebar (milik app) | #111111 | #ebe7e0 |
 | danger-foreground (milik app, teks tombol bahaya) | #0a0a0a | #ffffff |
+| overlay dialog (milik app) | rgb(2 6 23 / 0.55) | rgb(28 25 23 / 0.32) |
+| shadowSm | 0 1px 2px rgb(0 0 0 / 0.4) | 0 1px 2px rgb(28 25 23 / 0.06), 0 1px 3px rgb(28 25 23 / 0.04) |
+
+## Terang hangat
+Latar halaman (#f3f1ec) sengaja lebih dalam dari kartu putih supaya kartu, tabel, dan dialog terpisah jelas dari latar; garis tepi #d9d2c7 dan bayangan dua lapis menguatkan batasnya. Latar di belakang dialog memakai warna hangat, bukan biru-abu.
 
 ## Kontras
 Semua warna status lolos WCAG AA 4.5:1 sebagai teks di atas surface dan di dalam pill (latar 12%). Di mode gelap, teks putih di atas merah tidak bisa lolos bersamaan dengan teks merah di atas latar gelap. Karena itu tombol bahaya memakai `--app-danger-foreground`: teks gelap (#0a0a0a) di mode gelap dan putih di mode terang hangat. Sampai design system punya token warna teks tombol bahaya, core-ui memasang override kecil yang diberi komentar pada DButton varian danger.
