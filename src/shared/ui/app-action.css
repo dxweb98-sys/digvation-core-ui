@@ -40,15 +40,6 @@
   background: color-mix(in srgb, var(--cc-status-danger) 14%, transparent);
 }
 
-/* The DS dims disabled controls to 50%, below AA on these surfaces. */
-:root[data-ds-mode] .app-action:disabled {
-  opacity: 0.85;
-}
-
-:root[data-ds-mode] .app-action.app-action-danger:disabled {
-  opacity: 0.9;
-}
-
 /* A pressed toggle is a selection, not a second primary action. */
 :root[data-ds-mode] .app-action-secondary[aria-pressed='true'] {
   color: var(--cc-text);

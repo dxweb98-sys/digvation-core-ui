@@ -1,0 +1,136 @@
+/* Change roles dialog: docs/design/03-change-roles.html, section B. The dialog body scrolls, not the list. */
+.change-roles-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* The DDialog body is 16px; the design sets the dialog content at 14px. */
+  font-size: 14px;
+}
+
+.change-roles-lead,
+.change-roles-summary {
+  margin: 0;
+  font-size: 13.5px;
+}
+
+.change-roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.change-roles-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.change-roles-option:hover {
+  background: color-mix(in srgb, var(--color-text) 5%, transparent);
+}
+
+.change-roles-option-on {
+  border-color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--color-text) 5%, transparent);
+}
+
+.change-roles-option [data-ds-component='checkbox'] {
+  margin-top: 2px;
+}
+
+.change-roles-option-locked {
+  cursor: not-allowed;
+}
+
+.change-roles-option-locked:hover {
+  background: transparent;
+}
+
+.change-roles-option-locked .change-roles-name,
+.change-roles-option-locked .change-roles-description {
+  opacity: 0.6;
+}
+
+.change-roles-skeleton {
+  cursor: default;
+}
+
+.change-roles-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.change-roles-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.change-roles-name {
+  font-weight: 500;
+}
+
+.change-roles-tag {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.change-roles-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.change-roles-description {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.change-roles-lock,
+.change-roles-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.change-roles-note {
+  margin: 0;
+}
+
+.change-roles-note svg {
+  flex: none;
+}
+
+.change-roles-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .change-roles-option {
+    transition: none;
+  }
+}

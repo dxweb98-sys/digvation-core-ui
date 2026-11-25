@@ -71,7 +71,7 @@
 }
 
 :root[data-ds-mode='light'] {
-  --app-sidebar: #f3f1ed;
+  --app-sidebar: #ebe7e0;
   --app-danger-foreground: #ffffff;
   --app-overlay: rgb(28 25 23 / 32%);
   color-scheme: light;
@@ -354,7 +354,10 @@ samp {
   color: var(--app-danger-foreground);
 }
 
-/* Dialog overlay of the approved design (02-users.html, section C): DDialog's own blur, app overlay color. */
+/*
+ * DDialog overlay in the app overlay color (00-foundation.md), keeping DDialog's own blur.
+ * Temporary until the design system has an overlay token.
+ */
 .app-dialog-overlay {
   background: var(--app-overlay);
 }

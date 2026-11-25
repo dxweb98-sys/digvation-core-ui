@@ -6,6 +6,7 @@ export const accessKeys = {
   all: ['access'] as const,
   users: (query?: Query) => ['access', 'users', query ?? {}] as const,
   user: (userId: string) => ['access', 'user', userId] as const,
+  userRoles: (userId: string) => ['access', 'user', userId, 'roles'] as const,
   roles: ['access', 'roles'] as const,
   permissions: ['access', 'permissions'] as const,
   invitations: (query?: Query) => ['access', 'invitations', query ?? {}] as const,
@@ -64,4 +65,14 @@ export function usePendingInvitationCount(enabled: boolean) {
     staleTime: 30_000,
   });
   return enabled ? (result.data?.pagination.total ?? 0) : 0;
+}
+
+/** The roles a user holds now, read fresh when the change roles dialog opens. */
+export function useUserRoles(userId: string | undefined) {
+  return useQuery({
+    queryKey: accessKeys.userRoles(userId ?? ''),
+    queryFn: async () => (await accessApi.userRoles(userId!)).roles,
+    enabled: Boolean(userId),
+    staleTime: 0,
+  });
 }

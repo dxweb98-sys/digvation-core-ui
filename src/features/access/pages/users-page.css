@@ -197,3 +197,10 @@
 .users-table [data-ds-component='data-table'] > .sm\:hidden .users-roles > *:not(:last-child)::after {
   content: ',';
 }
+
+/* In the cards, values sit on the label's line ("Role: Admin", "Status: Aktif"), like "Dibuat". */
+.users-table [data-ds-component='data-table'] > .sm\:hidden .users-roles,
+.users-table [data-ds-component='data-table'] > .sm\:hidden .users-status {
+  display: inline-flex;
+  vertical-align: middle;
+}

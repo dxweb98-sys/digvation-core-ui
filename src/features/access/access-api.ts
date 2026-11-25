@@ -10,6 +10,7 @@ export type AuditItem = Dto<'AuthorizationAuditItemDto'>;
 export const accessApi = {
   users: (query: Query) => api.list<User>('/users', query),
   user: (userId: string) => api.get<User>(`/users/${seg(userId)}`),
+  userRoles: (userId: string) => api.get<Dto<'UserRolesDto'>>(`/users/${seg(userId)}/roles`),
   setUserRoles: (userId: string, body: Dto<'SetUserRolesDto'>) =>
     api.put<Dto<'UserRolesUpdateResponseDto'>>(`/users/${seg(userId)}/roles`, body),
   setUserStatus: (userId: string, body: Dto<'ChangeUserStatusDto'>) =>

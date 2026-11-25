@@ -28,7 +28,7 @@ function tint(color: Rgb, background: Rgb, alpha = 0.12): Rgb {
   return color.map((channel, index) => channel * alpha + background[index] * (1 - alpha)) as Rgb;
 }
 
-const SIDEBAR = { dark: '#111111', light: '#f3f1ed' } as const;
+const SIDEBAR = { dark: '#111111', light: '#ebe7e0' } as const;
 
 /** App-owned danger button text, read from the stylesheet that sets it. */
 function dangerForeground(mode: 'dark' | 'light') {
@@ -63,6 +63,12 @@ describe.each(Object.entries(THEME_TOKENS) as [keyof typeof THEME_TOKENS, ThemeT
       const surface = rgb(tokens.surface);
       expect(contrast(rgb(status), surface)).toBeGreaterThanOrEqual(4.5);
       expect(contrast(rgb(status), tint(rgb(status), surface))).toBeGreaterThanOrEqual(4.5);
+    });
+
+    it.each(Object.entries(statuses))('keeps %s readable on background and surfaceMuted', (_, status) => {
+      for (const surface of [tokens.background, tokens.surfaceMuted]) {
+        expect(contrast(rgb(status), rgb(surface))).toBeGreaterThanOrEqual(4.5);
+      }
     });
 
     it('keeps danger button text readable on danger', () => {

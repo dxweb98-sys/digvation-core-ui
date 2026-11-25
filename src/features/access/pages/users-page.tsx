@@ -2,10 +2,7 @@ import { DBadge, DDataTable, type TableColumn } from '@digvation/ui';
 import { AlertCircle, MoreHorizontal, Plus, Search, Shield, UserCheck, UserX } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
-import { useApiMutation } from '../../../shared/api/use-api-mutation';
 import { calendarDateOf, formatBusinessDate } from '../../../shared/format/date';
-import { FormDialog } from '../../../shared/forms/form-dialog';
-import { read } from '../../../shared/forms/form-spec';
 import { AppAction } from '../../../shared/ui/app-action';
 import { AppMenu, AppMenuItem, AppMenuSeparator } from '../../../shared/ui/app-menu';
 import { Page, PageHeader } from '../../../shared/ui/page';
@@ -13,11 +10,12 @@ import { useListState } from '../../../shared/ui/use-list-state';
 import { PERMISSIONS } from '../../auth/permissions';
 import { useAuth } from '../../auth/use-auth';
 import { usePermissions } from '../../auth/use-permissions';
-import { accessApi, type User } from '../access-api';
-import { accessKeys, usePendingInvitationCount, useRoles, useUsers } from '../access-queries';
+import { type User } from '../access-api';
+import { usePendingInvitationCount, useRoles, useUsers } from '../access-queries';
+import { ChangeRolesDialog } from '../components/change-roles-dialog';
 import { InviteUserDialog } from '../components/invite-user-dialog';
 import { UserStatusDialog } from '../components/user-status-dialog';
-import { deactivateBlock } from '../user-rules';
+import { changeRolesBlock, deactivateBlock } from '../user-rules';
 import { useUsersCopy } from '../users-copy';
 import './users-page.css';
 
@@ -51,8 +49,9 @@ export function UsersPage() {
   const copy = useUsersCopy();
   const list = useListState();
   const users = useUsers(list.query);
-  const { can, roles: myRoles } = usePermissions();
+  const { can, roles: myRoles, permissions: myPermissions } = usePermissions();
   const { user: me } = useAuth();
+  const actor = { id: me?.id, roles: myRoles, permissions: myPermissions };
   const canInvite = can(PERMISSIONS.USERS_INVITE);
   const canManageRoles = can(PERMISSIONS.USERS_ROLES_MANAGE);
   const canLifecycle = can(PERMISSIONS.USERS_LIFECYCLE_MANAGE);
@@ -62,17 +61,20 @@ export function UsersPage() {
   const [editing, setEditing] = useState<User | null>(null);
   const [statusTarget, setStatusTarget] = useState<User | null>(null);
 
-  const setRoles = useApiMutation(
-    (input: { userId: string; roles: string[] }) =>
-      accessApi.setUserRoles(input.userId, { role_slugs: input.roles }),
-    { success: 'Role disimpan', invalidate: [accessKeys.all], toastErrors: false },
-  );
-
   // The user payload carries role slugs; the operator sees the role name.
   const roleName = new Map((roles.data ?? []).map((role) => [role.slug, role.name]));
-  const roleOptions = (roles.data ?? [])
-    .filter((role) => role.is_active)
-    .map((role) => ({ value: role.slug, label: role.name, description: role.description ?? undefined }));
+
+  // Focus goes back to the row's ⋯ button when a dialog closes. DDataTable renders
+  // the row twice (desktop table and mobile card), so the visible button is used.
+  const closeAndRefocus = (user: User | null, close: () => void) => {
+    close();
+    if (!user) return;
+    requestAnimationFrame(() =>
+      [...document.querySelectorAll<HTMLElement>(`[data-row-actions="${user.id}"]`)]
+        .find((button) => button.offsetParent !== null)
+        ?.focus(),
+    );
+  };
 
   const columns: TableColumn<User>[] = [
     {
@@ -126,7 +128,8 @@ export function UsersPage() {
   ];
 
   const rowActions = (user: User) => {
-    const blocked = user.is_active ? deactivateBlock(user, { id: me?.id, roles: myRoles }, copy) : undefined;
+    const blocked = user.is_active ? deactivateBlock(user, actor, copy) : undefined;
+    const rolesBlocked = changeRolesBlock(user, actor, roles.data ?? [], copy);
     return (
       <AppMenu
         label={copy.actionsFor(user.fullname)}
@@ -135,6 +138,7 @@ export function UsersPage() {
             ref={ref}
             type="button"
             className="users-row-action"
+            data-row-actions={user.id}
             aria-haspopup="menu"
             aria-expanded={open}
             aria-label={copy.actionsFor(user.fullname)}
@@ -144,7 +148,12 @@ export function UsersPage() {
         )}
       >
         {canManageRoles ? (
-          <AppMenuItem icon={<Shield size={16} aria-hidden="true" />} onSelect={() => setEditing(user)}>
+          <AppMenuItem
+            disabled={Boolean(rolesBlocked)}
+            hint={rolesBlocked}
+            icon={<Shield size={16} aria-hidden="true" />}
+            onSelect={() => setEditing(user)}
+          >
             {copy.changeRoles}
           </AppMenuItem>
         ) : null}
@@ -243,16 +252,11 @@ export function UsersPage() {
       </section>
 
       <InviteUserDialog open={inviting} onClose={() => setInviting(false)} />
-      <UserStatusDialog user={statusTarget} onClose={() => setStatusTarget(null)} />
-      <FormDialog
-        open={editing !== null}
-        title={`Role untuk ${editing?.fullname ?? ''}`}
-        description="User mendapat seluruh permission dari role yang dipilih. Sesi yang sedang terbuka akan memakai perubahan ini pada permintaan berikutnya."
-        fields={[{ name: 'role_slugs', label: 'Role', kind: 'checklist', options: roleOptions }]}
-        initialValues={{ role_slugs: editing?.roles ?? [] }}
-        submitLabel="Simpan role"
-        onSubmit={(values) => setRoles.mutateAsync({ userId: editing!.id, roles: read.list(values, 'role_slugs') })}
-        onClose={() => setEditing(null)}
+      <UserStatusDialog user={statusTarget} onClose={() => closeAndRefocus(statusTarget, () => setStatusTarget(null))} />
+      <ChangeRolesDialog
+        user={editing}
+        actor={actor}
+        onClose={() => closeAndRefocus(editing, () => setEditing(null))}
       />
     </Page>
   );

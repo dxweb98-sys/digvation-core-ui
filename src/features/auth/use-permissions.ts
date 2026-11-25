@@ -25,6 +25,8 @@ export function usePermissions() {
     resolved: !snapshot.isPending,
     /** Role slugs of the signed-in operator. */
     roles: snapshot.data?.roles ?? [],
+    /** Permission codes of the signed-in operator; `*` for a Super Admin. */
+    permissions: snapshot.data?.permissions ?? [],
     can: (permission: Permission) => hasPermission(snapshot.data, permission),
     canAny: (permissions: readonly Permission[]) => hasAnyPermission(snapshot.data, permissions),
   };

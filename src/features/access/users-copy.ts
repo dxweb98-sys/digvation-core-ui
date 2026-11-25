@@ -21,6 +21,8 @@ const id = {
   reactivate: 'Aktifkan kembali',
   notForSelf: 'Tidak bisa untuk akun sendiri',
   superAdminOnly: 'Hanya Super Admin yang bisa menonaktifkan Super Admin',
+  changeSuperAdminOnly: 'Hanya Super Admin yang bisa mengubah Super Admin',
+  changeBeyond: 'Pengguna ini punya izin yang tidak Anda miliki',
   showing: (n: number, total: number) => `Menampilkan ${n} dari ${total} pengguna`,
   noMatch: ['Tidak ada pengguna yang cocok', 'Coba kata kunci lain, atau undang pengguna baru.'],
   loadFailed: ['Daftar pengguna belum bisa dimuat', 'Periksa koneksi ke CORE, lalu coba lagi.'],
@@ -46,6 +48,41 @@ const id = {
     USER_STATUS_FORBIDDEN: ['Tidak bisa dinonaktifkan', 'Hanya Super Admin yang bisa menonaktifkan Super Admin.'],
     USER_INVALID_TRANSITION: ['Status sudah berubah', 'Pengguna ini sudah dalam status tersebut. Muat ulang daftar.'],
   } as Record<string, [string, string]>,
+
+  /** Change roles dialog: docs/design/03-change-roles.html. */
+  roles: {
+    title: 'Ubah role',
+    description: (name: string, email: string) => `${name} · ${email}`,
+    lead: 'Pilih satu atau lebih role. Pengguna mendapat gabungan izin dari semua role yang dipilih.',
+    legend: 'Role',
+    system: 'Sistem',
+    permissionCount: (n: number) => `${n} izin`,
+    allPermissions: 'Semua izin',
+    lockSuperAdmin: 'Hanya Super Admin yang bisa memberikan role ini.',
+    lockBeyond: 'Berisi izin yang tidak Anda miliki.',
+    chosen: 'Dipilih:',
+    noRole: (first: string) =>
+      ['Tanpa role', `Tanpa role, ${first} tidak bisa membuka halaman apa pun setelah masuk.`] as [string, string],
+    ownAccount: ['Anda mengubah role sendiri', 'Akses Anda ikut berubah pada permintaan berikutnya.'] as [string, string],
+    nextRequest: (first: string) => `Perubahan berlaku pada permintaan berikutnya. ${first} tidak perlu masuk ulang.`,
+    save: 'Simpan role',
+    saved: (name: string) => `Role ${name} diperbarui.`,
+    errors: (first: string): Record<string, [string, string]> => ({
+      LAST_SUPER_ADMIN: [
+        'Tidak bisa disimpan',
+        `${first} adalah Super Admin aktif terakhir. Jadikan pengguna lain Super Admin dulu.`,
+      ],
+      ROLE_ASSIGNMENT_FORBIDDEN: [
+        'Tidak bisa disimpan',
+        'Hanya Super Admin yang bisa memberikan atau mengubah role Super Admin.',
+      ],
+      PERMISSION_NOT_GRANTABLE: ['Tidak bisa disimpan', 'Ada role yang berisi izin yang tidak Anda miliki.'],
+      ROLE_NOT_ASSIGNABLE: [
+        'Daftar role berubah',
+        'Ada role yang sudah tidak aktif. Daftar role dimuat ulang; periksa pilihan Anda.',
+      ],
+    }),
+  },
 };
 
 export type UsersCopy = typeof id;
@@ -70,6 +107,8 @@ const en: UsersCopy = {
   reactivate: 'Reactivate',
   notForSelf: 'Not available for your own account',
   superAdminOnly: 'Only a Super Admin can deactivate a Super Admin',
+  changeSuperAdminOnly: 'Only a Super Admin can change a Super Admin',
+  changeBeyond: 'This user has permissions you don’t have',
   showing: (n, total) => `Showing ${n} of ${total} users`,
   noMatch: ['No matching users', 'Try another keyword, or invite a new user.'],
   loadFailed: ['Couldn’t load users', 'Check the connection to CORE, then try again.'],
@@ -94,6 +133,30 @@ const en: UsersCopy = {
     LAST_SUPER_ADMIN: ['Can’t deactivate', 'This is the last active Super Admin. Make another user Super Admin first.'],
     USER_STATUS_FORBIDDEN: ['Can’t deactivate', 'Only a Super Admin can deactivate a Super Admin.'],
     USER_INVALID_TRANSITION: ['Status already changed', 'This user already has that status. Reload the list.'],
+  },
+
+  roles: {
+    title: 'Change roles',
+    description: (name, email) => `${name} · ${email}`,
+    lead: 'Choose one or more roles. The user gets the combined permissions of every role chosen.',
+    legend: 'Roles',
+    system: 'System',
+    permissionCount: (n) => `${n} permissions`,
+    allPermissions: 'All permissions',
+    lockSuperAdmin: 'Only a Super Admin can give this role.',
+    lockBeyond: 'Includes permissions you don’t have.',
+    chosen: 'Chosen:',
+    noRole: (first) => ['No role', `Without a role, ${first} can’t open any page after signing in.`],
+    ownAccount: ['You are changing your own roles', 'Your access changes on your next request.'],
+    nextRequest: (first) => `Changes apply on the next request. ${first} doesn’t need to sign in again.`,
+    save: 'Save roles',
+    saved: (name) => `${name}’s roles updated.`,
+    errors: (first) => ({
+      LAST_SUPER_ADMIN: ['Couldn’t save', `${first} is the last active Super Admin. Make another user Super Admin first.`],
+      ROLE_ASSIGNMENT_FORBIDDEN: ['Couldn’t save', 'Only a Super Admin can give or change the Super Admin role.'],
+      PERMISSION_NOT_GRANTABLE: ['Couldn’t save', 'A chosen role includes permissions you don’t have.'],
+      ROLE_NOT_ASSIGNABLE: ['Roles changed', 'A role is no longer active. The roles were reloaded; check your choice.'],
+    }),
   },
 };
 
