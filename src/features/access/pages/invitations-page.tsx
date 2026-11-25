@@ -1,4 +1,4 @@
-import { DBadge, DConfirmDialog, DDataTable, DStatusFilter, useToast, type TableColumn } from '@digvation/ui';
+import { DBadge, DConfirmDialog, DDataTable, DSelectFilter, useToast, type TableColumn } from '@digvation/ui';
 import { AlertCircle, Mail, MoreHorizontal, Search, Shield, Users, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -108,7 +108,7 @@ export function InvitationsPage() {
     {
       key: 'invited_by',
       label: copy.columns.invitedBy,
-      render: (invitation) => <span className="users-muted">{invitation.invited_by.fullname}</span>,
+      render: (invitation) => <span className="users-muted inv-invited-by">{invitation.invited_by.fullname}</span>,
     },
     {
       key: 'expires_at',
@@ -251,19 +251,24 @@ export function InvitationsPage() {
             searchable
             searchPlaceholder={copy.search}
             {...list.tableProps}
+            filters={
+              <DSelectFilter
+                label={copy.statusLabel}
+                options={[
+                  { value: 'ALL', label: copy.all },
+                  ...STATUSES.map((value) => ({ value, label: copy.status[value] })),
+                ]}
+                value={status ?? 'ALL'}
+                onChange={(value) => list.setFilter('status', value ? String(value) : 'ALL')}
+              />
+            }
             headerActions={
-              <div className="inv-toolbar">
-                <div role="group" aria-label={copy.statusLabel}>
-                  <DStatusFilter
-                    label={copy.statusLabel}
-                    allLabel={copy.all}
-                    options={STATUSES.map((value) => ({ value, label: copy.status[value] }))}
-                    value={status ?? ''}
-                    onChange={(value) => list.setFilter('status', value || 'ALL')}
-                  />
-                </div>
-                {page ? <span className="users-meta">{copy.total(page.pagination.total)}</span> : null}
-              </div>
+              page ? (
+                <span className="users-meta">
+                  {copy.total(page.pagination.total)}
+                  {status ? copy.activeFilter(copy.statusLabel, copy.status[status]) : null}
+                </span>
+              ) : null
             }
             pagination={
               page && !invitations.isError

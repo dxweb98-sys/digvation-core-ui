@@ -2,6 +2,7 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { envelope, failure, mockFetch, type RecordedCall } from '../../../test/fetch-mock';
 import { renderApp } from '../../../test/render-app';
+import { openFilter } from '../../../test/table';
 import { RolesPage } from './roles-page';
 
 const role = (slug: string, name: string, permissions: string[], extra: Record<string, unknown> = {}) => ({
@@ -94,8 +95,11 @@ describe('roles list', () => {
     expect(rows.getAllByText('Sistem')).toHaveLength(2);
     expect(screen.getByText('4 role')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /Nonaktif/ }));
-    expect(await screen.findByText('1 role')).toBeInTheDocument();
+    openFilter('Status');
+    expect(await screen.findByRole('option', { name: 'Semua (4)' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Aktif (3)' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('option', { name: 'Nonaktif (1)' }));
+    expect(await screen.findByText('1 role · Status: Nonaktif')).toBeInTheDocument();
     expect((await table()).getByText('Lama')).toBeInTheDocument();
     expect((await table()).queryByText('Dukungan')).not.toBeInTheDocument();
   });

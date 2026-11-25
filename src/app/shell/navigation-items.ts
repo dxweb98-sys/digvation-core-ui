@@ -90,6 +90,5 @@ export function trailFor(pathname: string, copy: ShellCopy) {
       .sort((a, b) => b.to.length - a.to.length)[0];
     if (item) return [{ label: copy.groups[group.label] ?? group.label }, { label: label(item.to, item.label) }];
   }
-  if (pathname === '/profile') return [{ label: copy.myProfile }];
   return [{ label: copy.productContext }];
 }

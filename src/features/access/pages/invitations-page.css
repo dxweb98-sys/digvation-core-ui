@@ -1,18 +1,4 @@
 /* Invitations list: docs/design/05-invitations.html, section A. Shares the users list styles. */
-.inv-table [data-ds-component='data-table'] div:has(> .inv-toolbar) {
-  flex: 1;
-  width: 100%;
-}
-
-.inv-toolbar {
-  display: flex;
-  flex: 1;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
 .inv-own-only {
   display: block;
   margin-top: 6px;
@@ -39,3 +25,12 @@
   display: inline;
 }
 
+/*
+ * The card shows "Diundang oleh" under the email (design 05, board I16), so the
+ * DIUNDANG OLEH column is hidden in the card. Temporary, as in the users list:
+ * `.sm\:hidden` is a DS utility class, used until DDataTable offers an official
+ * option for its mobile cards.
+ */
+.inv-table [data-ds-component='data-table'] > .sm\:hidden div:has(> span > .inv-invited-by) {
+  display: none;
+}

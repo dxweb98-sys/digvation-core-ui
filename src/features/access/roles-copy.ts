@@ -8,6 +8,10 @@ const id = {
   create: 'Buat role',
   count: (n: number) => `${n} role`,
   statusLabel: 'Status',
+  /** A filter option with its count: "Aktif (5)". */
+  withCount: (label: string, n: number) => `${label} (${n})`,
+  /** Appended to the toolbar count while a filter is on: " · Status: Aktif". */
+  activeFilter: (filter: string, value: string) => ` · ${filter}: ${value}`,
   all: 'Semua',
   active: 'Aktif',
   inactive: 'Nonaktif',
@@ -119,6 +123,8 @@ const en: RolesCopy = {
   create: 'Create role',
   count: (n) => `${n} roles`,
   statusLabel: 'Status',
+  withCount: (label, n) => `${label} (${n})`,
+  activeFilter: (filter, value) => ` · ${filter}: ${value}`,
   all: 'All',
   active: 'Active',
   inactive: 'Inactive',

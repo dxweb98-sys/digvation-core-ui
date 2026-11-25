@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router';
-import { AuthContext, type AuthUser } from '../features/auth/auth-context';
+import { AuthContext, type AuthContextValue, type AuthUser } from '../features/auth/auth-context';
 
 export const TEST_USER: AuthUser = {
   id: 'user-1',
@@ -18,7 +18,10 @@ export const TEST_USER: AuthUser = {
 };
 
 /** Renders a signed-in screen; CORE is answered by the test's fetch stub. */
-export function renderApp(ui: ReactElement, { path = '/', route = '/' }: { path?: string; route?: string } = {}) {
+export function renderApp(
+  ui: ReactElement,
+  { path = '/', route = '/', auth = {} }: { path?: string; route?: string; auth?: Partial<AuthContextValue> } = {},
+) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
@@ -31,6 +34,9 @@ export function renderApp(ui: ReactElement, { path = '/', route = '/' }: { path?
               login: async () => undefined,
               logout: async () => undefined,
               setUser: () => undefined,
+              endSession: () => undefined,
+              signedOutNotice: null,
+              ...auth,
             }}
           >
             <MemoryRouter initialEntries={[route]}>

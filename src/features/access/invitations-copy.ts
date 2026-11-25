@@ -7,6 +7,8 @@ const id = {
   ownOnly: 'Anda hanya melihat undangan yang Anda kirim.',
   search: 'Cari email',
   statusLabel: 'Status',
+  /** Appended to the toolbar count while a filter is on: " · Status: Menunggu". */
+  activeFilter: (filter: string, value: string) => ` · ${filter}: ${value}`,
   all: 'Semua',
   status: { pending: 'Menunggu', accepted: 'Diterima', expired: 'Kedaluwarsa', revoked: 'Dicabut' },
   total: (n: number) => `${n} undangan`,
@@ -112,6 +114,7 @@ const en: InvitationsCopy = {
   ownOnly: 'You only see the invitations you sent.',
   search: 'Search email',
   statusLabel: 'Status',
+  activeFilter: (filter, value) => ` · ${filter}: ${value}`,
   all: 'All',
   status: { pending: 'Pending', accepted: 'Accepted', expired: 'Expired', revoked: 'Revoked' },
   total: (n) => `${n} invitations`,

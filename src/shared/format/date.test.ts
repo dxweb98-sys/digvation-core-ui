@@ -82,15 +82,22 @@ describe('business dates', () => {
 describe('instants', () => {
   const instant = '2026-11-24T03:05:00Z';
 
-  it('shows an instant in the given zone, with its time, in both languages', () => {
-    expect(formatInstant(instant, { locale: 'id-ID', timeZone: 'Asia/Jakarta' })).toBe('24 Nov 2026 10.05');
-    expect(formatInstant(instant, { locale: 'en-US', timeZone: 'Asia/Jakarta' })).toBe('Nov 24, 2026 10:05 AM');
+  it('shows an instant in the given zone, 24-hour with a colon and the zone, in both languages', () => {
+    expect(formatInstant(instant, { locale: 'id-ID', timeZone: 'Asia/Jakarta' })).toBe('24 Nov 2026 10:05 WIB');
+    expect(formatInstant(instant, { locale: 'en-US', timeZone: 'Asia/Jakarta' })).toBe('Nov 24, 2026 10:05 WIB');
     expect(formatInstant(instant, { locale: 'id-ID', timeZone: 'Asia/Jakarta', style: 'long' })).toBe(
-      '24 November 2026 10.05',
+      '24 November 2026 10:05 WIB',
     );
     expect(formatInstant(instant, { locale: 'en-US', timeZone: 'Asia/Jakarta', style: 'short' })).toBe(
-      '11/24/2026 10:05 AM',
+      '11/24/2026 10:05 WIB',
     );
+  });
+
+  it('names the Indonesian zones WIB, WITA and WIT, and others by their Intl short name', () => {
+    expect(formatInstant(instant, { locale: 'id-ID', timeZone: 'Asia/Pontianak' })).toBe('24 Nov 2026 10:05 WIB');
+    expect(formatInstant(instant, { locale: 'id-ID', timeZone: 'Asia/Makassar' })).toBe('24 Nov 2026 11:05 WITA');
+    expect(formatInstant(instant, { locale: 'en-US', timeZone: 'Asia/Jayapura' })).toBe('Nov 24, 2026 12:05 WIT');
+    expect(formatInstant(instant, { locale: 'en-US', timeZone: 'Asia/Singapore' })).toBe('Nov 24, 2026 11:05 GMT+8');
   });
 
   it('uses the browser zone by default, never a fixed Asia/Jakarta', () => {
@@ -99,8 +106,8 @@ describe('instants', () => {
     } as Intl.ResolvedDateTimeFormatOptions);
     expect(browserTimeZone()).toBe('America/Los_Angeles');
     // 03:05 UTC on 24 Nov is still 23 Nov, 19:05 in Los Angeles (UTC-8).
-    expect(formatInstant(instant, { locale: 'id-ID' })).toBe('23 Nov 2026 19.05');
-    expect(formatInstant(instant, { locale: 'en-US' })).toBe('Nov 23, 2026 7:05 PM');
+    expect(formatInstant(instant, { locale: 'id-ID' })).toBe('23 Nov 2026 19:05 PST');
+    expect(formatInstant(instant, { locale: 'en-US' })).toBe('Nov 23, 2026 19:05 PST');
   });
 
   it('keeps unreadable values and shows nothing for none', () => {

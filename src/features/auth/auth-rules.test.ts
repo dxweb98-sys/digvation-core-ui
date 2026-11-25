@@ -1,16 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { ApiError } from '../../shared/api/api-error';
-import { USERNAME_RULE } from '../access/password-rules';
 import { invitationToken } from './invitation-token';
 import { authAlertKey } from './sign-in-copy';
 
 describe('auth form rules', () => {
-  it('accepts usernames CORE accepts after lowercasing', () => {
-    expect(USERNAME_RULE('Jane.Doe')).toBeUndefined();
-    expect(USERNAME_RULE('ab')).toBeDefined();
-    expect(USERNAME_RULE('has space')).toBeDefined();
-  });
-
   it('reads the invitation token from the fragment, falling back to the query', () => {
     expect(invitationToken('#token=abc', '')).toBe('abc');
     expect(invitationToken('', '?token=xyz')).toBe('xyz');

@@ -1,5 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { Query } from '../../shared/api/client';
+import { PERMISSIONS } from '../auth/permissions';
+import { usePermissions } from '../auth/use-permissions';
 import { accessApi } from './access-api';
 
 export const accessKeys = {
@@ -29,6 +31,16 @@ export function useRoles(enabled = true) {
     queryFn: async () => (await accessApi.roles()).items,
     enabled,
   });
+}
+
+/**
+ * The signed-in operator's roles (GET /authorization/me) by the names the Role
+ * page shows (GET /roles); the slug when the operator cannot read roles.
+ */
+export function useMyRoleNames() {
+  const { can, roles } = usePermissions();
+  const catalog = useRoles(can(PERMISSIONS.ROLES_READ));
+  return roles.map((slug) => catalog.data?.find((role) => role.slug === slug)?.name ?? slug);
 }
 
 export function usePermissionCatalog(enabled = true) {

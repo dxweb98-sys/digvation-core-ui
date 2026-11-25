@@ -1,34 +1,5 @@
 /* Roles list: docs/design/04-roles.html, section A. */
 
-/*
- * The status filter sits on the left of the toolbar and the "{n} role" meta on
- * the right. DDataTable only offers the right-hand headerActions slot, so that
- * slot is widened and the empty search slot is hidden; scoped to this table.
- * Temporary: this :has() selector waits for a left toolbar slot in DDataTable.
- */
-.roles-table [data-ds-component='data-table'] div:has(> .roles-toolbar) {
-  flex: 1;
-  width: 100%;
-}
-
-.roles-table [data-ds-component='data-table'] div:has(> div > .roles-toolbar) > div:empty {
-  display: none;
-}
-
-.roles-toolbar {
-  display: flex;
-  flex: 1;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.roles-filter-count {
-  margin-left: 6px;
-  opacity: 0.7;
-}
-
 .roles-meta {
   font-size: 13px;
   color: var(--color-text-muted);

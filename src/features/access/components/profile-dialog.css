@@ -1,0 +1,92 @@
+/* Profile dialog: docs/design/06-profile.html, sections A–D. */
+.profile-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px 20px;
+  /* The DDialog body is 16px; the design sets the dialog content at 14px. */
+  font-size: 14px;
+}
+
+.profile-who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.profile-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.profile-who-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.profile-who-text b {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.profile-muted {
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.profile-small {
+  font-size: 12px;
+}
+
+.profile-roles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+/*
+ * Full-width tabs. In the drawer the body scrolls, so the tab list sticks to
+ * its top and stays visible; the footer is outside the scrolling body.
+ */
+.profile-tabs-list {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  box-shadow: 0 -16px 0 var(--color-surface);
+}
+
+.profile-tabs-list [role='tab'] {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.profile-tab-panel {
+  margin-top: 16px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

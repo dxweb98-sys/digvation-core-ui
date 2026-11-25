@@ -1,7 +1,6 @@
 import type { RouteObject } from 'react-router';
 import { AuditPage } from '../../features/access/pages/audit-page';
 import { InvitationsPage } from '../../features/access/pages/invitations-page';
-import { ProfilePage } from '../../features/access/pages/profile-page';
 import { RolesPage } from '../../features/access/pages/roles-page';
 import { UsersPage } from '../../features/access/pages/users-page';
 import { RequireAuthentication } from '../../features/auth/components/require-authentication';
@@ -33,7 +32,6 @@ export const applicationRoutes: RouteObject[] = [
     errorElement: <RouteErrorState />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'profile', element: <ProfilePage /> },
       { path: 'users', element: <UsersPage /> },
       { path: 'invitations', element: <InvitationsPage /> },
       { path: 'roles', element: <RolesPage /> },

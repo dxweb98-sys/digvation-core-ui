@@ -2,6 +2,7 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { envelope, failure, mockFetch, type RecordedCall } from '../../../test/fetch-mock';
 import { renderApp } from '../../../test/render-app';
+import { chooseFilter } from '../../../test/table';
 import { useInvitationsCopy } from '../invitations-copy';
 import { validityText } from '../invitation-rules';
 import { InvitationsPage } from './invitations-page';
@@ -78,15 +79,29 @@ describe('invitations list', () => {
     expect(screen.queryByText('Anda hanya melihat undangan yang Anda kirim.')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Undang pengguna' })).not.toBeInTheDocument();
 
-    const group = screen.getByRole('group', { name: 'Status' });
-    fireEvent.click(within(group).getByRole('button', { name: 'Menunggu' }));
+    await chooseFilter('Status', 'Menunggu');
     await waitFor(() => expect(invitationCalls(calls).some((call) => call.url.includes('status=pending'))).toBe(true));
-    await waitFor(() => expect(screen.getByText('1 undangan')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('1 undangan · Status: Menunggu')).toBeInTheDocument());
+
+    await chooseFilter('Status', 'Semua');
+    await waitFor(() => expect(screen.getByText('4 undangan')).toBeInTheDocument());
+    expect(invitationCalls(calls).at(-1)?.url).not.toContain('status=');
 
     fireEvent.change(screen.getAllByPlaceholderText('Cari email')[0], { target: { value: 'yoga' } });
     await waitFor(() => expect(invitationCalls(calls).some((call) => call.url.includes('search=yoga'))).toBe(true), {
       timeout: 2000,
     });
+  });
+
+  it('shows "Diundang oleh" in the mobile card once, under the email', async () => {
+    serve({ items: INVITATIONS.slice(0, 1) });
+    renderApp(<InvitationsPage />);
+    await (await table()).findByText('yoga@digvation.id');
+    const card = document.querySelector<HTMLElement>('[data-ds-component="data-table"] > .sm\\:hidden')!;
+    expect(within(card).getAllByText('Diundang oleh Rina Kusuma')).toHaveLength(1);
+    // The card's DIUNDANG OLEH column is marked for the CSS rule that hides it there.
+    const column = within(card).getByText('Rina Kusuma', { selector: '.inv-invited-by' });
+    expect(column.closest('div')?.textContent).toBe('Diundang oleh: Rina Kusuma');
   });
 
   it('shows the own-only line to an operator who is not a Super Admin', async () => {
@@ -116,7 +131,7 @@ describe('invitations list', () => {
     serve({ items: INVITATIONS.slice(0, 1) });
     renderApp(<InvitationsPage />);
     await (await table()).findByText('yoga@digvation.id');
-    fireEvent.click(within(screen.getByRole('group', { name: 'Status' })).getByRole('button', { name: 'Dicabut' }));
+    await chooseFilter('Status', 'Dicabut');
     expect((await screen.findAllByText('Tidak ada undangan yang cocok'))[0]).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: 'Hapus filter' })[0]);
     expect(await (await table()).findByText('yoga@digvation.id')).toBeInTheDocument();

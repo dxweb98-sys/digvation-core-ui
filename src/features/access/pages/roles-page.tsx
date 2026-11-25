@@ -1,4 +1,4 @@
-import { DBadge, DConfirmDialog, DDataTable, DStatusFilter, type TableColumn } from '@digvation/ui';
+import { DBadge, DConfirmDialog, DDataTable, DSelectFilter, type TableColumn } from '@digvation/ui';
 import { AlertCircle, KeyRound, MoreHorizontal, Pencil, Plus, ShieldCheck, ShieldOff } from 'lucide-react';
 import { useState } from 'react';
 import { useApiMutation } from '../../../shared/api/use-api-mutation';
@@ -16,7 +16,7 @@ import { ALL_PERMISSIONS, customRoleLock, permissionsLock } from '../role-rules'
 import { useRolesCopy } from '../roles-copy';
 import './roles-page.css';
 
-type StatusFilter = '' | 'active' | 'inactive';
+type StatusFilter = 'ALL' | 'active' | 'inactive';
 
 export function RolesPage() {
   const copy = useRolesCopy();
@@ -28,7 +28,7 @@ export function RolesPage() {
   const canSetPermissions = can(PERMISSIONS.ROLES_PERMISSIONS_MANAGE);
   const canUpdate = can(PERMISSIONS.ROLES_UPDATE);
   const canDelete = can(PERMISSIONS.ROLES_DELETE);
-  const [status, setStatus] = useState<StatusFilter>('');
+  const [status, setStatus] = useState<StatusFilter>('ALL');
   const [creating, setCreating] = useState(false);
   const [editingPermissions, setEditingPermissions] = useState<Role | null>(null);
   const [editingDetails, setEditingDetails] = useState<Role | null>(null);
@@ -40,7 +40,7 @@ export function RolesPage() {
   // GET /roles is not paginated, so the status filter runs in the browser.
   const all = roles.data ?? [];
   const activeCount = all.filter((role) => role.is_active).length;
-  const shown = status === '' ? all : all.filter((role) => role.is_active === (status === 'active'));
+  const shown = status === 'ALL' ? all : all.filter((role) => role.is_active === (status === 'active'));
   const catalogSize = catalog.data?.length;
 
   const setActive = useApiMutation(
@@ -179,44 +179,24 @@ export function RolesPage() {
           data={roles.isError ? [] : shown}
           rowKey="id"
           loading={roles.isPending}
+          filters={
+            <DSelectFilter
+              label={copy.statusLabel}
+              options={[
+                { value: 'ALL', label: copy.withCount(copy.all, all.length) },
+                { value: 'active', label: copy.withCount(copy.active, activeCount) },
+                { value: 'inactive', label: copy.withCount(copy.inactive, all.length - activeCount) },
+              ]}
+              value={status}
+              onChange={(value) => setStatus((value ?? 'ALL') as StatusFilter)}
+            />
+          }
           headerActions={
             roles.data ? (
-              <div className="roles-toolbar">
-                <div role="group" aria-label={copy.statusLabel}>
-                <DStatusFilter
-                  allLabel={
-                    <>
-                      {copy.all}
-                      <span className="roles-filter-count">{all.length}</span>
-                    </>
-                  }
-                  // Counts go in the labels: DStatusFilter's own count adds brackets the design does not use.
-                  options={[
-                    {
-                      value: 'active',
-                      label: (
-                        <>
-                          {copy.active}
-                          <span className="roles-filter-count">{activeCount}</span>
-                        </>
-                      ),
-                    },
-                    {
-                      value: 'inactive',
-                      label: (
-                        <>
-                          {copy.inactive}
-                          <span className="roles-filter-count">{all.length - activeCount}</span>
-                        </>
-                      ),
-                    },
-                  ]}
-                  value={status}
-                  onChange={(value) => setStatus(value as StatusFilter)}
-                />
-                </div>
-                <span className="roles-meta">{copy.count(shown.length)}</span>
-              </div>
+              <span className="roles-meta">
+                {copy.count(shown.length)}
+                {status === 'ALL' ? null : copy.activeFilter(copy.statusLabel, status === 'active' ? copy.active : copy.inactive)}
+              </span>
             ) : null
           }
           actions={anyActions ? rowActions : undefined}

@@ -5,7 +5,7 @@ import '../auth.css';
 
 export function RequireAuthentication({ children }: PropsWithChildren) {
   const location = useLocation();
-  const { status } = useAuth();
+  const { status, signedOutNotice } = useAuth();
 
   if (status === 'loading') {
     return (
@@ -18,7 +18,11 @@ export function RequireAuthentication({ children }: PropsWithChildren) {
   }
   if (status !== 'authenticated') {
     return (
-      <Navigate to="/login" replace state={{ from: `${location.pathname}${location.search}` }} />
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: `${location.pathname}${location.search}`, ...signedOutNotice }}
+      />
     );
   }
   return children;

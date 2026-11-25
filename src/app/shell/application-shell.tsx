@@ -1,7 +1,8 @@
 import { ChevronsUpDown, Globe, LogOut, Menu, Monitor, Moon, Sun, User, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router';
-import { usePendingInvitationCount, useRoles } from '../../features/access/access-queries';
+import { Outlet, useLocation } from 'react-router';
+import { ProfileDialog } from '../../features/access/components/profile-dialog';
+import { useMyRoleNames, usePendingInvitationCount } from '../../features/access/access-queries';
 import { PERMISSIONS } from '../../features/auth/permissions';
 import { useSignInCopy } from '../../features/auth/sign-in-copy';
 import { useAuth } from '../../features/auth/use-auth';
@@ -23,18 +24,20 @@ const APPEARANCE_ICONS: Record<Appearance, typeof Moon> = { dark: Moon, light: S
 
 function AccountMenu() {
   const { user, logout } = useAuth();
-  const { can, roles } = usePermissions();
-  const navigate = useNavigate();
   const copy = useShellCopy();
   const appearanceCopy = useSignInCopy();
   const locale = useDisplayLocale();
   const appearance = useAppearance();
-  const roleCatalog = useRoles(can(PERMISSIONS.ROLES_READ));
+  const roleNames = useMyRoleNames().join(', ');
+  const [profileOpen, setProfileOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   if (!user) return null;
 
-  const roleNames = roles
-    .map((slug) => roleCatalog.data?.find((role) => role.slug === slug)?.name ?? slug)
-    .join(', ');
+  const closeProfile = () => {
+    setProfileOpen(false);
+    // Focus goes back to the account menu button, where the dialog was opened from.
+    requestAnimationFrame(() => buttonRef.current?.focus());
+  };
   const appearanceLabels: Record<Appearance, string> = {
     dark: appearanceCopy.appearanceDark,
     light: appearanceCopy.appearanceLight,
@@ -42,13 +45,17 @@ function AccountMenu() {
   };
 
   return (
+    <>
     <AppMenu
       label={copy.accountMenu}
       placement="top-start"
       className="account-menu"
       trigger={({ open, ref }) => (
         <button
-          ref={ref}
+          ref={(node) => {
+            ref(node);
+            buttonRef.current = node;
+          }}
           type="button"
           className="account-button"
           aria-haspopup="menu"
@@ -72,7 +79,7 @@ function AccountMenu() {
         <span>{user.email}</span>
         {roleNames ? <span>{roleNames}</span> : null}
       </div>
-      <AppMenuItem icon={<User size={16} aria-hidden="true" />} onSelect={() => navigate('/profile')}>
+      <AppMenuItem icon={<User size={16} aria-hidden="true" />} onSelect={() => setProfileOpen(true)}>
         {copy.myProfile}
       </AppMenuItem>
       <AppMenuLabel>{copy.language}</AppMenuLabel>
@@ -105,6 +112,8 @@ function AccountMenu() {
         {copy.logout}
       </AppMenuItem>
     </AppMenu>
+    <ProfileDialog open={profileOpen} onClose={closeProfile} />
+    </>
   );
 }
 

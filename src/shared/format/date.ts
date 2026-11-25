@@ -23,7 +23,30 @@ const DATE_PATTERNS: Record<DisplayLocale, Record<DateStyle, string>> = {
   'en-US': { long: 'MMMM d, yyyy', medium: 'MMM d, yyyy', short: 'MM/dd/yyyy' },
 };
 
-const TIME_PATTERNS: Record<DisplayLocale, string> = { 'id-ID': 'HH.mm', 'en-US': 'h:mm a' };
+/** 24-hour time with a colon in both languages (docs/design/00-foundation.md, "Mode dan bahasa"). */
+const TIME_PATTERN = 'HH:mm';
+
+/** Indonesian zones by their local abbreviation; other zones use the short name Intl gives. */
+const INDONESIAN_ZONES: Record<string, string> = {
+  'Asia/Jakarta': 'WIB',
+  'Asia/Pontianak': 'WIB',
+  'Asia/Makassar': 'WITA',
+  'Asia/Jayapura': 'WIT',
+};
+
+/** The abbreviation of a zone at an instant: "WIB", "WITA", "WIT", otherwise e.g. "GMT+8". */
+export function timeZoneAbbreviation(timeZone: string, instant: Date, locale: DisplayLocale): string {
+  const known = INDONESIAN_ZONES[timeZone];
+  if (known) return known;
+  try {
+    const part = new Intl.DateTimeFormat(locale, { timeZone, timeZoneName: 'short' })
+      .formatToParts(instant)
+      .find((item) => item.type === 'timeZoneName');
+    return part?.value ?? timeZone;
+  } catch {
+    return timeZone;
+  }
+}
 
 const DATE_FNS_LOCALES: Record<DisplayLocale, Locale> = { 'id-ID': id, 'en-US': enUS };
 
@@ -75,7 +98,7 @@ export function formatBusinessDate(
   });
 }
 
-/** An instant in the browser's time zone with its time: "24 Nov 2026 10.05" or "Nov 24, 2026 10:05 AM". */
+/** An instant in the browser's time zone with its time and zone: "24 Nov 2026 10:10 WIB" or "Nov 24, 2026 10:10 WIB". */
 export function formatInstant(
   value: string | null | undefined,
   options: { style?: DateStyle; locale?: DisplayLocale; timeZone?: string } = {},
@@ -84,9 +107,11 @@ export function formatInstant(
   const instant = new Date(value);
   if (Number.isNaN(instant.getTime())) return value;
   const locale = options.locale ?? getDisplayLocale();
-  const zoned = new TZDate(instant.getTime(), options.timeZone ?? browserTimeZone());
-  const pattern = `${DATE_PATTERNS[locale][options.style ?? 'medium']} ${TIME_PATTERNS[locale]}`;
-  return format(zoned, pattern, { locale: DATE_FNS_LOCALES[locale] });
+  const timeZone = options.timeZone ?? browserTimeZone();
+  const zoned = new TZDate(instant.getTime(), timeZone);
+  const pattern = `${DATE_PATTERNS[locale][options.style ?? 'medium']} ${TIME_PATTERN}`;
+  const text = format(zoned, pattern, { locale: DATE_FNS_LOCALES[locale] });
+  return `${text} ${timeZoneAbbreviation(timeZone, instant, locale)}`;
 }
 
 /**

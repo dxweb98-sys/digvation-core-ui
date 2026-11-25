@@ -7,7 +7,8 @@ import {
   logout as logoutRequest,
   refreshSession,
 } from '../../shared/api/client';
-import { AuthContext, type AuthStatus, type AuthUser, type LoginInput } from './auth-context';
+import { clearCoreSessionTokens } from '../../shared/api/session';
+import { AuthContext, type AuthStatus, type AuthUser, type LoginInput, type SignedOutNotice } from './auth-context';
 
 const currentUser = () => api.get<AuthUser>('/users/me');
 
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [signedOutNotice, setSignedOutNotice] = useState<SignedOutNotice | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -56,6 +58,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       remember_me: input.rememberMe,
     });
     setUser(await currentUser());
+    setSignedOutNotice(null);
     setStatus('authenticated');
   }, []);
 
@@ -69,9 +72,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
   }, [queryClient]);
 
+  const endSession = useCallback(
+    (notice?: SignedOutNotice) => {
+      clearCoreSessionTokens();
+      setSignedOutNotice(notice ?? null);
+      setUser(null);
+      setStatus('anonymous');
+      queryClient.clear();
+    },
+    [queryClient],
+  );
+
   const value = useMemo(
-    () => ({ status, user, login, logout, setUser }),
-    [status, user, login, logout],
+    () => ({ status, user, login, logout, setUser, endSession, signedOutNotice }),
+    [status, user, login, logout, endSession, signedOutNotice],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
