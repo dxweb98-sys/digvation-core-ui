@@ -3,15 +3,8 @@ import { ApiError } from '../../shared/api/api-error';
 import { USERNAME_RULE } from '../access/password-rules';
 import { invitationToken } from './invitation-token';
 import { authAlertKey } from './sign-in-copy';
-import { passwordProblems } from './password-problems';
 
 describe('auth form rules', () => {
-  it('needs 12 to 128 characters and a matching confirmation', () => {
-    expect(passwordProblems('short', 'short')).toEqual({ password: 'Minimal 12 karakter.' });
-    expect(passwordProblems('long enough pw', 'other')).toEqual({ confirm: 'Kata sandi tidak cocok.' });
-    expect(passwordProblems('long enough pw', 'long enough pw')).toEqual({});
-  });
-
   it('accepts usernames CORE accepts after lowercasing', () => {
     expect(USERNAME_RULE('Jane.Doe')).toBeUndefined();
     expect(USERNAME_RULE('ab')).toBeDefined();

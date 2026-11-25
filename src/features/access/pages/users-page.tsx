@@ -1,12 +1,13 @@
 import { DBadge, DDataTable, type TableColumn } from '@digvation/ui';
 import { AlertCircle, MoreHorizontal, Plus, Search, Shield, UserCheck, UserX } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
-import { Link } from 'react-router';
+import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router';
 import { calendarDateOf, formatBusinessDate } from '../../../shared/format/date';
 import { AppAction } from '../../../shared/ui/app-action';
 import { AppMenu, AppMenuItem, AppMenuSeparator } from '../../../shared/ui/app-menu';
 import { Page, PageHeader } from '../../../shared/ui/page';
 import { closeAndRefocus } from '../../../shared/ui/row-actions-focus';
+import { StateBlock } from '../../../shared/ui/state-block';
 import { useListState } from '../../../shared/ui/use-list-state';
 import { PERMISSIONS } from '../../auth/permissions';
 import { useAuth } from '../../auth/use-auth';
@@ -23,32 +24,11 @@ import './users-page.css';
 const initials = (name: string) =>
   name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || '?';
 
-function StateBlock({
-  icon,
-  title,
-  body,
-  action,
-  danger = false,
-}: {
-  icon: ReactNode;
-  title: string;
-  body: string;
-  action: ReactNode;
-  danger?: boolean;
-}) {
-  return (
-    <div className={`users-state${danger ? ' users-state-danger' : ''}`} role={danger ? 'alert' : undefined}>
-      <span className="users-state-icon">{icon}</span>
-      <b>{title}</b>
-      <p>{body}</p>
-      {action}
-    </div>
-  );
-}
-
 export function UsersPage() {
   const copy = useUsersCopy();
-  const list = useListState();
+  // "Lihat di Pengguna" on the invitations page opens this list searched by email.
+  const [params] = useSearchParams();
+  const list = useListState({ search: params.get('search') ?? '' });
   const users = useUsers(list.query);
   const { can, roles: myRoles, permissions: myPermissions } = usePermissions();
   const { user: me } = useAuth();

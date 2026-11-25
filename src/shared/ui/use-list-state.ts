@@ -5,11 +5,11 @@ import type { Query } from '../api/client';
  * Page, page size, search and filters for a server-paged CORE list. A new
  * search or filter goes back to page 1.
  */
-export function useListState(initial: { limit?: number; filters?: Query } = {}) {
+export function useListState(initial: { limit?: number; search?: string; filters?: Query } = {}) {
   const [state, setState] = useState({
     page: 1,
     limit: initial.limit ?? 20,
-    search: '',
+    search: initial.search ?? '',
     filters: initial.filters ?? ({} as Query),
   });
 

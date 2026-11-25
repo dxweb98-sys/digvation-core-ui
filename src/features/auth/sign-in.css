@@ -233,3 +233,34 @@
     padding-inline: 16px;
   }
 }
+
+/* Accept invitation: "Memeriksa undangan…" (docs/design/05-invitations.html, A01). */
+.accept-checking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+/* Invitation marker on the accept form (05-invitations.html, A02–A04, A07–A09). */
+.accept-marker-label {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.accept-marker-email {
+  display: block;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* The badge wraps to its own line on narrow screens. */
+.accept-marker-validity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 4px;
+}

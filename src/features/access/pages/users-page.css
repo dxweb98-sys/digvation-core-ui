@@ -99,41 +99,6 @@
   color: var(--color-text);
 }
 
-.users-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 32px 8px;
-  color: var(--color-text);
-  text-align: center;
-}
-
-.users-state-icon {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin-bottom: 4px;
-  border-radius: 12px;
-  background: var(--color-surface-muted);
-  color: var(--color-text-muted);
-}
-
-.users-state-danger .users-state-icon {
-  color: var(--color-danger);
-}
-
-.users-state b {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.users-state p {
-  max-width: 420px;
-  margin: 0 0 8px;
-  color: var(--color-text-muted);
-}
 
 /* Status dialog: section C. */
 .user-status-form {

@@ -23,6 +23,9 @@ export function usePermissions() {
   });
   return {
     resolved: !snapshot.isPending,
+    /** Reads the permissions again, e.g. after an admin gave this account a role. */
+    refetch: () => snapshot.refetch(),
+    refetching: snapshot.isFetching,
     /** Role slugs of the signed-in operator. */
     roles: snapshot.data?.roles ?? [],
     /** Permission codes of the signed-in operator; `*` for a Super Admin. */

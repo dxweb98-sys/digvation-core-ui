@@ -1,0 +1,41 @@
+/* Invitations list: docs/design/05-invitations.html, section A. Shares the users list styles. */
+.inv-table [data-ds-component='data-table'] div:has(> .inv-toolbar) {
+  flex: 1;
+  width: 100%;
+}
+
+.inv-toolbar {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inv-own-only {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.inv-validity {
+  white-space: nowrap;
+}
+
+/* Expired and revoked rows are dimmed. */
+.inv-table tr:has(.inv-dim) > td,
+.inv-table [data-ds-component='data-table'] > .sm\:hidden > *:has(.inv-dim) {
+  opacity: 0.6;
+}
+
+/* "Diundang oleh" sits under the email only in the mobile cards (DDataTable's `sm:hidden` list). */
+.inv-card-only {
+  display: none;
+}
+
+.inv-table [data-ds-component='data-table'] > .sm\:hidden .inv-card-only {
+  display: inline;
+}
+

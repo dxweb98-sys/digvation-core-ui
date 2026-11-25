@@ -6,60 +6,10 @@
   background: var(--color-background);
 }
 
-.auth-card,
 .auth-status-card {
   width: min(100%, 440px);
   border: 1px solid var(--color-border);
   border-radius: 16px;
   background: var(--color-surface);
   padding: 28px;
-}
-
-.auth-card {
-  display: grid;
-  gap: 24px;
-}
-
-
-.auth-eyebrow,
-.auth-copy {
-  color: var(--color-text-muted);
-}
-
-.auth-eyebrow {
-  margin: 0 0 6px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.auth-card h1 {
-  margin: 0;
-}
-
-.auth-copy {
-  margin: 8px 0 0;
-  line-height: 1.5;
-}
-
-.auth-form {
-  display: grid;
-  gap: 16px;
-}
-
-
-.auth-error {
-  margin: 0;
-  color: var(--color-danger);
-  font-size: 14px;
-}
-
-.auth-link {
-  justify-self: start;
-  font-size: var(--cc-text-sm);
-  color: var(--cc-accent);
-}
-
-.auth-link:hover,
-.auth-link:focus-visible {
-  color: var(--cc-accent-hover);
 }
