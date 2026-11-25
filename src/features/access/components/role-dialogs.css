@@ -1,0 +1,70 @@
+/* Roles dialogs: docs/design/04-roles.html, sections C–E. DDialog body is 16px; the design sets content at 14px. */
+.role-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.role-dialog-count {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+}
+
+.role-dialog-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.role-dialog-slug input {
+  font-family: var(--app-font-mono);
+}
+
+.role-dialog-counter {
+  display: block;
+  text-align: right;
+}
+
+.role-dialog-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.role-dialog-section-label {
+  margin: 0;
+  font-weight: 500;
+}
+
+.role-dialog-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.role-dialog-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.role-dialog-note svg {
+  flex: none;
+}
+
+.role-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 639px) {
+  .role-dialog-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -6,6 +6,7 @@ import { calendarDateOf, formatBusinessDate } from '../../../shared/format/date'
 import { AppAction } from '../../../shared/ui/app-action';
 import { AppMenu, AppMenuItem, AppMenuSeparator } from '../../../shared/ui/app-menu';
 import { Page, PageHeader } from '../../../shared/ui/page';
+import { closeAndRefocus } from '../../../shared/ui/row-actions-focus';
 import { useListState } from '../../../shared/ui/use-list-state';
 import { PERMISSIONS } from '../../auth/permissions';
 import { useAuth } from '../../auth/use-auth';
@@ -63,18 +64,6 @@ export function UsersPage() {
 
   // The user payload carries role slugs; the operator sees the role name.
   const roleName = new Map((roles.data ?? []).map((role) => [role.slug, role.name]));
-
-  // Focus goes back to the row's ⋯ button when a dialog closes. DDataTable renders
-  // the row twice (desktop table and mobile card), so the visible button is used.
-  const closeAndRefocus = (user: User | null, close: () => void) => {
-    close();
-    if (!user) return;
-    requestAnimationFrame(() =>
-      [...document.querySelectorAll<HTMLElement>(`[data-row-actions="${user.id}"]`)]
-        .find((button) => button.offsetParent !== null)
-        ?.focus(),
-    );
-  };
 
   const columns: TableColumn<User>[] = [
     {
@@ -219,7 +208,7 @@ export function UsersPage() {
           ) : null
         }
       />
-      <section className="users-table" aria-label={copy.title}>
+      <section className="users-table app-table-caps" aria-label={copy.title}>
         <DDataTable
           columns={columns}
           data={users.isError ? [] : (page?.items ?? [])}
@@ -252,11 +241,11 @@ export function UsersPage() {
       </section>
 
       <InviteUserDialog open={inviting} onClose={() => setInviting(false)} />
-      <UserStatusDialog user={statusTarget} onClose={() => closeAndRefocus(statusTarget, () => setStatusTarget(null))} />
+      <UserStatusDialog user={statusTarget} onClose={() => closeAndRefocus(statusTarget?.id, () => setStatusTarget(null))} />
       <ChangeRolesDialog
         user={editing}
         actor={actor}
-        onClose={() => closeAndRefocus(editing, () => setEditing(null))}
+        onClose={() => closeAndRefocus(editing?.id, () => setEditing(null))}
       />
     </Page>
   );

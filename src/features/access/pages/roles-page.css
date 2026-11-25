@@ -1,0 +1,114 @@
+/* Roles list: docs/design/04-roles.html, section A. */
+
+/*
+ * The status filter sits on the left of the toolbar and the "{n} role" meta on
+ * the right. DDataTable only offers the right-hand headerActions slot, so that
+ * slot is widened and the empty search slot is hidden; scoped to this table.
+ * Temporary: this :has() selector waits for a left toolbar slot in DDataTable.
+ */
+.roles-table [data-ds-component='data-table'] div:has(> .roles-toolbar) {
+  flex: 1;
+  width: 100%;
+}
+
+.roles-table [data-ds-component='data-table'] div:has(> div > .roles-toolbar) > div:empty {
+  display: none;
+}
+
+.roles-toolbar {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.roles-filter-count {
+  margin-left: 6px;
+  opacity: 0.7;
+}
+
+.roles-meta {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.roles-identity {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.roles-name {
+  font-weight: 500;
+}
+
+.roles-description,
+.roles-muted {
+  color: var(--color-text-muted);
+}
+
+.roles-description {
+  font-size: 12px;
+}
+
+.roles-dim {
+  opacity: 0.6;
+}
+
+.roles-slug {
+  font: 12px var(--app-font-mono);
+  color: var(--color-text-muted);
+}
+
+.roles-row-action {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.roles-row-action:hover,
+.roles-row-action[aria-expanded='true'] {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.roles-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 8px;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.roles-state-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 4px;
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+  color: var(--color-danger);
+}
+
+.roles-state b {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.roles-state p {
+  max-width: 420px;
+  margin: 0 0 8px;
+  color: var(--color-text-muted);
+}

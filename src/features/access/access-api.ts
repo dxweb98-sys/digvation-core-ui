@@ -22,6 +22,9 @@ export const accessApi = {
     api.patch<Dto<'RoleMutationResponseDto'>>(`/roles/${seg(roleId)}`, body),
   setRolePermissions: (roleId: string, body: Dto<'SetRolePermissionsDto'>) =>
     api.put<Dto<'RolePermissionsUpdateResponseDto'>>(`/roles/${seg(roleId)}/permissions`, body),
+  deleteRole: (roleId: string) => api.delete<Dto<'RoleMutationResponseDto'>>(`/roles/${seg(roleId)}`),
+  rolePermissions: (roleId: string) =>
+    api.get<Dto<'RolePermissionsDto'>>(`/roles/${seg(roleId)}/permissions`),
   permissions: () => api.get<Dto<'PermissionListDto'>>('/permissions'),
 
   invitations: (query: Query) => api.list<Invitation>('/invitations', query),

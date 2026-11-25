@@ -8,6 +8,7 @@ export const accessKeys = {
   user: (userId: string) => ['access', 'user', userId] as const,
   userRoles: (userId: string) => ['access', 'user', userId, 'roles'] as const,
   roles: ['access', 'roles'] as const,
+  rolePermissions: (roleId: string) => ['access', 'roles', roleId, 'permissions'] as const,
   permissions: ['access', 'permissions'] as const,
   invitations: (query?: Query) => ['access', 'invitations', query ?? {}] as const,
   audit: (query?: Query) => ['access', 'audit', query ?? {}] as const,
@@ -73,6 +74,16 @@ export function useUserRoles(userId: string | undefined) {
     queryKey: accessKeys.userRoles(userId ?? ''),
     queryFn: async () => (await accessApi.userRoles(userId!)).roles,
     enabled: Boolean(userId),
+    staleTime: 0,
+  });
+}
+
+/** A role's permissions, read fresh when the permission editor opens. */
+export function useRolePermissions(roleId: string | undefined) {
+  return useQuery({
+    queryKey: accessKeys.rolePermissions(roleId ?? ''),
+    queryFn: async () => (await accessApi.rolePermissions(roleId!)).permissions,
+    enabled: Boolean(roleId),
     staleTime: 0,
   });
 }

@@ -1,175 +1,271 @@
-import { DDataTable, type TableAction, type TableColumn } from '@digvation/ui';
-import { Plus } from 'lucide-react';
+import { DBadge, DConfirmDialog, DDataTable, DStatusFilter, type TableColumn } from '@digvation/ui';
+import { AlertCircle, KeyRound, MoreHorizontal, Pencil, Plus, ShieldCheck, ShieldOff } from 'lucide-react';
 import { useState } from 'react';
 import { useApiMutation } from '../../../shared/api/use-api-mutation';
-import { ConfirmDialog, FormDialog } from '../../../shared/forms/form-dialog';
-import { read, type FieldSpec } from '../../../shared/forms/form-spec';
 import { AppAction } from '../../../shared/ui/app-action';
-import { Code, Identity, Page, PageHeader, QueryState } from '../../../shared/ui/page';
-import { StatusBadge } from '../../../shared/ui/status-badge';
+import { AppMenu, AppMenuItem, AppMenuSeparator } from '../../../shared/ui/app-menu';
+import { Page, PageHeader } from '../../../shared/ui/page';
+import { closeAndRefocus } from '../../../shared/ui/row-actions-focus';
 import { PERMISSIONS } from '../../auth/permissions';
+import { useAuth } from '../../auth/use-auth';
 import { usePermissions } from '../../auth/use-permissions';
-import { accessApi, type PermissionItem, type Role } from '../access-api';
+import { accessApi, type Role } from '../access-api';
 import { accessKeys, usePermissionCatalog, useRoles } from '../access-queries';
+import { CreateRoleDialog, EditRoleDialog, RolePermissionsDialog } from '../components/role-dialogs';
+import { ALL_PERMISSIONS, customRoleLock, permissionsLock } from '../role-rules';
+import { useRolesCopy } from '../roles-copy';
+import './roles-page.css';
 
-const COLUMNS: TableColumn<Role>[] = [
-  { key: 'name', label: 'Role', render: (role) => <Identity primary={role.name} secondary={role.description} /> },
-  { key: 'slug', label: 'Code', render: (role) => <Code>{role.slug}</Code> },
-  { key: 'is_system', label: 'Tipe', render: (role) => (role.is_system ? 'Sistem' : 'Kustom') },
-  { key: 'user_count', label: 'User', align: 'right' },
-  { key: 'permissions', label: 'Permission', align: 'right', render: (role) => role.permissions.length },
-  { key: 'is_active', label: 'Status', render: (role) => <StatusBadge status={role.is_active ? 'ACTIVE' : 'INACTIVE'} /> },
-];
+type StatusFilter = '' | 'active' | 'inactive';
 
-const IDENTITY_FIELDS: FieldSpec[] = [
-  { name: 'name', label: 'Nama', required: true, maxLength: 100, placeholder: 'Manajer operasional' },
-  { name: 'description', label: 'Deskripsi', kind: 'textarea', maxLength: 255 },
-];
-
-const CREATE_FIELDS: FieldSpec[] = [
-  IDENTITY_FIELDS[0],
-  { name: 'slug',
-    label: 'Code',
-    required: true,
-    maxLength: 100,
-    placeholder: 'OPERATIONS_MANAGER',
-    hint: 'Huruf kapital dengan garis bawah. Tidak bisa diubah nanti.' },
-  IDENTITY_FIELDS[1],
-];
-
-function permissionOptions(catalog: readonly PermissionItem[]) { return [...catalog]
-    .sort((a, b) => a.slug.localeCompare(b.slug))
-    .map((permission) => ({ value: permission.slug,
-      label: permission.name,
-      description: permission.description ?? permission.slug }));
-}
-
-export function RolesPage() { const roles = useRoles();
-  const { can } = usePermissions();
-  const canEditPermissions = can(PERMISSIONS.ROLES_PERMISSIONS_MANAGE);
-  const catalog = usePermissionCatalog(canEditPermissions && can(PERMISSIONS.PERMISSIONS_READ));
+export function RolesPage() {
+  const copy = useRolesCopy();
+  const roles = useRoles();
+  const { can, roles: myRoles, permissions: myPermissions } = usePermissions();
+  const { user: me } = useAuth();
+  const actor = { id: me?.id, roles: myRoles, permissions: myPermissions };
+  const catalog = usePermissionCatalog(can(PERMISSIONS.PERMISSIONS_READ));
+  const canSetPermissions = can(PERMISSIONS.ROLES_PERMISSIONS_MANAGE);
+  const canUpdate = can(PERMISSIONS.ROLES_UPDATE);
+  const canDelete = can(PERMISSIONS.ROLES_DELETE);
+  const [status, setStatus] = useState<StatusFilter>('');
   const [creating, setCreating] = useState(false);
-  const [editing, setEditing] = useState<Role | null>(null);
-  const [permissionsFor, setPermissionsFor] = useState<Role | null>(null);
-  const [statusTarget, setStatusTarget] = useState<Role | null>(null);
-  const invalidate = [accessKeys.all];
+  const [editingPermissions, setEditingPermissions] = useState<Role | null>(null);
+  const [editingDetails, setEditingDetails] = useState<Role | null>(null);
+  const [toggling, setToggling] = useState<Role | null>(null);
+  // Keeps the last role while the confirm dialog closes, so its text does not jump.
+  const [togglingRole, setTogglingRole] = useState<Role | null>(null);
+  if (toggling && toggling !== togglingRole) setTogglingRole(toggling);
 
-  const create = useApiMutation(accessApi.createRole, { success: 'Role dibuat', invalidate, toastErrors: false });
-  const update = useApiMutation(
-    (input: { roleId: string; name: string; description: string | null }) =>
-      accessApi.updateRole(input.roleId, { name: input.name, description: input.description }),
-    { success: 'Role disimpan', invalidate, toastErrors: false },
-  );
-  const savePermissions = useApiMutation(
-    (input: { roleId: string; slugs: string[] }) =>
-      accessApi.setRolePermissions(input.roleId, { permission_slugs: input.slugs }),
-    { success: 'Permission disimpan', invalidate, toastErrors: false },
-  );
+  // GET /roles is not paginated, so the status filter runs in the browser.
+  const all = roles.data ?? [];
+  const activeCount = all.filter((role) => role.is_active).length;
+  const shown = status === '' ? all : all.filter((role) => role.is_active === (status === 'active'));
+  const catalogSize = catalog.data?.length;
+
   const setActive = useApiMutation(
-    (role: Role) => accessApi.updateRole(role.id, { is_active: !role.is_active }),
-    { success: (_, role) => (role.is_active ? 'Role dinonaktifkan' : 'Role diaktifkan kembali'),
-      invalidate,
-      toastErrors: false },
+    (role: Role) => (role.is_active ? accessApi.deleteRole(role.id) : accessApi.updateRole(role.id, { is_active: true })),
+    {
+      success: (_, role) => (role.is_active ? copy.deactivated(role.name) : copy.reactivated(role.name)),
+      invalidate: [accessKeys.all],
+    },
   );
 
-  const actions: TableAction<Role>[] = [
-    ...(can(PERMISSIONS.ROLES_UPDATE)
-      ? [{ label: 'Edit', show: (role: Role) => !role.is_system, onClick: setEditing }]
-      : []),
-    ...(canEditPermissions
-      ? [{ label: 'Permission', show: (role: Role) => role.slug !== 'SUPER_ADMIN', onClick: setPermissionsFor }]
-      : []),
-    ...(can(PERMISSIONS.ROLES_UPDATE)
-      ? [
-          { label: 'Nonaktifkan', variant: 'danger' as const, show: (role: Role) => !role.is_system && role.is_active, onClick: setStatusTarget },
-          { label: 'Aktifkan kembali', show: (role: Role) => !role.is_system && !role.is_active, onClick: setStatusTarget },
-        ]
-      : []),
+  const columns: TableColumn<Role>[] = [
+    {
+      key: 'name',
+      label: copy.columns.role,
+      render: (role) => (
+        <span className={`roles-identity${role.is_active ? '' : ' roles-dim'}`}>
+          <span className="roles-name">{role.name}</span>
+          {role.description ? <span className="roles-description">{role.description}</span> : null}
+        </span>
+      ),
+    },
+    { key: 'slug', label: copy.columns.slug, render: (role) => <span className="roles-slug">{role.slug}</span> },
+    { key: 'is_system', label: copy.columns.type, render: (role) => <DBadge>{role.is_system ? copy.system : copy.custom}</DBadge> },
+    { key: 'user_count', label: copy.columns.users, align: 'right' },
+    {
+      key: 'permissions',
+      label: copy.columns.permissions,
+      render: (role) => (
+        <span className="roles-muted">
+          {role.permissions.includes(ALL_PERMISSIONS)
+            ? copy.allPermissions
+            : catalogSize !== undefined
+              ? copy.ofCatalog(role.permissions.length, catalogSize)
+              : role.permissions.length}
+        </span>
+      ),
+    },
+    {
+      key: 'is_active',
+      label: copy.columns.status,
+      render: (role) => (
+        <DBadge variant={role.is_active ? 'success' : 'default'}>{role.is_active ? copy.active : copy.inactive}</DBadge>
+      ),
+    },
   ];
+
+  const rowActions = (role: Role) => {
+    const permissionLock = permissionsLock(role, actor, copy.locks);
+    const customLock = role.is_system ? undefined : customRoleLock(role, actor, copy.locks);
+    const showDetails = !role.is_system && canUpdate;
+    const showLifecycle = !role.is_system && (role.is_active ? canDelete : canUpdate);
+    if (!canSetPermissions && !showDetails && !showLifecycle) return null;
+    return (
+      <AppMenu
+        label={copy.actionsFor(role.name)}
+        trigger={({ open, ref }) => (
+          <button
+            ref={ref}
+            type="button"
+            className="roles-row-action"
+            data-row-actions={role.id}
+            aria-haspopup="menu"
+            aria-expanded={open}
+            aria-label={copy.actionsFor(role.name)}
+          >
+            <MoreHorizontal size={16} aria-hidden="true" />
+          </button>
+        )}
+      >
+        {canSetPermissions ? (
+          <AppMenuItem
+            disabled={Boolean(permissionLock)}
+            hint={permissionLock}
+            icon={<KeyRound size={16} aria-hidden="true" />}
+            onSelect={() => setEditingPermissions(role)}
+          >
+            {copy.setPermissions}
+          </AppMenuItem>
+        ) : null}
+        {showDetails ? (
+          <AppMenuItem
+            disabled={Boolean(customLock)}
+            hint={customLock}
+            icon={<Pencil size={16} aria-hidden="true" />}
+            onSelect={() => setEditingDetails(role)}
+          >
+            {copy.editDetails}
+          </AppMenuItem>
+        ) : null}
+        {showLifecycle && (canSetPermissions || showDetails) ? <AppMenuSeparator /> : null}
+        {showLifecycle ? (
+          <AppMenuItem
+            danger={role.is_active && !customLock}
+            disabled={Boolean(customLock)}
+            hint={customLock}
+            icon={role.is_active ? <ShieldOff size={16} aria-hidden="true" /> : <ShieldCheck size={16} aria-hidden="true" />}
+            onSelect={() => setToggling(role)}
+          >
+            {role.is_active ? copy.deactivate : copy.reactivate}
+          </AppMenuItem>
+        ) : null}
+      </AppMenu>
+    );
+  };
+
+  const anyActions = canSetPermissions || canUpdate || canDelete;
+  const empty = roles.isError ? (
+    <div className="roles-state" role="alert">
+      <span className="roles-state-icon">
+        <AlertCircle size={20} aria-hidden="true" />
+      </span>
+      <b>{copy.loadFailed[0]}</b>
+      <p>{copy.loadFailed[1]}</p>
+      <AppAction tone="secondary" loading={roles.isFetching} onClick={() => void roles.refetch()}>
+        {copy.retry}
+      </AppAction>
+    </div>
+  ) : undefined;
 
   return (
     <Page>
       <PageHeader
-        title="Role"
-        description="Role adalah sekumpulan permission dengan satu nama. Role sistem tetap; role kustom bisa diubah."
-        actions={ can(PERMISSIONS.ROLES_CREATE) ? (
+        title={copy.title}
+        description={copy.description}
+        actions={
+          can(PERMISSIONS.ROLES_CREATE) ? (
             <AppAction icon={Plus} onClick={() => setCreating(true)}>
-              Tambah role
+              {copy.create}
             </AppAction>
           ) : null
         }
       />
-      <QueryState query={roles} label="role">
-        {(items) => (
-          <DDataTable
-            columns={COLUMNS}
-            data={items}
-            rowKey="id"
-            actions={actions.length ? actions : undefined}
-            emptyMessage="Belum ada role. Tambah role untuk mengelompokkan permission."
-          />
-        )}
-      </QueryState>
+      <section className="roles-table app-table-caps" aria-label={copy.title}>
+        <DDataTable
+          columns={columns}
+          data={roles.isError ? [] : shown}
+          rowKey="id"
+          loading={roles.isPending}
+          headerActions={
+            roles.data ? (
+              <div className="roles-toolbar">
+                <div role="group" aria-label={copy.statusLabel}>
+                <DStatusFilter
+                  allLabel={
+                    <>
+                      {copy.all}
+                      <span className="roles-filter-count">{all.length}</span>
+                    </>
+                  }
+                  // Counts go in the labels: DStatusFilter's own count adds brackets the design does not use.
+                  options={[
+                    {
+                      value: 'active',
+                      label: (
+                        <>
+                          {copy.active}
+                          <span className="roles-filter-count">{activeCount}</span>
+                        </>
+                      ),
+                    },
+                    {
+                      value: 'inactive',
+                      label: (
+                        <>
+                          {copy.inactive}
+                          <span className="roles-filter-count">{all.length - activeCount}</span>
+                        </>
+                      ),
+                    },
+                  ]}
+                  value={status}
+                  onChange={(value) => setStatus(value as StatusFilter)}
+                />
+                </div>
+                <span className="roles-meta">{copy.count(shown.length)}</span>
+              </div>
+            ) : null
+          }
+          actions={anyActions ? rowActions : undefined}
+          emptyMessage={empty}
+        />
+      </section>
 
-      <FormDialog
+      <CreateRoleDialog
         open={creating}
-        title="Tambah role"
-        fields={CREATE_FIELDS}
-        submitLabel="Tambah role"
-        onSubmit={(values) =>
-          create.mutateAsync({ name: read.text(values, 'name'),
-            slug: read.text(values, 'slug').toUpperCase(),
-            description: read.omit(values, 'description'),
-            permission_slugs: [] })
-        }
+        actor={actor}
+        canManagePermissions={canSetPermissions}
         onClose={() => setCreating(false)}
       />
-
-      <FormDialog
-        open={editing !== null}
-        title="Edit role"
-        fields={IDENTITY_FIELDS}
-        initialValues={{ name: editing?.name ?? '', description: editing?.description ?? '' }}
-        submitLabel="Simpan role"
-        onSubmit={(values) =>
-          update.mutateAsync({ roleId: editing!.id,
-            name: read.text(values, 'name'),
-            description: read.optional(values, 'description') })
-        }
-        onClose={() => setEditing(null)}
+      <RolePermissionsDialog
+        role={editingPermissions}
+        actor={actor}
+        onClose={() => closeAndRefocus(editingPermissions?.id, () => setEditingPermissions(null))}
       />
-
-      <FormDialog
-        open={permissionsFor !== null}
-        kind="wide"
-        title={`Permission untuk ${permissionsFor?.name ?? ''}`}
-        description="Setiap user dengan role ini mendapat persis permission yang dipilih."
-        fields={[
-          { name: 'permission_slugs',
-            label: 'Permission',
-            kind: 'checklist',
-            options: permissionOptions(catalog.data ?? []),
-            hint: catalog.isPending ? 'Memuat katalog permission…' : undefined },
-        ]}
-        initialValues={{ permission_slugs: permissionsFor?.permissions ?? [] }}
-        submitLabel="Simpan permission"
-        onSubmit={(values) =>
-          savePermissions.mutateAsync({ roleId: permissionsFor!.id, slugs: read.list(values, 'permission_slugs') })
-        }
-        onClose={() => setPermissionsFor(null)}
+      <EditRoleDialog
+        role={editingDetails}
+        onClose={() => closeAndRefocus(editingDetails?.id, () => setEditingDetails(null))}
       />
-
-      <ConfirmDialog
-        open={statusTarget !== null}
-        title={statusTarget?.is_active ? 'Nonaktifkan role' : 'Aktifkan kembali role'}
-        message={ statusTarget?.is_active
-            ? `User dengan role ${statusTarget.name} kehilangan permission-nya sampai role diaktifkan kembali.`
-            : `User dengan role ${statusTarget?.name ?? ''} mendapat permission-nya kembali.`
+      <DConfirmDialog
+        open={toggling !== null}
+        onClose={() => closeAndRefocus(togglingRole?.id, () => setToggling(null))}
+        onConfirm={() => {
+          if (!togglingRole) return;
+          setActive.mutate(togglingRole, {
+            onSettled: () => closeAndRefocus(togglingRole.id, () => setToggling(null)),
+          });
+        }}
+        loading={setActive.isPending}
+        variant={togglingRole?.is_active ? 'danger' : 'primary'}
+        title={
+          togglingRole
+            ? togglingRole.is_active
+              ? copy.deactivateTitle(togglingRole.name)
+              : copy.reactivateTitle(togglingRole.name)
+            : ''
         }
-        confirmLabel={statusTarget?.is_active ? 'Nonaktifkan' : 'Aktifkan kembali'}
-        tone={statusTarget?.is_active ? 'danger' : 'primary'}
-        onConfirm={() => setActive.mutateAsync(statusTarget!)}
-        onClose={() => setStatusTarget(null)}
+        message={
+          togglingRole
+            ? togglingRole.is_active
+              ? copy.deactivateMessage(togglingRole.user_count)
+              : copy.reactivateMessage
+            : ''
+        }
+        confirmLabel={togglingRole?.is_active ? copy.deactivate : copy.reactivate}
+        cancelLabel={copy.cancel}
       />
     </Page>
   );
