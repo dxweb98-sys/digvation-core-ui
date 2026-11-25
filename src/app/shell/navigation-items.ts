@@ -1,6 +1,7 @@
-import { Banknote, Building2, ClipboardList, FileMinus, FileSignature, Receipt, Settings, Layers, Package, Puzzle, Mail, Shield, User, type LucideIcon } from 'lucide-react';
+import { Banknote, Building2, House, ClipboardList, FileMinus, FileSignature, Receipt, Settings, Layers, Package, Puzzle, Mail, Shield, User, type LucideIcon } from 'lucide-react';
 import { PERMISSIONS, type Permission } from '../../features/auth/permissions';
 import { isParkedPath } from '../parked-areas';
+import type { ShellCopy } from './shell-copy';
 
 export interface NavigationItem {
   label: string;
@@ -21,6 +22,11 @@ export interface NavigationGroup {
  * (../parked-areas.ts) are kept here but left out of the menu.
  */
 const ALL_NAVIGATION_GROUPS: NavigationGroup[] = [
+  {
+    label: 'Overview',
+    // Home has no page yet: "/" sends the operator to the first area below (product-owner decision 2026-11-24).
+    items: [{ label: 'Home', to: '/', icon: House, permissions: [] }],
+  },
   {
     label: 'Customers',
     items: [
@@ -70,7 +76,20 @@ export function visibleNavigation(
     .filter((group) => group.items.length > 0);
 }
 
-/** Where the home route sends the operator: the first area they may open. */
+/** Where the home route sends the operator: the first area they may open other than home itself. */
 export function firstVisibleRoute(groups: readonly NavigationGroup[]) {
-  return groups[0]?.items[0]?.to;
+  return groups.flatMap((group) => group.items).find((item) => item.to !== '/')?.to;
+}
+
+/** The breadcrumb for a path: menu group, then the item. */
+export function trailFor(pathname: string, copy: ShellCopy) {
+  const label = (path: string, fallback: string) => copy.items[path] ?? fallback;
+  for (const group of NAVIGATION_GROUPS) {
+    const item = group.items
+      .filter((entry) => entry.to !== '/' && (pathname === entry.to || pathname.startsWith(`${entry.to}/`)))
+      .sort((a, b) => b.to.length - a.to.length)[0];
+    if (item) return [{ label: copy.groups[group.label] ?? group.label }, { label: label(item.to, item.label) }];
+  }
+  if (pathname === '/profile') return [{ label: copy.myProfile }];
+  return [{ label: copy.productContext }];
 }

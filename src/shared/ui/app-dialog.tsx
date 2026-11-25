@@ -42,6 +42,7 @@ export function AppDialog({
 
   return (
     <DDialog
+      overlayClassName="app-dialog-overlay"
       {...dialogProps}
       ariaLabel={title}
       size={WIDTHS[kind]}

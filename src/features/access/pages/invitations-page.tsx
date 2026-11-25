@@ -3,14 +3,14 @@ import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useApiMutation } from '../../../shared/api/use-api-mutation';
 import { formatInstant } from '../../../shared/format/date';
-import { ConfirmDialog, FormDialog } from '../../../shared/forms/form-dialog';
-import { read } from '../../../shared/forms/form-spec';
+import { ConfirmDialog } from '../../../shared/forms/form-dialog';
 import { AppAction } from '../../../shared/ui/app-action';
 import { Identity, Page, PageHeader, QueryState } from '../../../shared/ui/page';
 import { StatusBadge } from '../../../shared/ui/status-badge';
 import { useListState } from '../../../shared/ui/use-list-state';
 import { PERMISSIONS } from '../../auth/permissions';
 import { usePermissions } from '../../auth/use-permissions';
+import { InviteUserDialog } from '../components/invite-user-dialog';
 import { accessApi, type Invitation } from '../access-api';
 import { accessKeys, useInvitations } from '../access-queries';
 
@@ -39,9 +39,6 @@ export function InvitationsPage() { const list = useListState();
   const [inviting, setInviting] = useState(false);
   const [revoking, setRevoking] = useState<Invitation | null>(null);
 
-  const invite = useApiMutation(accessApi.invite, { success: 'Undangan terkirim',
-    invalidate: [accessKeys.all],
-    toastErrors: false });
   const revoke = useApiMutation((invitation: Invitation) => accessApi.revokeInvitation(invitation.id), { success: 'Undangan dicabut',
     invalidate: [accessKeys.all],
     toastErrors: false });
@@ -90,19 +87,7 @@ export function InvitationsPage() { const list = useListState();
         )}
       </QueryState>
 
-      <FormDialog
-        open={inviting}
-        title="Undang user"
-        description="CORE mengirim tautan pendaftaran lewat email. Akun baru dibuat tanpa role; berikan role dari halaman Users setelah undangan diterima."
-        fields={[
-          { name: 'email', label: 'Email', kind: 'email', required: true, placeholder: 'name@digvation.id' },
-        ]}
-        submitLabel="Kirim undangan"
-        onSubmit={(values) =>
-          invite.mutateAsync({ email: read.text(values, 'email').toLowerCase() })
-        }
-        onClose={() => setInviting(false)}
-      />
+      <InviteUserDialog open={inviting} onClose={() => setInviting(false)} />
 
       <ConfirmDialog
         open={revoking !== null}

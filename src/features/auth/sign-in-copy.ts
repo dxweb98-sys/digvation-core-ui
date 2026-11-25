@@ -73,7 +73,7 @@ const en: SignInCopy = {
   appearanceGroup: 'Appearance',
   appearanceDark: 'Dark',
   appearanceLight: 'Warm light',
-  appearanceSystem: 'Follow system',
+  appearanceSystem: 'Match system',
   footerApp: 'Control Center',
 
   loginTitle: 'Sign in to Control Center',

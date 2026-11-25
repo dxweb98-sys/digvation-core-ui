@@ -9,6 +9,8 @@
    * The --cc-* names stay as aliases so screens not yet redesigned follow the theme.
    */
   --app-sidebar: #111111;
+  --app-danger-foreground: #0a0a0a;
+  --app-overlay: rgb(2 6 23 / 55%);
   --app-font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
 
   --cc-rail: var(--app-sidebar);
@@ -70,6 +72,8 @@
 
 :root[data-ds-mode='light'] {
   --app-sidebar: #f3f1ed;
+  --app-danger-foreground: #ffffff;
+  --app-overlay: rgb(28 25 23 / 32%);
   color-scheme: light;
 }
 
@@ -128,221 +132,11 @@ samp {
   border: 0;
 }
 
-/* App shell */
-.application-layout {
-  display: grid;
-  grid-template-columns: 236px minmax(0, 1fr);
-  min-height: 100vh;
-}
-
-.application-sidebar {
-  position: sticky;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  padding: var(--cc-space-4) var(--cc-space-3);
-  overflow: hidden auto;
-  color: var(--cc-text-muted);
-  background: var(--cc-rail);
-}
-
-.product-identity {
-  display: flex;
-  gap: var(--cc-space-3);
-  align-items: center;
-  padding: var(--cc-space-1) var(--cc-space-2) var(--cc-space-4);
-}
-
-.product-mark {
-  display: grid;
-  width: 28px;
-  height: 28px;
-  flex: 0 0 auto;
-  place-items: center;
-  font-size: var(--cc-text-sm);
-  font-weight: 700;
-  color: var(--cc-text);
-  background: var(--cc-overlay);
-  border-radius: var(--cc-radius-md);
-}
-
-.product-name,
-.product-context,
-.header-eyebrow,
-.header-title,
-.navigation-section-label,
-.page-eyebrow {
-  margin: 0;
-}
-
-.product-name {
-  font-size: var(--cc-text-sm);
-  font-weight: 600;
-  color: var(--cc-text);
-}
-
-.product-context {
-  font-size: var(--cc-text-xs);
-  color: var(--cc-text-subtle);
-}
-
-.application-navigation {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 1px;
-  padding-bottom: var(--cc-space-4);
-}
-
-.navigation-group {
-  display: grid;
-  gap: 1px;
-  margin-top: var(--cc-space-4);
-}
-
-.navigation-section-label {
-  padding: 0 var(--cc-space-2) var(--cc-space-1);
-  font-size: var(--cc-text-xs);
-  font-weight: 500;
-  color: var(--cc-text-subtle);
-}
-
-.navigation-item {
-  position: relative;
-  display: flex;
-  gap: var(--cc-space-2);
-  align-items: center;
-  min-height: 32px;
-  padding: 0 var(--cc-space-2);
-  font-size: var(--cc-text-sm);
-  font-weight: 450;
-  color: var(--cc-text-muted);
-  text-decoration: none;
-  border-radius: var(--cc-radius-md);
-  transition:
-    color var(--motion-fast) var(--ease-standard),
-    background-color var(--motion-fast) var(--ease-standard);
-}
-
-.navigation-item:hover {
-  color: var(--cc-text);
-  background: var(--cc-canvas);
-}
-
-.navigation-item-active,
-.navigation-item-active:hover {
-  font-weight: 600;
-  color: var(--cc-text);
-  background: var(--cc-surface);
-}
-
-/* Position and weight carry the active state as well as the accent. */
-.navigation-item-active::before {
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  left: -12px;
-  width: 3px;
-  content: '';
-  background: var(--color-brand);
-  border-radius: 0 var(--cc-radius-sm) var(--cc-radius-sm) 0;
-}
-
-.navigation-item-icon {
-  width: 16px;
-  height: 16px;
-  flex: 0 0 auto;
-  opacity: 0.8;
-}
-
-.navigation-item-active .navigation-item-icon {
-  opacity: 1;
-}
-
-.operator-profile {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--cc-space-2);
-  align-items: center;
-  padding: var(--cc-space-3) var(--cc-space-2) 0;
-}
-
-.operator-profile > button {
-  grid-column: 1 / -1;
-}
-
-.operator-profile-details {
-  display: grid;
-  min-width: 0;
-}
-
-.operator-profile strong,
-.operator-profile span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.operator-profile strong {
-  font-size: var(--cc-text-xs);
-  font-weight: 600;
-  color: var(--cc-text);
-}
-
-.operator-profile-details span {
-  font-size: var(--cc-text-xs);
-  color: var(--cc-text-subtle);
-}
-
-.application-workspace {
-  min-width: 0;
-}
-
-.application-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 56px;
-  padding: 0 var(--cc-space-6);
-  background: var(--cc-canvas);
-}
-
-.header-leading,
 /* The DS placeholder measures 3.77:1 on field surfaces, below AA. */
 :root[data-ds-mode] input::placeholder,
 :root[data-ds-mode] textarea::placeholder {
   color: var(--cc-text-subtle);
   opacity: 1;
-}
-
-.header-status {
-  display: flex;
-  gap: var(--cc-space-3);
-  align-items: center;
-}
-
-.header-eyebrow {
-  font-size: var(--cc-text-xs);
-  color: var(--cc-text-subtle);
-}
-
-.header-status > span:first-child {
-  font-size: var(--cc-text-xs);
-  color: var(--cc-text-subtle);
-}
-
-.mobile-navigation-trigger,
-.mobile-navigation {
-  display: none;
-}
-
-.application-content {
-  width: 100%;
-  padding: var(--cc-space-4) var(--cc-space-6) 56px;
 }
 
 /* Links inside content carry the single accent, never the browser default. */
@@ -411,7 +205,6 @@ samp {
 /* Shared @digvation/ui components, themed through public hooks only. */
 [data-ds-component='input'],
 [data-ds-component='select'],
-[data-ds-component='search-input'],
 [data-ds-component='select-filter'],
 [data-ds-component='status-filter'],
 [data-ds-component='textarea'],
@@ -442,21 +235,9 @@ samp {
   min-height: 32px;
 }
 
-[data-ds-component='dialog'] {
-  --color-surface: var(--cc-overlay);
-  --color-surface-muted: var(--cc-raised);
-  --color-secondary-hover: var(--cc-raised);
-  animation: cc-dialog-enter var(--motion-slow) var(--ease-emphasized) backwards;
-}
-
 /* The dialog receives focus only as a container; its controls show the focus ring. */
 :root[data-ds-mode] [data-ds-component='dialog']:focus-visible {
   outline: none;
-}
-
-[data-ds-component='dropdown'] {
-  --color-surface: var(--cc-overlay);
-  --color-surface-muted: var(--cc-raised);
 }
 
 /*
@@ -504,9 +285,6 @@ samp {
   animation: cc-shimmer calc(var(--motion-slow) * 6) linear infinite;
 }
 
-.status-dot-live {
-  animation: cc-status-pulse calc(var(--motion-slow) * 8) var(--ease-standard) infinite;
-}
 
 @keyframes cc-page-enter {
   from {
@@ -522,13 +300,6 @@ samp {
   }
 }
 
-@keyframes cc-dialog-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
-
 @keyframes cc-shimmer {
   from {
     background-position: 100% 0;
@@ -539,14 +310,8 @@ samp {
   }
 }
 
-@keyframes cc-status-pulse {
-  50% {
-    opacity: 0.35;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  :root[data-ds-mode='dark'] {
+  :root[data-ds-mode] {
     --motion-fast: 0ms;
     --motion-base: 0ms;
     --motion-slow: 0ms;
@@ -556,8 +321,6 @@ samp {
   .page-enter,
   .list-reveal [data-ds-component='data-table'] tbody tr:nth-child(-n + 8),
   .content-skeleton-block,
-  .status-dot-live,
-  [data-ds-component='dialog'],
   [aria-live='polite'] > section[role='status'] {
     animation: none;
   }
@@ -568,63 +331,6 @@ samp {
 }
 
 @media (max-width: 760px) {
-  .application-layout {
-    display: block;
-  }
-
-  .application-sidebar {
-    position: static;
-    width: auto;
-    height: auto;
-    padding: var(--cc-space-3) var(--cc-space-4);
-    overflow: visible;
-  }
-
-  .application-sidebar .application-navigation,
-  .application-sidebar .operator-profile {
-    display: none;
-  }
-
-  .product-identity {
-    padding: 0;
-  }
-
-  .application-header {
-    padding: 0 var(--cc-space-4);
-  }
-
-  .mobile-navigation-trigger {
-    display: inline-flex;
-  }
-
-  .header-status > span:first-child {
-    display: none;
-  }
-
-  .mobile-navigation {
-    position: sticky;
-    top: 56px;
-    z-index: 19;
-    display: none;
-    max-height: calc(100vh - 56px);
-    padding: var(--cc-space-1) var(--cc-space-4) var(--cc-space-4);
-    overflow-y: auto;
-    color: var(--cc-text-muted);
-    background: var(--cc-rail);
-  }
-
-  .mobile-navigation-open {
-    display: block;
-  }
-
-  .mobile-navigation .operator-profile {
-    padding-bottom: var(--cc-space-1);
-  }
-
-  .application-content {
-    padding: var(--cc-space-4) var(--cc-space-4) 44px;
-  }
-
   .placeholder-heading {
     flex-direction: column;
   }
@@ -638,4 +344,17 @@ samp {
 /* Temporary until the design system draws the checkbox box at 4px (00-foundation.md, addition 2). */
 :root[data-ds-mode] [data-ds-component='checkbox'] > span {
   border-radius: 4px;
+}
+
+/*
+ * Temporary until the design system has a danger-foreground token
+ * (00-foundation.md, addition 3): DButton danger draws fixed white text.
+ */
+:root[data-ds-mode] [data-ds-component='button'][class*='bg-[var(--color-danger)] text-white'] {
+  color: var(--app-danger-foreground);
+}
+
+/* Dialog overlay of the approved design (02-users.html, section C): DDialog's own blur, app overlay color. */
+.app-dialog-overlay {
+  background: var(--app-overlay);
 }

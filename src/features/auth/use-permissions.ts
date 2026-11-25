@@ -23,6 +23,8 @@ export function usePermissions() {
   });
   return {
     resolved: !snapshot.isPending,
+    /** Role slugs of the signed-in operator. */
+    roles: snapshot.data?.roles ?? [],
     can: (permission: Permission) => hasPermission(snapshot.data, permission),
     canAny: (permissions: readonly Permission[]) => hasAnyPermission(snapshot.data, permissions),
   };

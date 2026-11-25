@@ -1,6 +1,6 @@
 .app-page {
   display: grid;
-  gap: var(--cc-space-5);
+  gap: 20px;
   width: 100%;
   min-width: 0;
 }
@@ -22,16 +22,17 @@
 
 .app-page-heading h1 {
   margin: 0;
-  font-size: clamp(1.25rem, 1.4vw, 1.5rem);
+  font-size: 24px;
+  line-height: 1.2;
   font-weight: 650;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
 }
 
 .app-page-heading p {
   max-width: 68ch;
   margin: 0;
-  font-size: var(--cc-text-sm);
+  font-size: 13.5px;
   line-height: 1.6;
   color: var(--cc-text-muted);
 }

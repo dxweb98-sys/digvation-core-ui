@@ -53,3 +53,15 @@ export function useAudit(query: Query) {
     placeholderData: keepPreviousData,
   });
 }
+
+/** Pending invitations for the menu badge and the users toolbar; 0 without users.invite. */
+export function usePendingInvitationCount(enabled: boolean) {
+  const query = { status: 'pending', limit: 1 };
+  const result = useQuery({
+    queryKey: accessKeys.invitations(query),
+    queryFn: () => accessApi.invitations(query),
+    enabled,
+    staleTime: 30_000,
+  });
+  return enabled ? (result.data?.pagination.total ?? 0) : 0;
+}

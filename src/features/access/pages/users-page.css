@@ -1,0 +1,199 @@
+/* Users list: docs/design/02-users.html, section B. */
+.users-table .users-meta {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.users-table .users-meta a {
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--color-border);
+}
+
+/*
+ * Uppercase column headers (00-foundation.md, addition 1). Temporary until
+ * DDataTable has the option; scoped to this table only.
+ */
+.users-table [data-ds-component='data-table'] th,
+.users-table [data-ds-component='data-table'] th button {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  /* Column labels sit in a <button>, which does not inherit text-transform. */
+  text-transform: uppercase;
+}
+
+.users-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.users-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.users-dim .users-avatar,
+.users-dim .users-name {
+  opacity: 0.6;
+}
+
+.users-two {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.users-status {
+  gap: 3px;
+  align-items: flex-start;
+}
+
+.users-name {
+  font-weight: 500;
+}
+
+.users-you {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  vertical-align: 1px;
+}
+
+.users-muted {
+  color: var(--color-text-muted);
+}
+
+.users-small {
+  font-size: 12px;
+}
+
+.users-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.users-row-action {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.users-row-action:hover,
+.users-row-action[aria-expanded='true'] {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.users-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 8px;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.users-state-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 4px;
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+
+.users-state-danger .users-state-icon {
+  color: var(--color-danger);
+}
+
+.users-state b {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.users-state p {
+  max-width: 420px;
+  margin: 0 0 8px;
+  color: var(--color-text-muted);
+}
+
+/* Status dialog: section C. */
+.user-status-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-status-body {
+  margin: 0;
+}
+
+.user-status-hint {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.user-status-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Below 640px the toolbar stacks: the count sits left under the search (DDataTable's slot is justify-end). */
+@media (max-width: 639px) {
+  .users-table .users-meta {
+    flex: 1;
+    margin-left: 0;
+  }
+}
+
+/*
+ * Mobile cards (DDataTable's own list, the `sm:hidden` block): roles read as bold
+ * text, "Admin, Keuangan", as in the design; the desktop table keeps the badges.
+ * Temporary: `.sm\:hidden` is a DS utility class, used until DDataTable offers an
+ * official option for its mobile cards.
+ */
+.users-table [data-ds-component='data-table'] > .sm\:hidden .users-roles > * {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.users-table [data-ds-component='data-table'] > .sm\:hidden .users-roles > *:not(:last-child)::after {
+  content: ',';
+}

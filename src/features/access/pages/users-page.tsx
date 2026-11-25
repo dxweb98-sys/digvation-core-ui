@@ -1,49 +1,64 @@
-import { DBadge, DDataTable, type TableAction, type TableColumn } from '@digvation/ui';
-import { useState } from 'react';
+import { DBadge, DDataTable, type TableColumn } from '@digvation/ui';
+import { AlertCircle, MoreHorizontal, Plus, Search, Shield, UserCheck, UserX } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { Link } from 'react-router';
 import { useApiMutation } from '../../../shared/api/use-api-mutation';
-import { formatInstant } from '../../../shared/format/date';
-import { ConfirmDialog, FormDialog } from '../../../shared/forms/form-dialog';
+import { calendarDateOf, formatBusinessDate } from '../../../shared/format/date';
+import { FormDialog } from '../../../shared/forms/form-dialog';
 import { read } from '../../../shared/forms/form-spec';
-import { Identity, Page, PageHeader, QueryState } from '../../../shared/ui/page';
-import { StatusBadge } from '../../../shared/ui/status-badge';
+import { AppAction } from '../../../shared/ui/app-action';
+import { AppMenu, AppMenuItem, AppMenuSeparator } from '../../../shared/ui/app-menu';
+import { Page, PageHeader } from '../../../shared/ui/page';
 import { useListState } from '../../../shared/ui/use-list-state';
 import { PERMISSIONS } from '../../auth/permissions';
 import { useAuth } from '../../auth/use-auth';
 import { usePermissions } from '../../auth/use-permissions';
 import { accessApi, type User } from '../access-api';
-import { accessKeys, useRoles, useUsers } from '../access-queries';
+import { accessKeys, usePendingInvitationCount, useRoles, useUsers } from '../access-queries';
+import { InviteUserDialog } from '../components/invite-user-dialog';
+import { UserStatusDialog } from '../components/user-status-dialog';
+import { deactivateBlock } from '../user-rules';
+import { useUsersCopy } from '../users-copy';
+import './users-page.css';
 
-const columns = (roleName: (slug: string) => string): TableColumn<User>[] => [
-  { key: 'fullname',
-    label: 'User',
-    render: (user) => <Identity primary={user.fullname} secondary={user.email} /> },
-  { key: 'username', label: 'Username' },
-  { key: 'roles',
-    label: 'Role',
-    render: (user) =>
-      user.roles.length ? (
-        <span className="app-page-actions">
-          {user.roles.map((role) => (
-            <DBadge key={role} variant="outline">
-              {roleName(role)}
-            </DBadge>
-          ))}
-        </span>
-      ) : (
-        'Tidak ada role'
-      ) },
-  { key: 'is_active',
-    label: 'Status',
-    render: (user) => <StatusBadge status={user.is_active ? 'ACTIVE' : 'INACTIVE'} /> },
-  { key: 'created_at', label: 'Dibuat', render: (user) => formatInstant(user.created_at) },
-];
+const initials = (name: string) =>
+  name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || '?';
 
-export function UsersPage() { const list = useListState();
+function StateBlock({
+  icon,
+  title,
+  body,
+  action,
+  danger = false,
+}: {
+  icon: ReactNode;
+  title: string;
+  body: string;
+  action: ReactNode;
+  danger?: boolean;
+}) {
+  return (
+    <div className={`users-state${danger ? ' users-state-danger' : ''}`} role={danger ? 'alert' : undefined}>
+      <span className="users-state-icon">{icon}</span>
+      <b>{title}</b>
+      <p>{body}</p>
+      {action}
+    </div>
+  );
+}
+
+export function UsersPage() {
+  const copy = useUsersCopy();
+  const list = useListState();
   const users = useUsers(list.query);
-  const { can } = usePermissions();
+  const { can, roles: myRoles } = usePermissions();
   const { user: me } = useAuth();
+  const canInvite = can(PERMISSIONS.USERS_INVITE);
   const canManageRoles = can(PERMISSIONS.USERS_ROLES_MANAGE);
-  const roles = useRoles(canManageRoles && can(PERMISSIONS.ROLES_READ));
+  const canLifecycle = can(PERMISSIONS.USERS_LIFECYCLE_MANAGE);
+  const roles = useRoles(can(PERMISSIONS.ROLES_READ));
+  const pending = usePendingInvitationCount(canInvite);
+  const [inviting, setInviting] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
   const [statusTarget, setStatusTarget] = useState<User | null>(null);
 
@@ -52,54 +67,183 @@ export function UsersPage() { const list = useListState();
       accessApi.setUserRoles(input.userId, { role_slugs: input.roles }),
     { success: 'Role disimpan', invalidate: [accessKeys.all], toastErrors: false },
   );
-  const setStatus = useApiMutation(
-    (input: { user: User; reason: string }) =>
-      accessApi.setUserStatus(input.user.id, { is_active: !input.user.is_active, reason: input.reason }),
-    { success: (_, input) => (input.user.is_active ? 'User dinonaktifkan' : 'User diaktifkan kembali'),
-      invalidate: [accessKeys.all],
-      toastErrors: false },
-  );
 
-  const actions: TableAction<User>[] = [
-    ...(canManageRoles ? [{ label: 'Edit role', onClick: setEditing }] : []),
-    ...(can(PERMISSIONS.USERS_LIFECYCLE_MANAGE)
-      ? [
-          { label: 'Nonaktifkan',
-            variant: 'danger' as const,
-            show: (user: User) => user.is_active && user.id !== me?.id,
-            onClick: setStatusTarget },
-          { label: 'Aktifkan kembali', show: (user: User) => !user.is_active, onClick: setStatusTarget },
-        ]
-      : []),
-  ];
-
+  // The user payload carries role slugs; the operator sees the role name.
+  const roleName = new Map((roles.data ?? []).map((role) => [role.slug, role.name]));
   const roleOptions = (roles.data ?? [])
     .filter((role) => role.is_active)
     .map((role) => ({ value: role.slug, label: role.name, description: role.description ?? undefined }));
 
-  // The user payload carries role slugs; the operator sees the role name.
-  const roleName = new Map((roles.data ?? []).map((role) => [role.slug, role.name]));
-  const userColumns = columns((slug) => roleName.get(slug) ?? slug);
+  const columns: TableColumn<User>[] = [
+    {
+      key: 'fullname',
+      label: copy.columns.user,
+      render: (user) => (
+        <span className={`users-identity${user.is_active ? '' : ' users-dim'}`}>
+          <span className="users-avatar" aria-hidden="true">
+            {initials(user.fullname)}
+          </span>
+          <span className="users-two">
+            <span className="users-name">
+              {user.fullname}
+              {user.id === me?.id ? <span className="users-you">{copy.you}</span> : null}
+            </span>
+            <span className="users-muted users-small">{user.email}</span>
+          </span>
+        </span>
+      ),
+    },
+    { key: 'username', label: copy.columns.username, render: (user) => <span className="users-muted">{user.username}</span> },
+    {
+      key: 'roles',
+      label: copy.columns.roles,
+      render: (user) =>
+        user.roles.length ? (
+          <span className="users-roles">
+            {user.roles.map((slug) => (
+              <DBadge key={slug}>{roleName.get(slug) ?? slug}</DBadge>
+            ))}
+          </span>
+        ) : (
+          <span className="users-muted">{copy.noRole}</span>
+        ),
+    },
+    {
+      key: 'is_active',
+      label: copy.columns.status,
+      render: (user) => (
+        <span className="users-two users-status">
+          <DBadge variant={user.is_active ? 'success' : 'default'}>{user.is_active ? copy.active : copy.inactive}</DBadge>
+          {user.email_verified_at ? null : <span className="users-muted users-small">{copy.emailUnverified}</span>}
+        </span>
+      ),
+    },
+    {
+      key: 'created_at',
+      label: copy.columns.created,
+      render: (user) => <span className="users-muted">{formatBusinessDate(calendarDateOf(user.created_at))}</span>,
+    },
+  ];
+
+  const rowActions = (user: User) => {
+    const blocked = user.is_active ? deactivateBlock(user, { id: me?.id, roles: myRoles }, copy) : undefined;
+    return (
+      <AppMenu
+        label={copy.actionsFor(user.fullname)}
+        trigger={({ open, ref }) => (
+          <button
+            ref={ref}
+            type="button"
+            className="users-row-action"
+            aria-haspopup="menu"
+            aria-expanded={open}
+            aria-label={copy.actionsFor(user.fullname)}
+          >
+            <MoreHorizontal size={16} aria-hidden="true" />
+          </button>
+        )}
+      >
+        {canManageRoles ? (
+          <AppMenuItem icon={<Shield size={16} aria-hidden="true" />} onSelect={() => setEditing(user)}>
+            {copy.changeRoles}
+          </AppMenuItem>
+        ) : null}
+        {canManageRoles && canLifecycle ? <AppMenuSeparator /> : null}
+        {canLifecycle ? (
+          user.is_active ? (
+            <AppMenuItem
+              danger={!blocked}
+              disabled={Boolean(blocked)}
+              hint={blocked}
+              icon={<UserX size={16} aria-hidden="true" />}
+              onSelect={() => setStatusTarget(user)}
+            >
+              {copy.deactivate}
+            </AppMenuItem>
+          ) : (
+            <AppMenuItem icon={<UserCheck size={16} aria-hidden="true" />} onSelect={() => setStatusTarget(user)}>
+              {copy.reactivate}
+            </AppMenuItem>
+          )
+        ) : null}
+      </AppMenu>
+    );
+  };
+
+  const page = users.data;
+  const searching = Boolean(list.state.search.trim());
+  const empty = users.isError ? (
+    <StateBlock
+      danger
+      icon={<AlertCircle size={20} aria-hidden="true" />}
+      title={copy.loadFailed[0]}
+      body={copy.loadFailed[1]}
+      action={
+        <AppAction tone="secondary" loading={users.isFetching} onClick={() => void users.refetch()}>
+          {copy.retry}
+        </AppAction>
+      }
+    />
+  ) : searching ? (
+    <StateBlock
+      icon={<Search size={20} aria-hidden="true" />}
+      title={copy.noMatch[0]}
+      body={copy.noMatch[1]}
+      action={
+        <AppAction tone="secondary" onClick={() => list.setSearch('')}>
+          {copy.clearSearch}
+        </AppAction>
+      }
+    />
+  ) : undefined;
 
   return (
     <Page>
-      <PageHeader title="User" description="Akun operator beserta role yang menentukan apa yang bisa mereka lakukan." />
-      <QueryState query={users} label="user">
-        {(page) => (
-          <DDataTable
-            columns={userColumns}
-            data={page.items}
-            rowKey="id"
-            searchable
-            searchPlaceholder="Cari nama, email, atau username"
-            {...list.tableProps}
-            pagination={{ page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }}
-            actions={actions.length ? actions : undefined}
-            emptyMessage="User tidak ditemukan. Coba kata lain, atau undang user."
-          />
-        )}
-      </QueryState>
+      <PageHeader
+        title={copy.title}
+        description={copy.description}
+        actions={
+          canInvite ? (
+            <AppAction icon={Plus} onClick={() => setInviting(true)}>
+              {copy.invite}
+            </AppAction>
+          ) : null
+        }
+      />
+      <section className="users-table" aria-label={copy.title}>
+        <DDataTable
+          columns={columns}
+          data={users.isError ? [] : (page?.items ?? [])}
+          rowKey="id"
+          loading={users.isPending}
+          searchable
+          searchPlaceholder={copy.search}
+          {...list.tableProps}
+          headerActions={
+            page ? (
+              <span className="users-meta">
+                {copy.total(page.pagination.total)}
+                {canInvite && pending > 0 ? (
+                  <>
+                    {' · '}
+                    <Link to="/invitations">{copy.pending(pending)}</Link>
+                  </>
+                ) : null}
+              </span>
+            ) : null
+          }
+          pagination={
+            page && !users.isError
+              ? { page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }
+              : undefined
+          }
+          actions={canManageRoles || canLifecycle ? rowActions : undefined}
+          emptyMessage={empty}
+        />
+      </section>
 
+      <InviteUserDialog open={inviting} onClose={() => setInviting(false)} />
+      <UserStatusDialog user={statusTarget} onClose={() => setStatusTarget(null)} />
       <FormDialog
         open={editing !== null}
         title={`Role untuk ${editing?.fullname ?? ''}`}
@@ -109,20 +253,6 @@ export function UsersPage() { const list = useListState();
         submitLabel="Simpan role"
         onSubmit={(values) => setRoles.mutateAsync({ userId: editing!.id, roles: read.list(values, 'role_slugs') })}
         onClose={() => setEditing(null)}
-      />
-
-      <ConfirmDialog
-        open={statusTarget !== null}
-        title={statusTarget?.is_active ? 'Nonaktifkan user' : 'Aktifkan kembali user'}
-        message={ statusTarget?.is_active
-            ? `${statusTarget.fullname} akan keluar dari semua sesi sekaligus dan tidak bisa masuk lagi sampai diaktifkan kembali.`
-            : `${statusTarget?.fullname ?? ''} bisa masuk kembali dengan role yang sudah dimilikinya.`
-        }
-        confirmLabel={statusTarget?.is_active ? 'Nonaktifkan' : 'Aktifkan kembali'}
-        tone={statusTarget?.is_active ? 'danger' : 'primary'}
-        reason={{ label: 'Alasan' }}
-        onConfirm={(values) => setStatus.mutateAsync({ user: statusTarget!, reason: read.text(values, 'reason') })}
-        onClose={() => setStatusTarget(null)}
       />
     </Page>
   );
