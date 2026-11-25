@@ -21,6 +21,7 @@ This folder holds the product owner's approved designs. Each screen is built to 
 | `04-roles.html` | Roles page, permission editor, create/edit role, deactivate/reactivate (status filter moved to the DDataTable filter section 2026-11-25) | 2026-11-25 |
 | `05-invitations.html` | Invitations page, invite dialog, revoke, give roles to an accepted invitation, accept invitation (public), account without a role (status filter moved to the DDataTable filter section 2026-11-25) | 2026-11-25 |
 | `06-profile.html` | My profile as a dialog from the account menu: profile tab, password tab | 2026-11-25 |
+| `07-clients.html` | Clients list, client detail, business page, brand page, register client, edit client, change status | 2026-11-25 |
 | `digvation-mark.svg` | Digvation logo mark (`fill="currentColor"`) | 2026-11-24 |
 
 Open the `.html` files in a browser. Each one starts with the behaviour and copy, followed by every state as rendered.
