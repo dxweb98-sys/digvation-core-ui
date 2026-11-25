@@ -41,6 +41,7 @@ Latar halaman (#f3f1ec) sengaja lebih dalam dari kartu putih supaya kartu, tabel
 Semua warna status lolos WCAG AA 4.5:1 sebagai teks di atas surface dan di dalam pill (latar 12%). Di mode gelap, teks putih di atas merah tidak bisa lolos bersamaan dengan teks merah di atas latar gelap. Karena itu tombol bahaya memakai `--app-danger-foreground`: teks gelap (#0a0a0a) di mode gelap dan putih di mode terang hangat. Sampai design system punya token warna teks tombol bahaya, core-ui memasang override kecil yang diberi komentar pada DButton varian danger.
 
 ## Bentuk dan huruf
+- Tombol nonaktif: opacity 0.5 dan kursor not-allowed, persis DButton (`disabled:opacity-50`). Komponen nonaktif dikecualikan dari syarat kontras WCAG.
 - Font: Inter (400/500/600/700); kode dan nomor dokumen: JetBrains Mono.
 - Radius: control 8, card 16, panel 16, menu item 10 (default design system).
 - Status: DBadge pil. Judul kolom tabel: kapital 11px, letter-spacing 0.05em (butuh opsi baru di DDataTable).
