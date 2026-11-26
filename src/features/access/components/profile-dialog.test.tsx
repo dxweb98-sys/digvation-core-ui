@@ -25,17 +25,18 @@ const ME = {
 
 interface Options {
   roles?: string[];
+  permissions?: string[];
   write?: (call: RecordedCall) => Response;
 }
 
 /** CORE for a signed-in operator: a restorable session, the profile and the role catalog. */
-function serve({ roles = ['SUPER_ADMIN'], write }: Options = {}) {
+function serve({ roles = ['SUPER_ADMIN'], permissions = ['*'], write }: Options = {}) {
   return mockFetch((call) => {
     const path = new URL(call.url).pathname;
     if (path === '/auth/refresh')
       return envelope({ access_token: 'access', csrf_token: 'csrf', remember_me: false, user: ME });
     if (path === '/users/me' && call.method === 'GET') return envelope(ME);
-    if (path === '/authorization/me') return envelope({ roles, permissions: ['*'] });
+    if (path === '/authorization/me') return envelope({ roles, permissions });
     if (path === '/roles') return envelope({ items: [{ id: 'r1', slug: 'SUPER_ADMIN', name: 'Super Admin', is_active: true }] });
     if (path === '/invitations') return envelope({ items: [], pagination: { page: 1, limit: 1, total: 0, total_pages: 1 } });
     if (write && call.method !== 'GET') return write(call);
@@ -121,6 +122,16 @@ describe('profile dialog', () => {
     expect(dialog.getByRole('tab', { name: 'Profil' })).toHaveAttribute('aria-selected', 'true');
     expect(dialog.getByRole('tabpanel')).toBeInTheDocument();
     expect(dialog.getByLabelText('Nama lengkap')).toHaveValue('Dicky Darmawan');
+  });
+
+  it('labels system roles for an operator who cannot read roles, and keeps custom slugs', async () => {
+    const { calls } = serve({ roles: ['ADMIN', 'OPS_CUSTOM'], permissions: ['users.read'] });
+    renderShell();
+    const dialog = await openProfile();
+    expect(await dialog.findByText('Admin')).toBeInTheDocument();
+    expect(dialog.getByText('OPS_CUSTOM')).toBeInTheDocument();
+    expect(dialog.queryByText('ADMIN')).not.toBeInTheDocument();
+    expect(calls.some((call) => new URL(call.url).pathname === '/roles')).toBe(false);
   });
 
   it('shows "Belum punya role" for an account without roles', async () => {

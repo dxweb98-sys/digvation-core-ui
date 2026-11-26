@@ -21,7 +21,6 @@
   "include": ["src", "parked-areas.json"],
   // Keep in step with parked-areas.json (src/features/PARKED.md).
   "exclude": [
-    "src/features/clients",
     "src/features/services",
     "src/features/contracts",
     "src/features/billing",

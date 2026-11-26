@@ -6,37 +6,32 @@ export const clientKeys = {
   all: ['clients'] as const,
   list: (query?: Query) => ['clients', 'list', query ?? {}] as const,
   detail: (clientId: string) => ['clients', 'detail', clientId] as const,
-  brands: (clientId: string) => ['clients', 'brands', clientId] as const,
+  brand: (clientId: string, brandId: string) => ['clients', 'detail', clientId, 'brand', brandId] as const,
+  businessTypes: ['business-types', 'active'] as const,
 };
 
-export function useClients(query: Query, enabled = true) {
+export function useClients(query: Query) {
   return useQuery({
     queryKey: clientKeys.list(query),
     queryFn: () => clientsApi.list(query),
     placeholderData: keepPreviousData,
-    enabled,
   });
 }
 
+/** One GET /clients/{id} feeds the client page and its business pages. */
 export function useClient(clientId: string) {
   return useQuery({ queryKey: clientKeys.detail(clientId), queryFn: () => clientsApi.detail(clientId) });
 }
 
-/** Brands with the billing contacts invoices will use. */
-export function useBrands(clientId: string, enabled = true) {
-  return useQuery({
-    queryKey: clientKeys.brands(clientId),
-    queryFn: async () => (await clientsApi.brands(clientId)).items,
-    enabled: enabled && Boolean(clientId),
-  });
+export function useBrand(clientId: string, brandId: string) {
+  return useQuery({ queryKey: clientKeys.brand(clientId, brandId), queryFn: () => clientsApi.brand(clientId, brandId) });
 }
 
-/** Active clients as options for pickers in other areas. */
-export function useClientOptions(enabled = true) {
+export function useActiveBusinessTypes(enabled: boolean) {
   return useQuery({
-    queryKey: clientKeys.list({ status: 'ACTIVE', limit: 100, page: 1 }),
-    queryFn: () => clientsApi.list({ status: 'ACTIVE', limit: 100, page: 1 }),
-    select: (page) => page.items.map((client) => ({ value: client.id, label: `${client.display_name} (${client.code})` })),
+    queryKey: clientKeys.businessTypes,
+    queryFn: async () => (await clientsApi.activeBusinessTypes()).items,
     enabled,
+    staleTime: 5 * 60_000,
   });
 }

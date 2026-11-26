@@ -34,13 +34,25 @@ export function useRoles(enabled = true) {
 }
 
 /**
+ * Names of the system roles, for operators who cannot read GET /roles. The same
+ * in both languages, as the Role page shows them. Custom roles keep their slug
+ * until CORE returns role names with GET /authorization/me (core-v2 follow-up P4).
+ */
+export const SYSTEM_ROLE_LABELS: Readonly<Record<string, string>> = {
+  SUPER_ADMIN: 'Super Admin',
+  ADMIN: 'Admin',
+};
+
+/**
  * The signed-in operator's roles (GET /authorization/me) by the names the Role
- * page shows (GET /roles); the slug when the operator cannot read roles.
+ * page shows (GET /roles); without roles.read, the system role label or the slug.
  */
 export function useMyRoleNames() {
   const { can, roles } = usePermissions();
   const catalog = useRoles(can(PERMISSIONS.ROLES_READ));
-  return roles.map((slug) => catalog.data?.find((role) => role.slug === slug)?.name ?? slug);
+  return roles.map(
+    (slug) => catalog.data?.find((role) => role.slug === slug)?.name ?? SYSTEM_ROLE_LABELS[slug] ?? slug,
+  );
 }
 
 export function usePermissionCatalog(enabled = true) {

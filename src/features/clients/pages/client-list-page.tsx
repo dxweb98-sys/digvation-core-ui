@@ -1,103 +1,196 @@
-import { DDataTable, DEmptyState, DStatusFilter, type TableColumn } from '@digvation/ui';
-import { Plus } from 'lucide-react';
+import { DDataTable, DSelectFilter, type TableColumn } from '@digvation/ui';
+import { AlertCircle, Building2, ChevronRight, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { useApiMutation } from '../../../shared/api/use-api-mutation';
-import { formatInstant } from '../../../shared/format/date';
-import { FormDialog } from '../../../shared/forms/form-dialog';
+import { Link, useNavigate } from 'react-router';
+import { calendarDateOf, formatBusinessDate } from '../../../shared/format/date';
+import { formatPhone } from '../../../shared/format/phone';
 import { AppAction } from '../../../shared/ui/app-action';
-import { Code, Identity, Page, PageHeader, QueryState } from '../../../shared/ui/page';
-import { RecordButton } from '../../../shared/ui/record-button';
-import { StatusBadge } from '../../../shared/ui/status-badge';
+import { Page, PageHeader } from '../../../shared/ui/page';
+import { StateBlock } from '../../../shared/ui/state-block';
 import { useListState } from '../../../shared/ui/use-list-state';
 import { PERMISSIONS } from '../../auth/permissions';
 import { usePermissions } from '../../auth/use-permissions';
-import { CLIENT_CREATE_FIELDS, createClientBody } from '../client-forms';
-import { clientsApi, type Client } from '../clients-api';
-import { clientKeys, useClients } from '../clients-queries';
+import type { Client, ClientStatus } from '../clients-api';
+import { clientPaths } from '../client-paths';
+import { CLIENT_STATUSES } from '../client-rules';
+import { useClientsCopy } from '../clients-copy';
+import { useClients } from '../clients-queries';
+import { ClientStatusPill } from '../components/client-parts';
+import { RegisterClientDialog } from '../components/register-client-dialog';
+import '../clients.css';
 
-const STATUS_OPTIONS = [
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'SUSPENDED', label: 'Suspended' },
-  { value: 'ARCHIVED', label: 'Archived' },
-];
+const clientPath = (client: Client) => clientPaths.client(client.id);
 
-const COLUMNS: TableColumn<Client>[] = [
-  {
-    key: 'display_name',
-    label: 'Client',
-    render: (client) => (
-      <RecordButton>
-        <Identity primary={client.display_name} secondary={client.legal_name} />
-      </RecordButton>
-    ),
-  },
-  { key: 'code', label: 'Code', render: (client) => <Code>{client.code}</Code> },
-  { key: 'status', label: 'Status', render: (client) => <StatusBadge status={client.status} /> },
-  { key: 'email', label: 'Email', render: (client) => client.email ?? '—' },
-  { key: 'updated_at', label: 'Updated', render: (client) => formatInstant(client.updated_at) },
-];
-
+/** Clients list (docs/design/07-clients.html, section A). */
 export function ClientListPage() {
+  const copy = useClientsCopy();
   const navigate = useNavigate();
   const list = useListState();
   const clients = useClients(list.query);
   const { can } = usePermissions();
-  const [creating, setCreating] = useState(false);
-  const create = useApiMutation(clientsApi.create, {
-    success: 'Client added',
-    invalidate: [clientKeys.all],
-    toastErrors: false,
-    onSuccess: (result) => navigate(`/clients/${result.client_id}`),
-  });
+  const canManage = can(PERMISSIONS.CLIENTS_MANAGE);
+  const [registering, setRegistering] = useState(false);
+
+  const status = list.state.filters.status as ClientStatus | undefined;
+  const filtered = Boolean(list.state.search.trim() || status);
+  const page = clients.data;
+
+  const contact = (client: Client) => [client.email, formatPhone(client.phone)].filter(Boolean);
+
+  const columns: TableColumn<Client>[] = [
+    {
+      key: 'full_name',
+      label: copy.columns.client,
+      render: (client) => (
+        <span className={`clients-two${client.status === 'ARCHIVED' ? ' clients-dim' : ''}`}>
+          {/* The name is the row's link: Tab reaches it and Enter opens the client. */}
+          <Link
+            to={clientPath(client)}
+            className="clients-row-link"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {client.full_name ?? client.code}
+          </Link>
+          <span className="clients-code clients-muted">{client.code}</span>
+          {/* In the mobile card: status top right, then email · phone (board K25). */}
+          <span className="clients-card-only clients-card-status">
+            <ClientStatusPill status={client.status} />
+          </span>
+          <span className="clients-card-only clients-muted clients-small">{contact(client).join(' · ')}</span>
+        </span>
+      ),
+    },
+    {
+      key: 'email',
+      label: copy.columns.contact,
+      render: (client) => (
+        <span className={`clients-two clients-table-only${client.status === 'ARCHIVED' ? ' clients-dim' : ''}`}>
+          {contact(client).map((line) => (
+            <span key={line} className="clients-muted">
+              {line}
+            </span>
+          ))}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      label: copy.columns.status,
+      render: (client) => (
+        <span className={`clients-cell-status${client.status === 'ARCHIVED' ? ' clients-dim' : ''}`}>
+          <ClientStatusPill status={client.status} />
+        </span>
+      ),
+    },
+    {
+      key: 'created_at',
+      label: copy.columns.registered,
+      render: (client) => (
+        <span className={`clients-muted clients-cell-date${client.status === 'ARCHIVED' ? ' clients-dim' : ''}`}>
+          {formatBusinessDate(calendarDateOf(client.created_at))}
+        </span>
+      ),
+    },
+    {
+      key: 'open',
+      label: <span className="visually-hidden">{copy.columns.open}</span>,
+      align: 'right',
+      width: '48px',
+      render: () => <ChevronRight size={16} aria-hidden="true" className="clients-chevron clients-cell-open" />,
+    },
+  ];
+
+  const clearFilters = () => {
+    list.setSearch('');
+    list.setFilter('status', 'ALL');
+  };
+
+  const empty = clients.isError ? (
+    <StateBlock
+      danger
+      icon={<AlertCircle size={20} aria-hidden="true" />}
+      title={copy.loadFailed[0]}
+      body={copy.loadFailed[1]}
+      action={
+        <AppAction tone="secondary" loading={clients.isFetching} onClick={() => void clients.refetch()}>
+          {copy.retry}
+        </AppAction>
+      }
+    />
+  ) : filtered ? (
+    <StateBlock
+      icon={<Search size={20} aria-hidden="true" />}
+      title={copy.noMatch[0]}
+      body={copy.noMatch[1]}
+      action={
+        <AppAction tone="secondary" onClick={clearFilters}>
+          {copy.clearFilters}
+        </AppAction>
+      }
+    />
+  ) : undefined;
+
+  // Nothing registered yet: no table, and no second button (the one in the header is enough).
+  const neverRegistered = !filtered && page?.pagination.total === 0 && !clients.isError;
 
   return (
     <Page>
       <PageHeader
-        title="Clients"
-        description="Organizations Digvation serves. Each client has one or more brands."
+        title={copy.title}
+        description={copy.description}
         actions={
-          can(PERMISSIONS.CLIENTS_MANAGE) ? (
-            <AppAction icon={Plus} onClick={() => setCreating(true)}>
-              Add client
+          canManage ? (
+            <AppAction icon={Plus} onClick={() => setRegistering(true)}>
+              {copy.register}
             </AppAction>
           ) : null
         }
       />
-      <QueryState query={clients} label="clients">
-        {(page) => (
+      {neverRegistered ? (
+        <section className="app-state-card" aria-label={copy.title}>
+          <StateBlock icon={<Building2 size={20} aria-hidden="true" />} title={copy.empty[0]} body={copy.empty[1]} action={null} />
+        </section>
+      ) : (
+        <section className="clients-table app-table-caps" aria-label={copy.title}>
           <DDataTable
-            columns={COLUMNS}
-            data={page.items}
+            columns={columns}
+            data={clients.isError ? [] : (page?.items ?? [])}
             rowKey="id"
+            loading={clients.isPending}
             searchable
-            searchPlaceholder="Search code, display name, or legal name"
+            searchPlaceholder={copy.search}
             {...list.tableProps}
+            onRowClick={(client) => navigate(clientPath(client))}
             filters={
-              <DStatusFilter
-                label="Status"
-                allLabel="All statuses"
-                options={STATUS_OPTIONS}
-                value={String(list.state.filters.status ?? 'ALL')}
-                onChange={(status) => list.setFilter('status', status)}
+              <DSelectFilter
+                label={copy.statusLabel}
+                options={[
+                  { value: 'ALL', label: copy.all },
+                  ...CLIENT_STATUSES.map((value) => ({ value, label: copy.status[value] })),
+                ]}
+                value={status ?? 'ALL'}
+                onChange={(value) => list.setFilter('status', value ? String(value) : 'ALL')}
               />
             }
-            pagination={{ page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }}
-            onRowClick={(client) => navigate(`/clients/${client.id}`)}
-            emptyMessage={<DEmptyState title="No clients found" description="Try another search, or add a client." />}
+            headerActions={
+              page ? (
+                <span className="clients-meta">
+                  {copy.total(page.pagination.total)}
+                  {status ? copy.activeFilter(copy.statusLabel, copy.status[status]) : null}
+                </span>
+              ) : null
+            }
+            pagination={
+              page && !clients.isError
+                ? { page: page.pagination.page, pageSize: page.pagination.limit, total: page.pagination.total }
+                : undefined
+            }
+            emptyMessage={empty}
           />
-        )}
-      </QueryState>
-      <FormDialog
-        open={creating}
-        kind="wide"
-        title="Add client"
-        description="The client starts active, with a first brand and a primary contact."
-        fields={CLIENT_CREATE_FIELDS}
-        submitLabel="Add client"
-        onSubmit={(values) => create.mutateAsync(createClientBody(values))}
-        onClose={() => setCreating(false)}
-      />
+        </section>
+      )}
+
+      <RegisterClientDialog open={registering} onClose={() => setRegistering(false)} />
     </Page>
   );
 }

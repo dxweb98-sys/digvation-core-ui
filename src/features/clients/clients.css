@@ -1,0 +1,409 @@
+/* Clients, client, business and brand pages: docs/design/07-clients.html. */
+.clients-muted {
+  color: var(--color-text-muted);
+}
+
+.clients-small {
+  font-size: 12px;
+}
+
+.clients-code {
+  font-family: var(--cc-font-mono);
+  font-size: 12.5px;
+}
+
+.clients-two {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.clients-name {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.clients-alias {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.clients-chevron {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+/* The row's own link: the whole row also opens on click; the link carries keyboard and screen reader use. */
+.clients-row-link {
+  color: var(--color-text);
+  font-weight: 500;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.clients-row-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.clients-table tbody tr,
+.clients-business-table tbody tr,
+.clients-table [data-ds-component='data-table'] > .sm\:hidden > *,
+.clients-business-table [data-ds-component='data-table'] > .sm\:hidden > * {
+  cursor: pointer;
+}
+
+.clients-table tbody tr:hover > td,
+.clients-business-table tbody tr:hover > td {
+  background: color-mix(in srgb, var(--color-surface-muted) 60%, transparent);
+}
+
+/* Archived clients are dimmed, in the table and in the cards. */
+.clients-table tr:has(.clients-dim) > td,
+.clients-table [data-ds-component='data-table'] > .sm\:hidden > *:has(.clients-dim) {
+  opacity: 0.6;
+}
+
+.clients-table .clients-meta {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/*
+ * Mobile cards (DDataTable's own list, the `sm:hidden` block): the client card
+ * shows the status top right and "email · phone" under the name (board K25), so
+ * the second column and the label rows are hidden there; the business card keeps
+ * its counts. Temporary, as in the users list: `.sm\:hidden` is a DS utility
+ * class, used until DDataTable offers an official option for its mobile cards.
+ */
+.clients-card-only {
+  display: none;
+}
+
+.clients-table [data-ds-component='data-table'] > .sm\:hidden > * {
+  position: relative;
+}
+
+.clients-table [data-ds-component='data-table'] > .sm\:hidden .clients-card-only {
+  display: block;
+}
+
+.clients-table [data-ds-component='data-table'] > .sm\:hidden .clients-card-status {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.clients-table [data-ds-component='data-table'] > .sm\:hidden .clients-two {
+  padding-right: 96px;
+}
+
+.clients-table [data-ds-component='data-table'] > .sm\:hidden .clients-table-only,
+.clients-business-table [data-ds-component='data-table'] > .sm\:hidden .clients-table-only,
+.clients-table [data-ds-component='data-table'] > .sm\:hidden div:has(> div > span > .clients-cell-status),
+.clients-business-table [data-ds-component='data-table'] > .sm\:hidden div:has(> span > .clients-cell-open) {
+  display: none;
+}
+
+/* Page header line: code, status, "Status sejak …" or the parent link. */
+.clients-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.clients-inline-link {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.clients-banner {
+  margin-bottom: 20px;
+}
+
+.clients-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+.clients-main,
+.clients-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.clients-side {
+  gap: 0;
+}
+
+@media (max-width: 1023px) {
+  .clients-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.clients-heading {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.clients-heading-gap {
+  margin-top: 24px;
+}
+
+.clients-card {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.clients-row {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  min-height: 52px;
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
+.clients-row + .clients-row {
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+}
+
+.clients-side .clients-row {
+  grid-template-columns: 110px minmax(0, 1fr);
+}
+
+.clients-key {
+  color: var(--color-text-muted);
+}
+
+.clients-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.clients-source {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.clients-link-row,
+.clients-contact,
+.clients-empty-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.clients-empty-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.clients-link-row {
+  color: inherit;
+  text-decoration: none;
+}
+
+.clients-link-row:hover {
+  background: color-mix(in srgb, var(--color-surface-muted) 60%, transparent);
+}
+
+.clients-link-row:focus-visible {
+  outline-offset: -2px;
+}
+
+.clients-row-aside {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.clients-flags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.clients-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.clients-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clients-swatch-box {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.clients-note {
+  margin: 10px 2px 0;
+}
+
+@media (max-width: 639px) {
+  .clients-row,
+  .clients-side .clients-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .clients-link-row,
+  .clients-contact {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+
+  .clients-contact .clients-flags {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+/* Dialogs: register, edit and change status. */
+.clients-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* The DDialog body is 16px; the design sets the dialog content at 14px. */
+  font-size: 14px;
+}
+
+.clients-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.clients-form-section + .clients-form-section {
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+}
+
+.clients-form-section h3 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.clients-form-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 639px) {
+  .clients-form-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.clients-alias-input input {
+  font-family: var(--cc-font-mono);
+  text-transform: uppercase;
+}
+
+.clients-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.clients-later {
+  margin: 0;
+}
+
+.clients-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.clients-now {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.clients-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clients-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.clients-option > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.clients-option b {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.clients-option-on {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 1px var(--color-brand);
+}
+
+.clients-option:has(input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.clients-option [data-ds-component='radio'] {
+  margin-top: 2px;
+}
+
+.clients-field-error {
+  margin: -8px 0 0;
+  font-size: 12px;
+  color: var(--color-danger);
+}
+
+.clients-hint-count {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}

@@ -1,5 +1,5 @@
 import { ChevronsUpDown, Globe, LogOut, Menu, Monitor, Moon, Sun, User, X } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { ProfileDialog } from '../../features/access/components/profile-dialog';
 import { useMyRoleNames, usePendingInvitationCount } from '../../features/access/access-queries';
@@ -11,7 +11,8 @@ import { DISPLAY_LOCALES, setDisplayLocale, useDisplayLocale } from '../../share
 import { setAppearance, useAppearance, type Appearance } from '../../shared/theme/appearance';
 import { AppMenu, AppMenuItem, AppMenuLabel, AppMenuSeparator } from '../../shared/ui/app-menu';
 import { DigvationMark } from '../../shared/ui/digvation-mark';
-import { PageBreadcrumb } from '../../shared/ui/page';
+import { PageBreadcrumb, type BreadcrumbTrailItem } from '../../shared/ui/page';
+import { RecordTrailContext } from '../../shared/ui/record-trail';
 import { ApplicationNavigation } from './application-navigation';
 import { trailFor } from './navigation-items';
 import { useShellCopy } from './shell-copy';
@@ -122,7 +123,10 @@ export function ApplicationShell() {
   const copy = useShellCopy();
   const { can } = usePermissions();
   const pendingInvitations = usePendingInvitationCount(can(PERMISSIONS.USERS_INVITE));
-  const trail = trailFor(location.pathname, copy);
+  // A record page names its records in the breadcrumb (shared/ui/record-trail.ts).
+  const [recordTrail, setRecordTrail] = useState<BreadcrumbTrailItem[] | null>(null);
+  const recordTrailValue = useMemo(() => ({ trail: recordTrail, setTrail: setRecordTrail }), [recordTrail]);
+  const trail = recordTrail ?? trailFor(location.pathname, copy);
   const pageTitle = trail[trail.length - 1].label;
   // Formats are read at render; a new language re-renders the page.
   const locale = useDisplayLocale();
@@ -151,6 +155,7 @@ export function ApplicationShell() {
   }, [closeDrawer, drawerOpen]);
 
   return (
+    <RecordTrailContext.Provider value={recordTrailValue}>
     <div className="application-layout">
       <aside
         id="application-sidebar"
@@ -202,5 +207,6 @@ export function ApplicationShell() {
         </main>
       </div>
     </div>
+    </RecordTrailContext.Provider>
   );
 }

@@ -35,7 +35,7 @@ describe('navigation visibility', () => {
 describe('parked areas', () => {
   it('leaves every parked area out of the menu and the router', () => {
     const menu = NAVIGATION_GROUPS.flatMap((group) => group.items.map((item) => item.to));
-    expect(menu).toEqual(['/', '/users', '/invitations', '/roles', '/audit']);
+    expect(menu).toEqual(['/', '/clients', '/users', '/invitations', '/roles', '/audit']);
     const routed = (applicationRoutes.find((route) => route.path === '/')?.children ?? [])
       .map((route) => `/${route.path ?? ''}`);
     expect(routed.filter(isParkedPath)).toEqual([]);

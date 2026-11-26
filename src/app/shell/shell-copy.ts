@@ -5,9 +5,10 @@ const id = {
   product: 'Digvation',
   productContext: 'Control Center',
   /** Menu labels by group and by path; anything missing shows its English source label. */
-  groups: { Overview: 'Ringkasan', Access: 'Akses' } as Partial<Record<string, string>>,
+  groups: { Overview: 'Ringkasan', Customers: 'Pelanggan', Access: 'Akses' } as Partial<Record<string, string>>,
   items: {
     '/': 'Beranda',
+    '/clients': 'Klien',
     '/users': 'Pengguna',
     '/invitations': 'Undangan',
     '/roles': 'Role',
@@ -29,9 +30,10 @@ export type ShellCopy = typeof id;
 const en: ShellCopy = {
   product: 'Digvation',
   productContext: 'Control Center',
-  groups: { Overview: 'Overview', Access: 'Access' },
+  groups: { Overview: 'Overview', Customers: 'Customers', Access: 'Access' },
   items: {
     '/': 'Home',
+    '/clients': 'Clients',
     '/users': 'Users',
     '/invitations': 'Invitations',
     '/roles': 'Roles',

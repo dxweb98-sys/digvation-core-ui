@@ -1,203 +1,144 @@
-import { DTabs, DTabsContent, DTabsList, DTabsTrigger } from '@digvation/ui';
-import { useState, type ReactNode } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
-import { useApiMutation } from '../../../shared/api/use-api-mutation';
+import { DAlert, DDataTable, type TableColumn } from '@digvation/ui';
+import { ChevronRight, Pencil } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router';
 import { formatInstant } from '../../../shared/format/date';
-import { formatMoney } from '../../../shared/format/money';
-import { ConfirmDialog, FormDialog } from '../../../shared/forms/form-dialog';
-import { read } from '../../../shared/forms/form-spec';
-import { transitionLabel } from '../../../shared/labels/labels';
+import { formatPhone } from '../../../shared/format/phone';
 import { AppAction } from '../../../shared/ui/app-action';
-import { DetailItem, DetailList } from '../../../shared/ui/app-dialog';
-import { Code, Page, PageHeader, QueryState, Section } from '../../../shared/ui/page';
-import { StatusBadge } from '../../../shared/ui/status-badge';
-import { PERMISSIONS, type Permission } from '../../auth/permissions';
+import { Page, PageHeader } from '../../../shared/ui/page';
+import { useRecordTrail } from '../../../shared/ui/record-trail';
+import { PERMISSIONS } from '../../auth/permissions';
 import { usePermissions } from '../../auth/use-permissions';
-import { CLIENT_EDIT_FIELDS, clientFormValues, updateClientBody } from '../client-forms';
-import { CLIENT_TRANSITIONS, clientsApi, type ClientDetail, type ClientStatus } from '../clients-api';
-import { clientKeys, useClient } from '../clients-queries';
-import { BrandsSection } from '../components/brands-section';
-import { ContactsSection } from '../components/contacts-section';
-import { ClientBillingTab } from '../../billing/components/client-billing-tab';
-import { ClientContractsTab } from '../../contracts/components/client-contracts-tab';
-import { ClientServicesTab } from '../../services/components/client-services-tab';
+import type { Business, ClientDetail } from '../clients-api';
+import { clientPaths } from '../client-paths';
+import { useClientsCopy } from '../clients-copy';
+import { useClient } from '../clients-queries';
+import { CardHeading, ClientStatusPill, InfoCard, InfoRow } from '../components/client-parts';
+import { ClientPageState } from '../components/client-page-state';
+import { ClientStatusDialog } from '../components/client-status-dialog';
+import { EditClientDialog } from '../components/edit-client-dialog';
+import '../clients.css';
 
-interface ClientTab {
-  value: string;
-  label: string;
-  permissions: readonly Permission[];
-  render: (client: ClientDetail) => ReactNode;
+/** Client detail (docs/design/07-clients.html, section B). */
+export function ClientDetailPage() {
+  const { clientId = '' } = useParams();
+  const copy = useClientsCopy();
+  const detail = useClient(clientId);
+  const name = detail.data ? (detail.data.client.full_name ?? detail.data.client.code) : null;
+  useRecordTrail(name ? [{ label: copy.title, to: clientPaths.list }, { label: name }] : null);
+
+  if (!detail.data) return <ClientPageState query={detail} />;
+  return <ClientDetailView detail={detail.data} />;
 }
 
-const ARCHIVE_MESSAGE =
-  'An archived client keeps its history but cannot be changed. CORE refuses while the client still has open services, unpaid invoices or unused credit, and says which.';
-
-function OverviewTab({ client }: { client: ClientDetail }) {
-  return (
-    <div className="app-page">
-      <Section title="Profile">
-        <DetailList>
-          <DetailItem label="Legal name">{client.legal_name}</DetailItem>
-          <DetailItem label="Tax ID">{client.tax_identifier}</DetailItem>
-          <DetailItem label="Email">{client.email}</DetailItem>
-          <DetailItem label="Phone">{client.phone}</DetailItem>
-          <DetailItem label="Website">{client.website}</DetailItem>
-          <DetailItem label="Country">{client.country}</DetailItem>
-          <DetailItem label="Time zone">{client.timezone}</DetailItem>
-          <DetailItem label="Status since">{formatInstant(client.status_changed_at)}</DetailItem>
-          <DetailItem label="Address" wide>
-            {client.address}
-          </DetailItem>
-          <DetailItem label="Notes" wide>
-            {client.notes}
-          </DetailItem>
-        </DetailList>
-      </Section>
-      <Section title="Client credit">
-        {client.credit.length === 0 ? (
-          <p className="form-dialog-message">No unallocated payments.</p>
-        ) : (
-          <div className="app-summary">
-            {client.credit.map((credit) => (
-              <div className="app-summary-item" key={credit.currency}>
-                <span>Unallocated {credit.currency}</span>
-                <strong>{formatMoney(credit.amount, credit.currency)}</strong>
-              </div>
-            ))}
-          </div>
-        )}
-      </Section>
-    </div>
-  );
-}
-
-/** Tabs of the client page; later areas add theirs here. */
-const CLIENT_TABS: ClientTab[] = [
-  { value: 'overview', label: 'Overview', permissions: [], render: (client) => <OverviewTab client={client} /> },
-  { value: 'brands', label: 'Brands', permissions: [], render: (client) => <BrandsSection client={client} /> },
-  { value: 'contacts', label: 'Contacts', permissions: [], render: (client) => <ContactsSection client={client} /> },
-  {
-    value: 'services',
-    label: 'Services',
-    permissions: [PERMISSIONS.SERVICES_READ],
-    render: (client) => <ClientServicesTab client={client} />,
-  },
-  {
-    value: 'contracts',
-    label: 'Contracts',
-    permissions: [PERMISSIONS.CONTRACTS_READ],
-    render: (client) => <ClientContractsTab client={client} />,
-  },
-  {
-    value: 'billing',
-    label: 'Billing',
-    permissions: [PERMISSIONS.BILLING_READ],
-    render: (client) => <ClientBillingTab client={client} />,
-  },
-];
-
-function ClientView({ client }: { client: ClientDetail }) {
-  const { can, canAny } = usePermissions();
-  const [params, setParams] = useSearchParams();
+function ClientDetailView({ detail }: { detail: ClientDetail }) {
+  const copy = useClientsCopy();
+  const navigate = useNavigate();
+  const { can } = usePermissions();
   const [editing, setEditing] = useState(false);
-  const [target, setTarget] = useState<ClientStatus | null>(null);
-  const invalidate = [clientKeys.all];
-  const update = useApiMutation((values: Parameters<typeof updateClientBody>[0]) => clientsApi.update(client.id, updateClientBody(values)), {
-    success: 'Client saved',
-    invalidate,
-    toastErrors: false,
-  });
-  const transition = useApiMutation(
-    (input: { target: ClientStatus; reason: string }) =>
-      clientsApi.transition(client.id, { target_status: input.target, reason: input.reason }),
-    { success: (result) => `Client is now ${result.status.toLowerCase()}`, invalidate, toastErrors: false },
-  );
+  const [changingStatus, setChangingStatus] = useState(false);
+  const { client, businesses } = detail;
+  const banner = copy.banners[client.status];
+  const canEdit = can(PERMISSIONS.CLIENTS_MANAGE) && client.status !== 'ARCHIVED';
+  const canChangeStatus = can(PERMISSIONS.CLIENTS_LIFECYCLE_MANAGE);
 
-  const tabs = CLIENT_TABS.filter((tab) => canAny(tab.permissions));
-  const active = tabs.some((tab) => tab.value === params.get('tab')) ? params.get('tab')! : 'overview';
-  const archived = client.status === 'ARCHIVED';
+  const columns: TableColumn<Business>[] = [
+    {
+      key: 'alias',
+      label: copy.businessColumns.business,
+      render: (business) => (
+        <span className="clients-two">
+          <Link
+            to={clientPaths.business(client.id, business.id)}
+            className="clients-row-link clients-code clients-alias"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {business.alias}
+          </Link>
+          <span className="clients-code clients-muted clients-small">{business.code}</span>
+        </span>
+      ),
+    },
+    {
+      key: 'bill_to',
+      label: copy.businessColumns.billedTo,
+      render: (business) => (
+        <span className="clients-two">
+          <span>{business.bill_to.name}</span>
+          <span className="clients-muted clients-small clients-table-only">{copy.nameSource[business.bill_to.name_source]}</span>
+        </span>
+      ),
+    },
+    { key: 'brands', label: copy.businessColumns.brands, align: 'right', render: (business) => business.brands.length },
+    { key: 'contacts', label: copy.businessColumns.contacts, align: 'right', render: (business) => business.contacts.length },
+    {
+      key: 'open',
+      label: <span className="visually-hidden">{copy.businessColumns.open}</span>,
+      align: 'right',
+      width: '48px',
+      render: () => <ChevronRight size={16} aria-hidden="true" className="clients-chevron clients-cell-open" />,
+    },
+  ];
 
   return (
     <Page>
-      <Link className="app-back-link" to="/clients">
-        ← Clients
-      </Link>
       <PageHeader
-        title={client.display_name}
+        title={client.full_name ?? client.code}
         meta={
-          <>
-            <Code>{client.code}</Code>
-            <StatusBadge status={client.status} />
-          </>
+          <span className="clients-meta-line">
+            <span className="clients-code">{client.code}</span>
+            <ClientStatusPill status={client.status} />
+            <span className="clients-muted">{copy.statusSince(formatInstant(client.status_changed_at))}</span>
+          </span>
         }
         actions={
-          <>
-            {can(PERMISSIONS.CLIENTS_LIFECYCLE_MANAGE)
-              ? CLIENT_TRANSITIONS[client.status].map((status) => (
-                  <AppAction
-                    key={status}
-                    tone={status === 'ARCHIVED' ? 'danger-subtle' : 'secondary'}
-                    onClick={() => setTarget(status)}
-                  >
-                    {status === 'ACTIVE' ? (archived ? 'Restore' : 'Reactivate') : transitionLabel(status)}
-                  </AppAction>
-                ))
-              : null}
-            {can(PERMISSIONS.CLIENTS_MANAGE) && !archived ? (
-              <AppAction onClick={() => setEditing(true)}>Edit client</AppAction>
-            ) : null}
-          </>
+          canChangeStatus || canEdit ? (
+            <>
+              {canChangeStatus ? (
+                <AppAction tone="secondary" onClick={() => setChangingStatus(true)}>
+                  {copy.changeStatus}
+                </AppAction>
+              ) : null}
+              {canEdit ? (
+                <AppAction tone="secondary" icon={Pencil} onClick={() => setEditing(true)}>
+                  {copy.edit}
+                </AppAction>
+              ) : null}
+            </>
+          ) : null
         }
       />
+      {banner ? (
+        <DAlert variant={client.status === 'SUSPENDED' ? 'warning' : 'info'} title={banner[0]} className="clients-banner">
+          {banner[1]}
+        </DAlert>
+      ) : null}
+      <div className="clients-grid">
+        <div className="clients-main">
+          <CardHeading title={copy.businesses} count={businesses.length} first />
+          <section className="clients-business-table app-table-caps" aria-label={copy.businesses}>
+            <DDataTable
+              columns={columns}
+              data={businesses}
+              rowKey="id"
+              onRowClick={(business) => navigate(clientPaths.business(client.id, business.id))}
+            />
+          </section>
+        </div>
+        <aside className="clients-side">
+          <CardHeading title={copy.clientData} first />
+          <InfoCard label={copy.clientData}>
+            <InfoRow label={copy.fields.name}>{client.full_name}</InfoRow>
+            <InfoRow label={copy.fields.email}>{client.email}</InfoRow>
+            <InfoRow label={copy.fields.phone}>{formatPhone(client.phone)}</InfoRow>
+            <InfoRow label={copy.fields.address}>{client.address}</InfoRow>
+            <InfoRow label={copy.fields.registered}>{formatInstant(client.created_at)}</InfoRow>
+          </InfoCard>
+        </aside>
+      </div>
 
-      <DTabs value={active} defaultValue="overview" onValueChange={(tab) => setParams({ tab }, { replace: true })}>
-        <DTabsList>
-          {tabs.map((tab) => (
-            <DTabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </DTabsTrigger>
-          ))}
-        </DTabsList>
-        {tabs.map((tab) => (
-          <DTabsContent key={tab.value} value={tab.value}>
-            {active === tab.value ? tab.render(client) : null}
-          </DTabsContent>
-        ))}
-      </DTabs>
-
-      <FormDialog
-        open={editing}
-        kind="wide"
-        title="Edit client"
-        description="The client code cannot be changed."
-        fields={CLIENT_EDIT_FIELDS}
-        initialValues={clientFormValues(client)}
-        submitLabel="Save client"
-        onSubmit={(values) => update.mutateAsync(values)}
-        onClose={() => setEditing(false)}
-      />
-      <ConfirmDialog
-        open={target !== null}
-        title={`${target === 'ACTIVE' ? (archived ? 'Restore' : 'Reactivate') : transitionLabel(target ?? '')} ${client.display_name}`}
-        message={
-          target === 'ARCHIVED'
-            ? ARCHIVE_MESSAGE
-            : target === 'SUSPENDED'
-              ? 'A suspended client keeps its services and contracts but no new ones can be added.'
-              : 'The client becomes active again.'
-        }
-        confirmLabel={target === 'ACTIVE' ? (archived ? 'Restore' : 'Reactivate') : transitionLabel(target ?? '')}
-        tone={target === 'ACTIVE' ? 'primary' : 'danger'}
-        reason={{}}
-        onConfirm={(values) => transition.mutateAsync({ target: target!, reason: read.text(values, 'reason') })}
-        onClose={() => setTarget(null)}
-      />
+      <EditClientDialog client={editing ? client : null} onClose={() => setEditing(false)} />
+      <ClientStatusDialog client={changingStatus ? client : null} onClose={() => setChangingStatus(false)} />
     </Page>
   );
-}
-
-export function ClientDetailPage() {
-  const { clientId = '' } = useParams();
-  const client = useClient(clientId);
-  return <QueryState query={client} label="client">{(data) => <ClientView client={data} />}</QueryState>;
 }
